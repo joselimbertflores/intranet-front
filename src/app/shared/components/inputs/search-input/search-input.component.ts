@@ -36,7 +36,7 @@ import { InputTextModule } from 'primeng/inputtext';
           class="w-full"
         />
       </p-iconfield>
-      <label>{{label()}}</label>
+      <label>{{ label() }}</label>
     </p-floatlabel>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,7 +44,6 @@ import { InputTextModule } from 'primeng/inputtext';
 export class SearchInputComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
-  placeholder = input<string>('');
   label = input<string>('Buscar');
   searchControl = new FormControl('');
   search = output<string>();
@@ -55,7 +54,7 @@ export class SearchInputComponent implements OnInit {
         debounceTime(450),
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),
-        filter((term) => term !== null)
+        filter((term) => term !== null),
       )
       .subscribe((term) => {
         this.search.emit(term);

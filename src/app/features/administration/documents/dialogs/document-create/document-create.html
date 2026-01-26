@@ -1,0 +1,231 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <p-stepper [value]="1">
+    <p-step-list>
+      <p-step [value]="1">Clasificación</p-step>
+      <p-step [value]="2">Carga de Archivos</p-step>
+    </p-step-list>
+    <p-step-panels>
+      <p-step-panel [value]="1">
+        <ng-template #content let-activateCallback="activateCallback">
+          <div class="flex flex-col gap-y-4 pt-2">
+            <div class="flex flex-col gap-1">
+              <p-floatlabel class="w-full" variant="on">
+                <p-select
+                  [options]="sections()"
+                  optionLabel="name"
+                  optionValue="id"
+                  appendTo="body"
+                  class="w-full"
+                  inputId="sectionDoc"
+                  [filter]="true"
+                  formControlName="sectionId"
+                  [invalid]="formUtils.isInvalid(form.get('sectionId'))"
+                  (onChange)="onSelectSection($event.value)"
+                />
+                <label for="sectionDoc">Sección del documento *</label>
+              </p-floatlabel>
+              @if (formUtils.isInvalid(form.get("sectionId"))) {
+                <p-message
+                  severity="error"
+                  variant="simple"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ formUtils.getErrorMessage(form.get("sectionId")) }}
+                </p-message>
+              }
+            </div>
+            <div class="flex flex-col gap-1">
+              <p-floatlabel class="w-full" variant="on">
+                <p-select
+                  [options]="types()"
+                  optionLabel="name"
+                  optionValue="id"
+                  appendTo="body"
+                  class="w-full"
+                  inputId="typeId"
+                  [filter]="true"
+                  formControlName="typeId"
+                  [disabled]="!form.get('sectionId')?.value"
+                  [invalid]="formUtils.isInvalid(form.get('typeId'))"
+                  (onChange)="onSelectType($event.value)"
+                />
+                <label for="typeId">Tipo de documento *</label>
+              </p-floatlabel>
+              @if (formUtils.isInvalid(form.get("typeId"))) {
+                <p-message
+                  severity="error"
+                  variant="simple"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ formUtils.getErrorMessage(form.get("typeId")) }}
+                </p-message>
+              }
+            </div>
+            <p-floatlabel class="w-full" variant="on">
+              <p-select
+                [options]="subtypes()"
+                optionLabel="name"
+                optionValue="id"
+                appendTo="body"
+                class="w-full"
+                emptyMessage="Sin elementos"
+                inputId="subtype"
+                [filter]="true"
+                [disabled]="!form.get('typeId')?.value"
+                formControlName="subtypeId"
+              />
+              <label for="subtype">Subtipo (Opcional)</label>
+            </p-floatlabel>
+            <div class="flex flex-col gap-1 mt-4">
+              <p-floatlabel variant="on">
+                <p-datepicker
+                  inputId="yearInput"
+                  view="year"
+                  dateFormat="yy"
+                  showIcon
+                  iconDisplay="input"
+                  appendTo="body"
+                  [readonlyInput]="true"
+                  [minDate]="minDateValue"
+                  [maxDate]="maxDateValue"
+                  formControlName="date"
+                />
+                <label for="yearInput">Gestión</label>
+              </p-floatlabel>
+              <small class="ml-2">
+                Todos los archivos seleccionados se subiran con esta gestión.
+              </small>
+            </div>
+          </div>
+          <div class="flex pt-4 justify-end">
+            <p-button
+              label="Siguiente"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              (onClick)="activateCallback(2)"
+              [outlined]="true"
+              size="small"
+            />
+          </div>
+        </ng-template>
+      </p-step-panel>
+      <p-step-panel [value]="2">
+        <ng-template #content let-activateCallback="activateCallback">
+          <div class="p-4 rounded-xl border border-surface-200 mt-4">
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex flex-col">
+                <span class="font-medium">Listado de archivos</span>
+                <span class="text-xs text-surface-500">
+                  Tamaño máximo: {{ FILE_RULES.maxSizeMB }} MB por archivo.
+                </span>
+              </div>
+              <p-button
+                label="Seleccionar"
+                icon="pi pi-plus"
+                size="small"
+                (onClick)="fileInput.click()"
+                [outlined]="true"
+              />
+              <input
+                #fileInput
+                type="file"
+                [hidden]="true"
+                [multiple]="true"
+                [accept]="acceptAttribute"
+                (change)="onFileSelect($event)"
+              />
+            </div>
+            @if (hasInvalidFiles()) {
+              <div class="mb-4">
+                <p-message severity="warn" size="small">
+                  Algunos archivos seleccionados no son válidos o ya existen y
+                  no se cargaron.
+                </p-message>
+              </div>
+            }
+            <div formArrayName="documents" class="space-y-3">
+              <div
+                *ngFor="let item of documentsFormArray.controls; let i = index"
+                [formGroupName]="i"
+                class="group flex items-start gap-4 p-4 border border-surface-200 rounded-xl hover:bg-surface-50 transition"
+              >
+                <div class="shrink-0 mt-1">
+                  <file-icon [fileName]="files()[i].name" />
+                </div>
+
+                <div class="grow space-y-1">
+                  <input
+                    type="text"
+                    formControlName="displayName"
+                    class="w-full bg-transparent border-b focus:outline-none py-1 text-sm font-semibold text-surface-700 placeholder-surface-400"
+                    placeholder="Nombre del archivo"
+                    [ngClass]="{
+                      'border-surface-300 focus:border-primary-500 ':
+                        item.get('displayName')?.valid,
+                      'border-red-500 focus:border-red-500 focus:ring-red-500':
+                        item.get('displayName')?.invalid &&
+                        item.get('displayName')?.touched,
+                    }"
+                  />
+                  @if (formUtils.isInvalid(item.get("displayName"))) {
+                    <p-message severity="error" variant="simple" size="small">
+                      {{ formUtils.getErrorMessage(item.get("displayName")) }}
+                    </p-message>
+                  }
+
+                  <div class="text-xs text-slate-400 truncate">
+                    Original: {{ files()[i].name }}
+                  </div>
+
+                  <div class="text-xs text-slate-400 flex gap-2">
+                    <span>{{ files()[i].size | fileSize }}</span>
+                  </div>
+                </div>
+
+                <div class="shrink-0">
+                  <p-button
+                    icon="pi pi-trash"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="danger"
+                    class="opacity-60 group-hover:opacity-100 transition"
+                    (onClick)="removeFile(i)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            @if (documentsFormArray.length === 0) {
+              <div
+                class="text-center py-6 border-2 border-surface-200 rounded-lg"
+              >
+                <p class="text-surface-500">No hay archivos seleccionados</p>
+                <span class="text-xs text-surface-500">
+                  Formatos permitidos: {{ allowedExtensionsLabel }}
+                </span>
+              </div>
+            }
+          </div>
+          <div class="flex pt-6 justify-start">
+            <p-button
+              label="Atras"
+              icon="pi pi-arrow-left"
+              iconPos="right"
+              (onClick)="activateCallback(1)"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+            />
+          </div>
+        </ng-template>
+      </p-step-panel>
+    </p-step-panels>
+  </p-stepper>
+
+  <div class="p-dialog-footer">
+    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
+    <p-button type="submit" label="Guardar" [disabled]="form.invalid" />
+  </div>
+</form>

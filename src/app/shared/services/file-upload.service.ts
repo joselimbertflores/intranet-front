@@ -23,7 +23,7 @@ export interface UploadedPdfThumbnail {
   previewName: string | null;
 }
 
-interface UploadedFileResponse {
+export interface UploadedFileResponse {
   fileName: string;
   originalName: string;
   mimeType: string;

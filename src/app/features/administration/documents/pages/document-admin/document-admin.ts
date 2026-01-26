@@ -2,120 +2,174 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
-  linkedSignal,
   signal,
+  computed,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { DialogService } from 'primeng/dynamicdialog';
-import { BreadcrumbModule } from 'primeng/breadcrumb';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { ToolbarModule } from 'primeng/toolbar';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
 import { TableModule, TablePageEvent } from 'primeng/table';
+import { DialogService } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputTextModule } from 'primeng/inputtext';
+import { PopoverModule } from 'primeng/popover';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+
 import { SearchInputComponent } from '../../../../../shared';
+import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
-import { DocumentEditor } from '../../dialogs';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { FileSizePipe } from '../../pipes';
-
-interface Document {
-  id: number;
-  name: string;
-  category: string;
-}
-
-interface DocumentSection {
-  id: number;
-  name: string;
-  parentId?: number;
-  children?: DocumentSection[];
-  documents?: Document[];
-}
+import { FileIcon } from '../../components';
+import {
+  DocumentManageResponse,
+  DocumentSubtypeResponse,
+  DocumentTypeResponse,
+} from '../../interfaces';
 
 @Component({
   selector: 'app-document-admin',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    BreadcrumbModule,
-    ToolbarModule,
-    ButtonModule,
-    DialogModule,
+    DatePickerModule,
+    FloatLabelModule,
     InputTextModule,
-    MessageModule,
+    PopoverModule,
+    SelectModule,
+    ButtonModule,
     TableModule,
+    FileIcon,
     SearchInputComponent,
-    FileSizePipe,
   ],
   templateUrl: './document-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],
 })
 export default class DocumentAdmin {
-  currentPath: DocumentSection[] = [];
-  currentSection: DocumentSection | null = null;
-  subSections: DocumentSection[] = [];
-  documents: Document[] = [];
-
   private documentService = inject(DocumentDataSource);
   private dialogService = inject(DialogService);
+  private formBuilder = inject(FormBuilder);
 
   limit = signal(10);
-  offset = signal(0);
+  index = signal(0);
+  offset = computed(() => this.index() * this.limit());
   searchTerm = signal('');
-  roleResource = rxResource({
-    params: () => ({
-      offset: this.offset(),
-      limit: this.limit(),
-      term: this.searchTerm(),
-    }),
-    stream: ({ params }) => this.documentService.findAll(),
+  dataSource = signal<DocumentManageResponse[]>([]);
+  dataSize = signal<number>(0);
+
+  filterForm: FormGroup = this.formBuilder.group({
+    sectionId: [null],
+    typeId: [null],
+    subtypeId: [null],
+    date: [null],
   });
 
-  dataSource = linkedSignal(() => {
-    if (!this.roleResource.hasValue()) return [];
-    return this.roleResource.value().documents;
-  });
+  readonly sections = this.documentService.sections;
+  readonly types = signal<DocumentTypeResponse[]>([]);
+  readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
 
-  dataSize = linkedSignal(() => {
-    if (!this.roleResource.hasValue()) return 0;
-    return this.roleResource.value().total;
-  });
+  ngOnInit() {
+    this.getData();
+  }
 
-  constructor() {}
+  getData() {
+    this.documentService
+      .findAll({
+        limit: this.limit(),
+        offset: this.offset(),
+        term: this.searchTerm(),
+        ...this.filterForm.value,
+      })
+      .subscribe(({ documents, total }) => {
+        this.dataSource.set(documents);
+        this.dataSize.set(total);
+      });
+  }
 
-  ngOnInit() {}
+  onPageChange($event: TablePageEvent) {}
+
+  search(term: string) {
+    this.searchTerm.set(term);
+    this.index.set(0);
+    this.getData();
+  }
+
+  applyFilters() {
+    this.index.set(0);
+    this.getData();
+  }
+
+  clearFilters() {
+    this.filterForm.reset();
+    this.index.set(0);
+    this.getData();
+  }
+
+  selectSection(value: number) {
+    this.filterForm.patchValue({ typeId: null, subtypeId: null });
+    this.types.set([]);
+    this.subtypes.set([]);
+    this.documentService.getTypesBySection(value).subscribe((items) => {
+      this.types.set(items);
+    });
+  }
+
+  selectType(value: number) {
+    this.filterForm.patchValue({ subtypeId: null });
+    this.subtypes.set([]);
+    this.documentService.getSubtypesByType(value).subscribe((items) => {
+      this.subtypes.set(items);
+    });
+  }
 
   openCreateDialog() {
-    this.dialogService.open(DocumentEditor, {
-      header: 'Crear documentacion',
+    const diagloRef = this.dialogService.open(DocumentCreate, {
+      header: 'Crear Documentación',
       modal: true,
       focusOnShow: false,
-      width: '50vw',
-    });
-  }
-
-  openUpdateDialog(item: any) {
-    this.dialogService.open(DocumentEditor, {
-      header: 'Editar documentacion',
-      modal: true,
+      closable: true,
+      draggable: false,
       width: '40vw',
+    });
+    diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
+      if (!result) return;
+      result.forEach((item) => this.upsertItem(item));
+    });
+  }
+
+  openUpdateDialog(item: DocumentManageResponse) {
+    const diagloRef = this.dialogService.open(DocumentEdit, {
+      header: 'Editar Documentación',
+      modal: true,
+      focusOnShow: false,
+      closable: true,
+      draggable: false,
       data: item,
+      width: '40vw',
+    });
+    diagloRef?.onClose.subscribe((result?: DocumentManageResponse) => {
+      if (!result) return;
+      this.upsertItem(result);
     });
   }
 
-  onPageChange($event: TablePageEvent) {
-    this.documentService.setPage({
-      index: $event.first,
-    });
+  get activeFiltersCount(): number {
+    return Object.values(this.filterForm.value).filter(
+      (v) => v !== null && v !== undefined,
+    ).length;
   }
 
-  testss($event: string) {
-    console.log($event);
+  private upsertItem(newItem: DocumentManageResponse) {
+    const index = this.dataSource().findIndex((item) => item.id === newItem.id);
+    if (index !== -1) {
+      this.dataSource.update((values) => {
+        values[index] = newItem;
+        return [...values];
+      });
+    } else {
+      this.dataSource.update((values) => [newItem, ...values]);
+      this.dataSize.update((value) => (value += 1));
+    }
   }
 }

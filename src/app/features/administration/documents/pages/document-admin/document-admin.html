@@ -1,53 +1,161 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Documentos</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    iconPos="right"
-    size="small"
-    (onClick)="openCreateDialog()"
-  />
-</div>
-
-<div class="card">
-  <p-table
-    [value]="dataSource()"
-    [totalRecords]="dataSize()"
-    [paginator]="true"
-    (onPage)="onPageChange($event)"
-    [rows]="10"
-    size="small"
-  >
-    <ng-template #caption>
-      <div class="flex sm:justify-end">
-        <div class="w-full sm:w-1/4">
-          <search-input (search)="testss($event)" />
+  <div class="flex items-center gap-x-2">
+    @let isFiltering = activeFiltersCount > 0;
+    <p-button
+      (click)="op.toggle($event)"
+      [icon]="isFiltering ? 'pi pi-filter-fill' : 'pi pi-filter'"
+      label="Filtros"
+      size="small"
+      [severity]="isFiltering ? 'primary' : 'secondary'"
+      [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
+    />
+    <p-popover #op>
+      <div class="flex flex-col w-104 gap-y-6">
+        <div class="flex items-center justify-between px-2">
+          <span class="text-lg font-semibold text-surface-700">
+            Filtros Avanzados
+          </span>
+          <p-button
+            icon="pi pi-times"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            (click)="op.hide()"
+            size="small"
+          />
+        </div>
+        <form [formGroup]="filterForm" class="flex flex-col gap-y-4">
+          <p-floatlabel class="w-full" variant="on">
+            <p-select
+              inputId="section"
+              optionValue="id"
+              optionLabel="name"
+              class="w-full"
+              [filter]="true"
+              [options]="sections()"
+              (onChange)="selectSection($event.value)"
+              formControlName="sectionId"
+            />
+            <label for="section">Seccion</label>
+          </p-floatlabel>
+          <p-floatlabel class="w-full" variant="on">
+            <p-select
+              inputId="type"
+              optionValue="id"
+              optionLabel="name"
+              class="w-full"
+              [filter]="true"
+              [options]="types()"
+              (onChange)="selectType($event.value)"
+              [disabled]="!filterForm.value.sectionId"
+              formControlName="typeId"
+            />
+            <label for="type">Tipo</label>
+          </p-floatlabel>
+          <p-floatlabel class="w-full" variant="on">
+            <p-select
+              inputId="subtype"
+              optionValue="id"
+              optionLabel="name"
+              class="w-full"
+              [filter]="true"
+              [options]="subtypes()"
+              [disabled]="!filterForm.value.typeId"
+              formControlName="subtypeId"
+            />
+            <label for="subtype">Subtipo</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on">
+            <p-datepicker
+              inputId="yearInput"
+              view="year"
+              dateFormat="yy"
+              showIcon
+              iconDisplay="input"
+              appendTo="body"
+              [readonlyInput]="true"
+              [fluid]="true"
+              formControlName="date"
+            />
+            <label for="yearInput">Gestión</label>
+          </p-floatlabel>
+        </form>
+        <div class="flex justify-end gap-x-2">
+          <p-button
+            label="Limpiar"
+            severity="secondary"
+            size="small"
+            (onClick)="clearFilters(); op.hide()"
+          />
+          <p-button
+            label="Aplicar filtros"
+            size="small"
+            (onClick)="applyFilters(); op.hide()"
+          />
         </div>
       </div>
-    </ng-template>
-    <ng-template #header>
-      <tr>
-        <th>Nombre</th>
-        <th>Peso</th>
-        <th>Documentos</th>
-        <th style="width: 5rem"></th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-item>
-      <tr>
-        <td>{{ item.displayName }}</td>
-        <td>{{ item.sizeBytes | fileSize }}</td>
-        <td>{{ item }}</td>
-        <td>
-          <!-- <p-button
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openUpdateDialog(item)"
-            severity="secondary"
-            rounded
-          /> -->
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+    </p-popover>
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openCreateDialog()"
+    />
+  </div>
 </div>
+
+<p-table
+  [value]="dataSource()"
+  [totalRecords]="dataSize()"
+  [paginator]="true"
+  (onPage)="onPageChange($event)"
+  [rows]="10"
+  size="small"
+>
+  <ng-template #caption>
+    <div class="flex sm:justify-end">
+      <div class="w-full sm:w-1/4">
+        <search-input (search)="search($event)" />
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th>Nombre</th>
+      <th>Seccion</th>
+      <th>Tipo</th>
+      <th>Subtipo</th>
+      <th>Gestión</th>
+      <th style="width: 3rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-item>
+    <tr>
+      <td>
+        <div class="flex">
+          <file-icon [fileName]="item.fileName" />
+          <span class="ml-2">{{ item.displayName }}</span>
+        </div>
+      </td>
+      <td>{{ item.section.name }}</td>
+      <td>{{ item.type.name }}</td>
+      <td>{{ item.subtype?.name ?? "----" }}</td>
+      <td>{{ item.fiscalYear }}</td>
+      <td>
+        <p-button
+          icon="pi pi-pencil"
+          size="small"
+          (click)="openUpdateDialog(item)"
+          severity="secondary"
+          rounded
+        />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="6">Sin resultados.</td>
+    </tr>
+  </ng-template>
+</p-table>

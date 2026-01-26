@@ -21,7 +21,7 @@ const iconMap: Record<string, string> = {
 @Component({
   selector: 'file-icon',
   imports: [],
-  template: `<i [class]="iconClass()" style="font-size: 1.6rem"></i>`,
+  template: `<i [class]="iconClass()" style="font-size: 1.5rem"></i>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileIcon {

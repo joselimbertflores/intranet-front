@@ -1,30 +1,33 @@
-export interface DocumentsToManageResponse {
-  id: number;
-  section: CategoryItem;
-  category: SectionItem;
-  documents: DocumentItem[];
-}
-
-interface CategoryItem {
-  id: number;
-  name: string;
-}
-
-interface SectionItem {
-  id: number;
-  name: string;
-}
-
-interface DocumentItem {
+export interface DocumentManageResponse {
   id: string;
+  displayName: string;
   fileName: string;
   originalName: string;
+  mimeType: string;
+  sizeBytes: number;
   fiscalYear: number;
-  createdAt: Date;
-  updatedAt: Date;
+  downloadCount: number;
+  status: string;
+  section: DocumentSection;
+  type: DocumentType;
+  subtype: DocumentSubtype | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface DocumentSectionResponse {
+interface DocumentSection {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
+
+interface DocumentType {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
+
+interface DocumentSubtype {
   id: number;
   name: string;
   isActive: boolean;

@@ -4,7 +4,6 @@ import {
   Component,
   inject,
   signal,
-  computed,
 } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
@@ -16,6 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { TagModule } from 'primeng/tag';
 
 import { SearchInputComponent } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
@@ -39,6 +39,7 @@ import {
     SelectModule,
     ButtonModule,
     TableModule,
+    TagModule,
     FileIcon,
     SearchInputComponent,
   ],
@@ -52,8 +53,7 @@ export default class DocumentAdmin {
   private formBuilder = inject(FormBuilder);
 
   limit = signal(10);
-  index = signal(0);
-  offset = computed(() => this.index() * this.limit());
+  offset = signal(0);
   searchTerm = signal('');
   dataSource = signal<DocumentManageResponse[]>([]);
   dataSize = signal<number>(0);
@@ -87,22 +87,26 @@ export default class DocumentAdmin {
       });
   }
 
-  onPageChange($event: TablePageEvent) {}
+  chagePage(event: TablePageEvent) {
+    this.limit.set(event.rows);
+    this.offset.set(event.first);
+    this.getData();
+  }
 
   search(term: string) {
     this.searchTerm.set(term);
-    this.index.set(0);
+    this.offset.set(0);
     this.getData();
   }
 
   applyFilters() {
-    this.index.set(0);
+    this.offset.set(0);
     this.getData();
   }
 
   clearFilters() {
     this.filterForm.reset();
-    this.index.set(0);
+    this.offset.set(0);
     this.getData();
   }
 

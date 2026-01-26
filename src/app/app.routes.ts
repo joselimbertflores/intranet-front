@@ -67,19 +67,22 @@ export const routes: Routes = [
       import('./features/administration/layout/admin-layout/admin-layout.component'),
     children: [
       {
+        title: 'Tipos de documentos',
         path: 'document-types',
         loadComponent: () =>
-          import('./features/administration/documents/pages/document-types-admin/document-types-admin'),
+          import('./features/administration/institutional-documents/pages/document-types-admin/document-types-admin'),
       },
       {
+        title: 'Secciones de documentos',
         path: 'document-sections',
         loadComponent: () =>
-          import('./features/administration/documents/pages/document-sectons-admin/document-sectons-admin'),
+          import('./features/administration/institutional-documents/pages/document-sectons-admin/document-sectons-admin'),
       },
       {
+        title: 'Documentos',
         path: 'documents',
         loadComponent: () =>
-          import('./features/administration/documents/pages/document-admin/document-admin'),
+          import('./features/administration/institutional-documents/pages/document-admin/document-admin'),
       },
       // {
       //   path: 'communications-manage',

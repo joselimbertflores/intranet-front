@@ -149,48 +149,48 @@
               <div
                 *ngFor="let item of documentsFormArray.controls; let i = index"
                 [formGroupName]="i"
-                class="group flex items-start gap-4 p-4 border border-surface-200 rounded-xl hover:bg-surface-50 transition"
+                class="flex items-center gap-4 p-4 border border-surface-200 rounded-xl hover:bg-surface-50 transition"
               >
-                <div class="shrink-0 mt-1">
+                <!-- Icono -->
+                <div class="shrink-0">
                   <file-icon [fileName]="files()[i].name" />
                 </div>
 
-                <div class="grow space-y-1">
+                <!-- Contenido -->
+                <div class="flex-1 flex flex-col gap-1 overflow-hidden">
                   <input
                     type="text"
                     formControlName="displayName"
-                    class="w-full bg-transparent border-b focus:outline-none py-1 text-sm font-semibold text-surface-700 placeholder-surface-400"
+                    class="w-full bg-transparent border-b focus:outline-none py-1 text-sm font-semibold text-surface-700 placeholder-surface-400 truncate"
                     placeholder="Nombre del archivo"
                     [ngClass]="{
-                      'border-surface-300 focus:border-primary-500 ':
+                      'border-surface-300 focus:border-primary-500':
                         item.get('displayName')?.valid,
                       'border-red-500 focus:border-red-500 focus:ring-red-500':
                         item.get('displayName')?.invalid &&
                         item.get('displayName')?.touched,
                     }"
                   />
+
                   @if (formUtils.isInvalid(item.get("displayName"))) {
                     <p-message severity="error" variant="simple" size="small">
                       {{ formUtils.getErrorMessage(item.get("displayName")) }}
                     </p-message>
                   }
 
-                  <div class="text-xs text-slate-400 truncate">
-                    Original: {{ files()[i].name }}
-                  </div>
-
-                  <div class="text-xs text-slate-400 flex gap-2">
-                    <span>{{ files()[i].size | fileSize }}</span>
-                  </div>
+                  <span class="text-xs text-slate-400">
+                    {{ files()[i].size | fileSize }}
+                  </span>
                 </div>
 
+                <!-- Acción -->
                 <div class="shrink-0">
                   <p-button
                     icon="pi pi-trash"
                     [rounded]="true"
                     [text]="true"
                     severity="danger"
-                    class="opacity-60 group-hover:opacity-100 transition"
+                    class="opacity-60 hover:opacity-100 transition"
                     (onClick)="removeFile(i)"
                   />
                 </div>

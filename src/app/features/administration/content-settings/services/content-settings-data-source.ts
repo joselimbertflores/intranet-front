@@ -39,8 +39,8 @@ export class ContentSettingsDataSource {
           title,
           description,
           redirecttUrl,
-        }))
-      )
+        })),
+      ),
     );
   }
 
@@ -49,19 +49,26 @@ export class ContentSettingsDataSource {
       const { url, file, ...props } = item;
       if (!file) {
         return of({
-          ...props,
+          title: props.title,
+          description: props.description,
+          redirectUrl: props.redirectUrl,
           image: url.split('/').pop(),
         });
       }
       return this.fileUploadService.uploadFile(file, 'hero-section').pipe(
         map(({ fileName }) => ({
-          ...props,
+          title: props.title,
+          description: props.description,
+          redirectUrl: props.redirectUrl,
           image: fileName,
-        }))
+        })),
       );
     });
     return forkJoin(uploadTasks).pipe(
-      switchMap((slides) => this.http.put(this.QUICK_ACCESS_URL, { slides }))
+      switchMap((slides) => {
+        console.log(slides);
+        return this.http.put(this.HERO_SLIDES_URL, { slides });
+      }),
     );
   }
 
@@ -79,15 +86,15 @@ export class ContentSettingsDataSource {
         });
       }
       return this.fileUploadService.uploadFile(file, 'quick-access').pipe(
-        map(({ fileName }) => ({  
+        map(({ fileName }) => ({
           ...dto,
           icon: fileName,
-        }))
+        })),
       );
     });
 
     return forkJoin(uploadTasks).pipe(
-      switchMap((items) => this.http.put(this.QUICK_ACCESS_URL, { items }))
+      switchMap((items) => this.http.put(this.QUICK_ACCESS_URL, { items })),
     );
   }
 }

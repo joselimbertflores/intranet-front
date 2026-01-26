@@ -106,12 +106,18 @@
 </div>
 
 <p-table
+  [paginator]="true"
+  [lazy]="true"
+  size="small"
   [value]="dataSource()"
   [totalRecords]="dataSize()"
-  [paginator]="true"
-  (onPage)="onPageChange($event)"
-  [rows]="10"
-  size="small"
+  (onPage)="chagePage($event)"
+  [first]="offset()"
+  [rows]="limit()"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="{first} - {last} de {totalRecords}"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  class="text-sm"
 >
   <ng-template #caption>
     <div class="flex sm:justify-end">
@@ -123,9 +129,7 @@
   <ng-template #header>
     <tr>
       <th>Nombre</th>
-      <th>Seccion</th>
-      <th>Tipo</th>
-      <th>Subtipo</th>
+      <th>Estado</th>
       <th>Gestión</th>
       <th style="width: 3rem"></th>
     </tr>
@@ -138,9 +142,19 @@
           <span class="ml-2">{{ item.displayName }}</span>
         </div>
       </td>
-      <td>{{ item.section.name }}</td>
-      <td>{{ item.type.name }}</td>
-      <td>{{ item.subtype?.name ?? "----" }}</td>
+      <td>
+        @switch (item.status) {
+          @case ("PUBLISHED") {
+            <p-tag severity="success" value="Publicado" />
+          }
+          @case ("ARCHIVED") {
+            <p-tag severity="warn" value="Archivado" />
+          }
+          @default {
+            <span>Sin estado</span>
+          }
+        }
+      </td>
       <td>{{ item.fiscalYear }}</td>
       <td>
         <p-button

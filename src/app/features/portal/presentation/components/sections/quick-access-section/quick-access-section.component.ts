@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { QuickAccessResponse } from '../../../../../administration/content-settings/interfaces';
 
 @Component({
   selector: 'quick-access-section',
-  imports: [CommonModule],
+  imports: [],
   template: `
     <section
       class="py-20 bg-gradient-to-b from-primary-50 via-white to-surface-50 

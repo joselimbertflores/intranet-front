@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -22,7 +22,6 @@ import { InputTextModule } from 'primeng/inputtext';
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    CommonModule,
     ButtonModule,
     DatePickerModule,
     CheckboxModule,
@@ -30,7 +29,7 @@ import { InputTextModule } from 'primeng/inputtext';
     FieldsetModule,
     MultiSelectModule,
     InputTextModule
-  ],
+],
   templateUrl: './calendar-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

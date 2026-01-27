@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
@@ -12,7 +12,7 @@ import { DocumentSectionEditor } from '../../../dialogs';
 
 @Component({
   selector: 'app-document-sectons-admin',
-  imports: [CommonModule, ButtonModule, TableModule, TagModule],
+  imports: [ButtonModule, TableModule, TagModule],
   templateUrl: './document-sectons-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],

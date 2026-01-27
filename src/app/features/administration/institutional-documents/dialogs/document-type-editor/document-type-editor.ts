@@ -6,7 +6,7 @@ import {
   FormBuilder,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -24,15 +24,14 @@ import { FormUtils } from '../../../../../helpers';
 @Component({
   selector: 'app-document-type-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ConfirmDialogModule,
     FloatLabelModule,
     CheckboxModule,
     InputTextModule,
     MessageModule,
-    ButtonModule,
-  ],
+    ButtonModule
+],
   templateUrl: './document-type-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService],

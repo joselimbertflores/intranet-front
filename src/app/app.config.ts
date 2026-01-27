@@ -12,7 +12,6 @@ import {
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeBo from '@angular/common/locales/es-BO';
 import { registerLocaleData } from '@angular/common';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { definePreset, palette } from '@primeuix/themes';
 import { providePrimeNG } from 'primeng/config';
@@ -46,7 +45,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([httpErrorInterceptor, authInterceptor])
     ),
-    provideAnimationsAsync(),
     providePrimeNG({
       theme: {
         preset: AuraSky,

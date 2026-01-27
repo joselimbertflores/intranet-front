@@ -6,7 +6,7 @@
       size="small"
       label="Agregar"
       (click)="imageInput.click()"
-    />
+      />
     <input
       #imageInput
       type="file"
@@ -14,76 +14,77 @@
       [multiple]="true"
       accept="image/png, image/jpeg, image/jpg"
       (change)="onFileSelected($event)"
-    />
+      />
   </div>
   <div
     cdkDropList
     (cdkDropListDropped)="drop($event)"
     class="flex flex-col gap-y-4 max-h-[600px] p-4 overflow-y-auto border border-slate-300"
     formArrayName="slides"
-  >
-    <div
-      *ngFor="let control of slides.controls; let i = index"
-      [formGroupName]="i"
-      cdkDrag
     >
+    @for (control of slides.controls; track control; let i = $index) {
       <div
-        class="flex flex-col rounded-xl bg-surface-0 border border-surface-300 p-4"
-      >
-        <div class="flex justify-between mb-2">
-          <div class="flex items-center gap-x-2">
-            <div class="font-semibold">Slide {{ i + 1 }}</div>
-            @if (slideImages()[i].file) {
-            <p-tag severity="warn" value="Pendiente" />
-            } @else {
-            <p-tag severity="success" value="Completado" />
-            }
+        [formGroupName]="i"
+        cdkDrag
+        >
+        <div
+          class="flex flex-col rounded-xl bg-surface-0 border border-surface-300 p-4"
+          >
+          <div class="flex justify-between mb-2">
+            <div class="flex items-center gap-x-2">
+              <div class="font-semibold">Slide {{ i + 1 }}</div>
+              @if (slideImages()[i].file) {
+                <p-tag severity="warn" value="Pendiente" />
+              } @else {
+                <p-tag severity="success" value="Completado" />
+              }
+            </div>
+            <div class="flex gap-x-2">
+              <p-button
+                cdkDragHandle
+                icon="pi pi-arrows-alt"
+                size="small"
+                [text]="true"
+                />
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                size="small"
+                (onClick)="removeSlide(i)"
+                />
+            </div>
           </div>
-          <div class="flex gap-x-2">
-            <p-button
-              cdkDragHandle
-              icon="pi pi-arrows-alt"
-              size="small"
-              [text]="true"
-            />
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              size="small"
-              (onClick)="removeSlide(i)"
-            />
-          </div>
-        </div>
-        <div class="flex flex-col sm:flex-row items-center gap-6">
-          <div class="w-full sm:w-1/3">
-            <img [src]="slideImages()[i].url" class="object-cover" />
-          </div>
-          <div class="w-full sm:w-2/3 flex flex-col gap-4">
-            <p-floatlabel variant="on">
-              <label>Titulo</label>
-              <input pInputText class="w-full" formControlName="title" />
-            </p-floatlabel>
-            <p-floatlabel variant="on">
-              <textarea
-                pTextarea
-                rows="3"
-                style="resize: none"
-                class="h-full w-full"
-                [fluid]="true"
-                formControlName="description"
-              ></textarea>
-              <label>Descripcion</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on">
-              <label>URL de redireccion</label>
-              <input pInputText formControlName="redirectUrl" [fluid]="true" />
-            </p-floatlabel>
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="w-full sm:w-1/3">
+              <img [src]="slideImages()[i].url" class="object-cover" />
+            </div>
+            <div class="w-full sm:w-2/3 flex flex-col gap-4">
+              <p-floatlabel variant="on">
+                <label>Titulo</label>
+                <input pInputText class="w-full" formControlName="title" />
+              </p-floatlabel>
+              <p-floatlabel variant="on">
+                <textarea
+                  pTextarea
+                  rows="3"
+                  style="resize: none"
+                  class="h-full w-full"
+                  [fluid]="true"
+                  formControlName="description"
+                ></textarea>
+                <label>Descripcion</label>
+              </p-floatlabel>
+              <p-floatlabel variant="on">
+                <label>URL de redireccion</label>
+                <input pInputText formControlName="redirectUrl" [fluid]="true" />
+              </p-floatlabel>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
     @if(slideImages().length===0){
-    <div class="font-medium">No se encontraron elementos.</div>
+      <div class="font-medium">No se encontraron elementos.</div>
     }
   </div>
   <div class="p-dialog-footer">

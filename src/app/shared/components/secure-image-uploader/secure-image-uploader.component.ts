@@ -8,13 +8,13 @@ import {
   signal,
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+
 import { ButtonModule } from 'primeng/button';
 import { FileUploadService } from '../../services/file-upload.service';
 
 @Component({
   selector: 'secure-image-uploader',
-  imports: [CommonModule, ButtonModule],
+  imports: [ButtonModule],
   template: `
     <div class="flex flex-col border border-slate-500 p-3 rounded-xl">
       @if(imageDataUrl()){

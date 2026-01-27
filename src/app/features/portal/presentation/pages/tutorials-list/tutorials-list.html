@@ -15,57 +15,55 @@
     <!-- Buscador -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
       <!-- <p-inputText
-        [ngModel]="term"
-        (ngModelChange)="onSearch($event)"
-        placeholder="Buscar tutorial..."
-        class="w-full sm:max-w-xs"
-      ></p-inputText> -->
-    </div>
-
-    <!-- Loading -->
-    <!-- <p-progressSpinner
-      *ngIf="loading"
-      styleClass="mx-auto mt-10 block"
-    ></p-progressSpinner> -->
-
-    <!-- Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-      <a
-        *ngFor="let t of dataSource()"
-        class="cursor-pointer rounded-2xl overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
-        [routerLink]="t.slug"
-      >
-        <img
-          [src]="t.imageUrl"
-          alt="thumbnail"
-          class="w-full h-48 object-cover"
-        />
-
-        <div class="p-6">
-          <h2 class="text-xl font-semibold text-surface-800 line-clamp-2">
-            {{ t.title }}
-          </h2>
-
-          <p class="text-surface-600 text-sm mt-3 line-clamp-3">
-            {{ t.description }}
-          </p>
-
-          <div class="mt-4 text-primary-600 text-sm flex items-center gap-1">
-            <i class="pi pi-video"></i>
-            {{ t.videos.length }} videos
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <!-- Sin resultados -->
-    <!-- <div *ngIf="!loading && tutorials.length === 0" class="text-center mt-20">
-      <p class="text-surface-600 text-lg">No se encontraron tutoriales.</p>
-    </div> -->
-
-    <!-- Paginación -->
-    <div class="mt-10 flex justify-center">
-      <p-paginator> </p-paginator>
-    </div>
+      [ngModel]="term"
+      (ngModelChange)="onSearch($event)"
+      placeholder="Buscar tutorial..."
+      class="w-full sm:max-w-xs"
+    ></p-inputText> -->
   </div>
+
+  <!-- Loading -->
+  <!-- <p-progressSpinner
+  *ngIf="loading"
+  styleClass="mx-auto mt-10 block"
+></p-progressSpinner> -->
+
+<!-- Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+  @for (t of dataSource(); track t) {
+    <a
+      class="cursor-pointer rounded-2xl overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
+      [routerLink]="t.slug"
+      >
+      <img
+        [src]="t.imageUrl"
+        alt="thumbnail"
+        class="w-full h-48 object-cover"
+        />
+      <div class="p-6">
+        <h2 class="text-xl font-semibold text-surface-800 line-clamp-2">
+          {{ t.title }}
+        </h2>
+        <p class="text-surface-600 text-sm mt-3 line-clamp-3">
+          {{ t.description }}
+        </p>
+        <div class="mt-4 text-primary-600 text-sm flex items-center gap-1">
+          <i class="pi pi-video"></i>
+          {{ t.videos.length }} videos
+        </div>
+      </div>
+    </a>
+  }
+</div>
+
+<!-- Sin resultados -->
+<!-- <div *ngIf="!loading && tutorials.length === 0" class="text-center mt-20">
+<p class="text-surface-600 text-lg">No se encontraron tutoriales.</p>
+</div> -->
+
+<!-- Paginación -->
+<div class="mt-10 flex justify-center">
+  <p-paginator> </p-paginator>
+</div>
+</div>
 </section>

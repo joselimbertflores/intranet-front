@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -30,7 +30,6 @@ import {
 @Component({
   selector: 'app-document-admin',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     DatePickerModule,
     FloatLabelModule,
@@ -41,8 +40,8 @@ import {
     TableModule,
     TagModule,
     FileIcon,
-    SearchInputComponent,
-  ],
+    SearchInputComponent
+],
   templateUrl: './document-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],

@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 import { rxResource } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from "@angular/router";
 
 import { InputTextModule } from 'primeng/inputtext';
@@ -16,7 +16,7 @@ import { PortalTutorialData } from '../../services';
 
 @Component({
   selector: 'app-tutorials-list',
-  imports: [CommonModule, InputTextModule, PaginatorModule, RouterLink],
+  imports: [InputTextModule, PaginatorModule, RouterLink],
   templateUrl: './tutorials-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

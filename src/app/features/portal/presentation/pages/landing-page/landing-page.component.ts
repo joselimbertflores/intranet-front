@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import {
   HeroSectionComponent,
@@ -15,15 +15,14 @@ import { ScrollRestoreDirective } from '../../../../../shared';
 @Component({
   selector: 'landing-page',
   imports: [
-    CommonModule,
     HeroSectionComponent,
     PortalLoaderComponent,
     FooterSectionComponent,
     QuickAccessSectionComponent,
     CommunicationsSectionComponent,
     MostDownloadedDocumentsSection,
-    ScrollRestoreDirective,
-  ],
+    ScrollRestoreDirective
+],
   templateUrl: './landing-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -7,7 +7,7 @@
       id="username"
       placeholder="Username"
       formControlName="title"
-    />
+      />
 
     <p-datePicker
       formControlName="startDate"
@@ -15,7 +15,7 @@
       dateFormat="yy-mm-dd"
       placeholder="Fecha de inicio"
       appendTo="body"
-    >
+      >
     </p-datePicker>
 
     <p-datepicker
@@ -24,7 +24,7 @@
       dateFormat="yy-mm-dd"
       placeholder="Fecha de finalización (opcional)"
       appendTo="body"
-    >
+      >
     </p-datepicker>
 
     <p-checkbox
@@ -39,14 +39,14 @@
     [toggleable]="true"
     [collapsed]="true"
     class="mt-4"
-  >
+    >
     <div formGroupName="recurrence" class="grid gap-3">
       <p-select
         formControlName="freq"
         [options]="freqOptions"
         placeholder="Frecuencia"
         appendTo="body"
-      >
+        >
       </p-select>
 
       <p-inputNumber
@@ -54,45 +54,44 @@
         placeholder="Intervalo (cada cuántas unidades)"
       ></p-inputNumber>
 
-      <p-multiSelect
-        *ngIf="eventForm.get('recurrence.freq')?.value === 'WEEKLY'"
-        formControlName="byDay"
-        [options]="weekdays"
-        optionLabel="label"
-        placeholder="Días de la semana"
-         appendTo="body"
-      >
-      </p-multiSelect>
+      @if (eventForm.get('recurrence.freq')?.value === 'WEEKLY') {
+        <p-multiSelect
+          formControlName="byDay"
+          [options]="weekdays"
+          optionLabel="label"
+          placeholder="Días de la semana"
+          appendTo="body"
+          >
+        </p-multiSelect>
+      }
 
-      <ng-container
-        *ngIf="eventForm.get('recurrence.freq')?.value === 'YEARLY'"
-      >
+      @if (eventForm.get('recurrence.freq')?.value === 'YEARLY') {
         <p-multiSelect
           formControlName="byMonth"
           [options]="months"
           optionLabel="label"
           placeholder="Meses"
-           appendTo="body"
-        >
+          appendTo="body"
+          >
         </p-multiSelect>
         <p-inputNumber
           formControlName="byMonthDay"
           placeholder="Día del mes"
         ></p-inputNumber>
-      </ng-container>
+      }
 
       <p-datepicker
         formControlName="until"
         placeholder="Repetir hasta (opcional)"
         dateFormat="yy-mm-dd"
-         appendTo="body"
-      >
+        appendTo="body"
+        >
       </p-datepicker>
 
       <p-inputNumber
         formControlName="count"
         placeholder="Cantidad de repeticiones (opcional)"
-      >
+        >
       </p-inputNumber>
     </div>
   </p-fieldset>

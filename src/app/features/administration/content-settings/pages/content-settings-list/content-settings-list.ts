@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 
-import { CommonModule } from '@angular/common';
+
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 
@@ -10,7 +10,7 @@ import { HeroSlideEditor, QuickAccessEditor } from '../../dialogs';
 @Component({
   selector: 'app-content-settings-list',
   templateUrl: './content-settings-list.html',
-  imports: [CommonModule, ButtonModule, ChipModule, DynamicDialogModule],
+  imports: [ButtonModule, ChipModule, DynamicDialogModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ContentSettingsList {

@@ -84,13 +84,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/administration/institutional-documents/pages/document-admin/document-admin'),
       },
-      // {
-      //   path: 'communications-manage',
-      //   loadComponent: () =>
-      //     import(
-      //       './administration/presentation/pages/communications-manage/communications-manage.component'
-      //     ),
-      // },
+      {
+        path: 'communications-manage',
+        loadComponent: () =>
+          import(
+            './features/administration/communications/pages/communications-admin/communications-admin'
+          ),
+      },
       // {
       //   path: 'calendar-manage',
       //   loadComponent: () =>

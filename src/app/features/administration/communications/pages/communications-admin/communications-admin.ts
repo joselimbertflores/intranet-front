@@ -1,29 +1,36 @@
 import {
   ChangeDetectionStrategy,
+  linkedSignal,
   Component,
   computed,
   inject,
-  linkedSignal,
   signal,
 } from '@angular/core';
 
 import { rxResource } from '@angular/core/rxjs-interop';
 import { DialogService } from 'primeng/dynamicdialog';
+import { TextareaModule } from 'primeng/textarea';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { CommunicationDialogComponent } from '../../dialogs';
-import { SearchInputComponent } from '../../../../shared';
-import { CommunicationManageDataSource } from '../../services/communication-manage-data-source';
+import { CommunicationManageDataSource } from '../../services';
+import { SearchInputComponent } from '../../../../../shared';
+import { CommunicationEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-communications-manage',
-  imports: [CommonModule, ButtonModule, TableModule, SearchInputComponent],
-  templateUrl: './communications-manage.component.html',
+  selector: 'app-communications-admin',
+  imports: [
+    CommonModule,
+    ButtonModule,
+    TableModule,
+    TextareaModule,
+    SearchInputComponent,
+  ],
+  templateUrl: './communications-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class CommunicationsManageComponent {
+export default class CommunicationsAdmin {
   private dialogService = inject(DialogService);
   private communicationServce = inject(CommunicationManageDataSource);
 
@@ -55,10 +62,10 @@ export default class CommunicationsManageComponent {
   }
 
   openCreateDialog() {
-    const dialogRef = this.dialogService.open(CommunicationDialogComponent, {
+    const dialogRef = this.dialogService.open(CommunicationEditor, {
       header: 'Crear comunicado',
       modal: true,
-      width: '45vw',
+      width: '40vw',
       breakpoints: {
         '640px': '90vw',
       },
@@ -71,7 +78,7 @@ export default class CommunicationsManageComponent {
   }
 
   openUpdateDialog(item: any) {
-    const dialogRef = this.dialogService.open(CommunicationDialogComponent, {
+    const dialogRef = this.dialogService.open(CommunicationEditor, {
       header: 'Editar comunicado',
       modal: true,
       width: '45vw',

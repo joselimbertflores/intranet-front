@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { PortalService } from '../../services/portal.service';
 import {
@@ -16,7 +16,7 @@ import { DocumentResponse } from '../../../infrastructure';
 
 @Component({
   selector: 'app-document-repository',
-  imports: [CommonModule, DocumentListComponent, FilterDocumentsComponent],
+  imports: [DocumentListComponent, FilterDocumentsComponent],
   templateUrl: './document-repository.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

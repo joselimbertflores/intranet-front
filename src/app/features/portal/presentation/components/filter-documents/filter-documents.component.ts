@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -32,7 +32,6 @@ import { PortalService } from '../../services/portal.service';
   selector: 'filter-documents',
   imports: [
     FormsModule,
-    CommonModule,
     ReactiveFormsModule,
     SelectModule,
     ButtonModule,
@@ -42,8 +41,8 @@ import { PortalService } from '../../services/portal.service';
     FloatLabelModule,
     DatePicker,
     PanelModule,
-    ToggleButtonModule,
-  ],
+    ToggleButtonModule
+],
   template: `
     <p-panel [toggleable]="true" style="border: none;">
       <ng-template #header>

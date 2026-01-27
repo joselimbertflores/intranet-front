@@ -15,7 +15,7 @@ import {
   DragDropModule,
   CdkDragDrop,
 } from '@angular/cdk/drag-drop';
-import { CommonModule } from '@angular/common';
+
 
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -30,15 +30,14 @@ import { ImagePreview } from '../../interfaces';
 @Component({
   selector: 'hero-slide-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     InputTextModule,
     TextareaModule,
     DragDropModule,
     ButtonModule,
     TagModule,
-    FloatLabel,
-  ],
+    FloatLabel
+],
   templateUrl: './hero-slide-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

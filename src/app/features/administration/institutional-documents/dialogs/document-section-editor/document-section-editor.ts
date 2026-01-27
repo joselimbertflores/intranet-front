@@ -5,7 +5,7 @@ import {
   FormBuilder,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -23,15 +23,14 @@ import { FormUtils } from '../../../../../helpers';
 @Component({
   selector: 'app-document-section-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FloatLabelModule,
     InputTextModule,
     CheckboxModule,
     MessageModule,
     ListboxModule,
-    ButtonModule,
-  ],
+    ButtonModule
+],
   templateUrl: './document-section-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

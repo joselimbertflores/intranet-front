@@ -5,9 +5,9 @@
       <input pInputText class="w-full" formControlName="name" />
     </p-floatlabel>
     @if(formUtils.isInvalid(form.get("name"))){
-    <p-message severity="error" size="small" variant="simple">
-      {{ formUtils.getErrorMessage(form.get("name")) }}
-    </p-message>
+      <p-message severity="error" size="small" variant="simple">
+        {{ formUtils.getErrorMessage(form.get("name")) }}
+      </p-message>
     }
   </div>
   <div class="flex items-center px-2 mt-2">
@@ -21,46 +21,47 @@
       size="small"
       label="Agregar"
       (click)="addSubtype()"
-    />
+      />
   </div>
   <div class="p-4 border max-h-[400px] overflow-y-auto rounded-lg border-surface-300">
     <div class="flex flex-col gap-y-4" formArrayName="subtypes">
-      <div
-        *ngFor="let item of subTypes.controls; let i = index"
-        [formGroupName]="i"
-      >
-        <div class="flex gap-x-4 items-center">
-          <div class="flex-1">
-            <div class="flex flex-col gap-1">
-              <p-floatlabel variant="on">
-                <label>Nombre subtipo {{ i + 1 }}</label>
-                <input pInputText class="w-full" formControlName="name" />
-              </p-floatlabel>
-              @if(formUtils.isInvalid(item.get("name"))){
-              <p-message severity="error" size="small" variant="simple">
-                {{ formUtils.getErrorMessage(item.get("name")) }}
-              </p-message>
-              }
+      @for (item of subTypes.controls; track item; let i = $index) {
+        <div
+          [formGroupName]="i"
+          >
+          <div class="flex gap-x-4 items-center">
+            <div class="flex-1">
+              <div class="flex flex-col gap-1">
+                <p-floatlabel variant="on">
+                  <label>Nombre subtipo {{ i + 1 }}</label>
+                  <input pInputText class="w-full" formControlName="name" />
+                </p-floatlabel>
+                @if(formUtils.isInvalid(item.get("name"))){
+                  <p-message severity="error" size="small" variant="simple">
+                    {{ formUtils.getErrorMessage(item.get("name")) }}
+                  </p-message>
+                }
+              </div>
             </div>
+            <div class="flex items-center">
+              <p-checkbox
+                name="pizza"
+                [binary]="true"
+                formControlName="isActive"
+                />
+              <label class="ml-2"> Habilitado </label>
+            </div>
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              (onClick)="removeSubtype(i)"
+              />
           </div>
-          <div class="flex items-center">
-            <p-checkbox
-              name="pizza"
-              [binary]="true"
-              formControlName="isActive"
-            />
-            <label class="ml-2"> Habilitado </label>
-          </div>
-          <p-button
-            icon="pi pi-trash"
-            [rounded]="true"
-            [text]="true"
-            (onClick)="removeSubtype(i)"
-          />
         </div>
-      </div>
+      }
       @if(subTypes.controls.length===0){
-      <span>Sin elementos.</span>
+        <span>Sin elementos.</span>
       }
     </div>
   </div>

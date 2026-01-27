@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -32,13 +32,12 @@ import { ImagePreview, QuickAccessResponse } from '../../interfaces';
 @Component({
   selector: 'app-quick-access-editor',
   imports: [
-    CommonModule,
     DragDropModule,
     ReactiveFormsModule,
     FloatLabelModule,
     InputTextModule,
-    ButtonModule,
-  ],
+    ButtonModule
+],
   templateUrl: './quick-access-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

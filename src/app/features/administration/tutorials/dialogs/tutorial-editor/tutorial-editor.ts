@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -28,13 +28,12 @@ import { CustomFormValidators } from '../../../../../../helpers';
 @Component({
   selector: 'tutorial-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
-    ButtonModule,
-  ],
+    ButtonModule
+],
   templateUrl: './tutorial-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -3,8 +3,8 @@ import { inject, Injectable } from '@angular/core';
 
 import { catchError, EMPTY, forkJoin, map, of, switchMap } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
-import { TutorialResponse } from '../interfaces';
+import { environment } from '../../../../../environments/environment';
+import { TutorialResponse } from '../../interfaces';
 
 interface TutorialProps {
   title: string;
@@ -27,7 +27,7 @@ interface ImageItem {
 @Injectable({
   providedIn: 'root',
 })
-export class TutorialData {
+export class TutorialDataSource {
   private http = inject(HttpClient);
   private readonly URL = `${environment.baseUrl}/assistance`;
 

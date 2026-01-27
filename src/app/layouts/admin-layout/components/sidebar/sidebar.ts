@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 
 import { MenuModule } from 'primeng/menu';
-import { AuthDataSource } from '../../services';
+import { AuthDataSource } from '../../../../core/auth/auth-data-source';
 
 @Component({
   selector: 'app-sidebar',

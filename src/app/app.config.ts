@@ -20,9 +20,9 @@ import { MessageService } from 'primeng/api';
 import theme from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
-import { handleTransitionCreated } from './core/view-transition.config';
-import { httpErrorInterceptor } from './core/interceptors/http-error-interceptor';
-import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { handleTransitionCreated } from './core/router/view-transition.config';
+import { httpErrorInterceptor } from './core/http/http-error-interceptor';
+import { authInterceptor } from './core/auth/auth-interceptor';
 import { DialogService } from 'primeng/dynamicdialog';
 
 registerLocaleData(localeBo, 'es');

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { isAuthenticatedGuard } from './features/administration/guards/is-authenticated-guard';
+import { isAuthenticatedGuard } from './core/auth/is-authenticated-guard';
 // import { isAuthenticatedGuard } from './administration/presentation/guards/is-authenticated-guard';
 
 export const routes: Routes = [
@@ -64,7 +64,7 @@ export const routes: Routes = [
     canActivate: [isAuthenticatedGuard],
     title: 'Administracion',
     loadComponent: () =>
-      import('./features/administration/layout/admin-layout/admin-layout.component'),
+      import('./layouts/admin-layout/admin-layout.component'),
     children: [
       {
         title: 'Tipos de documentos',
@@ -98,13 +98,11 @@ export const routes: Routes = [
       //       './administration/presentation/pages/calendar-manage.component/calendar-manage.component'
       //     ),
       // },
-      // {
-      //   path: 'tutorials-manage',
-      //   loadComponent: () =>
-      //     import(
-      //       './administration/presentation/pages/tutorial-manage/tutorial-manage'
-      //     ),
-      // },
+      {
+        path: 'tutorials-manage',
+        loadComponent: () =>
+          import('./features/administration/tutorials/pages/tutorial-admin/tutorial-admin'),
+      },
       {
         path: 'users',
         title: 'Usuarios',

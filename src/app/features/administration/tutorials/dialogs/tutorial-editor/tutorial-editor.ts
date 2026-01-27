@@ -20,13 +20,13 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
+import { TutorialDataSource } from '../../services';
+import { TutorialResponse, TutorialVideoResponse } from '../../../interfaces';
+import { CustomFormValidators } from '../../../../../../helpers';
 
-import { CustomFormValidators } from '../../../../../helpers';
-import { TutorialData } from '../../services/tutorial-data';
-import { TutorialResponse, TutorialVideoResponse } from '../../interfaces';
 
 @Component({
-  selector: 'tutorial-dialog',
+  selector: 'tutorial-editor',
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -35,14 +35,14 @@ import { TutorialResponse, TutorialVideoResponse } from '../../interfaces';
     TextareaModule,
     ButtonModule,
   ],
-  templateUrl: './tutorial-dialog.html',
+  templateUrl: './tutorial-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TutorialDialog {
+export class TutorialEditor {
   private dialogRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
-  private tutorialData = inject(TutorialData);
+  private tutorialData = inject(TutorialDataSource);
 
   readonly data?: TutorialResponse = inject(DynamicDialogConfig).data;
 

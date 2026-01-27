@@ -4,25 +4,24 @@ import {
   Component,
   inject,
 } from '@angular/core';
-
-import { DialogService } from 'primeng/dynamicdialog';
 import { rxResource } from '@angular/core/rxjs-interop';
 
+import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { TutorialDialog } from '../../dialogs';
-import { TutorialData } from '../../services/tutorial-data';
+import { TutorialDataSource } from '../../services';
+import { TutorialEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-tutorial-manage',
+  selector: 'app-tutorial-admin',
   imports: [TableModule, ButtonModule],
-  templateUrl: './tutorial-manage.html',
+  templateUrl: './tutorial-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class TutorialManage {
+export default class TutorialAdmin {
   private dialogService = inject(DialogService);
-  private tutorialData = inject(TutorialData);
+  private tutorialData = inject(TutorialDataSource);
 
   dataResource = rxResource({
     stream: () => this.tutorialData.findAll(),
@@ -33,7 +32,7 @@ export default class TutorialManage {
   dataSource = linkedSignal(() => this.dataResource.value().tutorials);
 
   openCreateDialog() {
-    const dialogRef = this.dialogService.open(TutorialDialog, {
+    const dialogRef = this.dialogService.open(TutorialEditor, {
       header: 'Crear tutorial',
       modal: true,
       width: '35vw',
@@ -50,7 +49,7 @@ export default class TutorialManage {
   }
 
   openUpdateDialog(item: any) {
-    const dialogRef = this.dialogService.open(TutorialDialog, {
+    const dialogRef = this.dialogService.open(TutorialEditor, {
       header: 'Editar tutorial',
       modal: true,
       width: '35vw',

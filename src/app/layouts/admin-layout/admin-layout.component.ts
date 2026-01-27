@@ -5,7 +5,8 @@ import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 
-import { ProfileOverlay, Sidebar } from '../../components';
+import { ProfileOverlay, Sidebar } from './components';
+
 
 @Component({
   selector: 'app-admin-layout',

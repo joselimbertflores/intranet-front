@@ -87,17 +87,13 @@ export const routes: Routes = [
       {
         path: 'communications-manage',
         loadComponent: () =>
-          import(
-            './features/administration/communications/pages/communications-admin/communications-admin'
-          ),
+          import('./features/administration/communications/pages/communications-admin/communications-admin'),
       },
-      // {
-      //   path: 'calendar-manage',
-      //   loadComponent: () =>
-      //     import(
-      //       './administration/presentation/pages/calendar-manage.component/calendar-manage.component'
-      //     ),
-      // },
+      {
+        path: 'calendar-manage',
+        loadComponent: () =>
+          import('./features/administration/calendar/pages/calendar-manage.component/calendar-manage.component'),
+      },
       {
         path: 'tutorials-manage',
         loadComponent: () =>

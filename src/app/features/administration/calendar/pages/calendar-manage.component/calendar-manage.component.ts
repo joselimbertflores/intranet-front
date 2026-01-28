@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { DialogService } from 'primeng/dynamicdialog';
-import { TableModule } from 'primeng/table';
+
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarDialogComponent } from '../../dialogs';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+
+import { CalendarEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-calendar-manage.component',
@@ -15,10 +17,10 @@ export default class CalendarManageComponent {
   private dialogService = inject(DialogService);
 
   openCreateDialog() {
-    const dialogRef = this.dialogService.open(CalendarDialogComponent, {
+    const dialogRef = this.dialogService.open(CalendarEditor, {
       header: 'Crear evento',
-      modal: true,
-      width: '45vw',
+      closable: true,
+      width: '40vw',
       breakpoints: {
         '640px': '90vw',
       },

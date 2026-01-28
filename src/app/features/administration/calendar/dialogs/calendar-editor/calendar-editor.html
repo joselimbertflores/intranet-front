@@ -1,0 +1,137 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div class="space-y-4 pt-1">
+    <p-floatlabel variant="on">
+      <input pInputText id="titleTxt" formControlName="title" class="w-full" />
+      <label for="titleTxt">Titulo</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on">
+      <label for="referencTxt">Descripción</label>
+      <textarea
+        pTextarea
+        id="referencTxt"
+        formControlName="description"
+        rows="2"
+        class="w-full"
+      ></textarea>
+    </p-floatlabel>
+    <div class="flex flex-col sm:flex-row gap-x-2">
+      <p-floatlabel variant="on" class="w-full">
+        <p-datepicker
+          formControlName="startDate"
+          [showTime]="!isAllDay"
+          hourFormat="24"
+          class="w-full"
+          appendTo="body"
+          inputId="startDatePicker"
+        >
+        </p-datepicker>
+        <label for="startDatePicker">Inicio</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="w-full">
+        <p-datepicker
+          formControlName="endDate"
+          [showTime]="true"
+          hourFormat="24"
+          class="w-full"
+          appendTo="body"
+          inputId="endDatePicker"
+          [disabled]="isAllDay"
+        >
+        </p-datepicker>
+        <label for="endDatePicker">Fin</label>
+      </p-floatlabel>
+    </div>
+    <div class="flex gap-6 px-2">
+      <div class="flex items-center">
+        <p-checkbox
+          inputId="recurrenceCheck"
+          formControlName="allDay"
+          [binary]="true"
+          (onChange)="onAllDayToggle()"
+        >
+        </p-checkbox>
+        <label class="ml-1 font-medium">Todo el día</label>
+      </div>
+
+      <div class="flex items-center">
+        <p-checkbox
+          inputId="recurrenceCheck"
+          [binary]="true"
+          [(ngModel)]="isRecurring"
+          [ngModelOptions]="{ standalone: true }"
+          (onChange)="onRecurringToggle($event.checked)"
+        >
+        </p-checkbox>
+        <label for="recurrenceCheck" class="ml-1 font-medium"> Repetir </label>
+      </div>
+    </div>
+
+    @if (isRecurring()) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <p-floatlabel variant="on">
+          <p-select
+            inputId="frequencySelect"
+            [options]="frequencies"
+            [(ngModel)]="recurrence().frequency"
+            [ngModelOptions]="{ standalone: true }"
+            (onChange)="onFrequencyChange($event.value)"
+            [fluid]="true"
+            [required]="true"
+            appendTo="body"
+          >
+          </p-select>
+          <label for="frequencySelect">Frecuencia</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on">
+          <p-inputNumber
+            [(ngModel)]="recurrence().interval"
+            [min]="1"
+            suffix=" vez / veces"
+            [ngModelOptions]="{ standalone: true }"
+            class="w-full"
+            inputId="intervalTxt"
+          />
+          <label for="intervalTxt">Cada</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on">
+          <p-datepicker
+            [(ngModel)]="recurrence().until"
+            dateFormat="yy-mm-dd"
+            [ngModelOptions]="{ standalone: true }"
+            class="w-full"
+            appendTo="body"
+          />
+          <label for="untilDatePicker">Hasta</label>
+        </p-floatlabel>
+
+        @if (recurrence().frequency === "WEEKLY") {
+          <p-floatlabel variant="on">
+            <p-multiselect
+              [options]="weekDays"
+              #byWeekDays="ngModel"
+              [(ngModel)]="recurrence().byWeekDays"
+              [ngModelOptions]="{ standalone: true }"
+              class="w-full"
+              appendTo="body"
+              inputId="byWeekDaysSelect"
+              [invalid]="
+                byWeekDays.touched && recurrence().byWeekDays.length === 0
+              "
+            />
+            <label for="byWeekDaysSelect">Días de la semana</label>
+          </p-floatlabel>
+        }
+      </div>
+    }
+  </div>
+  <div class="p-dialog-footer">
+    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
+    <p-button
+      type="submit"
+      label="Guardar"
+      [disabled]="form.invalid || !this.isRecurrenceValid"
+      (onClick)="save()"
+    />
+  </div>
+</form>

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService } from '../../../../shared';
@@ -39,8 +39,8 @@ export class CommunicationManageDataSource {
             fileName,
             previewName,
             originalName,
-          })
-        )
+          }),
+        ),
       );
   }
 
@@ -53,8 +53,8 @@ export class CommunicationManageDataSource {
               fileName,
               previewName,
               originalName,
-            })
-          )
+            }),
+          ),
         )
       : this.http.patch(`${this.URL}/${id}`, form);
   }

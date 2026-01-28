@@ -8,7 +8,7 @@ import { TagModule } from 'primeng/tag';
 
 import { DocumentSectionWithTypesResponse } from '../../interfaces';
 import { DocumentSectionDataSource } from '../../services';
-import { DocumentSectionEditor } from '../../../dialogs';
+import { DocumentSectionEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-document-sectons-admin',

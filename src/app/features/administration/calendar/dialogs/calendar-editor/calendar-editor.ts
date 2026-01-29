@@ -84,24 +84,23 @@ export class CalendarEditor {
     startDate: [this.currentDate, Validators.required],
     endDate: [null],
     allDay: [false],
+    recurrence: this.formBuilder.group({
+      frequency: [null],
+      interval: [1, Validators.min(1)],
+      byWeekDays: [[]],
+      until: [null],
+    }),
   });
 
   isRecurring = signal(false);
-  recurrence = signal<RecurrenceConfig>({
-    frequency: 'YEARLY',
-    interval: 1,
-    byWeekDays: [],
-    until: null,
-  });
 
   save() {
-    if (this.form.invalid || !this.isRecurrenceValid) {
-      this.form.markAllAsTouched();
-      return;
+    if (this.form.invalid) {
+      return this.form.markAllAsTouched();
     }
-    this.calendarDataSource
-      .create(this.form.value, this.recurrence())
-      .subscribe(() => {});
+    // this.calendarDataSource
+    //   .create(this.form.value, this.recurrence())
+    //   .subscribe(() => {});
   }
 
   close() {
@@ -114,33 +113,59 @@ export class CalendarEditor {
     }
   }
 
-  onFrequencyChange(freq: Frecuency) {
-    this.recurrence.update((values) => ({
-      ...values,
-      frequency: freq,
-      ...(freq === 'WEEKLY' && { byWeekDays: [] }),
-    }));
-  }
-
-  onRecurringToggle(value: boolean) {
-    if (!value) {
-      this.recurrence.set({
+  onRecurringToggle(isRecurring: boolean) {
+    const recurrenceGroup = this.form.get('recurrence') as FormGroup;
+    if (isRecurring) {
+      recurrenceGroup.get('frequency')?.setValidators([Validators.required]);
+    } else {
+      recurrenceGroup.get('frequency')?.clearValidators();
+      recurrenceGroup.get('byWeekDays')?.clearValidators();
+      recurrenceGroup.reset({
         frequency: 'YEARLY',
         interval: 1,
         byWeekDays: [],
         until: null,
       });
     }
+    recurrenceGroup.get('frequency')?.updateValueAndValidity();
+    recurrenceGroup.get('byWeekDays')?.updateValueAndValidity();
   }
+
+  onFrequencyChange(freq: Frecuency) {
+    const recurrenceGroup = this.form.get('recurrence') as FormGroup;
+    if (freq === 'WEEKLY') {
+      recurrenceGroup
+        .get('byWeekDays')
+        ?.setValidators([Validators.required, Validators.minLength(1)]);
+    } else {
+      recurrenceGroup.get('byWeekDays')?.clearValidators();
+    }
+    recurrenceGroup.get('byWeekDays')?.updateValueAndValidity();
+  }
+
+  // onFrequencyChange(freq: Frecuency) {
+  //   const control = this.form.get('recurrence.byWeekDays');
+  //   if (!control) return;
+  //   if (freq === 'WEEKLY') {
+  //     control.setValidators([Validators.required, Validators.minLength(1)]);
+  //   } else {
+  //     control.clearValidators();
+  //   }
+  //   control.updateValueAndValidity();
+  // }
+
+  // onRecurringToggle(value: boolean) {
+  //   const control = this.form.get('recurrence.frequency');
+  //   if (!control) return;
+  //   if (value) {
+  //     control.setValidators(Validators.required);
+  //   } else {
+  //     control.clearValidators();
+  //   }
+  //   control.updateValueAndValidity();
+  // }
 
   get isAllDay() {
-    return this.form.value.allDay;
-  }
-
-  get isRecurrenceValid() {
-    if (!this.isRecurring()) return true;
-    return this.recurrence().frequency === 'WEEKLY'
-      ? this.recurrence().byWeekDays.length > 0
-      : true;
+    return this.form.get('allDay')?.value;
   }
 }

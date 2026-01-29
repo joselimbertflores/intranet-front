@@ -41,7 +41,7 @@ export class CalendarDataSource {
       ...props,
       startDate: startDate.toString(),
       ...(endDate && { endDate: endDate.toString() }),
-      ...(recurrenceRule && { recurrenceRule }),
+      // ...(recurrenceRule && { recurrenceRule:"Texto de prueba" }),
     });
   }
 

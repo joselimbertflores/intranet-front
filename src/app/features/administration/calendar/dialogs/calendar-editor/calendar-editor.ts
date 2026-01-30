@@ -3,6 +3,7 @@ import {
   signal,
   Component,
   ChangeDetectionStrategy,
+  OnInit,
 } from '@angular/core';
 import {
   FormGroup,
@@ -10,10 +11,12 @@ import {
   FormsModule,
   FormBuilder,
   ReactiveFormsModule,
+  ValidatorFn,
+  AbstractControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -23,16 +26,24 @@ import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+
 import { CalendarDataSource } from '../../services';
 
-type Frecuency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+const recurrenceValidator: ValidatorFn = (group: AbstractControl) => {
+  // Si el grupo está deshabilitado, no validar
+  if (group.disabled) return null;
 
-interface RecurrenceConfig {
-  frequency: Frecuency;
-  interval: number;
-  byWeekDays: string[];
-  until?: Date | null;
-}
+  const freq: string | null = group.get('frequency')?.value;
+  const days: string[] = group.get('byWeekDays')?.value;
+
+  if (!freq) return null;
+
+  if (freq === 'WEEKLY' && (!days || days.length === 0)) {
+    return { weeklyRequiresDays: true };
+  }
+
+  return null;
+};
 
 @Component({
   selector: 'app-calendar-editor',
@@ -54,7 +65,7 @@ interface RecurrenceConfig {
   templateUrl: './calendar-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CalendarEditor {
+export class CalendarEditor implements OnInit {
   private formBuilder = inject(FormBuilder);
   private diagloRef = inject(DynamicDialogRef);
 
@@ -78,29 +89,37 @@ export class CalendarEditor {
     { label: 'Domingo', value: 'SU' },
   ];
 
+  readonly data: any = inject(DynamicDialogConfig).data;
+
   form: FormGroup = this.formBuilder.group({
     title: ['', [Validators.required, Validators.maxLength(150)]],
     description: [''],
     startDate: [this.currentDate, Validators.required],
     endDate: [null],
     allDay: [false],
-    recurrence: this.formBuilder.group({
-      frequency: [null],
-      interval: [1, Validators.min(1)],
-      byWeekDays: [[]],
-      until: [null],
-    }),
+
+    recurrence: this.formBuilder.group(
+      {
+        frequency: [null],
+        interval: [1],
+        byWeekDays: [[]],
+        until: [null],
+      },
+      { validators: recurrenceValidator },
+    ),
   });
 
   isRecurring = signal(false);
+
+  ngOnInit(): void {
+    this.loadForm();
+  }
 
   save() {
     if (this.form.invalid) {
       return this.form.markAllAsTouched();
     }
-    // this.calendarDataSource
-    //   .create(this.form.value, this.recurrence())
-    //   .subscribe(() => {});
+    this.calendarDataSource.create(this.form.value).subscribe(() => {});
   }
 
   close() {
@@ -113,59 +132,49 @@ export class CalendarEditor {
     }
   }
 
-  onRecurringToggle(isRecurring: boolean) {
-    const recurrenceGroup = this.form.get('recurrence') as FormGroup;
-    if (isRecurring) {
-      recurrenceGroup.get('frequency')?.setValidators([Validators.required]);
+  // onRecurringToggle(checked: boolean) {
+  //   this.isRecurring.set(checked);
+  //   const recurrenceGroup = this.form.get('recurrence');
+
+  //   if (!checked) {
+  //     recurrenceGroup?.disable();
+  //   } else {
+  //     recurrenceGroup?.enable();
+  //   }
+  // }
+
+  onRecurringToggle(checked: boolean) {
+    this.isRecurring.set(checked);
+    const recurrenceGroup = this.form.get('recurrence');
+
+    if (!checked) {
+      recurrenceGroup?.disable();
     } else {
-      recurrenceGroup.get('frequency')?.clearValidators();
-      recurrenceGroup.get('byWeekDays')?.clearValidators();
-      recurrenceGroup.reset({
-        frequency: 'YEARLY',
+      recurrenceGroup?.reset({
+        frequency: null,
         interval: 1,
         byWeekDays: [],
         until: null,
       });
+      recurrenceGroup?.enable();
     }
-    recurrenceGroup.get('frequency')?.updateValueAndValidity();
-    recurrenceGroup.get('byWeekDays')?.updateValueAndValidity();
   }
-
-  onFrequencyChange(freq: Frecuency) {
-    const recurrenceGroup = this.form.get('recurrence') as FormGroup;
-    if (freq === 'WEEKLY') {
-      recurrenceGroup
-        .get('byWeekDays')
-        ?.setValidators([Validators.required, Validators.minLength(1)]);
-    } else {
-      recurrenceGroup.get('byWeekDays')?.clearValidators();
-    }
-    recurrenceGroup.get('byWeekDays')?.updateValueAndValidity();
-  }
-
-  // onFrequencyChange(freq: Frecuency) {
-  //   const control = this.form.get('recurrence.byWeekDays');
-  //   if (!control) return;
-  //   if (freq === 'WEEKLY') {
-  //     control.setValidators([Validators.required, Validators.minLength(1)]);
-  //   } else {
-  //     control.clearValidators();
-  //   }
-  //   control.updateValueAndValidity();
-  // }
-
-  // onRecurringToggle(value: boolean) {
-  //   const control = this.form.get('recurrence.frequency');
-  //   if (!control) return;
-  //   if (value) {
-  //     control.setValidators(Validators.required);
-  //   } else {
-  //     control.clearValidators();
-  //   }
-  //   control.updateValueAndValidity();
-  // }
 
   get isAllDay() {
     return this.form.get('allDay')?.value;
+  }
+
+  private loadForm() {
+    if (!this.data) return;
+    const { recurrenceConfig, startDate, endDate, ...props } = this.data;
+    if (recurrenceConfig) {
+      this.isRecurring.set(true);
+    }
+    this.form.patchValue({
+      ...props,
+      startDate: new Date(startDate),
+      ...(endDate && { endDate: new Date(endDate) }),
+      recurrence: recurrenceConfig,
+    });
   }
 }

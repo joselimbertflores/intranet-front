@@ -92,7 +92,7 @@ export const routes: Routes = [
       {
         path: 'calendar-manage',
         loadComponent: () =>
-          import('./features/administration/calendar/pages/calendar-manage.component/calendar-manage.component'),
+          import('./features/administration/calendar/pages/calendar-admin/calendar-admin'),
       },
       {
         path: 'tutorials-manage',

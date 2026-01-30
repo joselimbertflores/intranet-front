@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="save()">
-  <div class="space-y-4 pt-1">
+  <div class="space-y-6 pt-2">
     <p-floatlabel variant="on">
       <input pInputText id="titleTxt" formControlName="title" class="w-full" />
       <label for="titleTxt">Titulo</label>
@@ -57,8 +57,7 @@
         <p-checkbox
           inputId="recurrenceCheck"
           [binary]="true"
-          [(ngModel)]="isRecurring"
-          [ngModelOptions]="{ standalone: true }"
+          [value]="isRecurring()"
           (onChange)="onRecurringToggle($event.checked)"
         >
         </p-checkbox>
@@ -75,7 +74,6 @@
               inputId="frequencySelect"
               [options]="frequencies"
               formControlName="frequency"
-              (onChange)="onFrequencyChange($event.value)"
               [fluid]="true"
               [required]="true"
               appendTo="body"
@@ -100,7 +98,6 @@
               dateFormat="yy-mm-dd"
               class="w-full"
               appendTo="body"
-              [minDate]="form.get('startDate')?.value"
               [showClear]="true"
             />
             <label for="untilDatePicker">Hasta</label>
@@ -120,6 +117,7 @@
           }
         </div>
       </div>
+      <pre>{{ form.errors| json }}</pre>
     }
   </div>
   <div class="p-dialog-footer">

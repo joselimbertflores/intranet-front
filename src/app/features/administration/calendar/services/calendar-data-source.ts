@@ -1,11 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import utc from 'dayjs/plugin/utc';
-import dayjs from 'dayjs';
-
-dayjs.extend(utc);
-
 import { environment } from '../../../../../environments/environment';
 
 export interface FormCalendarProps {
@@ -14,12 +9,11 @@ export interface FormCalendarProps {
   startDate: Date;
   endDate: Date | null;
   allDay: boolean;
+  recurrence?: RecurrenceConfig;
 }
 
-type Frecuency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-
 export interface RecurrenceConfig {
-  frequency: Frecuency;
+  frequency: string | null;
   interval: number;
   byWeekDays: string[];
   until?: Date | null;
@@ -34,35 +28,15 @@ export class CalendarDataSource {
 
   constructor() {}
 
-  create(form: FormCalendarProps, recurrence: RecurrenceConfig) {
-    const { startDate, endDate, ...props } = form;
-    const recurrenceRule = this.buildRRule(recurrence);
+  create(form: FormCalendarProps) {
+    const { recurrence, ...props } = form;
     return this.http.post(this.URL, {
       ...props,
-      startDate: startDate.toString(),
-      ...(endDate && { endDate: endDate.toString() }),
-      // ...(recurrenceRule && { recurrenceRule:"Texto de prueba" }),
+      recurrence: recurrence?.frequency ? recurrence : null,
     });
   }
 
-  buildRRule(recurrence: RecurrenceConfig): string | null {
-    let rule = `FREQ=${recurrence.frequency}`;
-
-    if (recurrence.interval > 1) {
-      rule += `;INTERVAL=${recurrence.interval}`;
-    }
-
-    if (recurrence.frequency === 'WEEKLY' && recurrence.byWeekDays.length) {
-      rule += `;BYDAY=${recurrence.byWeekDays.join(',')}`;
-    }
-
-    if (recurrence.until) {
-      const untilDate =
-        dayjs(recurrence.until).endOf('day').utc().format('YYYYMMDDTHHmmss') +
-        'Z';
-      rule += `;UNTIL=${untilDate}`;
-    }
-
-    return rule;
+  findAll() {
+    return this.http.get<{ events: any[]; total: number }>(this.URL);
   }
 }

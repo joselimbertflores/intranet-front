@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { Observable, switchMap } from 'rxjs';
+import { Observable, switchMap, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService } from '../../../../shared';
@@ -29,29 +29,28 @@ export class CommunicationManageDataSource {
     return this.http.get<any[]>(`${this.URL}/types`);
   }
 
-  create(form: object, file: File) {
-    return this.fileUploadService
-      .uploadPdfThumbnail(file, 'communication')
-      .pipe(
-        switchMap(({ fileName, previewName, originalName }) =>
-          this.http.post(`${this.URL}`, {
-            ...form,
-            fileName,
-            previewName,
-            originalName,
-          }),
-        ),
-      );
+  create(form: object, pdf: File) {
+    return this.fileUploadService.uploadPdfThumbnail(pdf, 'communication').pipe(
+      tap((resp) => console.log(resp)),
+      switchMap(({ fileName, originalName, thumbnailFileName }) =>
+        this.http.post(`${this.URL}`, {
+          ...form,
+          fileName,
+          thumbnailFileName,
+          originalName,
+        }),
+      ),
+    );
   }
 
   update(id: string, form: object, file?: File | null): Observable<any> {
     return file
       ? this.fileUploadService.uploadPdfThumbnail(file, 'communication').pipe(
-          switchMap(({ fileName, previewName, originalName }) =>
+          switchMap(({ fileName, thumbnailFileName, originalName }) =>
             this.http.patch(`${this.URL}/${id}`, {
               ...form,
               fileName,
-              previewName,
+              thumbnailFileName,
               originalName,
             }),
           ),

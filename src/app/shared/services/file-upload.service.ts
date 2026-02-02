@@ -17,17 +17,15 @@ export interface UploadedFile {
   sizeBytes: number;
 }
 
-export interface UploadedPdfThumbnail {
-  fileName: string;
-  originalName: string;
-  previewName: string | null;
-}
-
 export interface UploadedFileResponse {
   fileName: string;
   originalName: string;
   mimeType: string;
   sizeBytes: number;
+}
+
+export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
+  thumbnailFileName: string;
 }
 
 @Injectable({
@@ -60,7 +58,7 @@ export class FileUploadService {
   uploadPdfThumbnail(file: File, group: FileGroup) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<UploadedPdfThumbnail>(
+    return this.http.post<UploadedPdfThumbnailResponse>(
       `${this.URL}/${group}`,
       formData,
     );
@@ -69,7 +67,7 @@ export class FileUploadService {
   uploadVideoWithThumbnail(file: File, group: FileGroup) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<UploadedPdfThumbnail>(
+    return this.http.post<UploadedPdfThumbnailResponse>(
       `${this.URL}/${group}`,
       formData,
     );

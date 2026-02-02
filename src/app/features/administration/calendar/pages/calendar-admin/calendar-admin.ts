@@ -13,14 +13,14 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { FullCalendarModule } from '@fullcalendar/angular';
 
 import { CalendarEditor } from '../../dialogs';
 import { CalendarDataSource } from '../../services';
+import { CalendarEventResponse } from '../../interfaces';
 
 @Component({
   selector: 'app-calendar-admin',
-  imports: [CommonModule, ButtonModule, TableModule, FullCalendarModule],
+  imports: [CommonModule, ButtonModule, TableModule],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,23 +51,8 @@ export default class CalendarAdmin {
     return this.resource.value().total;
   });
 
-  openCreateDialog() {
-    const dialogRef = this.dialogService.open(CalendarEditor, {
-      header: 'Crear evento',
-      closable: true,
-      width: '40vw',
-      breakpoints: {
-        '640px': '90vw',
-      },
-    });
-    dialogRef?.onClose.subscribe((result) => {
-      if (!result) return;
-      // this.dataSize.update((values) => (values += 1));
-      // this.dataSource.update((values) => [result, ...values]);
-    });
-  }
 
-  openDialog(item?: any) {
+  openEventDialog(item?: CalendarEventResponse) {
     const dialogRef = this.dialogService.open(CalendarEditor, {
       header: item ? 'Editar evento' : 'Crear evento',
       modal: true,
@@ -81,13 +66,13 @@ export default class CalendarAdmin {
         '640px': '90vw',
       },
     });
-    dialogRef?.onClose.subscribe((result?: any) => {
+    dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
       if (!result) return;
       this.updateItemDataSource(result);
     });
   }
 
-  private updateItemDataSource(item: any): void {
+  private updateItemDataSource(item: CalendarEventResponse): void {
     const index = this.dataSource().findIndex(({ id }) => item.id === id);
     if (index === -1) {
       this.dataSource.update((values) => [item, ...values]);

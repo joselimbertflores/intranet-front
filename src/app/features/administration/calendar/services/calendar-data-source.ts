@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { tap } from 'rxjs';
+
 import { environment } from '../../../../../environments/environment';
+import { CalendarEventResponse } from '../interfaces';
 
 export interface FormCalendarProps {
   title: string;
@@ -37,6 +40,8 @@ export class CalendarDataSource {
   }
 
   findAll() {
-    return this.http.get<{ events: any[]; total: number }>(this.URL);
+    return this.http
+      .get<{ events: CalendarEventResponse[]; total: number }>(this.URL)
+      .pipe(tap((resp) => console.log(resp)));
   }
 }

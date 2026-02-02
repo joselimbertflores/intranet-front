@@ -1,90 +1,158 @@
 <form [formGroup]="form" (ngSubmit)="save()">
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-2 pt-1">
-    <div class="sm:col-span-2">
-      <div class="flex flex-col">
-        <p-floatlabel variant="on">
-          <label for="referenc_txt">Referencia</label>
-          <textarea
-            pTextarea
-            id="referenc_txt"
-            formControlName="reference"
-            rows="2"
-            class="w-full"
-            [invalid]="formUtils.isInvalid(form.get('reference'))"
-          ></textarea>
-        </p-floatlabel>
-        @if (formUtils.isInvalid(form.get("reference"))) {
-          <p-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(form.get("reference")) }}
-          </p-message>
-        }
-      </div>
-    </div>
-    <div>
-      <div class="flex flex-col gap-1">
-        <p-floatlabel variant="on">
-          <label>CITE</label>
-          <input pInputText class="w-full" formControlName="code" />
-        </p-floatlabel>
-        @if (formUtils.isInvalid(form.get("code"))) {
-          <p-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(form.get("code")) }}
-          </p-message>
-        }
-      </div>
-    </div>
-    <div class="flex flex-col gap-1">
-      <p-floatlabel class="w-full" variant="on">
-        <p-select
-          inputId="type_txt"
-          appendTo="body"
-          class="w-full"
-          optionLabel="name"
-          optionValue="id"
-          [invalid]="formUtils.isInvalid(form.get('typeId'))"
-          [options]="types()"
-          formControlName="typeId"
-        />
-        <label for="type_txt">Tipo</label>
-      </p-floatlabel>
-      @if (formUtils.isInvalid(form.get("typeId"))) {
-        <p-message severity="error" size="small" variant="simple">
-          {{ formUtils.getErrorMessage(form.get("typeId")) }}
-        </p-message>
-      }
-    </div>
-  </div>
-  <div class="flex flex-col gap-y-4 mt-4">
-    <div>
-      <p-button
-        size="small"
-        icon="pi pi-upload"
-        variant="outlined"
-        label="Adjuntar PDF"
-        (onClick)="pdfInput.click()"
-      />
-      <input
-        type="file"
-        accept="application/pdf"
-        (change)="onFileSelected($event)"
-        #pdfInput
-        hidden
-        size=""
-      />
-    </div>
-    <div class="border border-surface-300 rounded-xl px-4 py-3">
-      @if (selectedFileName()) {
-        <div class="flex items-center space-x-3">
-          <i class="pi pi-file-pdf text-red-500" style="font-size: 1.5rem"></i>
-          <p class="font-medium">
-            {{ selectedFileName() }}
-          </p>
-        </div>
-      } @else {
-        <div class="font-medium">Seleccione el PDF a adjuntar</div>
-      }
-    </div>
-  </div>
+  <p-stepper [value]="1" [linear]="true">
+    <p-step-list>
+      <p-step [value]="1">Datos comunicado</p-step>
+      <p-step [value]="2">Datos evento (Opcional)</p-step>
+    </p-step-list>
+    <p-step-panels>
+      <p-step-panel [value]="1">
+        <ng-template #content let-activateCallback="activateCallback">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-2 pt-1">
+            <div class="sm:col-span-2">
+              <div class="flex flex-col">
+                <p-floatlabel variant="on">
+                  <label for="referenc_txt">Referencia</label>
+                  <textarea
+                    pTextarea
+                    id="referenc_txt"
+                    formControlName="reference"
+                    rows="2"
+                    class="w-full"
+                    [invalid]="formUtils.isInvalid(form.get('reference'))"
+                  ></textarea>
+                </p-floatlabel>
+                @if (formUtils.isInvalid(form.get("reference"))) {
+                  <p-message severity="error" size="small" variant="simple">
+                    {{ formUtils.getErrorMessage(form.get("reference")) }}
+                  </p-message>
+                }
+              </div>
+            </div>
+            <div>
+              <div class="flex flex-col gap-1">
+                <p-floatlabel variant="on">
+                  <label>CITE</label>
+                  <input
+                    pInputText
+                    class="w-full"
+                    formControlName="code"
+                    [invalid]="formUtils.isInvalid(form.get('code'))"
+                  />
+                </p-floatlabel>
+                @if (formUtils.isInvalid(form.get("code"))) {
+                  <p-message severity="error" size="small" variant="simple">
+                    {{ formUtils.getErrorMessage(form.get("code")) }}
+                  </p-message>
+                }
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p-floatlabel class="w-full" variant="on">
+                <p-select
+                  inputId="type_txt"
+                  appendTo="body"
+                  class="w-full"
+                  optionLabel="name"
+                  optionValue="id"
+                  [invalid]="formUtils.isInvalid(form.get('typeId'))"
+                  [options]="types()"
+                  formControlName="typeId"
+                />
+                <label for="type_txt">Tipo</label>
+              </p-floatlabel>
+              @if (formUtils.isInvalid(form.get("typeId"))) {
+                <p-message severity="error" size="small" variant="simple">
+                  {{ formUtils.getErrorMessage(form.get("typeId")) }}
+                </p-message>
+              }
+            </div>
+            <div class="sm:col-span-2 flex items-center">
+              <p-checkbox
+                inputId="hasEventCheck"
+                name="pizza"
+                [binary]="true"
+                [(ngModel)]="hasEvent"
+                [ngModelOptions]="{ standalone: true }"
+                (onChange)="onHasEventChange($event.checked)"
+              />
+              <label for="hasEventCheck" class="ml-2"> Crear evento </label>
+            </div>
+            <div class="sm:col-span-2">
+              <p-fileupload
+                mode="basic"
+                chooseLabel="Seleccionar PDF"
+                chooseIcon="pi pi-upload"
+                accept="application/pdf"
+                [auto]="false"
+                (onSelect)="selectFile($event)"
+              />
+            </div>
+          </div>
+
+          <!-- <div class="flex flex-col gap-y-4 mt-4">
+            <div>
+              <p-button
+                size="small"
+                icon="pi pi-upload"
+                variant="outlined"
+                label="Adjuntar PDF"
+                (onClick)="pdfInput.click()"
+              />
+              <input
+                type="file"
+                accept="application/pdf"
+                (change)="onFileSelected($event)"
+                #pdfInput
+                hidden
+                size=""
+              />
+            </div>
+            <div class="border border-surface-300 rounded-xl px-4 py-3">
+              @if (selectedFileName()) {
+                <div class="flex items-center space-x-3">
+                  <i
+                    class="pi pi-file-pdf text-red-500"
+                    style="font-size: 1.5rem"
+                  ></i>
+                  <p class="font-medium">
+                    {{ selectedFileName() }}
+                  </p>
+                </div>
+              } @else {
+                <div class="font-medium">Seleccione el PDF a adjuntar</div>
+              }
+            </div>
+          </div> -->
+          <div class="flex pt-6 justify-end">
+            <p-button
+              [outlined]="true"
+              label="Siguiente"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              size="small"
+              (onClick)="activateCallback(2)"
+              [disabled]="!hasEvent()"
+            />
+          </div>
+        </ng-template>
+      </p-step-panel>
+      <p-step-panel [value]="2">
+        <ng-template #content let-activateCallback="activateCallback">
+          <calendar-event-form [eventForm]="calendarEventForm" />
+          <div class="flex pt-6 justify-start">
+            <p-button
+              label="Back"
+              icon="pi pi-arrow-left"
+              iconPos="right"
+              size="small"
+              (onClick)="activateCallback(1)"
+            />
+          </div>
+        </ng-template>
+      </p-step-panel>
+    </p-step-panels>
+  </p-stepper>
+
   <div class="p-dialog-footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
     <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />

@@ -16,8 +16,8 @@ import { MessageModule } from 'primeng/message';
 import { ListboxModule } from 'primeng/listbox';
 import { ButtonModule } from 'primeng/button';
 
+import { DocSectionManageResponse } from '../../interfaces';
 import { DocumentSectionDataSource } from '../../services';
-import { DocumentSectionWithTypesResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
 
 @Component({
@@ -29,8 +29,8 @@ import { FormUtils } from '../../../../../helpers';
     CheckboxModule,
     MessageModule,
     ListboxModule,
-    ButtonModule
-],
+    ButtonModule,
+  ],
   templateUrl: './document-section-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,18 +39,18 @@ export class DocumentSectionEditor {
   private formBuilder = inject(FormBuilder);
   private sectionService = inject(DocumentSectionDataSource);
 
-  readonly data?: DocumentSectionWithTypesResponse = inject(DynamicDialogConfig).data;
+  readonly data?: DocSectionManageResponse = inject(DynamicDialogConfig).data;
 
-  documentTypes = toSignal(this.sectionService.getDocumentTypes(), {
+  readonly documentTypes = toSignal(this.sectionService.getDocumentTypes(), {
     initialValue: [],
   });
+  readonly formUtils = FormUtils;
 
-  sectionForm: FormGroup = this.formBuilder.nonNullable.group({
+  form: FormGroup = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
     documentTypesIds: [[], [Validators.required, Validators.minLength(1)]],
     isActive: [true],
   });
-  formUtils = FormUtils;
 
   ngOnInit() {
     this.loadForm();
@@ -61,9 +61,10 @@ export class DocumentSectionEditor {
   }
 
   save() {
+    if (this.form.invalid) return this.form.markAllAsTouched();
     const subscription = this.data
-      ? this.sectionService.update(this.data.id, this.sectionForm.value)
-      : this.sectionService.create(this.sectionForm.value);
+      ? this.sectionService.update(this.data.id, this.form.value)
+      : this.sectionService.create(this.form.value);
     subscription.subscribe((resp) => {
       this.diagloRef.close(resp);
     });
@@ -71,9 +72,8 @@ export class DocumentSectionEditor {
 
   private loadForm(): void {
     if (!this.data) return;
-    console.log(this.data);
     const { documentTypes, ...props } = this.data;
     const documentTypesIds = documentTypes.map((type) => type.id);
-    this.sectionForm.patchValue({ ...props, documentTypesIds });
+    this.form.patchValue({ ...props, documentTypesIds });
   }
 }

@@ -76,7 +76,7 @@ export const routes: Routes = [
         title: 'Secciones de documentos',
         path: 'document-sections',
         loadComponent: () =>
-          import('./features/administration/institutional-documents/pages/document-sectons-admin/document-sectons-admin'),
+          import('./features/administration/institutional-documents/pages/document-sections-admin/document-sections-admin'),
       },
       {
         title: 'Documentos',

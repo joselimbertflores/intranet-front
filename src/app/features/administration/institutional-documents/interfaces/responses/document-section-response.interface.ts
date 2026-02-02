@@ -1,6 +1,6 @@
 import { DocumentTypeResponse } from './document-type-response.interface';
 
-export interface DocumentSectionWithTypesResponse {
+export interface DocSectionManageResponse {
   id: number;
   name: string;
   documentTypes: DocumentTypeResponse[];

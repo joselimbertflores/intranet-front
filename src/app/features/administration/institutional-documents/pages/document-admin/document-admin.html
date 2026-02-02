@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between mb-4">
+<div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Documentos</h2>
   <div class="flex items-center gap-x-2">
     @let isFiltering = activeFiltersCount > 0;
@@ -145,10 +145,10 @@
       <td>
         @switch (item.status) {
           @case ("PUBLISHED") {
-            <p-tag severity="success" value="Publicado" />
+            <p-tag severity="info" value="Publicado" />
           }
           @case ("ARCHIVED") {
-            <p-tag severity="warn" value="Archivado" />
+            <p-tag severity="secondary" value="Archivado" />
           }
           @default {
             <span>Sin estado</span>

@@ -39,7 +39,7 @@ export class CalendarEditor implements OnInit {
     description: [''],
     startDate: [this.currentDate, Validators.required],
     endDate: [null],
-    allDay: [false],
+    allDay: [true],
     recurrence: this.formBuilder.group(
       {
         frequency: [null],

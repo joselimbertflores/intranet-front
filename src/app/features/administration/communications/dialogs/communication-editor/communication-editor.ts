@@ -1,51 +1,52 @@
 import {
   ChangeDetectionStrategy,
-  linkedSignal,
   Component,
   inject,
   signal,
+  effect,
 } from '@angular/core';
 import {
   FormGroup,
   Validators,
+  FormsModule,
   FormBuilder,
   ReactiveFormsModule,
-  FormsModule,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 
-import { CommunicationManageDataSource } from '../../services';
 import { recurrenceValidator } from '../../../calendar/helpers';
-import { FormUtils } from '../../../../../helpers';
 import { CalendarEventForm } from '../../../calendar/components';
-import { CommonModule } from '@angular/common';
-import { CheckboxModule } from 'primeng/checkbox';
+import { CommunicationManageDataSource } from '../../services';
+import { CommunicationManageResponse } from '../../interfaces';
+import { FormUtils } from '../../../../../helpers';
 
 @Component({
   selector: 'app-communication-editor',
   imports: [
+    ReactiveFormsModule,
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     FloatLabelModule,
-    MessageModule,
-    ButtonModule,
-    SelectModule,
-    TextareaModule,
     FileUploadModule,
     InputTextModule,
-    StepperModule,
-    CalendarEventForm,
+    TextareaModule,
     CheckboxModule,
+    MessageModule,
+    StepperModule,
+    SelectModule,
+    ButtonModule,
+    CalendarEventForm,
   ],
   templateUrl: './communication-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,12 +55,14 @@ export class CommunicationEditor {
   private formBuilder = inject(FormBuilder);
   private diagloRef = inject(DynamicDialogRef);
 
-  readonly data?: any = inject(DynamicDialogConfig).data;
+  readonly data?: CommunicationManageResponse =
+    inject(DynamicDialogConfig).data;
 
   private communicationService = inject(CommunicationManageDataSource);
 
   readonly currentDate = new Date();
-  types = this.communicationService.types;
+
+  readonly types = this.communicationService.types;
 
   form: FormGroup = this.formBuilder.group({
     reference: ['', [Validators.required, Validators.minLength(3)]],
@@ -70,7 +73,7 @@ export class CommunicationEditor {
       description: [''],
       startDate: [this.currentDate, Validators.required],
       endDate: [null],
-      allDay: [false],
+      allDay: [true],
       recurrence: this.formBuilder.group(
         {
           frequency: [null],
@@ -82,15 +85,15 @@ export class CommunicationEditor {
       ),
     }),
   });
+
   hasEvent = signal(false);
 
   file = signal<File | null>(null);
-  selectedFileName = linkedSignal(() => this.file()?.name);
 
-  formUtils = FormUtils;
+  readonly formUtils = FormUtils;
 
   constructor() {
-    this.form.get('calendarEvent')?.disable();
+    this.onHasEventChange();
   }
 
   ngOnInit() {
@@ -117,26 +120,26 @@ export class CommunicationEditor {
     this.diagloRef.close();
   }
 
-  onFileSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const [file] = input.files ?? [];
-    if (!file || file.type !== 'application/pdf') return;
-    this.file.set(file);
-  }
-
   selectFile(event: FileSelectEvent) {
     const [file] = event.files;
     if (!file) return;
     this.file.set(file);
   }
 
-  onHasEventChange(checked: boolean) {
-    const eventForm = this.calendarEventForm;
-    if (checked) {
-      eventForm?.enable();
-    } else {
-      eventForm?.disable();
-    }
+  onHasEventChange() {
+    effect(() => {
+      const eventForm = this.calendarEventForm;
+      if (this.hasEvent()) {
+        eventForm?.enable();
+      } else {
+        eventForm?.disable();
+      }
+    });
+  }
+
+  setNameEvent() {
+    const description = this.form.get('reference')?.value;
+    this.form.get('calendarEvent.title')?.setValue(description);
   }
 
   get isFormValid() {
@@ -147,10 +150,24 @@ export class CommunicationEditor {
     return this.form.get('calendarEvent') as FormGroup;
   }
 
-  private loadFormData() {
+  private loadFormData(): void {
     if (!this.data) return;
-    this.selectedFileName.set(this.data.originalName);
-    const { type, ...proos } = this.data;
-    this.form.patchValue({ ...proos, typeId: type.id });
+
+    const { type, calendarEvent, originalName, ...props } = this.data;
+
+    const formData = { ...props, typeId: type.id, calendarEvent: {} };
+
+    if (calendarEvent) {
+      this.hasEvent.set(true);
+      const { recurrenceConfig, startDate, endDate, ...eventProps } =
+        calendarEvent;
+      formData.calendarEvent = {
+        ...eventProps,
+        startDate: new Date(startDate),
+        endDate: endDate ? new Date(endDate) : null,
+        recurrence: recurrenceConfig,
+      };
+    }
+    this.form.patchValue(formData);
   }
 }

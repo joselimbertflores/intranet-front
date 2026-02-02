@@ -25,7 +25,7 @@ export interface UploadedFileResponse {
 }
 
 export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
-  thumbnailFileName: string;
+  previewFileName: string;
 }
 
 @Injectable({

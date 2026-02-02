@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="save()">
-  <p-stepper [value]="1" [linear]="true">
+  <p-stepper [value]="1" [linear]="true" (valueChange)="setNameEvent()">
     <p-step-list>
       <p-step [value]="1">Datos comunicado</p-step>
       <p-step [value]="2">Datos evento (Opcional)</p-step>
@@ -73,10 +73,26 @@
                 [binary]="true"
                 [(ngModel)]="hasEvent"
                 [ngModelOptions]="{ standalone: true }"
-                (onChange)="onHasEventChange($event.checked)"
               />
               <label for="hasEventCheck" class="ml-2"> Crear evento </label>
             </div>
+
+            @if (data?.fileName) {
+              <div class="space-y-2 w-full">
+                <div class="font-medium">Documento actual:</div>
+                <div class="sm:col-span-2 p-2 border border-slate-300 w-full">
+                  <div class="flex items-center space-x-2">
+                    <i
+                      class="pi pi-file-pdf text-red-500"
+                      style="font-size: 1.5rem"
+                    ></i>
+                    <p class="font-medium">
+                      {{ data?.originalName }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
             <div class="sm:col-span-2">
               <p-fileupload
                 mode="basic"
@@ -88,42 +104,7 @@
               />
             </div>
           </div>
-
-          <!-- <div class="flex flex-col gap-y-4 mt-4">
-            <div>
-              <p-button
-                size="small"
-                icon="pi pi-upload"
-                variant="outlined"
-                label="Adjuntar PDF"
-                (onClick)="pdfInput.click()"
-              />
-              <input
-                type="file"
-                accept="application/pdf"
-                (change)="onFileSelected($event)"
-                #pdfInput
-                hidden
-                size=""
-              />
-            </div>
-            <div class="border border-surface-300 rounded-xl px-4 py-3">
-              @if (selectedFileName()) {
-                <div class="flex items-center space-x-3">
-                  <i
-                    class="pi pi-file-pdf text-red-500"
-                    style="font-size: 1.5rem"
-                  ></i>
-                  <p class="font-medium">
-                    {{ selectedFileName() }}
-                  </p>
-                </div>
-              } @else {
-                <div class="font-medium">Seleccione el PDF a adjuntar</div>
-              }
-            </div>
-          </div> -->
-          <div class="flex pt-6 justify-end">
+          <div class="flex pt-4 justify-end">
             <p-button
               [outlined]="true"
               label="Siguiente"
@@ -139,9 +120,10 @@
       <p-step-panel [value]="2">
         <ng-template #content let-activateCallback="activateCallback">
           <calendar-event-form [eventForm]="calendarEventForm" />
-          <div class="flex pt-6 justify-start">
+          <div class="flex pt-4 justify-start">
             <p-button
-              label="Back"
+              [outlined]="true"
+              label="Atras"
               icon="pi pi-arrow-left"
               iconPos="right"
               size="small"
@@ -152,7 +134,6 @@
       </p-step-panel>
     </p-step-panels>
   </p-stepper>
-
   <div class="p-dialog-footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
     <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />

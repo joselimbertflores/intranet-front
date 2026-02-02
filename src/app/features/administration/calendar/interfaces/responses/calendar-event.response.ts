@@ -6,13 +6,13 @@ export interface CalendarEventResponse {
   endDate: string | null;
   allDay: boolean;
   recurrenceRule: string | null;
-  recurrenceConfig: RecurrenceConfig | null;
+  recurrenceConfig: RecurrenceConfigResponse | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface RecurrenceConfig {
+export interface RecurrenceConfigResponse {
   until: null;
   interval: number;
   frequency: string;

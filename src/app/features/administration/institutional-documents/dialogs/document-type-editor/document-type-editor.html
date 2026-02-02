@@ -2,15 +2,20 @@
   <div class="flex flex-col gap-1 pt-1">
     <p-floatlabel variant="on">
       <label> Nombre</label>
-      <input pInputText class="w-full" formControlName="name" />
+      <input
+        pInputText
+        class="w-full"
+        formControlName="name"
+        [invalid]="formUtils.isInvalid(form.get('name'))"
+      />
     </p-floatlabel>
-    @if(formUtils.isInvalid(form.get("name"))){
+    @if (formUtils.isInvalid(form.get("name"))) {
       <p-message severity="error" size="small" variant="simple">
         {{ formUtils.getErrorMessage(form.get("name")) }}
       </p-message>
     }
   </div>
-  <div class="flex items-center px-2 mt-2">
+  <div class="flex items-center px-2 mt-4">
     <p-checkbox name="pizza" [binary]="true" formControlName="isActive" />
     <label class="ml-2"> Habilitado </label>
   </div>
@@ -21,14 +26,14 @@
       size="small"
       label="Agregar"
       (click)="addSubtype()"
-      />
+    />
   </div>
-  <div class="p-4 border max-h-[400px] overflow-y-auto rounded-lg border-surface-300">
+  <div
+    class="p-4 border max-h-[350px] overflow-y-auto rounded-lg border-surface-300"
+  >
     <div class="flex flex-col gap-y-4" formArrayName="subtypes">
       @for (item of subTypes.controls; track item; let i = $index) {
-        <div
-          [formGroupName]="i"
-          >
+        <div [formGroupName]="i">
           <div class="flex gap-x-4 items-center">
             <div class="flex-1">
               <div class="flex flex-col gap-1">
@@ -36,7 +41,7 @@
                   <label>Nombre subtipo {{ i + 1 }}</label>
                   <input pInputText class="w-full" formControlName="name" />
                 </p-floatlabel>
-                @if(formUtils.isInvalid(item.get("name"))){
+                @if (formUtils.isInvalid(item.get("name"))) {
                   <p-message severity="error" size="small" variant="simple">
                     {{ formUtils.getErrorMessage(item.get("name")) }}
                   </p-message>
@@ -48,7 +53,7 @@
                 name="pizza"
                 [binary]="true"
                 formControlName="isActive"
-                />
+              />
               <label class="ml-2"> Habilitado </label>
             </div>
             <p-button
@@ -56,19 +61,24 @@
               [rounded]="true"
               [text]="true"
               (onClick)="removeSubtype(i)"
-              />
+            />
           </div>
         </div>
       }
-      @if(subTypes.controls.length===0){
+      @if (subTypes.controls.length === 0) {
         <span>Sin elementos.</span>
       }
     </div>
   </div>
 
   <div class="p-dialog-footer">
-    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" [disabled]="form.invalid" />
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      (onClick)="close()"
+    />
+    <p-button type="submit" label="Guardar" />
   </div>
 </form>
 <p-confirmdialog />

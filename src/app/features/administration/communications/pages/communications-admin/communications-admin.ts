@@ -2,20 +2,20 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
-  computed,
   inject,
   signal,
 } from '@angular/core';
-
 import { rxResource } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+
+import { TableModule, TablePageEvent } from 'primeng/table';
 import { DialogService } from 'primeng/dynamicdialog';
 import { TextareaModule } from 'primeng/textarea';
-import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
 
 import { CommunicationManageDataSource } from '../../services';
 import { SearchInputComponent } from '../../../../../shared';
+import { CommunicationManageResponse } from '../../interfaces';
 import { CommunicationEditor } from '../../dialogs';
 
 @Component({
@@ -35,9 +35,8 @@ export default class CommunicationsAdmin {
   private communicationServce = inject(CommunicationManageDataSource);
 
   limit = signal(10);
-  index = signal(0);
+  offset = signal(0);
   term = signal('');
-  offset = computed(() => this.index() * this.limit());
   communicationResource = rxResource({
     params: () => ({
       offset: this.offset(),
@@ -58,44 +57,45 @@ export default class CommunicationsAdmin {
   });
 
   onSearch(term: string) {
+    this.offset.set(0);
     this.term.set(term);
   }
 
-  openCreateDialog() {
+  chagePage(event: TablePageEvent) {
+    this.limit.set(event.rows);
+    this.offset.set(event.first);
+  }
+
+  openCommunicationDialog(item?: CommunicationManageResponse) {
     const dialogRef = this.dialogService.open(CommunicationEditor, {
-      header: 'Crear comunicado',
+      header: item ? 'Editar comunicado' : 'Crear comunicado',
       modal: true,
+      draggable: false,
+      closeOnEscape: true,
+      closable: true,
       width: '40vw',
+      data: item,
       breakpoints: {
+        '960px': '75vw',
         '640px': '90vw',
       },
     });
-    dialogRef?.onClose.subscribe((result) => {
+    dialogRef?.onClose.subscribe((result?: CommunicationManageResponse) => {
       if (!result) return;
-      this.dataSize.update((values) => (values += 1));
-      this.dataSource.update((values) => [result, ...values]);
+      this.updateItemDataSource(result);
     });
   }
 
-  openUpdateDialog(item: any) {
-    const dialogRef = this.dialogService.open(CommunicationEditor, {
-      header: 'Editar comunicado',
-      modal: true,
-      width: '45vw',
-      data: item,
-      breakpoints: {
-        '640px': '90vw',
-      },
-    });
-    dialogRef?.onClose.subscribe((result) => {
-      if (!result) return;
-      const index = this.dataSource().findIndex(({ id }) => result.id === id);
-      if (index !== -1) {
-        this.dataSource.update((values) => {
-          values[index] = result;
-          return [...values];
-        });
-      }
-    });
+  private updateItemDataSource(item: CommunicationManageResponse): void {
+    const index = this.dataSource().findIndex(({ id }) => item.id === id);
+    if (index === -1) {
+      this.dataSource.update((values) => [item, ...values]);
+      this.dataSize.update((value) => (value += 1));
+    } else {
+      this.dataSource.update((values) => {
+        values[index] = item;
+        return [...values];
+      });
+    }
   }
 }

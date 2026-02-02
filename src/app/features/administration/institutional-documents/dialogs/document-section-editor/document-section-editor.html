@@ -1,13 +1,18 @@
-<form [formGroup]="sectionForm" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-4">
-    <div class="flex flex-col gap-1 pt-1">
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div class="flex flex-col gap-y-4 pt-2">
+    <div class="flex flex-col gap-1">
       <p-floatlabel variant="on">
         <label>Nombre</label>
-        <input pInputText class="w-full" formControlName="name" />
+        <input
+          pInputText
+          class="w-full"
+          formControlName="name"
+          [invalid]="formUtils.isInvalid(form.get('name'))"
+        />
       </p-floatlabel>
-      @if (formUtils.isInvalid(sectionForm.get("name"))) {
+      @if (formUtils.isInvalid(form.get("name"))) {
         <p-message severity="error" size="small" variant="simple">
-          {{ formUtils.getErrorMessage(sectionForm.get("name")) }}
+          {{ formUtils.getErrorMessage(form.get("name")) }}
         </p-message>
       }
     </div>
@@ -27,15 +32,26 @@
         formControlName="documentTypesIds"
         filterPlaceHolder="Buscar tipo"
         emptyFilterMessage="Sin resultados"
+        [invalid]="formUtils.isInvalid(form.get('documentTypesIds'))"
       >
         <ng-template #header>
           <span>Tipos de documento</span>
         </ng-template>
       </p-listbox>
+      @if (formUtils.isInvalid(form.get("documentTypesIds"))) {
+        <p-message severity="error" size="small" variant="simple" class="mt-1">
+          Seleccione al menos un tipo de documento
+        </p-message>
+      }
     </div>
   </div>
   <div class="p-dialog-footer">
-    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" [disabled]="sectionForm.invalid" />
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      (onClick)="close()"
+    />
+    <p-button type="submit" label="Guardar" />
   </div>
 </form>

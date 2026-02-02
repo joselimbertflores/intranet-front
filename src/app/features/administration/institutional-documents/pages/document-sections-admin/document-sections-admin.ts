@@ -1,29 +1,38 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-
 import { DialogService } from 'primeng/dynamicdialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
-import { DocumentSectionWithTypesResponse } from '../../interfaces';
+import { DocSectionManageResponse } from '../../interfaces';
 import { DocumentSectionDataSource } from '../../services';
 import { DocumentSectionEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-document-sectons-admin',
-  imports: [ButtonModule, TableModule, TagModule],
-  templateUrl: './document-sectons-admin.html',
+  selector: 'app-document-sections-admin',
+  imports: [
+    TagModule,
+    ButtonModule,
+    TableModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+  ],
+  templateUrl: './document-sections-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],
 })
-export default class DocumentSectonsAdmin {
+export default class DocumentSectionsAdmin {
   private dialogService = inject(DialogService);
   private sectionService = inject(DocumentSectionDataSource);
 
   dataSource = this.sectionService.dataSource;
 
-  openDocumentSectionDialog(item?: DocumentSectionWithTypesResponse) {
+  openDocumentSectionDialog(item?: DocSectionManageResponse) {
     this.dialogService.open(DocumentSectionEditor, {
       header: item ? 'Editar seccion documento' : 'Crear seccion documento',
       modal: true,

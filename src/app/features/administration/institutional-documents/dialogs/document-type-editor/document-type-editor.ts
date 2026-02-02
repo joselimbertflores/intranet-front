@@ -7,7 +7,6 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 
-
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -17,7 +16,11 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 
-import { DocumentTypeWithSubTypesResponse, DocumentSubtypeResponse } from '../../interfaces';
+import {
+  DocumentSubtypeResponse,
+  DocumentTypeWithSubTypesResponse,
+} from '../../interfaces';
+
 import { DocumentTypeDataSource } from '../../services';
 import { FormUtils } from '../../../../../helpers';
 
@@ -30,8 +33,8 @@ import { FormUtils } from '../../../../../helpers';
     CheckboxModule,
     InputTextModule,
     MessageModule,
-    ButtonModule
-],
+    ButtonModule,
+  ],
   templateUrl: './document-type-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService],
@@ -42,7 +45,8 @@ export class DocumentTypeEditor {
   private documentTypeDataSource = inject(DocumentTypeDataSource);
   private confirmationService = inject(ConfirmationService);
 
-  readonly data?: DocumentTypeWithSubTypesResponse = inject(DynamicDialogConfig).data;
+  readonly data?: DocumentTypeWithSubTypesResponse =
+    inject(DynamicDialogConfig).data;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
     name: [
@@ -60,7 +64,7 @@ export class DocumentTypeEditor {
   }
 
   save() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) return this.form.markAllAsTouched();
     const subscription = this.data
       ? this.documentTypeDataSource.update(this.data!.id, this.form.value)
       : this.documentTypeDataSource.create(this.form.value);

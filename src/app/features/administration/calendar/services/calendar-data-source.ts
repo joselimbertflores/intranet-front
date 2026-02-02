@@ -4,23 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { CalendarEventResponse } from '../interfaces';
-
-export interface FormCalendarProps {
-  title: string;
-  description: string;
-  startDate: Date;
-  endDate: Date | null;
-  allDay: boolean;
-  recurrence?: RecurrenceConfig;
-}
-
-export interface RecurrenceConfig {
-  frequency: string | null;
-  interval: number;
-  byWeekDays: string[];
-  until?: Date | null;
-}
+import { CalendarEventResponse, FormCalendarProps } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',

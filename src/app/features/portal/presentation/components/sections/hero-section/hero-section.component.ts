@@ -55,10 +55,10 @@ import { HeroSlideResponse } from '../../../../../administration/content-setting
         <ng-template let-slide pTemplate="item">
           <div
             class="relative h-[500px] md:h-[600px] bg-cover bg-center transition-all duration-700"
-            [style.backgroundImage]="'url(' + slide.image + ')'"
+            [style.backgroundImage]="'url(' + slide.imageUrl + ')'"
           >
             <div
-              class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent
+              class="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent
                  flex flex-col justify-center text-white px-6 md:px-16 space-y-4"
             >
               <h2

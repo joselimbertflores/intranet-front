@@ -14,8 +14,8 @@ import {
   RouterModule,
 } from '@angular/router';
 
-import { AppToolbarComponent } from '../../components';
-import { ScrollStateService } from '../../../../../shared';
+import { AppToolbarComponent } from '../../features/portal/presentation/components';
+import { ScrollStateService } from '../../shared';
 
 @Component({
   selector: 'app-portal-layout',

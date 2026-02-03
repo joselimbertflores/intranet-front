@@ -6,13 +6,12 @@ import {
   signal,
 } from '@angular/core';
 
-
 import { PortalService } from '../../services/portal.service';
+import { DocumentResponse } from '../../interfaces';
 import {
   DocumentListComponent,
   FilterDocumentsComponent,
-} from '../../components';
-import { DocumentResponse } from '../../../infrastructure';
+} from '../../presentation/components';
 
 @Component({
   selector: 'app-document-repository',

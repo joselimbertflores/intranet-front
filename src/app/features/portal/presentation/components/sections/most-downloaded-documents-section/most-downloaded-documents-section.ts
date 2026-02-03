@@ -11,12 +11,12 @@ import { RouterModule } from '@angular/router';
 import { AnimateOnScroll } from 'primeng/animateonscroll';
 import { ButtonModule } from 'primeng/button';
 
-import { PortalService } from '../../../services';
 import {
   PrimengFileIconPipe,
   FileSizePipe,
   UiBreakpointObserver,
 } from '../../../../../../shared';
+import { PortalService } from '../../../../services';
 
 @Component({
   selector: 'most-downloaded-documents-section',

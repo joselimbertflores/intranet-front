@@ -14,9 +14,8 @@ import { map } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 
 import { PortalTutorialData } from '../../services';
-import { ScrollStateService } from '../../../../../shared';
-import { TutorialVideoResponse } from '../../../../administration/interfaces';
-
+import { ScrollStateService } from '../../../../shared';
+import { TutorialVideoResponse } from '../../../administration/interfaces';
 @Component({
   selector: 'app-tutorials-detail',
   imports: [CommonModule, ButtonModule],
@@ -33,7 +32,7 @@ export default class TutorialsDetail {
   slug = input.required<string>();
 
   videoId = toSignal(
-    this.route.queryParamMap.pipe(map((param) => param.get('video') ?? null))
+    this.route.queryParamMap.pipe(map((param) => param.get('video') ?? null)),
   );
 
   dataResource = rxResource({

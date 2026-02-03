@@ -3,13 +3,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 
 import { finalize, of, switchMap, tap } from 'rxjs';
-
+import { environment } from '../../../../environments/environment';
 import {
   DocumentResponse,
   HomePortalDataResponse,
   CategoriesWithSectionsResponse,
-} from '../../infrastructure';
-import { environment } from '../../../../../environments/environment';
+} from '../interfaces';
 
 interface FilterDocumentsParams {
   categoryId?: number;
@@ -40,9 +39,9 @@ export class PortalService {
   sections = computed(() => {
     const id = this.selectedCategoryId();
     return id
-      ? this.categoriesWithSections()
+      ? (this.categoriesWithSections()
           .find((item) => item.id === id)
-          ?.sectionCategories.map((item) => item.section) ?? []
+          ?.sectionCategories.map((item) => item.section) ?? [])
       : [];
   });
 
@@ -54,8 +53,8 @@ export class PortalService {
     this.http.get<HomePortalDataResponse>(`${this.URL}/home`).pipe(
       finalize(() => {
         this._isPortalLoading.set(false);
-      })
-    )
+      }),
+    ),
   );
 
   isDocumentSearching = signal<boolean>(false);
@@ -87,7 +86,7 @@ export class PortalService {
               fiscalYear: (cleanParams['fiscalYear'] as Date).getFullYear(),
             }),
           },
-        }
+        },
       )
       .pipe(
         tap((resp) => {
@@ -97,14 +96,14 @@ export class PortalService {
         }),
         finalize(() => {
           this.isDocumentSearching.set(false);
-        })
+        }),
       );
   }
 
   dowloadDocument(
     docId: string,
     docUrl: string,
-    fileName: string = 'Sin nombre'
+    fileName: string = 'Sin nombre',
   ) {
     return this.http.get(docUrl, { responseType: 'blob' }).pipe(
       tap((blob) => {
@@ -118,25 +117,23 @@ export class PortalService {
       switchMap(() =>
         this.http.patch<{ success: true; newCount?: number }>(
           `${this.URL}/document/${docId}/increment-download`,
-          {}
-        )
-      )
+          {},
+        ),
+      ),
     );
   }
-
 
   getCategoriesWithSections() {
     return this.http.get<CategoriesWithSectionsResponse[]>(
-      `${this.URL}/categories-sections`
+      `${this.URL}/categories-sections`,
     );
   }
-
 
   private cleanFilterProps(form: object) {
     return Object.fromEntries(
       Object.entries(form).filter(
-        ([_, value]) => value !== null && value !== undefined && value !== ''
-      )
+        ([_, value]) => value !== null && value !== undefined && value !== '',
+      ),
     );
   }
 }

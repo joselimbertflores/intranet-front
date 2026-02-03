@@ -13,7 +13,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 
 import { PortalCommunicationService } from '../../services';
-import { PdfDisplayComponent, ScrollStateService } from '../../../../../shared';
+import { PdfDisplayComponent, ScrollStateService } from '../../../../shared';
 
 @Component({
   selector: 'app-communication-detail',

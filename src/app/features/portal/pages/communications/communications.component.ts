@@ -17,7 +17,7 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
 import { PortalCommunicationService } from '../../services';
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInputComponent } from '../../../../shared';
 @Component({
   selector: 'app-communications',
   imports: [

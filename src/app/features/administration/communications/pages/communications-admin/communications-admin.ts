@@ -12,6 +12,7 @@ import { TableModule, TablePageEvent } from 'primeng/table';
 import { DialogService } from 'primeng/dynamicdialog';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
 
 import { CommunicationManageDataSource } from '../../services';
 import { SearchInputComponent } from '../../../../../shared';
@@ -26,6 +27,7 @@ import { CommunicationEditor } from '../../dialogs';
     TableModule,
     TextareaModule,
     SearchInputComponent,
+    TagModule,
   ],
   templateUrl: './communications-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

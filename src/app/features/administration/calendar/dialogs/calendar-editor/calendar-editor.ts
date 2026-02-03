@@ -3,6 +3,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   OnInit,
+  signal,
 } from '@angular/core';
 import {
   FormGroup,
@@ -40,6 +41,7 @@ export class CalendarEditor implements OnInit {
     startDate: [this.currentDate, Validators.required],
     endDate: [null],
     allDay: [true],
+    isActive: [true],
     recurrence: this.formBuilder.group(
       {
         frequency: [null],
@@ -50,6 +52,7 @@ export class CalendarEditor implements OnInit {
       { validators: recurrenceValidator },
     ),
   });
+  isRecurring = signal(false);
 
   ngOnInit(): void {
     this.loadForm();
@@ -59,7 +62,11 @@ export class CalendarEditor implements OnInit {
     if (this.form.invalid) {
       return this.form.markAllAsTouched();
     }
-    this.calendarDataSource.create(this.form.value).subscribe((resp) => {
+    const saveObservable = this.data
+      ? this.calendarDataSource.update(this.data.id, this.form.value)
+      : this.calendarDataSource.create(this.form.value);
+
+    saveObservable.subscribe((resp) => {
       this.diagloRef.close(resp);
     });
   }
@@ -71,6 +78,7 @@ export class CalendarEditor implements OnInit {
   private loadForm() {
     if (!this.data) return;
     const { recurrenceConfig, startDate, endDate, ...props } = this.data;
+    if (recurrenceConfig) this.isRecurring.set(true);
     this.form.patchValue({
       ...props,
       startDate: new Date(startDate),

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { tap } from 'rxjs';
 
@@ -23,9 +23,23 @@ export class CalendarDataSource {
     });
   }
 
-  findAll() {
+  update(id: string, form: Partial<FormCalendarProps>) {
+    const { recurrence, ...props } = form;
+    return this.http.patch(`${this.URL}/${id}`, {
+      ...props,
+      recurrence: recurrence?.frequency ? recurrence : null,
+    });
+  }
+
+  findAll(limit: number, offset: number, term?: string) {
+    const params = new HttpParams({
+      fromObject: { limit, offset, ...(term && { term }) },
+    });
     return this.http
-      .get<{ events: CalendarEventResponse[]; total: number }>(this.URL)
+      .get<{
+        events: CalendarEventResponse[];
+        total: number;
+      }>(this.URL, { params })
       .pipe(tap((resp) => console.log(resp)));
   }
 }

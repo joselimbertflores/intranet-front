@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="save()">
-  <calendar-event-form [eventForm]="form" />
+  <calendar-event-form [eventForm]="form" [(isRecurring)]="isRecurring" />
   <div class="p-dialog-footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
     <p-button type="submit" label="Guardar" [disabled]="form.invalid" />

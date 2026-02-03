@@ -66,27 +66,40 @@
                 </p-message>
               }
             </div>
-            <div class="sm:col-span-2 flex items-center">
-              <p-checkbox
-                inputId="hasEventCheck"
-                name="pizza"
-                [binary]="true"
-                [(ngModel)]="hasEvent"
-                [ngModelOptions]="{ standalone: true }"
-              />
-              <label for="hasEventCheck" class="ml-2"> Crear evento </label>
+            <div class="sm:col-span-2 flex flex-col sm:flex-row gap-4">
+              <div class="flex items-center">
+                <p-checkbox
+                  inputId="isActiveCheck"
+                  name="pizza"
+                  [binary]="true"
+                  formControlName="isActive"
+                />
+                <label for="isActiveCheck" class="ml-1"> Activo </label>
+              </div>
+              <div class="flex items-center">
+                <p-checkbox
+                  inputId="hasEventCheck"
+                  name="pizza"
+                  [binary]="true"
+                  [(ngModel)]="hasEvent"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <label for="hasEventCheck" class="ml-1">
+                  Adjuntar evento
+                </label>
+              </div>
             </div>
 
             @if (data?.fileName) {
-              <div class="space-y-2 w-full">
+              <div class="mt-2 sm:col-span-2">
                 <div class="font-medium">Documento actual:</div>
-                <div class="sm:col-span-2 p-2 border border-slate-300 w-full">
+                <div class="p-2">
                   <div class="flex items-center space-x-2">
                     <i
                       class="pi pi-file-pdf text-red-500"
                       style="font-size: 1.5rem"
                     ></i>
-                    <p class="font-medium">
+                    <p class="font-medium text-sm">
                       {{ data?.originalName }}
                     </p>
                   </div>
@@ -96,7 +109,7 @@
             <div class="sm:col-span-2">
               <p-fileupload
                 mode="basic"
-                chooseLabel="Seleccionar PDF"
+                [chooseLabel]="data ? 'Remplazar PDF' : 'Seleccionar PDF'"
                 chooseIcon="pi pi-upload"
                 accept="application/pdf"
                 [auto]="false"
@@ -119,7 +132,10 @@
       </p-step-panel>
       <p-step-panel [value]="2">
         <ng-template #content let-activateCallback="activateCallback">
-          <calendar-event-form [eventForm]="calendarEventForm" />
+          <calendar-event-form
+            [eventForm]="calendarEventForm"
+            [(isRecurring)]="isEventRecurring"
+          />
           <div class="flex pt-4 justify-start">
             <p-button
               [outlined]="true"
@@ -139,3 +155,4 @@
     <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />
   </div>
 </form>
+<p-confirmdialog />

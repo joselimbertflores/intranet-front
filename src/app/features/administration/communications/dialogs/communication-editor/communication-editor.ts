@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
@@ -30,6 +31,7 @@ import { CalendarEventForm } from '../../../calendar/components';
 import { CommunicationManageDataSource } from '../../services';
 import { CommunicationManageResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-communication-editor',
@@ -37,6 +39,7 @@ import { FormUtils } from '../../../../../helpers';
     ReactiveFormsModule,
     CommonModule,
     FormsModule,
+    ConfirmDialogModule,
     FloatLabelModule,
     FileUploadModule,
     InputTextModule,
@@ -50,10 +53,12 @@ import { FormUtils } from '../../../../../helpers';
   ],
   templateUrl: './communication-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ConfirmationService],
 })
 export class CommunicationEditor {
   private formBuilder = inject(FormBuilder);
   private diagloRef = inject(DynamicDialogRef);
+  private confirmationService = inject(ConfirmationService);
 
   readonly data?: CommunicationManageResponse =
     inject(DynamicDialogConfig).data;
@@ -63,17 +68,20 @@ export class CommunicationEditor {
   readonly currentDate = new Date();
 
   readonly types = this.communicationService.types;
+  readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.group({
     reference: ['', [Validators.required, Validators.minLength(3)]],
     code: ['', [Validators.required, Validators.minLength(3)]],
     typeId: ['', Validators.required],
+    isActive: [true],
     calendarEvent: this.formBuilder.group({
       title: ['', [Validators.required, Validators.maxLength(150)]],
       description: [''],
       startDate: [this.currentDate, Validators.required],
       endDate: [null],
       allDay: [true],
+      isActive: [true],
       recurrence: this.formBuilder.group(
         {
           frequency: [null],
@@ -87,10 +95,9 @@ export class CommunicationEditor {
   });
 
   hasEvent = signal(false);
+  isEventRecurring = signal(false);
 
   file = signal<File | null>(null);
-
-  readonly formUtils = FormUtils;
 
   constructor() {
     this.onHasEventChange();
@@ -133,6 +140,9 @@ export class CommunicationEditor {
         eventForm?.enable();
       } else {
         eventForm?.disable();
+        if (this.data?.calendarEvent) {
+          this.showDeleteEventMessage();
+        }
       }
     });
   }
@@ -150,6 +160,20 @@ export class CommunicationEditor {
     return this.form.get('calendarEvent') as FormGroup;
   }
 
+  private showDeleteEventMessage(): void {
+    this.confirmationService.confirm({
+      header: 'Aviso: "Eliminación evento"',
+      message:
+        'Guardar cambios sin "Adjuntar evento" eliminara el evento vinculado al comunicado.',
+      rejectVisible: false,
+      acceptButtonProps: {
+        label: 'Aceptar',
+        severity: 'secondary',
+        size: 'small',
+      },
+    });
+  }
+
   private loadFormData(): void {
     if (!this.data) return;
 
@@ -161,6 +185,7 @@ export class CommunicationEditor {
       this.hasEvent.set(true);
       const { recurrenceConfig, startDate, endDate, ...eventProps } =
         calendarEvent;
+      if (recurrenceConfig) this.isEventRecurring.set(true);
       formData.calendarEvent = {
         ...eventProps,
         startDate: new Date(startDate),

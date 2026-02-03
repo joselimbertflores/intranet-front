@@ -2,9 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 import { of, tap } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
-import { FileUploadService } from '../../../../shared';
-
+import { environment } from '../../../../environments/environment';
+import { FileUploadService } from '../../../shared';
 
 interface GetCommunicationsParams {
   limit: number;

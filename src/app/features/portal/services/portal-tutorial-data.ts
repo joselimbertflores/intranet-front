@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-
-import { environment } from '../../../../../environments/environment';
-import { TutorialResponse } from '../../../administration/interfaces';
+import { environment } from '../../../../environments/environment';
+import { TutorialResponse } from '../../administration/interfaces';
 
 
 @Injectable({

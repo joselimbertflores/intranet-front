@@ -2,9 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
-  signal,
+  model,
 } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -17,6 +18,7 @@ import { SelectModule } from 'primeng/select';
 @Component({
   selector: 'calendar-event-form',
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     MultiSelectModule,
     FloatLabelModule,
@@ -80,6 +82,15 @@ import { SelectModule } from 'primeng/select';
         <div class="flex gap-6 px-2">
           <div class="flex items-center">
             <p-checkbox
+              inputId="isActiveCheck"
+              name="pizza"
+              [binary]="true"
+              formControlName="isActive"
+            />
+            <label for="isActiveCheck" class="ml-1"> Activo </label>
+          </div>
+          <div class="flex items-center">
+            <p-checkbox
               inputId="allDayCheck"
               formControlName="allDay"
               [binary]="true"
@@ -94,8 +105,9 @@ import { SelectModule } from 'primeng/select';
           <div class="flex items-center">
             <p-checkbox
               inputId="recurrenceCheck"
+              [(ngModel)]="isRecurring"
+              [ngModelOptions]="{ standalone: true }"
               [binary]="true"
-              [value]="isRecurring()"
               (onChange)="onRecurringToggle($event.checked)"
             >
             </p-checkbox>
@@ -167,7 +179,7 @@ import { SelectModule } from 'primeng/select';
 })
 export class CalendarEventForm {
   eventForm = input.required<FormGroup>();
-  isRecurring = signal(false);
+  isRecurring = model(false);
 
   readonly frequencies = [
     { label: 'Diario', value: 'DAILY' },
@@ -193,9 +205,7 @@ export class CalendarEventForm {
   }
 
   onRecurringToggle(checked: boolean) {
-    this.isRecurring.set(checked);
     const recurrenceGroup = this.eventForm().get('recurrence');
-
     if (!checked) {
       recurrenceGroup?.disable();
     } else {

@@ -11,16 +11,23 @@ import { CommonModule } from '@angular/common';
 
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
+import { TableModule, TablePageEvent } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 
-
-import { CalendarEditor } from '../../dialogs';
-import { CalendarDataSource } from '../../services';
 import { CalendarEventResponse } from '../../interfaces';
+import { CalendarDataSource } from '../../services';
+import { CalendarEditor } from '../../dialogs';
+import { SearchInputComponent } from '../../../../../shared';
 
 @Component({
   selector: 'app-calendar-admin',
-  imports: [CommonModule, ButtonModule, TableModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    TableModule,
+    TagModule,
+    SearchInputComponent,
+  ],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,16 +36,16 @@ export default class CalendarAdmin {
   private calendarDataSource = inject(CalendarDataSource);
 
   limit = signal(10);
-  index = signal(0);
   term = signal('');
-  offset = computed(() => this.index() * this.limit());
+  offset = signal(0);
   resource = rxResource({
     params: () => ({
       offset: this.offset(),
       limit: this.limit(),
       term: this.term(),
     }),
-    stream: ({ params }) => this.calendarDataSource.findAll(),
+    stream: ({ params }) =>
+      this.calendarDataSource.findAll(params.limit, params.offset, params.term),
   });
 
   dataSource = linkedSignal(() => {
@@ -50,7 +57,6 @@ export default class CalendarAdmin {
     if (!this.resource.hasValue()) return 0;
     return this.resource.value().total;
   });
-
 
   openEventDialog(item?: CalendarEventResponse) {
     const dialogRef = this.dialogService.open(CalendarEditor, {
@@ -70,6 +76,16 @@ export default class CalendarAdmin {
       if (!result) return;
       this.updateItemDataSource(result);
     });
+  }
+
+  onSearch(term: string) {
+    this.offset.set(0);
+    this.term.set(term);
+  }
+
+  chagePage(event: TablePageEvent) {
+    this.limit.set(event.rows);
+    this.offset.set(event.first);
   }
 
   private updateItemDataSource(item: CalendarEventResponse): void {

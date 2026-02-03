@@ -1,12 +1,16 @@
-<div class="h-full overflow-y-auto overflow-x-hidden" scrollRestore scrollKey="landing-page">
-  @if(!isLoading() && portalData()){
+<div
+  class="h-full overflow-y-auto overflow-x-hidden"
+  scrollRestore
+  scrollKey="landing-page"
+>
+  @if (!isLoading() && portalData()) {
+    <!-- {{ portalData()?.slides | json }} -->
     <hero-section [slides]="portalData()?.slides" />
     <quick-access-section [quickAccess]="portalData()?.quickAccess" />
     <communications-section [communications]="portalData()!.communications" />
     <most-downloaded-documents-section [documents]="portalData()!.documents" />
     <footer-section />
-  } 
-  @else {
+  } @else {
     <portal-loader />
   }
 </div>

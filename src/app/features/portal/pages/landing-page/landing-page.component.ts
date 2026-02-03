@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-
-
+import { ScrollRestoreDirective } from '../../../../shared';
 import {
   HeroSectionComponent,
   PortalLoaderComponent,
@@ -8,21 +7,22 @@ import {
   QuickAccessSectionComponent,
   CommunicationsSectionComponent,
   MostDownloadedDocumentsSection,
-} from '../../components';
-import { PortalService } from '../../services/portal.service';
-import { ScrollRestoreDirective } from '../../../../../shared';
+} from '../../presentation/components';
+import { PortalService } from '../../services';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'landing-page',
   imports: [
+    CommonModule,
     HeroSectionComponent,
     PortalLoaderComponent,
     FooterSectionComponent,
     QuickAccessSectionComponent,
     CommunicationsSectionComponent,
     MostDownloadedDocumentsSection,
-    ScrollRestoreDirective
-],
+    ScrollRestoreDirective,
+  ],
   templateUrl: './landing-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

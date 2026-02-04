@@ -1,0 +1,230 @@
+<!-- directory-admin.page.html -->
+<div class="p-4 space-y-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-semibold">Directorio interno</h2>
+      <p class="text-sm text-gray-500">Administración de secciones y contactos</p>
+    </div>
+
+    <div class="flex gap-2">
+      <p-button label="Nueva sección" icon="pi pi-plus" (onClick)="openCreateSection()"></p-button>
+      <p-button
+        label="Nuevo contacto"
+        icon="pi pi-phone"
+        [disabled]="!selectedSection()"
+        (onClick)="openCreateContact()"
+        severity="secondary"
+      ></p-button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-12 gap-4">
+    <!-- LEFT: Sections -->
+    <div class="col-span-12 lg:col-span-4">
+      <div class="bg-white rounded-xl border p-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-medium">Secciones</div>
+          <div class="flex gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              [disabled]="!selectedSection()"
+              severity="secondary"
+              (onClick)="openEditSection()"
+            ></p-button>
+
+            <p-button
+              [icon]="selectedSection()?.isActive ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              [disabled]="!selectedSection()"
+              severity="secondary"
+              (onClick)="toggleSectionActive()"
+            ></p-button>
+          </div>
+        </div>
+
+        <!-- <p-skeleton *ngIf="loadingSections()" height="2rem" class="mb-2"></p-skeleton> -->
+
+        <p-tree
+          [value]="treeNodes()"
+          selectionMode="single"
+          (onNodeSelect)="onSelectSection($event.node)"
+          [filter]="true"
+          filterPlaceholder="Buscar sección..."
+          class="w-full"
+        ></p-tree>
+
+        <div class="mt-3 text-xs text-gray-500">
+          Tip: selecciona una sección para ver/editar sus contactos.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Contacts -->
+    <div class="col-span-12 lg:col-span-8">
+      <div class="bg-white rounded-xl border p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-medium">Contactos</div>
+            <div class="text-sm text-gray-500">
+              <ng-container *ngIf="selectedSection(); else noSection">
+                Sección: <span class="font-medium text-gray-700">{{ selectedSection()?.name }}</span>
+              </ng-container>
+              <ng-template #noSection>Selecciona una sección para ver contactos</ng-template>
+            </div>
+          </div>
+        </div>
+
+        <p-table
+          [value]="contacts()"
+          [loading]="loadingContacts()"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[10,20,50]"
+          [tableStyle]="{ 'min-width': '48rem' }"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Cargo</th>
+              <th>Interno</th>
+              <th>Externo</th>
+              <th style="width: 110px;">Orden</th>
+              <th style="width: 130px;">Estado</th>
+              <th style="width: 120px;">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-c>
+            <tr [class.opacity-60]="!c.isActive">
+              <td class="font-medium">{{ c.title }}</td>
+              <td>{{ c.internalPhone || '—' }}</td>
+              <td>{{ c.externalPhone || '—' }}</td>
+              <td>{{ c.order }}</td>
+              <td>
+                <span class="text-sm" [class.text-green-700]="c.isActive" [class.text-gray-500]="!c.isActive">
+                  {{ c.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <p-button icon="pi pi-pencil" severity="secondary" (onClick)="openEditContact(c)"></p-button>
+                  <p-button
+                    [icon]="c.isActive ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    severity="secondary"
+                    (onClick)="toggleContactActive(c)"
+                  ></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center text-gray-500 py-6">
+                No hay contactos para esta sección.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION DIALOG -->
+  <p-dialog
+    header="Sección"
+    [(visible)]="sectionDialogOpen"
+    [modal]="true"
+    [style]="{ width: '32rem' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm text-gray-600">Nombre</label>
+        <input pInputText class="w-full" [(ngModel)]="sectionForm().name" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm text-gray-600">Orden</label>
+          <p-inputNumber class="w-full" [(ngModel)]="sectionForm().order" [min]="0"></p-inputNumber>
+        </div>
+
+        <div>
+          <label class="text-sm text-gray-600">Activa</label>
+          <p-inputSwitch [(ngModel)]="sectionForm().isActive"></p-inputSwitch>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-600">Sección padre (opcional)</label>
+        <p-select
+          class="w-full"
+          [options]="sections()"
+          optionLabel="name"
+          optionValue="id"
+          [showClear]="true"
+          [filter]="true"
+          placeholder="Sin padre"
+          [(ngModel)]="sectionForm().parentId"
+        ></p-select>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (onClick)="sectionDialogOpen.set(false)"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="saveSection()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- CONTACT DIALOG -->
+  <p-dialog
+    header="Contacto"
+    [(visible)]="contactDialogOpen"
+    [modal]="true"
+    [style]="{ width: '34rem' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm text-gray-600">Cargo</label>
+        <input pInputText class="w-full" [(ngModel)]="contactForm().title" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm text-gray-600">Teléfono interno</label>
+          <input pInputText class="w-full" [(ngModel)]="contactForm().internalPhone" placeholder="Ej: 312" />
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Teléfono externo</label>
+          <input pInputText class="w-full" [(ngModel)]="contactForm().externalPhone" placeholder="Ej: 46891234" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 items-center">
+        <div>
+          <label class="text-sm text-gray-600">Orden</label>
+          <p-inputNumber class="w-full" [(ngModel)]="contactForm().order" [min]="0"></p-inputNumber>
+        </div>
+        <div class="flex items-center gap-3 mt-6">
+          <label class="text-sm text-gray-600">Activo</label>
+          <p-inputSwitch [(ngModel)]="contactForm().isActive"></p-inputSwitch>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-500">
+        Nota: Debe existir al menos un teléfono (interno o externo).
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (onClick)="contactDialogOpen.set(false)"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="saveContact()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

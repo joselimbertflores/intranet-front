@@ -107,6 +107,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/administration/content-settings/pages/content-settings-list/content-settings-list'),
       },
+      {
+        path: 'directory',
+        loadComponent: () =>
+          import('./features/administration/directory/pages/directory-admin/directory-admin'),
+      },
     ],
   },
   { path: '', redirectTo: '', pathMatch: 'full' },

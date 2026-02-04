@@ -92,6 +92,11 @@ export class Sidebar {
           icon: 'pi pi-video',
           routerLink: 'tutorials-manage',
         },
+        {
+          label: 'Directorio telefonico',
+          icon: 'pi pi-video',
+          routerLink: 'directory',
+        },
       ],
     },
     {

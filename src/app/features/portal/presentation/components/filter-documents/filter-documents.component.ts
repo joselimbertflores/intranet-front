@@ -1,4 +1,3 @@
-
 import {
   ChangeDetectionStrategy,
   Component,
@@ -26,7 +25,7 @@ import { SelectModule } from 'primeng/select';
 import { PanelModule } from 'primeng/panel';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { PortalService } from '../../../services';
-
+import { DocumentDataSource } from '../../../../administration/institutional-documents/services/document-data-source';
 
 @Component({
   selector: 'filter-documents',
@@ -41,19 +40,20 @@ import { PortalService } from '../../../services';
     FloatLabelModule,
     DatePicker,
     PanelModule,
-    ToggleButtonModule
-],
+    ToggleButtonModule,
+  ],
   template: `
     <p-panel [toggleable]="true" style="border: none;">
       <ng-template #header>
-        <div class="flex items-center gap-2">
+        <span class="font-medium">Filtros </span>
+        <!-- <div class="flex items-center gap-2">
           <p-togglebutton
             [(ngModel)]="isAdvancedMode"
             onLabel="Filtro: Avanzado"
             offLabel="Filtro: Simple"
             class="w-40"
           />
-        </div>
+        </div> -->
       </ng-template>
 
       <ng-template #footer>
@@ -95,21 +95,6 @@ import { PortalService } from '../../../services';
             <div class="md:col-span-2">
               <p-select
                 [filter]="true"
-                [options]="categories()"
-                (onChange)="selectCategory($event.value)"
-                optionValue="id"
-                optionLabel="name"
-                placeholder="Categoria documento"
-                [showClear]="true"
-                class="w-full"
-                formControlName="categoryId"
-                 emptyFilterMessage="Sin resultados"
-              ></p-select>
-            </div>
-
-            <div class="md:col-span-2">
-              <p-select
-                [filter]="true"
                 [options]="sections()"
                 placeholder="Sección documento"
                 emptyFilterMessage="Sin resultados"
@@ -118,14 +103,47 @@ import { PortalService } from '../../../services';
                 [showClear]="true"
                 class="w-full"
                 formControlName="sectionId"
-                 [disabled]="filterForm().get('categoryId')?.value === null"
+                (onChange)="selectSection($event.value)"
               ></p-select>
             </div>
-            @if(isAdvancedMode()){
-            <div>
+
+            <div class="md:col-span-2">
+              <p-select
+                [filter]="true"
+                [options]="types()"
+                placeholder="Tipo documento"
+                emptyFilterMessage="Sin resultados"
+                emptyMessage="Sin resultados"
+                optionValue="id"
+                optionLabel="name"
+                [showClear]="true"
+                class="w-full"
+                formControlName="typeId"
+                (onChange)="selectType($event.value)"
+                [disabled]="!filterForm().value.sectionId"
+              ></p-select>
+            </div>
+
+            <div class="md:col-span-2">
+              <p-select
+                [filter]="true"
+                [options]="subtypes()"
+                placeholder="Subtipo documento"
+                emptyFilterMessage="Sin resultados"
+                emptyMessage="Sin resultados"
+                optionValue="id"
+                optionLabel="name"
+                [showClear]="true"
+                class="w-full"
+                formControlName="subtypeId"
+                [disabled]="!filterForm().value.typeId"
+              ></p-select>
+            </div>
+
+            <div class="md:col-span-2">
               <p-datepicker
                 [maxDate]="CURRENT_DATE"
-                formControlName="fiscalYear"
+                formControlName="date"
                 view="year"
                 dateFormat="yy"
                 appendTo="body"
@@ -133,19 +151,31 @@ import { PortalService } from '../../../services';
                 placeholder="Gestión"
               />
             </div>
+            @if (isAdvancedMode()) {
+              <div>
+                <p-datepicker
+                  [maxDate]="CURRENT_DATE"
+                  formControlName="fiscalYear"
+                  view="year"
+                  dateFormat="yy"
+                  appendTo="body"
+                  class="w-full"
+                  placeholder="Gestión"
+                />
+              </div>
 
-            <div>
-              <p-select
-                [options]="ORDER_DIRECTION_OPTIONS"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Tipo orden"
-                appendTo="body"
-                [showClear]="true"
-                class="w-full"
-                formControlName="orderDirection"
-              ></p-select>
-            </div>
+              <div>
+                <p-select
+                  [options]="ORDER_DIRECTION_OPTIONS"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Tipo orden"
+                  appendTo="body"
+                  [showClear]="true"
+                  class="w-full"
+                  formControlName="orderDirection"
+                ></p-select>
+              </div>
             }
           </div>
         </form>
@@ -159,28 +189,37 @@ export class FilterDocumentsComponent {
 
   private formBuilder = inject(FormBuilder);
 
+  private documentDataSource = inject(DocumentDataSource);
+
   readonly CURRENT_DATE = new Date();
+
+  types = signal<any[]>([]);
+  subtypes = signal<any[]>([]);
 
   onFilter = output<object>();
   onReset = output<void>();
 
-  categories = this.portalService.categoriesWithSections;
-  sections = this.portalService.sections;
+  categories = this.documentDataSource.sections;
+  sections = this.documentDataSource.sections;
 
   filterForm: Signal<FormGroup> = computed(() => {
     return this.isAdvancedMode()
       ? this.formBuilder.group({
           term: [],
-          categoryId: [],
           sectionId: [],
+          typeId: [],
+          subtypeId: [],
           orderDirection: [],
           orderBy: [],
           fiscalYear: [this.CURRENT_DATE],
+          date: [],
         })
       : this.formBuilder.group({
           term: [],
-          categoryId: [],
           sectionId: [],
+          typeId: [],
+          subtypeId: [],
+          date: [],
         });
   });
 
@@ -208,11 +247,36 @@ export class FilterDocumentsComponent {
 
   selectCategory(value: number) {
     this.filterForm().get('sectionId')?.setValue(null);
+    this.filterForm().get('typeId')?.setValue(null);
+    this.filterForm().get('subtypeId')?.setValue(null);
+    this.types.set([]);
+    this.subtypes.set([]);
     this.portalService.selectedCategoryId.set(value);
+  }
+
+  selectSection(value: number) {
+    this.filterForm().patchValue({ typeId: null, subtypeId: null });
+    this.types.set([]);
+    this.subtypes.set([]);
+    if (!value) return;
+    this.documentDataSource.getTypesBySection(value).subscribe((items) => {
+      this.types.set(items);
+    });
+  }
+
+  selectType(value: number) {
+    this.filterForm().patchValue({ subtypeId: null });
+    this.subtypes.set([]);
+    if (!value) return;
+    this.documentDataSource.getSubtypesByType(value).subscribe((items) => {
+      this.subtypes.set(items);
+    });
   }
 
   reset() {
     this.filterForm().reset();
+    this.types.set([]);
+    this.subtypes.set([]);
     this.onReset.emit();
   }
 

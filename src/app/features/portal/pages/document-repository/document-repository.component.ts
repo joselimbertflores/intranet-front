@@ -35,6 +35,7 @@ export default class DocumentRepositoryComponent {
   }
 
   getData(filterParams?: object): void {
+    console.log(filterParams);
     this.portalService
       .filterDocuments({
         limit: this.limit(),
@@ -42,7 +43,6 @@ export default class DocumentRepositoryComponent {
         ...filterParams,
       })
       .subscribe(({ documents, total }) => {
-        console.log(documents);
         this.dataSource.set(documents);
         this.dataSize.set(total);
       });

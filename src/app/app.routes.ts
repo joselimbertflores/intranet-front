@@ -42,6 +42,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/portal/pages/tutorials-detail/tutorials-detail'),
       },
+      {
+        path: 'directory',
+        loadComponent: () =>
+          import('./features/portal/pages/directory/directory'),
+      },
     ],
   },
   {

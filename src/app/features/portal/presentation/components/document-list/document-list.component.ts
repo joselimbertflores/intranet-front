@@ -13,7 +13,7 @@ import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 
 import { DocumentResponse } from '../../../interfaces';
-import { PrimengFileIconPipe } from '../../../../../shared';
+import { FileSizePipe, PrimengFileIconPipe } from '../../../../../shared';
 
 @Component({
   selector: 'document-list',
@@ -26,6 +26,7 @@ import { PrimengFileIconPipe } from '../../../../../shared';
     DataViewModule,
     PaginatorModule,
     PrimengFileIconPipe,
+    FileSizePipe,
   ],
   template: `
     <p-dataview #dv [value]="dataSource()" [layout]="layout">
@@ -68,16 +69,14 @@ import { PrimengFileIconPipe } from '../../../../../shared';
               class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-4"
             >
               <div class="flex flex-col gap-1">
-                <span class="text-sm">
-                  {{ doc.sectionCategory.category.name | titlecase }} -
-                  {{ doc.fiscalYear }}
-                </span>
+                <span class="text-sm font-bold text-primary-500"> Gestion {{ doc.fiscalYear }} </span>
                 <h3 class="text-lg font-semibold">
-                  {{ doc.originalName }}
+                  {{ doc.displayName }}
                 </h3>
-                <p class="text-sm text-surface-500">
+                <!-- <p class="text-sm text-surface-500">
                   Subido el {{ doc.createdAt | date: 'dd/MM/yyyy' }}
-                </p>
+                </p> -->
+                <p>Tamaño {{ doc.sizeBytes | fileSize }}</p>
               </div>
 
               <div
@@ -119,18 +118,19 @@ import { PrimengFileIconPipe } from '../../../../../shared';
                   >
                     <div>
                       <span class="text-sm">
-                        {{ doc.sectionCategory.category.name | titlecase }} -
+                        <!-- {{ doc.section.name | titlecase }} - -->
                         {{ doc.fiscalYear }}
                       </span>
                       <div class="text-lg mt-1 font-semibold">
-                        {{ doc.originalName }}
+                        {{ doc.displayName }}
                       </div>
                     </div>
                   </div>
                   <div class="flex items-center justify-between mt-4">
-                    <p class="text-sm text-surface-500">
+                    <!-- <p class="text-sm text-surface-500">
                       Subido el {{ doc.createdAt | date: 'dd/MM/yyyy' }}
-                    </p>
+                    </p> -->
+                    <p>Tamaño {{ doc.sizeBytes | fileSize }}</p>
                     <p-button
                       icon="pi pi-arrow-down"
                       size="small"

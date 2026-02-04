@@ -20,7 +20,7 @@ import { ButtonModule } from 'primeng/button';
       pAnimateOnScroll
       enterClass="animate-enter fade-in-20 slide-in-from-b-20 animate-duration-1000"
       [once]="true"
-      [threshold]="0.10"
+      [threshold]="0.1"
     >
       <div
         class="absolute inset-0 bg-linear-to-br from-primary-400 via-primary-700 to-surface-900"
@@ -35,7 +35,7 @@ import { ButtonModule } from 'primeng/button';
 
       <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <h2 class="text-xl sm:text-4xl font-semibold mb-3 text-white">
-            Comunicados
+          Comunicados
         </h2>
         <p class="text-primary-100 mx-auto mb-12 text-sm sm:text-xl">
           Mantente informado con los últimos comunicados institucionales.
@@ -45,6 +45,7 @@ import { ButtonModule } from 'primeng/button';
           [numVisible]="3"
           [numScroll]="1"
           [circular]="true"
+          [autoplayInterval]="4000"
           [responsiveOptions]="responsiveOptions"
         >
           <ng-template pTemplate="item" let-com>
@@ -74,7 +75,7 @@ import { ButtonModule } from 'primeng/button';
                   class="absolute bottom-0 left-0 right-0 p-5 bg-linear-to-t from-black/95 via-black/70 to-transparent backdrop-blur-[2px]"
                 >
                   <p class="text-sm text-white mb-1">
-                    {{ com.publicationDate | date : 'd MMMM, y' }}
+                    {{ com.publicationDate | date: 'd MMMM, y' }}
                   </p>
                   <h3
                     class="text-lg font-semibold leading-snug text-white line-clamp-2"

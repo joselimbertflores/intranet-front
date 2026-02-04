@@ -22,19 +22,19 @@ import { MenuItem } from 'primeng/api';
           "
           class="flex items-center p-menubar-item-link"
         >
-          @if(item.icon){
-          <i [class]="item.icon" class="p-menuitem-icon"></i>
+          @if (item.icon) {
+            <i [class]="item.icon" class="p-menuitem-icon"></i>
           }
           <span class="sm:text-xl font-medium  hover:text-primary-700">{{
             item.label
           }}</span>
-          @if(item.items){
-          <i
-            [ngClass]="[
-              'ml-auto pi',
-              root ? 'pi-angle-down' : 'pi-angle-right'
-            ]"
-          ></i>
+          @if (item.items) {
+            <i
+              [ngClass]="[
+                'ml-auto pi',
+                root ? 'pi-angle-down' : 'pi-angle-right',
+              ]"
+            ></i>
           }
         </a>
       </ng-template>
@@ -49,10 +49,10 @@ import { MenuItem } from 'primeng/api';
       border-radius: var(--radius-xl);
       background-color: var(--p-primary-100);
     }
-    
-   :host ::ng-deep .p-menubar .p-menubar-root-list {
-      justify-content: center; 
-      flex-grow: 1; 
+
+    :host ::ng-deep .p-menubar .p-menubar-root-list {
+      justify-content: center;
+      flex-grow: 1;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,8 +80,13 @@ export class AppToolbarComponent {
       routerLinkActiveOptions: { exact: true },
     },
     {
-      label: 'Tutoriales',
+      label: 'Multimedia',
       routerLink: '/tutorials',
+      routerLinkActiveOptions: { exact: false },
+    },
+    {
+      label: 'Directorio',
+      routerLink: '/directory',
       routerLinkActiveOptions: { exact: false },
     },
   ];

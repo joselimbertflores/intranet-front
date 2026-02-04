@@ -28,10 +28,12 @@ import { ButtonModule } from 'primeng/button';
 import { CustomFormValidators } from '../../../../../../helpers';
 import { ContentSettingsDataSource } from '../../services';
 import { ImagePreview, QuickAccessResponse } from '../../interfaces';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-quick-access-editor',
   imports: [
+    CommonModule,
     DragDropModule,
     ReactiveFormsModule,
     FloatLabelModule,
@@ -59,8 +61,8 @@ export class QuickAccessEditor {
   save() {
     const { items = [] } = this.form.value;
     const itemsToUpload = this.quickAccessImages().map((image, index) => ({
-      ...items[index],
       ...image,
+      ...items[index],
     }));
     this.conentDataSource.replaceQuickAccess(itemsToUpload).subscribe(() => {
       this.dialogRef.close();

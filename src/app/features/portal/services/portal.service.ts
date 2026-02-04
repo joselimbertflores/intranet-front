@@ -13,8 +13,11 @@ import {
 interface FilterDocumentsParams {
   categoryId?: number;
   sectionId?: number;
+  typeId?: number;
+  subtypeId?: number;
   orderDirection?: 'DESC' | 'ASC';
   fiscalYear?: Date;
+  date?: Date;
   offset?: number;
   limit?: number;
   term?: string;
@@ -74,18 +77,21 @@ export class PortalService {
 
     this.isDocumentSearching.set(true);
 
+    const { date, fiscalYear, ...rest } = cleanParams;
+
+    const payload = {
+      ...rest,
+      ...(date && { fiscalYear: (date as Date).getFullYear() }),
+      ...(fiscalYear && { fiscalYear: (fiscalYear as Date).getFullYear() }),
+    };
+
     return this.http
       .post<{ documents: DocumentResponse[]; total: number }>(
         `${this.URL}/documents`,
         {
           limit,
           offset,
-          ...{
-            ...cleanParams,
-            ...(cleanParams['fiscalYear'] && {
-              fiscalYear: (cleanParams['fiscalYear'] as Date).getFullYear(),
-            }),
-          },
+          ...payload,
         },
       )
       .pipe(
@@ -127,6 +133,16 @@ export class PortalService {
     return this.http.get<CategoriesWithSectionsResponse[]>(
       `${this.URL}/categories-sections`,
     );
+  }
+
+  getDirectoryTree() {
+    return this.http.get<any[]>(`${environment.baseUrl}/directory`);
+  }
+
+  getCalendarRange(start: string, end: string) {
+    return this.http.get<any[]>(`${environment.baseUrl}/calendar/list`, {
+      params: { start, end },
+    });
   }
 
   private cleanFilterProps(form: object) {

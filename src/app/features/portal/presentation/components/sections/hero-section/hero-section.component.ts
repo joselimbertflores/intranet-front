@@ -46,7 +46,7 @@ import { HeroSlideResponse } from '../../../../../administration/content-setting
         [value]="slides() ?? []"
         [numVisible]="1"
         [numScroll]="1"
-        [autoplayInterval]="6000"
+        [autoplayInterval]="4000"
         circular
         [showIndicators]="true"
         [showNavigators]="true"
@@ -79,7 +79,8 @@ import { HeroSlideResponse } from '../../../../../administration/content-setting
                 pButton
                 class="w-[150px] animate-enter fade-in-20 slide-in-from-b-10 animate-duration-1000"
                 rounded="true"
-                [routerLink]="'admin'"
+                target="_blank"
+               [href]="slide.redirectUrl"
               >
                 <span pButtonLabel>Saber más</span>
                 <i pButtonIcon class="pi pi-arrow-right"></i>

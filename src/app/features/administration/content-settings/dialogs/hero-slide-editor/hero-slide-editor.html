@@ -19,7 +19,7 @@
   <div
     cdkDropList
     (cdkDropListDropped)="drop($event)"
-    class="flex flex-col gap-y-4 max-h-[600px] p-4 overflow-y-auto border border-slate-300"
+    class="flex flex-col gap-y-4 max-h-[400px] p-4 overflow-y-auto border border-slate-300"
     formArrayName="slides"
     >
     @for (control of slides.controls; track control; let i = $index) {

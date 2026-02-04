@@ -69,7 +69,7 @@ import { PortalService } from '../../../../services';
                 <h3
                   class="text-base sm:text-lg font-medium text-surface-800 line-clamp-2 leading-snug"
                 >
-                  {{ doc.originalName }}
+                  {{ doc.displayName }}
                 </h3>
                 <p class="text-xs sm:text-sm text-surface-500 mt-1">
                   {{ doc.category || 'Documento público' }}

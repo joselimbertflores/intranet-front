@@ -10,6 +10,7 @@ import {
 } from '../../presentation/components';
 import { PortalService } from '../../services';
 import { CommonModule } from '@angular/common';
+import { HeroSection } from '../../components/hero-section/hero-section';
 
 @Component({
   selector: 'landing-page',
@@ -22,6 +23,7 @@ import { CommonModule } from '@angular/common';
     CommunicationsSectionComponent,
     MostDownloadedDocumentsSection,
     ScrollRestoreDirective,
+    HeroSection
   ],
   templateUrl: './landing-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

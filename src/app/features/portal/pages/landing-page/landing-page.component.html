@@ -1,10 +1,9 @@
-<div
+<!-- <div
   class="h-full overflow-y-auto overflow-x-hidden"
   scrollRestore
   scrollKey="landing-page"
 >
   @if (!isLoading() && portalData()) {
-    <!-- {{ portalData()?.slides | json }} -->
     <hero-section [slides]="portalData()?.slides" />
     <quick-access-section [quickAccess]="portalData()?.quickAccess" />
     <communications-section [communications]="portalData()!.communications" />
@@ -13,4 +12,5 @@
   } @else {
     <portal-loader />
   }
-</div>
+</div> -->
+<app-hero-section />

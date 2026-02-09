@@ -16,10 +16,11 @@ import {
 
 import { AppToolbarComponent } from '../../features/portal/presentation/components';
 import { ScrollStateService } from '../../shared';
+import { PortalNavbar } from '../../features/portal/components/portal-navbar/portal-navbar';
 
 @Component({
   selector: 'app-portal-layout',
-  imports: [RouterModule, AppToolbarComponent],
+  imports: [RouterModule, AppToolbarComponent, PortalNavbar],
   templateUrl: './portal-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

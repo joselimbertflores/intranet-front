@@ -4,22 +4,25 @@ import {
   Validators,
   FormBuilder,
   ReactiveFormsModule,
+  FormsModule,
 } from '@angular/forms';
-
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
-import { ListboxModule } from 'primeng/listbox';
+import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
-import { DocSectionManageResponse } from '../../interfaces';
-import { DocumentSectionDataSource } from '../../services';
+import { SectionTreeNodeResponse } from '../../interfaces';
+import { SectionDataSource } from '../../services';
 import { FormUtils } from '../../../../../helpers';
 
+interface DialogData {
+  section?: SectionTreeNodeResponse;
+  parent?: SectionTreeNodeResponse;
+}
 @Component({
   selector: 'app-document-section-editor',
   imports: [
@@ -28,8 +31,9 @@ import { FormUtils } from '../../../../../helpers';
     InputTextModule,
     CheckboxModule,
     MessageModule,
-    ListboxModule,
+    SelectModule,
     ButtonModule,
+    FormsModule,
   ],
   templateUrl: './document-section-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,18 +41,14 @@ import { FormUtils } from '../../../../../helpers';
 export class DocumentSectionEditor {
   private diagloRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
-  private sectionService = inject(DocumentSectionDataSource);
+  private sectionService = inject(SectionDataSource);
 
-  readonly data?: DocSectionManageResponse = inject(DynamicDialogConfig).data;
-
-  readonly documentTypes = toSignal(this.sectionService.getDocumentTypes(), {
-    initialValue: [],
-  });
+  readonly data: DialogData = inject(DynamicDialogConfig).data;
   readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
-    documentTypesIds: [[], [Validators.required, Validators.minLength(1)]],
+    parentId: [null],
     isActive: [true],
   });
 
@@ -62,8 +62,8 @@ export class DocumentSectionEditor {
 
   save() {
     if (this.form.invalid) return this.form.markAllAsTouched();
-    const subscription = this.data
-      ? this.sectionService.update(this.data.id, this.form.value)
+    const subscription = this.data.section
+      ? this.sectionService.update(this.data.section.id, this.form.value)
       : this.sectionService.create(this.form.value);
     subscription.subscribe((resp) => {
       this.diagloRef.close(resp);
@@ -71,9 +71,7 @@ export class DocumentSectionEditor {
   }
 
   private loadForm(): void {
-    if (!this.data) return;
-    const { documentTypes, ...props } = this.data;
-    const documentTypesIds = documentTypes.map((type) => type.id);
-    this.form.patchValue({ ...props, documentTypesIds });
+    const { parent, section } = this.data;
+    this.form.patchValue({ ...section, parentId: parent?.id });
   }
 }

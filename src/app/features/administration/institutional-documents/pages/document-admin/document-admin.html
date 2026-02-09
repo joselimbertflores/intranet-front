@@ -26,7 +26,7 @@
           />
         </div>
         <form [formGroup]="filterForm" class="flex flex-col gap-y-4">
-          <p-floatlabel class="w-full" variant="on">
+          <!-- <p-floatlabel class="w-full" variant="on">
             <p-select
               inputId="section"
               optionValue="id"
@@ -38,7 +38,7 @@
               formControlName="sectionId"
             />
             <label for="section">Seccion</label>
-          </p-floatlabel>
+          </p-floatlabel> -->
           <p-floatlabel class="w-full" variant="on">
             <p-select
               inputId="type"
@@ -129,8 +129,11 @@
   <ng-template #header>
     <tr>
       <th>Nombre</th>
-      <th>Estado</th>
+      <th>Seccion</th>
+      <th>Tipo</th>
+      <th>Subtipo</th>
       <th>Gestión</th>
+      <th>Estado</th>
       <th style="width: 3rem"></th>
     </tr>
   </ng-template>
@@ -138,24 +141,22 @@
     <tr>
       <td>
         <div class="flex">
-          <file-icon [fileName]="item.fileName" />
-          <span class="ml-2">{{ item.displayName }}</span>
+          <file-icon [fileName]="item.file.originalName" />
+          <span class="ml-2 font-medium">{{ item.title }}</span>
         </div>
       </td>
+      <td>{{ item.section.name }}</td>
+      <td>{{ item.type.name }}</td>
+      <td>{{ item.subtye?.name ?? "----" }}</td>
+
+      <td>{{ item.fiscalYear }}</td>
       <td>
-        @switch (item.status) {
-          @case ("PUBLISHED") {
-            <p-tag severity="info" value="Publicado" />
-          }
-          @case ("ARCHIVED") {
-            <p-tag severity="secondary" value="Archivado" />
-          }
-          @default {
-            <span>Sin estado</span>
-          }
+        @if (item.isActive) {
+          <p-tag severity="success" value="Activo"></p-tag>
+        } @else {
+          <p-tag severity="danger" value="Inactivo"></p-tag>
         }
       </td>
-      <td>{{ item.fiscalYear }}</td>
       <td>
         <p-button
           icon="pi pi-pencil"

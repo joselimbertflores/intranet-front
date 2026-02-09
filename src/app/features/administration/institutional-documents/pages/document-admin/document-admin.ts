@@ -64,7 +64,7 @@ export default class DocumentAdmin {
     date: [null],
   });
 
-  readonly sections = this.documentService.sections;
+  // readonly sections = this.documentService.sections;
   readonly types = signal<DocumentTypeResponse[]>([]);
   readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
 
@@ -113,17 +113,17 @@ export default class DocumentAdmin {
     this.filterForm.patchValue({ typeId: null, subtypeId: null });
     this.types.set([]);
     this.subtypes.set([]);
-    this.documentService.getTypesBySection(value).subscribe((items) => {
-      this.types.set(items);
-    });
+    // this.documentService.getTypesBySection(value).subscribe((items) => {
+    //   this.types.set(items);
+    // });
   }
 
   selectType(value: number) {
     this.filterForm.patchValue({ subtypeId: null });
     this.subtypes.set([]);
-    this.documentService.getSubtypesByType(value).subscribe((items) => {
-      this.subtypes.set(items);
-    });
+    // this.documentService.getSubtypesByType(value).subscribe((items) => {
+    //   this.subtypes.set(items);
+    // });
   }
 
   openCreateDialog() {
@@ -133,7 +133,7 @@ export default class DocumentAdmin {
       focusOnShow: false,
       closable: true,
       draggable: false,
-      width: '40vw',
+      width: '50vw',
     });
     diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
       if (!result) return;

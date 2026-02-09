@@ -12,7 +12,7 @@ import { DocumentTypeWithSubTypesResponse } from '../interfaces';
 export class DocumentTypeDataSource {
   private http = inject(HttpClient);
 
-  private readonly URL = `${environment.baseUrl}/document-type`;
+  private readonly URL = `${environment.baseUrl}/document-types`;
 
   resource = toSignal(this.http.get<DocumentTypeWithSubTypesResponse[]>(this.URL), {
     initialValue: [],

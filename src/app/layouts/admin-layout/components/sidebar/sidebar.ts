@@ -58,15 +58,16 @@ export class Sidebar {
       label: 'Repositorio',
       items: [
         {
-          label: 'Tipos',
-          icon: 'pi pi-objects-column',
-          routerLink: 'document-types',
-        },
-        {
           label: 'Secciones',
           icon: 'pi pi-objects-column',
           routerLink: 'document-sections',
         },
+        {
+          label: 'Tipos de documentos',
+          icon: 'pi pi-objects-column',
+          routerLink: 'document-types',
+        },
+
         {
           label: 'Documentos',
           icon: 'pi pi-file',

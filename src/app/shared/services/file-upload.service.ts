@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 
 type FileGroup =
   | 'hero-section'
-  | 'document'
+  | 'documents'
   | 'quick-access'
   | 'communication'
   | 'tutorial';
@@ -28,6 +28,11 @@ export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
   previewFileName: string;
 }
 
+export interface UploadResult {
+  fileId:string
+  originalName: string
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -38,6 +43,12 @@ export class FileUploadService {
 
   getFile(url: string) {
     return this.http.get(url, { responseType: 'blob' });
+  }
+
+  upload(file: File, group: FileGroup) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
   }
 
   uploadFile(file: File, group: FileGroup) {

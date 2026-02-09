@@ -1,7 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="save()">
   <p-stepper [value]="1">
     <p-step-list>
-      <p-step [value]="1">Clasificación</p-step>
+      <p-step [value]="1">Propiedades Documento</p-step>
       <p-step [value]="2">Carga de Archivos</p-step>
     </p-step-list>
     <p-step-panels>
@@ -9,28 +9,23 @@
         <ng-template #content let-activateCallback="activateCallback">
           <div class="flex flex-col gap-y-4 pt-2">
             <div class="flex flex-col gap-1">
-              <p-floatlabel class="w-full" variant="on">
-                <p-select
-                  [options]="sections()"
-                  optionLabel="name"
-                  optionValue="id"
-                  appendTo="body"
+              <p-floatlabel variant="on">
+                <p-treeSelect
                   class="w-full"
-                  inputId="sectionDoc"
+                  [options]="sectionsTree()"
+                  selectionMode="single"
+                  appendTo="body"
+                  [filterInputAutoFocus]="true"
                   [filter]="true"
-                  formControlName="sectionId"
-                  [invalid]="formUtils.isInvalid(form.get('sectionId'))"
-                  (onChange)="onSelectSection($event.value)"
-                />
+                  filterPlaceholder="Buscar seccion"
+                  emptyMessage="Sin resultados"
+                  (onNodeSelect)="selectSection($event)"
+                >
+                </p-treeSelect>
                 <label for="sectionDoc">Sección del documento *</label>
               </p-floatlabel>
               @if (formUtils.isInvalid(form.get("sectionId"))) {
-                <p-message
-                  severity="error"
-                  variant="simple"
-                  size="small"
-                  class="ml-2"
-                >
+                <p-message severity="error" size="small" variant="simple">
                   {{ formUtils.getErrorMessage(form.get("sectionId")) }}
                 </p-message>
               }
@@ -40,15 +35,12 @@
                 <p-select
                   [options]="types()"
                   optionLabel="name"
-                  optionValue="id"
                   appendTo="body"
                   class="w-full"
                   inputId="typeId"
                   [filter]="true"
-                  formControlName="typeId"
-                  [disabled]="!form.get('sectionId')?.value"
-                  [invalid]="formUtils.isInvalid(form.get('typeId'))"
-                  (onChange)="onSelectType($event.value)"
+                  filterPlaceholder="Nombre del tipo"
+                  (onChange)="selectType($event.value)"
                 />
                 <label for="typeId">Tipo de documento *</label>
               </p-floatlabel>
@@ -73,7 +65,7 @@
                 emptyMessage="Sin elementos"
                 inputId="subtype"
                 [filter]="true"
-                [disabled]="!form.get('typeId')?.value"
+                filterPlaceholder="Nombre del subtipo"
                 formControlName="subtypeId"
               />
               <label for="subtype">Subtipo (Opcional)</label>

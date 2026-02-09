@@ -11,25 +11,31 @@ import {
   FormArray,
   FormGroup,
 } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { map, Observable } from 'rxjs';
 
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DatePickerModule } from 'primeng/datepicker';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { TreeNode } from 'primeng/api';
 
 import { DocumentDataSource } from '../../services';
 import {
-  DocumentTypeResponse,
   DocumentSubtypeResponse,
+  DocumentTypeWithSubTypesResponse,
+  SectionTreeNodeResponse,
 } from '../../interfaces';
 import { FileIcon } from '../../components';
 import { FileSizePipe } from '../../pipes';
 import { CustomFormValidator, FormUtils } from '../../../../../helpers';
+import { TreeNodeSelectEvent } from 'primeng/tree';
 
 @Component({
   selector: 'app-document-create',
@@ -45,6 +51,7 @@ import { CustomFormValidator, FormUtils } from '../../../../../helpers';
     ButtonModule,
     FileSizePipe,
     FileIcon,
+    TreeSelectModule,
   ],
   templateUrl: './document-create.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,16 +88,21 @@ export class DocumentCreate {
   readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
-    sectionId: ['', Validators.required],
-    typeId: ['', Validators.required],
-    subtypeId: [''],
+    sectionId: [null, Validators.required],
+    typeId: [null, Validators.required],
+    subtypeId: [{ value: null, disabled: true }],
     documents: this.formBuilder.array([]),
     date: [this.currentDate, Validators.required],
   });
 
-  readonly sections = this.documentDataSource.sections;
-  types = signal<DocumentTypeResponse[]>([]);
-  subtypes = signal<DocumentSubtypeResponse[]>([]);
+  readonly sectionsTree = toSignal(this.getTreeSections(), {
+    initialValue: [],
+  });
+  readonly types = toSignal(this.documentDataSource.getTypes(), {
+    initialValue: [],
+  });
+  readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
+
   files = signal<File[]>([]);
   hasInvalidFiles = signal(false);
 
@@ -104,19 +116,6 @@ export class DocumentCreate {
 
   close() {
     this.diagloRef.close();
-  }
-
-  onSelectSection(id: number) {
-    this.documentDataSource.getTypesBySection(id).subscribe((items) => {
-      this.types.set(items);
-      this.subtypes.set([]);
-    });
-  }
-
-  onSelectType(id: number) {
-    this.documentDataSource.getSubtypesByType(id).subscribe((items) => {
-      this.subtypes.set(items);
-    });
   }
 
   removeFile(index: number) {
@@ -143,6 +142,16 @@ export class DocumentCreate {
     if (validFiles.length !== files.length) {
       this.showInvalidFileMessage();
     }
+  }
+
+  selectSection(event: TreeNodeSelectEvent) {
+    this.form.patchValue({ sectionId: event.node.key });
+  }
+
+  selectType(type: DocumentTypeWithSubTypesResponse) {
+    this.subtypes.set(type.subtypes);
+    this.form.patchValue({ typeId: type.id, subtypeId: null });
+    this.form.get('subtypeId')?.enable();
   }
 
   get allowedExtensionsLabel(): string {
@@ -218,5 +227,20 @@ export class DocumentCreate {
     setTimeout(() => {
       this.hasInvalidFiles.set(false);
     }, 3000);
+  }
+
+  private getTreeSections(): Observable<TreeNode[]> {
+    return this.documentDataSource
+      .getTreeSections()
+      .pipe(map((resp) => this.toTreeNode(resp)));
+  }
+
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
+    return nodes.map((n) => ({
+      key: n.id,
+      label: n.name.toUpperCase(),
+      selectable: true,
+      children: n.children ? this.toTreeNode(n.children) : [],
+    }));
   }
 }

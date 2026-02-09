@@ -1,0 +1,95 @@
+<div class="flex items-center justify-between mb-2">
+  <h2 class="text-2xl font-semibold">Secciones</h2>
+  <p-button
+    label="Agregar"
+    icon="pi pi-plus"
+    size="small"
+    (onClick)="openSectionDialog()"
+  />
+</div>
+
+<p-treeTable
+  #treeTable
+  [value]="treeSections()"
+  (onNodeExpand)="onExpand($event)"
+  (onNodeCollapse)="onCollapse($event)"
+  class="p-treetable-sm"
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 30, 50]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="{first} - {last} de {totalRecords}"
+  filterMode="lenient"
+  [globalFilterFields]="['name']"
+>
+  <ng-template #caption>
+    <div class="flex justify-end items-center">
+      <p-floatlabel iconPosition="left" class="w-full sm:w-1/4" variant="on">
+        <p-iconfield>
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            class="w-full"
+            (input)="
+              treeTable.filterGlobal($event.target.value, 'contains');
+              treeTable.toggleAll(true)
+            "
+          />
+        </p-iconfield>
+        <label>Buscar</label>
+      </p-floatlabel>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Nombre</th>
+      <th>Nivel</th>
+      <th>Estado</th>
+      <th class="w-[100px]"></th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-rowNode let-rowData="rowData">
+    <tr [ttRow]="rowNode">
+      <td>
+        <div class="flex items-center gap-2">
+          <p-treetable-toggler [rowNode]="rowNode" />
+          <span>{{ rowData.name | uppercase }}</span>
+        </div>
+      </td>
+      <td>{{ rowData.level + 1 }}</td>
+      <td>
+        @if (rowData.isActive) {
+          <p-tag severity="success" value="Activo"></p-tag>
+        } @else {
+          <p-tag severity="danger" value="Inactivo"></p-tag>
+        }
+      </td>
+
+      <td>
+        <div class="flex gap-x-2">
+          <p-button
+            size="small"
+            icon="pi pi-plus"
+            [rounded]="true"
+            [text]="true"
+            (click)="addChild(rowData)"
+          />
+          <p-button
+            size="small"
+            icon="pi pi-pencil"
+            [rounded]="true"
+            [text]="true"
+            (click)="openSectionDialog(rowNode)"
+          />
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4">Sin resultados.</td>
+    </tr>
+  </ng-template>
+</p-treeTable>

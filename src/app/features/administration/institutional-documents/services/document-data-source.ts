@@ -3,11 +3,17 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin, Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { FileUploadService, UploadedFileResponse } from '../../../../shared';
+import {
+  FileUploadService,
+  UploadedFileResponse,
+  UploadResult,
+} from '../../../../shared';
 import {
   DocumentManageResponse,
   DocumentSubtypeResponse,
   DocumentTypeResponse,
+  DocumentTypeWithSubTypesResponse,
+  SectionTreeNodeResponse,
 } from '../interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -16,19 +22,18 @@ interface CreateDocumentProps {
   typeId: number;
   subtypeId: number;
   date: Date;
-  documents: DocumentTest[];
+  documents: DocumentRecord[];
   files: File[];
 }
 
 interface UpdateDocumentProps {
   date: Date;
-  displayName: string;
-  status: string;
+  title: string;
   file: File;
 }
 
-interface DocumentTest {
-  displayName: string;
+interface DocumentRecord {
+  title: string;
 }
 
 interface GetDocumentsParams {
@@ -45,15 +50,9 @@ interface GetDocumentsParams {
   providedIn: 'root',
 })
 export class DocumentDataSource {
+  private readonly http = inject(HttpClient);
   private readonly URL = `${environment.baseUrl}/documents`;
-
-  private fileUploadService = inject(FileUploadService);
-
-  private http = inject(HttpClient);
-
-  sections = toSignal(this.http.get<any[]>(`${this.URL}/sections`), {
-    initialValue: [],
-  });
+  private readonly fileUploadService = inject(FileUploadService);
 
   constructor() {}
 
@@ -73,14 +72,12 @@ export class DocumentDataSource {
   create(data: CreateDocumentProps) {
     const { documents, files, date, ...rest } = data;
     return forkJoin(
-      files.map((file) =>
-        this.fileUploadService.newUploadFile(file, 'document'),
-      ),
+      files.map((file) => this.fileUploadService.upload(file, 'documents')),
     ).pipe(
       switchMap((uploadedFiles) => {
         const documentsToCreate = uploadedFiles.map((uploadedFile, index) => ({
-          displayName: documents[index].displayName,
-          ...uploadedFile,
+          fileId: uploadedFile.fileId,
+          title: documents[index].title ?? uploadedFile.originalName,
         }));
         return this.http.post<DocumentManageResponse[]>(this.URL, {
           ...rest,
@@ -92,14 +89,15 @@ export class DocumentDataSource {
   }
 
   update(id: string, data: UpdateDocumentProps) {
-    const { file, date, ...form } = data;
-    const uploadT$: Observable<UploadedFileResponse | null> = file
-      ? this.fileUploadService.newUploadFile(file, 'document')
+    const { file, date, title } = data;
+    const uploadTask$: Observable<UploadResult | null> = file
+      ? this.fileUploadService.upload(file, 'documents')
       : of(null);
-    return uploadT$.pipe(
+    return uploadTask$.pipe(
       switchMap((uploadedFile) => {
         return this.http.patch<DocumentManageResponse>(`${this.URL}/${id}`, {
-          ...form,
+          title: title ?? uploadedFile?.originalName,
+
           ...uploadedFile,
           fiscalYear: date.getFullYear(),
         });
@@ -107,13 +105,15 @@ export class DocumentDataSource {
     );
   }
 
-  getTypesBySection(id: number) {
-    return this.http.get<DocumentTypeResponse[]>(`${this.URL}/types/${id}`);
+  getTreeSections() {
+    return this.http.get<SectionTreeNodeResponse[]>(
+      `${this.URL}/sections/tree`,
+    );
   }
 
-  getSubtypesByType(id: number) {
-    return this.http.get<DocumentSubtypeResponse[]>(
-      `${this.URL}/subtypes/${id}`,
+  getTypes() {
+    return this.http.get<DocumentTypeWithSubTypesResponse[]>(
+      `${this.URL}/types`,
     );
   }
 

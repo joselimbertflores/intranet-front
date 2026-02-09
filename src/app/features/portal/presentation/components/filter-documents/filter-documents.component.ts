@@ -93,7 +93,7 @@ import { DocumentDataSource } from '../../../../administration/institutional-doc
             </div>
 
             <div class="md:col-span-2">
-              <p-select
+              <!-- <p-select
                 [filter]="true"
                 [options]="sections()"
                 placeholder="Sección documento"
@@ -104,7 +104,7 @@ import { DocumentDataSource } from '../../../../administration/institutional-doc
                 class="w-full"
                 formControlName="sectionId"
                 (onChange)="selectSection($event.value)"
-              ></p-select>
+              ></p-select> -->
             </div>
 
             <div class="md:col-span-2">
@@ -199,8 +199,8 @@ export class FilterDocumentsComponent {
   onFilter = output<object>();
   onReset = output<void>();
 
-  categories = this.documentDataSource.sections;
-  sections = this.documentDataSource.sections;
+  // categories = this.documentDataSource.sections;
+  // sections = this.documentDataSource.sections;
 
   filterForm: Signal<FormGroup> = computed(() => {
     return this.isAdvancedMode()
@@ -259,18 +259,18 @@ export class FilterDocumentsComponent {
     this.types.set([]);
     this.subtypes.set([]);
     if (!value) return;
-    this.documentDataSource.getTypesBySection(value).subscribe((items) => {
-      this.types.set(items);
-    });
+    // this.documentDataSource.getTypesBySection(value).subscribe((items) => {
+    //   this.types.set(items);
+    // });
   }
 
   selectType(value: number) {
     this.filterForm().patchValue({ subtypeId: null });
     this.subtypes.set([]);
     if (!value) return;
-    this.documentDataSource.getSubtypesByType(value).subscribe((items) => {
-      this.subtypes.set(items);
-    });
+    // this.documentDataSource.getSubtypesByType(value).subscribe((items) => {
+    //   this.subtypes.set(items);
+    // });
   }
 
   reset() {

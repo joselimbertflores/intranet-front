@@ -87,8 +87,8 @@
 
             <dd class="text-surface-700 sm:col-span-2">
               <div class="flex items-center gap-x-2">
-                <file-icon [fileName]="data.originalName" />
-                <span>{{ data.originalName }}</span>
+                <file-icon [fileName]="data.file.originalName" />
+                <span>{{ data.file.originalName }}</span>
               </div>
             </dd>
           </div>
@@ -96,7 +96,7 @@
             <dt class="font-medium text-surface-900">Descargas:</dt>
 
             <dd class="text-surface-700 sm:col-span-2">
-              {{ data.downloadCount }}
+              <!-- {{ data.downloadCount }} -->
             </dd>
           </div>
 
@@ -104,7 +104,7 @@
             <dt class="font-medium text-surface-900">Tamaño:</dt>
 
             <dd class="text-surface-700 sm:col-span-2">
-              {{ data.sizeBytes | fileSize }}
+              {{ data.file.sizeBytes| fileSize }}
             </dd>
           </div>
 

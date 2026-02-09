@@ -95,10 +95,10 @@ export class DocumentCreate {
     date: [this.currentDate, Validators.required],
   });
 
-  readonly sectionsTree = toSignal(this.getTreeSections(), {
+  readonly sectionsTree = toSignal(this.documentDataSource.getTreeSections(), {
     initialValue: [],
   });
-  readonly types = toSignal(this.documentDataSource.getTypes(), {
+  readonly types = toSignal(this.documentDataSource.getDocumentTypes(), {
     initialValue: [],
   });
   readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
@@ -227,20 +227,5 @@ export class DocumentCreate {
     setTimeout(() => {
       this.hasInvalidFiles.set(false);
     }, 3000);
-  }
-
-  private getTreeSections(): Observable<TreeNode[]> {
-    return this.documentDataSource
-      .getTreeSections()
-      .pipe(map((resp) => this.toTreeNode(resp)));
-  }
-
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
-    return nodes.map((n) => ({
-      key: n.id,
-      label: n.name.toUpperCase(),
-      selectable: true,
-      children: n.children ? this.toTreeNode(n.children) : [],
-    }));
   }
 }

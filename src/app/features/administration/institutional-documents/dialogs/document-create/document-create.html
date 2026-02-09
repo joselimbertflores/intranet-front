@@ -1,4 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="save()">
+  <pre>{{ form.value | json }}</pre>
   <p-stepper [value]="1">
     <p-step-list>
       <p-step [value]="1">Propiedades Documento</p-step>
@@ -39,6 +40,7 @@
                   class="w-full"
                   inputId="typeId"
                   [filter]="true"
+                  emptyMessage="Sin elementos"
                   filterPlaceholder="Nombre del tipo"
                   (onChange)="selectType($event.value)"
                 />

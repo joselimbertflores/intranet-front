@@ -4,14 +4,14 @@ import { Pipe, type PipeTransform } from '@angular/core';
   name: 'fileSize',
 })
 export class FileSizePipe implements PipeTransform {
-  transform(bytes: number, decimals = 2): unknown {
-    if (bytes === 0) return '0 B';
-
+  transform(bytes: number | string, decimals = 2): unknown {
+    const value = Number(bytes);
+    if (!value || value === 0) return '0 B';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    const i = Math.floor(Math.log(value) / Math.log(k));
+    return parseFloat((value / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 }

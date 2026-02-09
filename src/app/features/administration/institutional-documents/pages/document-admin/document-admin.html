@@ -3,53 +3,52 @@
   <div class="flex items-center gap-x-2">
     @let isFiltering = activeFiltersCount > 0;
     <p-button
-      (click)="op.toggle($event)"
+      (click)="filterPopover.toggle($event)"
       [icon]="isFiltering ? 'pi pi-filter-fill' : 'pi pi-filter'"
       label="Filtros"
       size="small"
       [severity]="isFiltering ? 'primary' : 'secondary'"
       [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
     />
-    <p-popover #op>
-      <div class="flex flex-col w-104 gap-y-6">
+    <p-popover #filterPopover>
+      <div class="flex flex-col w-[600px] gap-y-6">
         <div class="flex items-center justify-between px-2">
-          <span class="text-lg font-semibold text-surface-700">
-            Filtros Avanzados
-          </span>
+          <span class="text-lg font-semibold text-surface-700"> Filtros </span>
           <p-button
             icon="pi pi-times"
             [text]="true"
             [rounded]="true"
             severity="secondary"
-            (click)="op.hide()"
+            (click)="filterPopover.hide()"
             size="small"
           />
         </div>
         <form [formGroup]="filterForm" class="flex flex-col gap-y-4">
-          <!-- <p-floatlabel class="w-full" variant="on">
-            <p-select
-              inputId="section"
-              optionValue="id"
-              optionLabel="name"
+          <p-floatlabel variant="on">
+            <p-treeSelect
               class="w-full"
+              [options]="treeSections()"
+              selectionMode="single"
+              appendTo="body"
               [filter]="true"
-              [options]="sections()"
-              (onChange)="selectSection($event.value)"
-              formControlName="sectionId"
-            />
-            <label for="section">Seccion</label>
-          </p-floatlabel> -->
+              [showClear]="true"
+              filterPlaceholder="Buscar seccion"
+              emptyMessage="Sin resultados"
+          
+              (onNodeSelect)="selectSection($event.node.data)"
+            >
+            </p-treeSelect>
+            <label for="sectionDoc">Sección</label>
+          </p-floatlabel>
           <p-floatlabel class="w-full" variant="on">
             <p-select
               inputId="type"
-              optionValue="id"
               optionLabel="name"
               class="w-full"
               [filter]="true"
+              [showClear]="true"
               [options]="types()"
               (onChange)="selectType($event.value)"
-              [disabled]="!filterForm.value.sectionId"
-              formControlName="typeId"
             />
             <label for="type">Tipo</label>
           </p-floatlabel>
@@ -60,8 +59,8 @@
               optionLabel="name"
               class="w-full"
               [filter]="true"
+              [showClear]="true"
               [options]="subtypes()"
-              [disabled]="!filterForm.value.typeId"
               formControlName="subtypeId"
             />
             <label for="subtype">Subtipo</label>
@@ -76,6 +75,7 @@
               appendTo="body"
               [readonlyInput]="true"
               [fluid]="true"
+              [showClear]="true"
               formControlName="date"
             />
             <label for="yearInput">Gestión</label>
@@ -86,12 +86,12 @@
             label="Limpiar"
             severity="secondary"
             size="small"
-            (onClick)="clearFilters(); op.hide()"
+            (onClick)="clearFilters(); filterPopover.hide()"
           />
           <p-button
             label="Aplicar filtros"
             size="small"
-            (onClick)="applyFilters(); op.hide()"
+            (onClick)="applyFilters(); filterPopover.hide()"
           />
         </div>
       </div>
@@ -140,14 +140,14 @@
   <ng-template #body let-item>
     <tr>
       <td>
-        <div class="flex">
+        <div class="flex items-center">
           <file-icon [fileName]="item.file.originalName" />
-          <span class="ml-2 font-medium">{{ item.title }}</span>
+          <span class="ml-2 font-semibold">{{ item.title }}</span>
         </div>
       </td>
       <td>{{ item.section.name }}</td>
       <td>{{ item.type.name }}</td>
-      <td>{{ item.subtye?.name ?? "----" }}</td>
+      <td>{{ item.subtype?.name ?? "----" }}</td>
 
       <td>{{ item.fiscalYear }}</td>
       <td>

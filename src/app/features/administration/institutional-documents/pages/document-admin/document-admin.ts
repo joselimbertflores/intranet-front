@@ -1,13 +1,14 @@
-
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
   signal,
 } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TableModule, TablePageEvent } from 'primeng/table';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { DialogService } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -24,15 +25,17 @@ import { FileIcon } from '../../components';
 import {
   DocumentManageResponse,
   DocumentSubtypeResponse,
-  DocumentTypeResponse,
+  DocumentTypeWithSubTypesResponse,
 } from '../../interfaces';
 
 @Component({
   selector: 'app-document-admin',
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     DatePickerModule,
     FloatLabelModule,
+    TreeSelectModule,
     InputTextModule,
     PopoverModule,
     SelectModule,
@@ -40,14 +43,14 @@ import {
     TableModule,
     TagModule,
     FileIcon,
-    SearchInputComponent
-],
+    SearchInputComponent,
+  ],
   templateUrl: './document-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],
 })
 export default class DocumentAdmin {
-  private documentService = inject(DocumentDataSource);
+  private documentDataSource = inject(DocumentDataSource);
   private dialogService = inject(DialogService);
   private formBuilder = inject(FormBuilder);
 
@@ -60,20 +63,24 @@ export default class DocumentAdmin {
   filterForm: FormGroup = this.formBuilder.group({
     sectionId: [null],
     typeId: [null],
-    subtypeId: [null],
+    subtypeId: [{ value: null, disabled: true }],
     date: [null],
   });
 
-  // readonly sections = this.documentService.sections;
-  readonly types = signal<DocumentTypeResponse[]>([]);
-  readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
+  treeSections = toSignal(this.documentDataSource.getTreeSections(), {
+    initialValue: [],
+  });
+  types = toSignal(this.documentDataSource.getDocumentTypes(), {
+    initialValue: [],
+  });
+  subtypes = signal<DocumentSubtypeResponse[]>([]);
 
   ngOnInit() {
     this.getData();
   }
 
   getData() {
-    this.documentService
+    this.documentDataSource
       .findAll({
         limit: this.limit(),
         offset: this.offset(),
@@ -84,6 +91,23 @@ export default class DocumentAdmin {
         this.dataSource.set(documents);
         this.dataSize.set(total);
       });
+  }
+
+  selectSection(id: string) {
+    console.log(id);
+    this.filterForm.patchValue({ sectionId: id });
+  }
+
+  selectType(value: DocumentTypeWithSubTypesResponse | null) {
+    if (!value) {
+      this.filterForm.patchValue({ typeId: null, subtypeId: null });
+      this.filterForm.get('subtypeId')?.disable();
+      this.subtypes.set([]);
+    } else {
+      this.filterForm.patchValue({ subtypeId: null, typeId: value.id });
+      this.filterForm.get('subtypeId')?.enable();
+      this.subtypes.set(value.subtypes);
+    }
   }
 
   chagePage(event: TablePageEvent) {
@@ -109,23 +133,6 @@ export default class DocumentAdmin {
     this.getData();
   }
 
-  selectSection(value: number) {
-    this.filterForm.patchValue({ typeId: null, subtypeId: null });
-    this.types.set([]);
-    this.subtypes.set([]);
-    // this.documentService.getTypesBySection(value).subscribe((items) => {
-    //   this.types.set(items);
-    // });
-  }
-
-  selectType(value: number) {
-    this.filterForm.patchValue({ subtypeId: null });
-    this.subtypes.set([]);
-    // this.documentService.getSubtypesByType(value).subscribe((items) => {
-    //   this.subtypes.set(items);
-    // });
-  }
-
   openCreateDialog() {
     const diagloRef = this.dialogService.open(DocumentCreate, {
       header: 'Crear Documentación',
@@ -134,6 +141,10 @@ export default class DocumentAdmin {
       closable: true,
       draggable: false,
       width: '50vw',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw',
+      },
     });
     diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
       if (!result) return;
@@ -150,6 +161,10 @@ export default class DocumentAdmin {
       draggable: false,
       data: item,
       width: '40vw',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw',
+      },
     });
     diagloRef?.onClose.subscribe((result?: DocumentManageResponse) => {
       if (!result) return;

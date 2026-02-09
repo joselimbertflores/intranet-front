@@ -166,7 +166,6 @@ export class DocumentEdit implements OnInit {
 
   private loadForm() {
     const { fiscalYear, ...props } = this.data;
-    console.log(props.status);
     this.form.patchValue({ ...props, date: new Date(fiscalYear, 0, 1) });
   }
 }

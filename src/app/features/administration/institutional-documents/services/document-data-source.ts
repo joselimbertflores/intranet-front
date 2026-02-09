@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { forkJoin, Observable, of, switchMap } from 'rxjs';
+import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import {
@@ -16,6 +16,7 @@ import {
   SectionTreeNodeResponse,
 } from '../interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TreeNode } from 'primeng/api';
 
 interface CreateDocumentProps {
   sectionId: number;
@@ -106,12 +107,12 @@ export class DocumentDataSource {
   }
 
   getTreeSections() {
-    return this.http.get<SectionTreeNodeResponse[]>(
-      `${this.URL}/sections/tree`,
-    );
+    return this.http
+      .get<SectionTreeNodeResponse[]>(`${this.URL}/sections/tree`)
+      .pipe(map((resp) => this.toTreeNode(resp)));
   }
 
-  getTypes() {
+  getDocumentTypes() {
     return this.http.get<DocumentTypeWithSubTypesResponse[]>(
       `${this.URL}/types`,
     );
@@ -123,5 +124,14 @@ export class DocumentDataSource {
         ([_, v]) => v !== null && v !== undefined && v !== '',
       ),
     );
+  }
+
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
+    return nodes.map((node) => ({
+      key: node.id,
+      label: node.name.toUpperCase(),
+      data: node.id,
+      children: node.children ? this.toTreeNode(node.children) : [],
+    }));
   }
 }

@@ -4,52 +4,57 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-hero-section',
   imports: [],
   template: `
-    <section class="bg-surface-ground pt-28 pb-24">
+    <section
+      class="relative w-full overflow-hidden bg-surface border-b border-surface"
+    >
+      <!-- fondo sutil con color institucional -->
       <div
-        class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
-      >
-        <!-- Texto -->
-        <div class="space-y-6">
-          <!-- Badge -->
-          <span
-            class="inline-flex items-center px-4 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
-          >
-            Portal institucional
-          </span>
+        class="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent"
+      ></div>
 
-          <!-- Título -->
-          <h1
-            class="text-4xl lg:text-5xl font-semibold text-color leading-tight"
-          >
-            Portal Público del
-            <span class="text-primary"> Gobierno Autónomo Municipal </span>
-          </h1>
-
-          <!-- Subtítulo -->
-          <p class="text-base lg:text-lg text-color-secondary max-w-xl">
-            Acceda a información oficial, documentos, comunicados y servicios
-            institucionales a través de una plataforma clara, moderna y
-            accesible para la ciudadanía.
-          </p>
-        </div>
-
-        <!-- Visual -->
-        <div class="relative">
-          <!-- Glow suave -->
-          <div
-            class="absolute -inset-8 bg-primary/10 blur-3xl rounded-full"
-          ></div>
-
-          <!-- Imagen -->
-          <div
-            class="relative bg-surface rounded-2xl shadow-lg overflow-hidden"
-          >
+      <div class="relative max-w-7xl mx-auto px-6 py-20">
+        <div class="flex flex-col gap-6">
+          <!-- Marca / identidad -->
+          <div class="flex items-center gap-4">
+            <!-- Logo institución -->
             <img
-              src="images/institution/sacaba.jpeg"
-              alt="Institución pública"
-              class="w-full h-80 object-cover"
-              loading="lazy"
+              src="images/institution/alcaldia.webp"
+              alt="Institución"
+              class="h-12 w-auto"
             />
+
+            <!-- Separador -->
+            <div class="h-10 w-px bg-surface-border"></div>
+
+            <!-- Icono del sistema -->
+            <div class="flex items-center gap-2">
+              <div
+                class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center"
+              >
+                <!-- puede ser svg o icono -->
+                <span class="text-primary font-semibold text-lg">I</span>
+              </div>
+              <span class="text-lg font-semibold text-color"> Intranet </span>
+            </div>
+          </div>
+
+          <!-- Texto principal -->
+          <div class="max-w-3xl">
+            <h1
+              class="text-4xl md:text-5xl font-semibold text-color leading-tight"
+            >
+              Plataforma interna institucional
+            </h1>
+
+            <p class="mt-4 text-lg text-color-secondary leading-relaxed">
+              Acceso centralizado a documentos oficiales, comunicados internos,
+              sistemas institucionales y recursos administrativos.
+            </p>
+          </div>
+
+          <!-- Línea visual de cierre -->
+          <div class="pt-4">
+            <div class="h-1 w-20 bg-primary rounded-full"></div>
           </div>
         </div>
       </div>

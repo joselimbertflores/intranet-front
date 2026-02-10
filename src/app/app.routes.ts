@@ -15,7 +15,12 @@ export const routes: Routes = [
       {
         path: 'repository',
         loadComponent: () =>
-          import('./features/portal/pages/document-repository/document-repository.component'),
+          import('./features/portal/pages/documents/documents'),
+      },
+      {
+        path: 'documents',
+        loadComponent: () =>
+          import('./features/portal/pages/documents/documents'),
       },
       {
         path: 'communications',

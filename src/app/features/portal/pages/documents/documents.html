@@ -1,0 +1,142 @@
+<!-- <div class="h-full overflow-y-auto bg-gray-50 py-6 px-2">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-4 px-2">
+      <h2 class="text-2xl font-semibold text-gray-900 sm:text-3xl">
+        Documentación Institucional
+      </h2>
+      <p class="text-gray-500 text-xs sm:text-lg mt-1">
+        Acceda y descargue documentos emitidos por las diferentes unidades del
+        Gobierno Autónomo Municipal de Sacaba.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-2 mb-4">
+      <filter-documents
+        (onFilter)="applyFilter($event)"
+        (onReset)="resetFilter()"
+      />
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-2">
+      <document-list
+        [limit]="limit()"
+        [offset]="offset()"
+        [dataSize]="dataSize()"
+        [dataSource]="dataSource()"
+        (onDowload)="downloadDocument($event)"
+        (onPageChange)="changePage($event)"
+      />
+    </div>
+  </div>
+</div> -->
+
+<section class="bg-surface border-b">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <h1 class="text-2xl md:text-3xl font-semibold">Documentos</h1>
+    <p class="mt-2 text-sm md:text-base text-muted max-w-2xl">
+      Consulta, filtra y descarga documentos institucionales de manera ordenada.
+    </p>
+  </div>
+</section>
+
+<pre>{{ filterForm.value | json }}</pre>
+
+<form [formGroup]="filterForm">
+  <div class="card">
+    <h5>Seleccionar Sección</h5>
+    <p-treeSelect
+      [options]="nodes"
+      placeholder="Seleccione un ítem"
+      [(ngModel)]="selectedNodeVisual"
+      [ngModelOptions]="{ standalone: true }"
+      (onNodeSelect)="onSelect($event)"
+      (onNodeUnselect)="onUnselect()"
+    >
+    </p-treeSelect>
+  </div>
+</form>
+
+<!-- 2. Contenido principal -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+  <!-- filtros -->
+  <div class="bg-surface rounded-lg border p-6 mb-6">
+    <form [formGroup]="filterForm">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <!-- Búsqueda -->
+        <div class="md:col-span-4">
+          <p-floatlabel class="w-full" variant="on">
+            <input id="nameTxt" pInputText class="w-full" />
+            <label for="nameTxt">Buscar por nombre</label>
+          </p-floatlabel>
+        </div>
+        <div class="md:col-span-4">
+          <p-floatlabel class="w-full" variant="on">
+            <p-select
+              inputId="doctype"
+              optionLabel="name"
+              optionValue="slug"
+              [fluid]="true"
+              [showClear]="true"
+              [filter]="true"
+              [resetFilterOnHide]="true"
+              filterPlaceholder="Nombre del tipo"
+              emptyFilterMessage="Sin resultados"
+              emptyMessage="Sin opciones"
+              [options]="types()"
+              (onChange)="selectType($event.value)"
+              formControlName="type"
+            />
+            <label for="doctype">Tipo de documento</label>
+          </p-floatlabel>
+        </div>
+        <div class="md:col-span-4">
+          <p-floatlabel class="w-full" variant="on">
+            <p-select
+              inputId="docsubtype"
+              optionLabel="name"
+              optionValue="slug"
+              [fluid]="true"
+              [showClear]="true"
+              [filter]="true"
+              [resetFilterOnHide]="true"
+              filterPlaceholder="Nombre del subtipo"
+              emptyFilterMessage="Sin resultados"
+              emptyMessage="Sin opciones"
+              [options]="subtypes()"
+              (onChange)="selectSubtype($event.value)"
+              formControlName="subtype"
+            />
+            <label for="docsubtype">Subtipo de documento</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Sección (tree select) -->
+        <div class="md:col-span-8">
+          <p-treeSelect
+            [fluid]="true"
+            [(ngModel)]="selectedNodeVisual"
+            [ngModelOptions]="{ standalone: true }"
+            [options]="sections()"
+            (onNodeSelect)="selectSection($event.node)"
+          >
+          </p-treeSelect>
+        </div>
+
+        <div class="md:col-span-4">
+          <p-datepicker
+            view="year"
+            dateFormat="yy"
+            placeholder="Gestión"
+            class="w-full"
+          >
+          </p-datepicker>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <button (click)="resetFilterForm()">Reset</button>
+  </div>
+  <!-- listado -->
+  <!-- paginación -->
+</section>

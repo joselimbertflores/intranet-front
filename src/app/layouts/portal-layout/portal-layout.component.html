@@ -1,11 +1,69 @@
-<!-- <div class="flex flex-col h-screen w-screen">
-  <div class="sticky top-0 z-50 border-b border-surface-200 bg-surface-0">
-    <app-toolbar />
-  </div>
-  <div class="page-transition flex-1 overflow-y-auto bg-surface-50">
-    <router-outlet />
-  </div>
-</div> -->
+<div class="min-h-dvh bg-slate-50 text-slate-900">
+  <header
+    class="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm"
+  >
+    <div class="mx-auto max-w-7xl px-3 sm:px-4">
+      <p-menubar
+        [model]="menuItems"
+        styleClass="border-none bg-transparent rounded-none px-0"
+      >
+        <ng-template #start>
+          <a routerLink="/" class="flex items-center gap-3 py-2">
+            <img
+              src="images/icons/app.png"
+              alt="Intranet"
+              class="h-9 w-9 rounded-sm object-contain"
+            />
+            <div class="hidden sm:block leading-tight">
+              <p class="text-sm font-semibold text-slate-900">Intranet</p>
+              <p class="text-xs text-slate-500">Portal institucional interno</p>
+            </div>
+          </a>
+        </ng-template>
 
-<portal-navbar />
-<router-outlet />
+        <ng-template #item let-item let-root="root">
+          <a
+            [routerLink]="item.routerLink"
+            routerLinkActive="bg-primary-50 text-primary-800"
+            [routerLinkActiveOptions]="
+              item.routerLinkActiveOptions || { exact: true }
+            "
+            class="flex items-center rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            <span>{{ item.label }}</span>
+            @if (item.items) {
+              <i
+                class="ml-2 pi text-xs"
+                [class.pi-angle-down]="root"
+                [class.pi-angle-right]="!root"
+              ></i>
+            }
+          </a>
+        </ng-template>
+      </p-menubar>
+    </div>
+  </header>
+
+  <main class="pt-20">
+    <router-outlet />
+  </main>
+
+  <!-- <footer class="border-t border-slate-200 bg-white/90">
+    <div
+      class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:text-sm"
+    >
+      <p>© {{ currentYear }} Gobierno Autónomo Municipal de Sacaba.</p>
+      <div class="flex items-center gap-4">
+        <a routerLink="/documents" class="transition-colors hover:text-slate-700">
+          Documentos
+        </a>
+        <a
+          routerLink="/communications"
+          class="transition-colors hover:text-slate-700"
+        >
+          Comunicados
+        </a>
+      </div>
+    </div>
+  </footer> -->
+</div>

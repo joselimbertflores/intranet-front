@@ -15,12 +15,12 @@ export const routes: Routes = [
       {
         path: 'repository',
         loadComponent: () =>
-          import('./features/portal/pages/documents/documents'),
+          import('./features/portal/pages/documents-page/documents-page'),
       },
       {
         path: 'documents',
         loadComponent: () =>
-          import('./features/portal/pages/documents/documents'),
+          import('./features/portal/pages/documents-page/documents-page'),
       },
       {
         path: 'communications',

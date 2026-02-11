@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  effect,
   inject,
   input,
   OnInit,
@@ -44,9 +45,16 @@ import { InputTextModule } from 'primeng/inputtext';
 export class SearchInputComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
+  value = input<string | null>(null);
   label = input<string>('Buscar');
   searchControl = new FormControl('');
   search = output<string>();
+
+  constructor() {
+    effect(() => {
+      this.searchControl.setValue(this.value(), { emitEvent: false });
+    });
+  }
 
   ngOnInit(): void {
     this.searchControl.valueChanges
@@ -57,6 +65,7 @@ export class SearchInputComponent implements OnInit {
         filter((term) => term !== null),
       )
       .subscribe((term) => {
+        console.log('EMITIENDO EVENTO', term);
         this.search.emit(term);
       });
   }

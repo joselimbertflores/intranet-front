@@ -4,7 +4,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TableModule, TablePageEvent } from 'primeng/table';
@@ -18,10 +23,9 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 
-import { SearchInputComponent } from '../../../../../shared';
+import { FileIcon, SearchInputComponent } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
-import { FileIcon } from '../../components';
 import {
   DocumentManageResponse,
   DocumentSubtypeResponse,

@@ -30,12 +30,11 @@ import { DocumentDataSource } from '../../services';
 import {
   DocumentSubtypeResponse,
   DocumentTypeWithSubTypesResponse,
-  SectionTreeNodeResponse,
 } from '../../interfaces';
-import { FileIcon } from '../../components';
 import { FileSizePipe } from '../../pipes';
 import { CustomFormValidator, FormUtils } from '../../../../../helpers';
 import { TreeNodeSelectEvent } from 'primeng/tree';
+import { FileIcon } from '../../../../../shared';
 
 @Component({
   selector: 'app-document-create',

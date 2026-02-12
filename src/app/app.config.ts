@@ -17,6 +17,7 @@ import { definePreset, palette } from '@primeuix/themes';
 import { providePrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
 import theme from '@primeuix/themes/aura';
+import { es } from 'primelocale/es.json';
 
 import { routes } from './app.routes';
 import { handleTransitionCreated } from './core/router/view-transition.config';
@@ -40,12 +41,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withViewTransitions({ onViewTransitionCreated: handleTransitionCreated }),
-      withComponentInputBinding()
+      withComponentInputBinding(),
     ),
     provideHttpClient(
-      withInterceptors([httpErrorInterceptor, authInterceptor])
+      withInterceptors([httpErrorInterceptor, authInterceptor]),
     ),
     providePrimeNG({
+      translation: es,
       theme: {
         preset: AuraSky,
         options: {

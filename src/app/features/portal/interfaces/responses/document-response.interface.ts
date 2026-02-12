@@ -1,22 +1,22 @@
-export interface DocumentResponse {
+export interface PortalDocumentResponse {
   id: string;
-  displayName: string;
-  originalName: string;
-  fiscalYear: number;
-  downloadCount: number;
+  title: string;
+  fiscalYear: string;
   createdAt: string;
-  updatedAt: string;
-  section: {
-    id: number;
-    name: string;
-  };
-  type: {
-    id: number;
-    name: string;
-  };
-  fileName: string;
+  section: string;
+  type: string;
+  subtype: string | null;
+  file: PortalFileResponse;
 }
 
+export interface PortalFileResponse {
+  id: string;
+  url: string;
+  name: string;
+  size: number;
+  extension: string;
+  downloadCount: number;
+}
 export interface DocumentFiltersResponse {
   sections: DocSectionFilterResponse[];
   types: DocTypeFilterResponse[];

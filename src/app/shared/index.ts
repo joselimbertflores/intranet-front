@@ -2,6 +2,7 @@ export * from "./components/secure-image-uploader/secure-image-uploader.componen
 export * from "./components/inputs/file-uploader/file-uploader.component"
 export * from "./components/inputs/search-input/search-input.component"
 export * from "./components/pdf-display/pdf-display.component"
+export * from "./components/file-icon/file-icon"
 
 export * from "./pipes/primeng-file-icon.pipe"
 export * from "./pipes/form-error-messages.pipe"

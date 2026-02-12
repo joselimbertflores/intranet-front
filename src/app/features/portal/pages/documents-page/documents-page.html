@@ -19,6 +19,7 @@
           variant="outlined"
           size="small"
           severity="secondary"
+          icon="pi pi-filter-slash"
           (onClick)="resetFilterForm()"
         />
       </div>
@@ -72,7 +73,6 @@
               <label for="docsubtype">Subtipo de documento</label>
             </p-floatlabel>
           </div>
-
           <div class="md:col-span-8">
             <p-floatlabel class="w-full" variant="on">
               <p-treeSelect
@@ -82,6 +82,7 @@
                 [filter]="true"
                 [resetFilterOnHide]="true"
                 filterPlaceholder="Nombre de la sección"
+                [filterInputAutoFocus]="true"
                 emptyMessage="Sin resultados"
                 [(ngModel)]="selectedTreeNode"
                 [ngModelOptions]="{ standalone: true }"
@@ -111,6 +112,7 @@
       </form>
     </div>
   </p-panel>
+
   <p-dataview
     [value]="dataSource()"
     [totalRecords]="dataSize()"
@@ -122,14 +124,17 @@
     currentPageReportTemplate="{first} - {last} de {totalRecords}"
     [rows]="limit()"
     [first]="offset()"
-    [emptyMessage]="'No se encontraron documentos'"
   >
+    <!-- ================= HEADER ================= -->
     <ng-template #header>
-      <div class="flex justify-end">
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-semibold text-surface-900"> Archivos </span>
+
         <p-selectbutton
           [(ngModel)]="layout"
           [options]="layoutOptions"
           [allowEmpty]="false"
+          styleClass="w-full sm:w-auto"
         >
           <ng-template #item let-item>
             <i
@@ -143,82 +148,148 @@
         </p-selectbutton>
       </div>
     </ng-template>
+
+    <!-- ================= LIST VIEW ================= -->
     <ng-template #list let-items>
-      <div class="flex flex-col divide-y divide-surface-200">
-        @for (doc of items; track $index) {
-          <div class="flex items-center justify-between gap-4 py-4">
-            <div class="flex items-center gap-4 min-w-0">
-              <file-icon [fileName]="doc.file.name" />
-              <div class="min-w-0">
+      <div class="flex flex-col">
+        @for (doc of items; track $index; let last = $last) {
+          <article
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface-0 border-surface-200 transition-colors duration-200 hover:bg-surface-50"
+            [ngClass]="{ 'border-b': !last }"
+          >
+            <!-- INFO -->
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <div
+                class="flex items-center justify-center w-12 h-12 rounded-full bg-primary-50 text-primary-500 shrink-0"
+              >
+                <file-icon [fileName]="doc.file.name" class="text-xl" />
+              </div>
+
+              <div class="flex flex-col min-w-0 gap-1">
                 <h3
-                  class="font-medium text-surface-900 truncate"
+                  class="font-semibold text-surface-900 truncate"
                   [title]="doc.title"
                 >
                   {{ doc.title }}
                 </h3>
-                <p class="text-sm text-surface-500">
-                  {{ doc.file.size | fileSize }}
-                  @if (doc.file?.downloadCount > 10) {
-                    <span class="text-sm text-surface-500 ml-2">
-                      • {{ doc.file.downloadCount }} descargas
+
+                <div
+                  class="flex flex-wrap items-center gap-3 text-sm text-surface-500"
+                >
+                  <span class="inline-flex items-center gap-1">
+                    <i class="pi pi-file text-xs"></i>
+                    {{ doc.file.extension | uppercase }}
+                  </span>
+
+                  <span>{{ doc.file.size | fileSize }}</span>
+
+                  @if (doc.file?.downloadCount > 0) {
+                    <span class="hidden sm:inline">•</span>
+                    <span class="hidden sm:inline items-center gap-1">
+                      <i class="pi pi-download text-xs"></i>
+                      {{ doc.file.downloadCount }}
                     </span>
                   }
-                </p>
+                </div>
               </div>
             </div>
-            <a
-              [href]="doc.file.url"
-              pButton
-              size="small"
-              target="_blank"
-              rel="noopener"
-              aria-label="Descargar documento {{ doc.title }}"
+
+            <div
+              class="flex sm:justify-end shrink-0 w-full sm:w-auto mt-2 sm:mt-0"
             >
-              <i class="pi pi-download"></i>
-              <span pButtonLabel>Descargar</span>
-            </a>
-          </div>
-        }
-      </div>
-    </ng-template>
-
-    <ng-template #grid let-items>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        @for (doc of items; track $index) {
-          <article
-            class="flex flex-col justify-between rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm hover:shadow-md transition"
-          >
-            <div class="flex gap-4">
-              <file-icon [fileName]="doc.file.name" class="text-3xl shrink-0" />
-
-              <div class="min-w-0">
-                <h3
-                  class="font-semibold text-surface-900 line-clamp-2"
-                  [title]="doc.title"
-                >
-                  {{ doc.title }}
-                </h3>
-
-                <p class="mt-1 text-sm text-surface-500">
-                  {{ doc.file.extension | uppercase }}
-                  • {{ doc.file.size | fileSize }}
-                </p>
-              </div>
-            </div>
-
-            <div class="mt-4 flex justify-end">
               <a
                 [href]="doc.file.url"
+                pButton
+                pRipple
+                size="small"
                 target="_blank"
                 rel="noopener"
-                class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-contrast hover:bg-primary-600"
+                class="w-full sm:w-auto justify-center"
+                aria-label="Descargar archivo"
               >
                 <i class="pi pi-download"></i>
-                Descargar
+                <span class="font-bold">Descargar</span>
               </a>
             </div>
           </article>
         }
+      </div>
+    </ng-template>
+
+    <!-- ================= GRID VIEW ================= -->
+    <ng-template #grid let-items>
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2"
+      >
+        @for (doc of items; track $index) {
+          <article
+            class="flex flex-col h-full bg-surface-0 rounded-xl border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+          >
+            <!-- CONTENT -->
+            <div class="p-5 flex flex-col flex-1 gap-4">
+              <div class="flex justify-between items-start">
+                <div
+                  class="w-12 h-12 rounded-lg bg-surface-50 flex items-center justify-center text-primary-500 text-2xl"
+                >
+                  <file-icon [fileName]="doc.file.name" />
+                </div>
+
+                @if (doc.file?.downloadCount > 0) {
+                  <span
+                    class="inline-flex items-center gap-1 text-xs text-surface-500"
+                  >
+                    <i class="pi pi-download text-[0.65rem]"></i>
+                    {{ doc.file.downloadCount }}
+                  </span>
+                }
+              </div>
+
+              <div class="flex flex-col gap-2 min-w-0">
+                <h3
+                  class="font-bold text-lg text-surface-900 line-clamp-2 min-h-14"
+                  [title]="doc.title"
+                >
+                  {{ doc.title }}
+                </h3>
+
+                <div
+                  class="flex flex-wrap gap-3 text-sm text-surface-500 mt-auto"
+                >
+                  <span class="inline-flex items-center gap-1">
+                    <i class="pi pi-file text-xs"></i>
+                    {{ doc.file.extension | uppercase }}
+                  </span>
+
+                  <span>{{ doc.file.size | fileSize }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTION -->
+            <div class="p-4 bg-surface-50 border-t border-surface-100">
+              <a
+                size="small"
+                [href]="doc.file.url"
+                pButton
+                pRipple
+                label="Descargar"
+                icon="pi pi-download"
+                class="w-full"
+                target="_blank"
+                rel="noopener"
+                aria-label="Descargar archivo"
+              >
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <div class="text-center p-4">
+        <i class="pi pi-exclamation-triangle" style="font-size: 2rem"></i>
+        <p>No se encontraron archivos.</p>
       </div>
     </ng-template>
   </p-dataview>

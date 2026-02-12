@@ -23,9 +23,9 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 
 import { FileSizePipe } from '../../pipes';
-import { FileIcon } from '../../components';
 import { DocumentManageResponse } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
+import { FileIcon } from '../../../../../shared';
 
 @Component({
   selector: 'app-document-edit',

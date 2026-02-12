@@ -12,7 +12,7 @@ import { SelectButton } from 'primeng/selectbutton';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 
-import { DocumentResponse } from '../../../interfaces';
+import { PortalDocumentResponse } from '../../../interfaces';
 import { FileSizePipe, PrimengFileIconPipe } from '../../../../../shared';
 
 @Component({
@@ -162,7 +162,7 @@ import { FileSizePipe, PrimengFileIconPipe } from '../../../../../shared';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentListComponent {
-  dataSource = input.required<DocumentResponse[]>();
+  dataSource = input.required<PortalDocumentResponse[]>();
 
   dataSize = input.required<number>();
   limit = input<number>();
@@ -170,7 +170,7 @@ export class DocumentListComponent {
 
   onPageChange = output<{ index: number; limit: number }>();
 
-  onDowload = output<DocumentResponse>();
+  onDowload = output<PortalDocumentResponse>();
 
   layout: 'list' | 'grid' = 'list';
 
@@ -183,7 +183,7 @@ export class DocumentListComponent {
     });
   }
 
-  download(doc: DocumentResponse) {
+  download(doc: PortalDocumentResponse) {
     this.onDowload.emit(doc);
   }
 }

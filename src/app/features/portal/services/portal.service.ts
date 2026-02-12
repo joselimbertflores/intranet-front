@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { finalize, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-  DocumentResponse,
+  PortalDocumentResponse,
   HomePortalDataResponse,
   CategoriesWithSectionsResponse,
 } from '../interfaces';
@@ -24,7 +24,7 @@ interface FilterDocumentsParams {
 }
 
 interface DocumentCache {
-  documents: DocumentResponse[];
+  documents: PortalDocumentResponse[];
   total: number;
 }
 
@@ -86,7 +86,7 @@ export class PortalService {
     };
 
     return this.http
-      .post<{ documents: DocumentResponse[]; total: number }>(
+      .post<{ documents: PortalDocumentResponse[]; total: number }>(
         `${this.URL}/documents`,
         {
           limit,

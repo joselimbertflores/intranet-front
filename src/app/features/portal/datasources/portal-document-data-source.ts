@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { environment } from '../../../../environments/environment';
 
-import { DocumentFiltersResponse } from '../interfaces';
+import { DocumentFiltersResponse, PortalDocumentResponse } from '../interfaces';
 
 interface SearchDocumentsParams {
   limit: number;
@@ -20,7 +20,7 @@ interface SearchDocumentsParams {
   providedIn: 'root',
 })
 export class PortalDocumentDataSource {
-  private readonly URL = `${environment.baseUrl}/portal`;
+  private readonly URL = `${environment.baseUrl}/portal-documents`;
   private http = inject(HttpClient);
 
   documentFilters = toSignal(this.getDocumentFilters(), {
@@ -33,17 +33,16 @@ export class PortalDocumentDataSource {
     const params = new HttpParams({
       fromObject: this.removeEmptyProperties(filterParams),
     });
-    console.log(params);
-    return this.http.get<{ documents: any[]; total: number }>(
-      `${this.URL}/documents`,
-      { params },
-    );
+    return this.http.get<{
+      documents: PortalDocumentResponse[];
+      total: number;
+    }>(`${this.URL}`, {
+      params,
+    });
   }
 
   private getDocumentFilters() {
-    return this.http.get<DocumentFiltersResponse>(
-      `${this.URL}/document-filters`,
-    );
+    return this.http.get<DocumentFiltersResponse>(`${this.URL}/filters`);
   }
 
   private removeEmptyProperties<T extends object>(obj: T): Partial<T> {

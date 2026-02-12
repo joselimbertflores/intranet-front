@@ -65,7 +65,6 @@ export class SearchInputComponent implements OnInit {
         filter((term) => term !== null),
       )
       .subscribe((term) => {
-        console.log('EMITIENDO EVENTO', term);
         this.search.emit(term);
       });
   }

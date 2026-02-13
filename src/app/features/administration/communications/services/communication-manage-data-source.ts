@@ -2,12 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { switchMap } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FormCalendarProps } from '../../calendar/interfaces';
 import { CommunicationManageResponse } from '../interfaces';
-import { FileUploadService } from '../../../../shared';
+import { FileUploadService, UploadResult } from '../../../../shared';
 
 interface GetCommunicationsParams {
   term?: string;
@@ -46,55 +46,37 @@ export class CommunicationManageDataSource {
     });
   }
 
-  create(form: CreateCommunicationProps, pdf: File) {
-    const { calendarEvent, ...props } = form;
-    return this.fileUploadService.uploadPdfThumbnail(pdf, 'communication').pipe(
-      switchMap(({ fileName, originalName, previewFileName }) =>
-        this.http.post(`${this.URL}`, {
-          ...props,
-          fileName,
-          originalName,
-          previewFileName,
-          calendarEvent: this.buildCalendarEventDto(calendarEvent),
+  create(data: object, pdf: File) {
+    return this.fileUploadService
+      .uploadPdfForGeneratePreview(pdf, 'communication')
+      .pipe(
+        switchMap(({ fileId }) =>
+          this.http.post(`${this.URL}`, {
+            ...data,
+            fileId,
+          }),
+        ),
+      );
+  }
+
+  update(id: string, data: object, file: File | null) {
+    const fileUploadObserbable: Observable<null | UploadResult> = file
+      ? this.fileUploadService.uploadPdfForGeneratePreview(
+          file,
+          'communication',
+        )
+      : of(null);
+    return fileUploadObserbable.pipe(
+      switchMap((result) =>
+        this.http.patch(`${this.URL}/${id}`, {
+          ...data,
+          ...(result && { fileId: result.fileId }),
         }),
       ),
     );
   }
 
-  update(
-    id: string,
-    form: Partial<CreateCommunicationProps>,
-    file: File | null,
-  ) {
-    const { calendarEvent, ...props } = form;
-    return file
-      ? this.fileUploadService.uploadPdfThumbnail(file, 'communication').pipe(
-          switchMap(({ fileName, previewFileName, originalName }) =>
-            this.http.patch(`${this.URL}/${id}`, {
-              ...props,
-              fileName,
-              originalName,
-              previewFileName,
-              calendarEvent: this.buildCalendarEventDto(calendarEvent),
-            }),
-          ),
-        )
-      : this.http.patch<CommunicationManageResponse>(`${this.URL}/${id}`, {
-          ...props,
-          calendarEvent: this.buildCalendarEventDto(calendarEvent),
-        });
-  }
-
-  getTypes() {
+  private getTypes() {
     return this.http.get<any[]>(`${this.URL}/types`);
-  }
-
-  private buildCalendarEventDto(data: FormCalendarProps | undefined) {
-    if (!data) return null;
-    const { recurrence, ...props } = data;
-    return {
-      ...props,
-      recurrence: recurrence?.frequency ? recurrence : null,
-    };
   }
 }

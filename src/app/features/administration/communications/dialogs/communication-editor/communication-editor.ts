@@ -26,8 +26,6 @@ import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 
-import { recurrenceValidator } from '../../../calendar/helpers';
-import { CalendarEventForm } from '../../../calendar/components';
 import { CommunicationManageDataSource } from '../../services';
 import { CommunicationManageResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
@@ -49,7 +47,6 @@ import { ConfirmationService } from 'primeng/api';
     StepperModule,
     SelectModule,
     ButtonModule,
-    CalendarEventForm,
   ],
   templateUrl: './communication-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,33 +72,10 @@ export class CommunicationEditor {
     code: ['', [Validators.required, Validators.minLength(3)]],
     typeId: ['', Validators.required],
     isActive: [true],
-    calendarEvent: this.formBuilder.group({
-      title: ['', [Validators.required, Validators.maxLength(150)]],
-      description: [''],
-      startDate: [this.currentDate, Validators.required],
-      endDate: [null],
-      allDay: [true],
-      isActive: [true],
-      recurrence: this.formBuilder.group(
-        {
-          frequency: [null],
-          interval: [1],
-          byWeekDays: [[]],
-          until: [null],
-        },
-        { validators: recurrenceValidator },
-      ),
-    }),
   });
-
-  hasEvent = signal(false);
-  isEventRecurring = signal(false);
-
   file = signal<File | null>(null);
 
-  constructor() {
-    this.onHasEventChange();
-  }
+  constructor() {}
 
   ngOnInit() {
     this.loadFormData();
@@ -131,25 +105,6 @@ export class CommunicationEditor {
     const [file] = event.files;
     if (!file) return;
     this.file.set(file);
-  }
-
-  onHasEventChange() {
-    effect(() => {
-      const eventForm = this.calendarEventForm;
-      if (this.hasEvent()) {
-        eventForm?.enable();
-      } else {
-        eventForm?.disable();
-        if (this.data?.calendarEvent) {
-          this.showDeleteEventMessage();
-        }
-      }
-    });
-  }
-
-  setNameEvent() {
-    const description = this.form.get('reference')?.value;
-    this.form.get('calendarEvent.title')?.setValue(description);
   }
 
   get isFormValid() {
@@ -182,10 +137,8 @@ export class CommunicationEditor {
     const formData = { ...props, typeId: type.id, calendarEvent: {} };
 
     if (calendarEvent) {
-      this.hasEvent.set(true);
       const { recurrenceConfig, startDate, endDate, ...eventProps } =
         calendarEvent;
-      if (recurrenceConfig) this.isEventRecurring.set(true);
       formData.calendarEvent = {
         ...eventProps,
         startDate: new Date(startDate),

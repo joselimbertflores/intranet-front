@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
 
-type FileGroup =
+type FileContext =
   | 'hero-section'
   | 'documents'
   | 'quick-access'
@@ -29,8 +29,8 @@ export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
 }
 
 export interface UploadResult {
-  fileId:string
-  originalName: string
+  fileId: string;
+  originalName: string;
 }
 
 @Injectable({
@@ -45,19 +45,25 @@ export class FileUploadService {
     return this.http.get(url, { responseType: 'blob' });
   }
 
-  upload(file: File, group: FileGroup) {
+  upload(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
   }
 
-  uploadFile(file: File, group: FileGroup) {
+  uploadPdfForGeneratePreview(pdf: File, group: FileContext) {
+    const formData = new FormData();
+    formData.append('file', pdf);
+    return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
+  }
+
+  uploadFile(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadedFile>(`${this.URL}/${group}`, formData);
   }
 
-  newUploadFile(file: File, group: FileGroup) {
+  newUploadFile(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadedFileResponse>(
@@ -66,7 +72,7 @@ export class FileUploadService {
     );
   }
 
-  uploadPdfThumbnail(file: File, group: FileGroup) {
+  uploadPdfThumbnail(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadedPdfThumbnailResponse>(
@@ -75,7 +81,7 @@ export class FileUploadService {
     );
   }
 
-  uploadVideoWithThumbnail(file: File, group: FileGroup) {
+  uploadVideoWithThumbnail(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadedPdfThumbnailResponse>(

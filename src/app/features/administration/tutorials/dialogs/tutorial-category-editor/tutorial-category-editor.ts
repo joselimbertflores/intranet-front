@@ -13,8 +13,8 @@ import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 
 import { FormUtils } from '../../../../../helpers';
-import { TutorialCategoryResponse } from '../../../interfaces';
 import { TutorialCategoryDataSource } from '../../services';
+import { TutorialCategoryResponse } from '../../interfaces';
 
 @Component({
   selector: 'app-tutorial-category-editor',
@@ -37,7 +37,10 @@ export class TutorialCategoryEditor {
   readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+    name: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(120)],
+    ],
   });
 
   ngOnInit() {
@@ -50,7 +53,10 @@ export class TutorialCategoryEditor {
     }
 
     const subscription = this.data
-      ? this.tutorialCategoryDataSource.update(this.data.id, this.form.getRawValue())
+      ? this.tutorialCategoryDataSource.update(
+          this.data.id,
+          this.form.getRawValue(),
+        )
       : this.tutorialCategoryDataSource.create(this.form.getRawValue());
 
     subscription.subscribe((result) => {

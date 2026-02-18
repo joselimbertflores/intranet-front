@@ -13,9 +13,9 @@ import { TableModule } from 'primeng/table';
 
 import { TutorialDataSource } from '../../services';
 import { TutorialEditor } from '../../dialogs';
-import { TutorialResponse } from '../../../interfaces';
 import { SearchInputComponent } from '../../../../../shared';
 import { RouterLink } from "@angular/router";
+import { TutorialResponse } from '../../interfaces';
 
 @Component({
   selector: 'app-tutorial-admin',

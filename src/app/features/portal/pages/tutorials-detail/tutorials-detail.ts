@@ -15,7 +15,6 @@ import { ButtonModule } from 'primeng/button';
 
 import { PortalTutorialData } from '../../services';
 import { ScrollStateService } from '../../../../shared';
-import { TutorialVideoResponse } from '../../../administration/interfaces';
 @Component({
   selector: 'app-tutorials-detail',
   imports: [CommonModule, ButtonModule],
@@ -46,7 +45,7 @@ export default class TutorialsDetail {
   //   return videos.find(({ id }) => id.toString() === this.videoId());
   // });
 
-  selectVideo(video: TutorialVideoResponse) {
+  selectVideo(video: any) {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { video: video.id },

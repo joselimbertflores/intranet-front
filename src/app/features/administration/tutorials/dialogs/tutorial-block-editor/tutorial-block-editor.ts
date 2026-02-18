@@ -1,18 +1,35 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FileUploadModule } from 'primeng/fileupload';
+import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { EditorModule } from 'primeng/editor';
+import { ButtonModule } from 'primeng/button';
+
+import { TutorialBlockResponse, TutorialBlockType } from '../../interfaces';
+import { FileIcon, FileSizePipe } from '../../../../../shared';
+import { FormUtils } from '../../../../../helpers';
+import { TutorialDataSource } from '../../services';
 
 interface DialogData {
-  blockType: string;
-  block?: any;
+  tutorialId: string;
+  blockType: TutorialBlockType;
+  block?: TutorialBlockResponse;
 }
 @Component({
   selector: 'app-tutorial-block-editor',
@@ -25,64 +42,85 @@ interface DialogData {
     TextareaModule,
     ButtonModule,
     EditorModule,
+    FileIcon,
+    FileSizePipe,
   ],
   templateUrl: './tutorial-block-editor.html',
-  styles: `
-    /* Arreglo para listas de Quill con Tailwind */
-    .ql-editor ul {
-      list-style-type: disc !important;
-      padding-left: 1.5em !important;
-    }
 
-    .ql-editor ol {
-      list-style-type: decimal !important;
-      padding-left: 1.5em !important;
-    }
-
-    /* Opcional: Para que los links se vean azules y subrayados al editar */
-    .ql-editor a {
-      color: #3b82f6; /* blue-500 */
-      text-decoration: underline;
-    }
-
-    /* Aumentar el z-index del tooltip de Quill para que flote sobre el Dialog */
-    .ql-tooltip {
-      z-index: 99999 !important;
-    }
-
-    /* Opcional: Si el tooltip se ve muy pegado o cortado lateralmente */
-    .ql-tooltip.ql-editing {
-      left: 50% !important;
-      transform: translateX(-50%);
-    }
-  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TutorialBlockEditor {
+export class TutorialBlockEditor implements OnInit {
   private dialogRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
+  private tutorialDataSource = inject(TutorialDataSource);
+
   readonly data: DialogData = inject(DynamicDialogConfig).data;
+  formUtils = FormUtils;
 
-  editorModules = {
-    toolbar: [
-      // Solo negrita, cursiva, subrayado
-      ['bold', 'italic', 'underline'],
-
-      // Solo listas ordenadas y desordenadas
-      [{ list: 'ordered' }, { list: 'bullet' }],
-
-      // Solo enlaces y limpiar formato
-      ['link', 'clean'],
-    ],
-  };
-
-  blockForm = this.formBuilder.group({
+  blockForm: FormGroup = this.formBuilder.group({
     content: [null],
   });
 
-  save() {}
+  file: File | null = null;
+
+  previewUrl = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.loadForm();
+  }
+
+  save() {
+    if (this.blockForm.invalid) return this.blockForm.markAllAsTouched();
+    const saveObservable = this.data.block
+      ? this.tutorialDataSource.updateBlock(
+          this.data.block.id,
+          this.blockForm.value,
+          this.file,
+        )
+      : this.tutorialDataSource.createBlock(
+          this.data.tutorialId,
+          {
+            ...this.blockForm.value,
+            type: this.data.blockType,
+          },
+          this.file,
+        );
+
+    saveObservable.subscribe((resp) => {
+      this.dialogRef.close(resp);
+    });
+  }
 
   close() {
     this.dialogRef.close();
+  }
+
+  selectFile(event: FileSelectEvent) {
+    const [file] = event.files;
+    this.file = file;
+  }
+
+  private loadForm() {
+    if (this.data.blockType === 'VIDEO_URL' || this.data.blockType === 'TEXT') {
+      this.blockForm.get('content')?.addValidators(Validators.required);
+      this.blockForm.updateValueAndValidity();
+    }
+
+    if (this.data.block) {
+      this.blockForm.patchValue({ content: this.data.block.content ?? '' });
+      this.previewUrl.set(this.data.block.file?.url ?? null);
+    }
+  }
+
+  onFileChange(event: Event) {
+    const [file] = (event.target as HTMLInputElement).files ?? [];
+    if (!file) return;
+    this.file = file;
+    if (this.previewUrl() !== null) {
+      URL.revokeObjectURL(this.previewUrl()!);
+    }
+
+    // preview local
+    this.previewUrl.set(URL.createObjectURL(file));
   }
 }

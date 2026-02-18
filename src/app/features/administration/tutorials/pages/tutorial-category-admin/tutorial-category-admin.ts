@@ -11,9 +11,9 @@ import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { TutorialCategoryResponse } from '../../../interfaces';
 import { TutorialCategoryDataSource } from '../../services';
 import { TutorialCategoryEditor } from '../../dialogs';
+import { TutorialCategoryResponse } from '../../interfaces';
 
 @Component({
   selector: 'app-tutorial-category-admin',

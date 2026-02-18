@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { environment } from '../../../../../environments/environment';
-import { TutorialCategoryResponse } from '../../interfaces';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { TutorialCategoryResponse } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',

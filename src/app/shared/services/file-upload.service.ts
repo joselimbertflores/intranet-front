@@ -8,7 +8,7 @@ type FileContext =
   | 'documents'
   | 'quick-access'
   | 'communication'
-  | 'tutorial';
+  | 'tutorials';
 type MediaType = 'image' | 'audio' | 'video' | 'document';
 export interface UploadedFile {
   fileName: string;

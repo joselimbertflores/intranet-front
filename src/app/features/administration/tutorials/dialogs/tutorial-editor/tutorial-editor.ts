@@ -22,8 +22,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
-import { TutorialResponse } from '../../../interfaces';
 import { TutorialDataSource } from '../../services';
+import { TutorialResponse } from '../../interfaces';
 
 @Component({
   selector: 'tutorial-editor',

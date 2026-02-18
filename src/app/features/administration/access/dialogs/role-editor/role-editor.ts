@@ -19,8 +19,8 @@ import { ListboxModule } from 'primeng/listbox';
 import { ButtonModule } from 'primeng/button';
 import { SelectItemGroup } from 'primeng/api';
 
-import { RoleResponse } from '../../../interfaces';
 import { RoleDataSource } from '../../services';
+import { RoleResponse } from '../../interfaces';
 
 @Component({
   selector: 'app-role-editor',

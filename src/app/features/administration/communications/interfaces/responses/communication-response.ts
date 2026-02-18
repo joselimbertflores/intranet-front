@@ -1,15 +1,18 @@
-import { CalendarEventResponse } from '../../../calendar/interfaces';
-
-export interface CommunicationManageResponse {
+export interface CommunicationAdminResponse {
   id: string;
   reference: string;
   code: string;
-  fileName: string;
-  previewFileName: string;
-  originalName: string;
-  createdAt: Date;
+  createdAt: string;
+  isActive: boolean;
+  eventId?: string;
+  file: CommunicationFileResponse;
   type: CommunicationTypeResponse;
-  calendarEvent: CalendarEventResponse | null;
+}
+
+export interface CommunicationFileResponse {
+  id: string;
+  originalName: string;
+  url: string;
 }
 
 export interface CommunicationTypeResponse {

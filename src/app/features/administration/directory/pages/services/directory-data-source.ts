@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { inject, Injectable } from '@angular/core';
+
 import { environment } from '../../../../../../environments/environment';
+import { TreeDirectoryResponse } from '../../interfaces';
 
 // models.ts
 export interface DirectorySection {
@@ -28,64 +30,24 @@ export interface DirectoryContact {
   providedIn: 'root',
 })
 export class DirectoryDataSource {
-  private base = `${environment.baseUrl}/directory`;
+  private readonly URL = `${environment.baseUrl}/directory`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
-  // Sections
-  getSections(): Observable<DirectorySection[]> {
-    return this.http.get<DirectorySection[]>(`${this.base}/sections`);
+  create(dto: object) {
+    return this.http.post<DirectorySection>(this.URL, dto);
   }
 
-  createSection(dto: { name: string; parentId?: string; order?: number }) {
-    return this.http.post<DirectorySection>(`${this.base}/sections`, dto);
+  update(id: number, dto: object) {
+    return this.http.patch<DirectorySection>(`${this.URL}/${id}`, dto);
   }
 
-  updateSection(
-    id: string,
-    dto: Partial<{
-      name: string;
-      parentId: string | null;
-      order: number;
-      isActive: boolean;
-    }>,
-  ) {
-    return this.http.patch<DirectorySection>(
-      `${this.base}/sections/${id}`,
-      dto,
-    );
+  remove(id: number) {
+    return this.http.delete(`${this.URL}/${id}`);
   }
 
-  // Contacts
-  getContactsBySection(sectionId: string): Observable<DirectoryContact[]> {
-    return this.http.get<DirectoryContact[]>(
-      `${this.base}/sections/${sectionId}/contacts`,
-    );
-  }
-
-  createContact(dto: {
-    sectionId: string;
-    title: string;
-    internalPhone?: string | null;
-    externalPhone?: string | null;
-    order?: number;
-  }) {
-    return this.http.post<DirectoryContact>(`${this.base}/contacts`, dto);
-  }
-
-  updateContact(
-    id: string,
-    dto: Partial<{
-      title: string;
-      internalPhone: string | null;
-      externalPhone: string | null;
-      order: number;
-      isActive: boolean;
-    }>,
-  ) {
-    return this.http.patch<DirectoryContact>(
-      `${this.base}/contacts/${id}`,
-      dto,
-    );
+  getTreeDirectory() {
+    return this.http.get<TreeDirectoryResponse[]>(this.URL, {});
   }
 }

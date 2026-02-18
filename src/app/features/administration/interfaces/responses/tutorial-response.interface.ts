@@ -1,10 +1,9 @@
 export interface TutorialResponse {
   id: string;
   title: string;
-  description: string;
-  imageUrl: string | null;
-  slug: string;
-  videos: TutorialVideoResponse[];
+  summary: string | null;
+  isPublished: boolean
+  blocks:any[]
 }
 
 export interface TutorialVideoResponse {

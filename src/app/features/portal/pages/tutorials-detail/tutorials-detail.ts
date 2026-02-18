@@ -40,11 +40,11 @@ export default class TutorialsDetail {
     stream: ({ params }) => this.portalTutorialService.findBySlug(params.id),
   });
 
-  currentVideo = computed(() => {
-    if (!this.videoId()) return null;
-    const videos = this.dataResource.value()?.videos ?? [];
-    return videos.find(({ id }) => id.toString() === this.videoId());
-  });
+  // currentVideo = computed(() => {
+  //   if (!this.videoId()) return null;
+  //   const videos = this.dataResource.value()?.videos ?? [];
+  //   return videos.find(({ id }) => id.toString() === this.videoId());
+  // });
 
   selectVideo(video: TutorialVideoResponse) {
     this.router.navigate([], {

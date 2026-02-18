@@ -1,11 +1,11 @@
 <div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Comunicados</h2>
+  <h2 class="text-2xl font-semibold">Tutoriales</h2>
   <p-button
     label="Agregar"
     icon="pi pi-plus"
     iconPos="left"
     size="small"
-    (onClick)="openCreateDialog()"
+    (onClick)="openEditorDialog()"
   />
 </div>
 <div class="card">
@@ -16,16 +16,18 @@
     [globalFilterFields]="['name']"
     [paginator]="true"
     [rows]="10"
+    size="small"
   >
     <ng-template #caption>
       <div class="flex sm:justify-end">
         <div class="w-full sm:w-1/4">
-          <!-- <search-input (search)="onSearch($event)" label="Referencia / Cite" /> -->
+          <search-input (search)="onSearch($event)" label="Referencia / Cite" />
         </div>
       </div>
     </ng-template>
     <ng-template #header>
       <tr>
+        <th>Detalle</th>
         <th>Titulo</th>
         <th>Descripcion</th>
         <th>Videos</th>
@@ -34,14 +36,23 @@
     </ng-template>
     <ng-template #body let-item>
       <tr>
+        <td>
+          <p-button
+            label="Ver detalle"
+            size="small"
+            [routerLink]="['/admin/tutorials', item.id]"
+            icon="pi pi-eye"
+            variant="text"
+          />
+        </td>
         <td>{{ item.title }}</td>
         <td>{{ item.description }}</td>
-        <td style="width: 8rem">{{ item.videos.length }}</td>
+        <td style="width: 8rem"></td>
         <td>
           <p-button
             icon="pi pi-pencil"
             size="small"
-            (click)="openUpdateDialog(item)"
+            (click)="openEditorDialog(item)"
             severity="secondary"
             rounded
           />

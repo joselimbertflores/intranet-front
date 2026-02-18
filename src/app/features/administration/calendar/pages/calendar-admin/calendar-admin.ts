@@ -1,39 +1,45 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
   linkedSignal,
+  Component,
+  inject,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
+import { TableModule, TablePageEvent } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
-import { TableModule, TablePageEvent } from 'primeng/table';
+import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
+import { SearchInputComponent } from '../../../../../shared';
 import { CalendarEventResponse } from '../../interfaces';
 import { CalendarDataSource } from '../../services';
 import { CalendarEditor } from '../../dialogs';
-import { SearchInputComponent } from '../../../../../shared';
 
 @Component({
   selector: 'app-calendar-admin',
   imports: [
     CommonModule,
+    ConfirmDialogModule,
     ButtonModule,
     TableModule,
     TagModule,
+    MenuModule,
     SearchInputComponent,
   ],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ConfirmationService],
 })
 export default class CalendarAdmin {
   private dialogService = inject(DialogService);
   private calendarDataSource = inject(CalendarDataSource);
+  private confirmationService = inject(ConfirmationService);
 
   limit = signal(10);
   term = signal('');
@@ -58,6 +64,8 @@ export default class CalendarAdmin {
     return this.resource.value().total;
   });
 
+  menuItems: MenuItem[] = [];
+
   openEventDialog(item?: CalendarEventResponse) {
     const dialogRef = this.dialogService.open(CalendarEditor, {
       header: item ? 'Editar evento' : 'Crear evento',
@@ -78,6 +86,26 @@ export default class CalendarAdmin {
     });
   }
 
+  openMenu(row: CalendarEventResponse, event: Event) {
+    this.menuItems = [
+      {
+        label: 'Opciones',
+        items: [
+          {
+            label: 'Editar',
+            icon: 'pi pi-pencil',
+            command: () => this.openEventDialog(row),
+          },
+          {
+            label: 'Eliminar',
+            icon: 'pi pi-calendar',
+            command: () => this.remove(row.id, event),
+          },
+        ],
+      },
+    ];
+  }
+
   onSearch(term: string) {
     this.offset.set(0);
     this.term.set(term);
@@ -86,6 +114,32 @@ export default class CalendarAdmin {
   chagePage(event: TablePageEvent) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
+  }
+
+  private remove(id: string, event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: '¿Esta seguro que desea eliminar este evento?',
+      header: 'Eliminar evento',
+      rejectButtonProps: {
+        label: 'Cancelar',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Aceptar',
+      },
+      accept: () => {
+        this.calendarDataSource.remove(id).subscribe(() => {
+          this.dataSize.update((value) => (value -= 1));
+          this.dataSource.update((values) => {
+            const index = values.findIndex((item) => item.id === id);
+            values.splice(index, 1);
+            return [...values];
+          });
+        });
+      },
+    });
   }
 
   private updateItemDataSource(item: CalendarEventResponse): void {

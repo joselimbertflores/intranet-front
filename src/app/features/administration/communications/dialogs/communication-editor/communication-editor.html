@@ -58,19 +58,8 @@
         </p-message>
       }
     </div>
-    <div class="sm:col-span-2 flex flex-col sm:flex-row gap-4">
-      <div class="flex items-center">
-        <p-checkbox
-          inputId="isActiveCheck"
-          name="pizza"
-          [binary]="true"
-          formControlName="isActive"
-        />
-        <label for="isActiveCheck" class="ml-2"> Activo </label>
-      </div>
-    </div>
 
-    @if (data?.fileName) {
+    @if (data?.file) {
       <div class="mt-2 sm:col-span-2">
         <div class="font-medium">Documento actual:</div>
         <div class="p-2">
@@ -80,7 +69,7 @@
               style="font-size: 1.5rem"
             ></i>
             <p class="font-medium text-sm">
-              {{ data?.originalName }}
+              {{ data?.file?.originalName }}
             </p>
           </div>
         </div>
@@ -109,4 +98,4 @@
     <p-button type="submit" label="Guardar" />
   </div>
 </form>
-<p-confirmdialog />
+

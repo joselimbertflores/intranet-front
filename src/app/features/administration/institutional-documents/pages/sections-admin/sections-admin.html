@@ -13,7 +13,7 @@
   [value]="treeSections()"
   (onNodeExpand)="onExpand($event)"
   (onNodeCollapse)="onCollapse($event)"
-  class="p-treetable-sm"
+  class="p-treetable-sm text-sm"
   [paginator]="true"
   [rows]="10"
   [rowsPerPageOptions]="[10, 30, 50]"
@@ -44,8 +44,8 @@
   <ng-template pTemplate="header">
     <tr>
       <th>Nombre</th>
-      <th>Nivel</th>
-      <th>Estado</th>
+      <th class="w-[70px]">Nivel</th>
+      <th class="w-[120px]">Estado</th>
       <th class="w-[100px]"></th>
     </tr>
   </ng-template>

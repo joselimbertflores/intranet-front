@@ -1,128 +1,59 @@
 <form [formGroup]="tutorialForm" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-2 mb-4">
-    <input
-      pInputText
-      type="text"
-      formControlName="title"
-      placeholder="Titulo"
-      class="w-full"
-      />
-    <textarea
-      rows="2"
-      pTextarea
-      formControlName="description"
-      placeholder="Descripcion"
-    ></textarea>
-  </div>
-  <div class="mb-4">
-    <div
-      class="flex items-center flex-col gap-x-2 border border-slate-300 rounded-lg"
-      >
-      <figure class="flex justify-center items-center rounded-2xl mb-4">
-        @if(localImagePreview()){
-          <img
-            [src]="localImagePreview()"
-            alt="Image preview"
-            class="object-contain rounded-2xl max-h-[250px]"
-            />
-        } @else { @if (data?.imageUrl) {
-          <img
-            [src]="data?.imageUrl"
-            alt="Image preview"
-            class="object-contain rounded-2xl max-h-[250px]"
-            />
-          } }
-        </figure>
-        <div class="flex items-center">
-          <div class="text-lg mr-4">Imagen</div>
-          <div class="flex gap-x-4">
-            <p-button
-              icon="pi pi-image"
-              [rounded]="true"
-              [text]="true"
-              (click)="imageInput.click()"
-              />
-            <input
-              #imageInput
-              [hidden]="true"
-              [multiple]="true"
-              type="file"
-              accept="image/png, image/jpeg, image/jpg"
-              (change)="onImageSelect($event)"
-              />
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between p-2">
-      <span class="font-medium text-lg">Listado de videos</span>
-      <p-button
-        icon="pi pi-plus"
-        size="small"
-        label="Agregar"
-        (click)="videoInput.click()"
-        />
+  <div class="flex flex-col gap-y-4 mt-1">
+    <p-floatlabel variant="on">
       <input
-        #videoInput
-        type="file"
-        [hidden]="true"
-        [multiple]="true"
-        accept="video/mp4"
-        (change)="onFileSelected($event)"
-        />
+        id="titleTxt"
+        pInputText
+        type="text"
+        formControlName="title"
+        placeholder="Titulo"
+        class="w-full"
+      />
+      <label for="titleTxt">Titulo</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="on">
+      <textarea
+        id="summaryTxt"
+        rows="2"
+        pTextarea
+        formControlName="summary"
+        placeholder="Descripcion"
+        class="w-full"
+      ></textarea>
+      <label for="summaryTxt">Resumen</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="on">
+      <p-select
+        inputId="category_txt"
+        [options]="categories()"
+        optionLabel="name"
+        optionValue="id"
+        class="w-full"
+        appendTo="body"
+        [filter]="true"
+        formControlName="categoryId"
+      />
+      <label for="category_txt">Categoria</label>
+    </p-floatlabel>
+
+    <div class="flex items-center">
+      <p-checkbox
+        inputId="published_check"
+        name="pizza"
+        [binary]="true"
+        formControlName="isPublished"
+      />
+      <label for="published_check" class="ml-2"> Publicado </label>
     </div>
-    <div
-      class="flex flex-col gap-y-4 p-4 border rounded-xl border-slate-300"
-      formArrayName="videos"
-      >
-      @for (control of videosFormArray.controls; track control; let i = $index) {
-        <div
-          [formGroupName]="i"
-          >
-          <div
-            class="flex flex-col gap-y-3 rounded-lg border border-surface-300 px-4 py-2"
-            >
-            <div class="flex justify-between">
-              <div class="flex items-center gap-x-2">
-                <div class="font-semibold">Nro. {{ i + 1 }}</div>
-              </div>
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                size="small"
-                (onClick)="removeVideo(i)"
-                />
-            </div>
-            <div class="flex justify-center">
-              <video
-                [src]="videos()[i].fileUrl"
-                class="w-full sm:w-[400px] aspect-video rounded-xl"
-                controls
-                preload="metadata"
-              ></video>
-            </div>
-            <div>
-              <input
-                pInputText
-                formControlName="title"
-                type="text"
-                placeholder="Titulo"
-                class="w-full"
-                />
-            </div>
-          </div>
-        </div>
-      }
-      @if(videosFormArray.controls.length===0){
-        <div class="font-medium">Sin elementos.</div>
-      }
-    </div>
-    <div class="p-dialog-footer">
-      <button pButton severity="secondary" type="button" (click)="close()">
-        <span pButtonLabel>Cancelar</span>
-      </button>
-      <button pButton type="submit" [disabled]="tutorialForm.invalid">
-        <span pButtonLabel>Guardar</span>
-      </button>
-    </div>
-  </form>
+  </div>
+  <div class="p-dialog-footer">
+    <button pButton severity="secondary" type="button" (click)="close()">
+      <span pButtonLabel>Cancelar</span>
+    </button>
+    <button pButton type="submit" [disabled]="tutorialForm.invalid">
+      <span pButtonLabel>Guardar</span>
+    </button>
+  </div>
+</form>

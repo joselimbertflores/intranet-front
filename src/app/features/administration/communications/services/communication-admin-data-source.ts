@@ -5,9 +5,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { FormCalendarProps } from '../../calendar/interfaces';
-import { CommunicationManageResponse } from '../interfaces';
 import { FileUploadService, UploadResult } from '../../../../shared';
+import { CommunicationAdminResponse } from '../interfaces';
 
 interface GetCommunicationsParams {
   term?: string;
@@ -15,31 +14,22 @@ interface GetCommunicationsParams {
   offset: number;
 }
 
-export interface CreateCommunicationProps {
-  reference: string;
-  code: string;
-  typeId: number;
-  calendarEvent?: FormCalendarProps;
-}
-
 @Injectable({
   providedIn: 'root',
 })
-export class CommunicationManageDataSource {
+export class CommunicationAdminDataSource {
   private fileUploadService = inject(FileUploadService);
   private http = inject(HttpClient);
   private readonly URL = `${environment.baseUrl}/communications`;
 
   types = toSignal(this.getTypes(), { initialValue: [] });
 
-  constructor() {}
-
   findAll({ term, ...props }: GetCommunicationsParams) {
     const params = new HttpParams({
       fromObject: { ...props, ...(term && { term }) },
     });
     return this.http.get<{
-      communications: CommunicationManageResponse[];
+      communications: CommunicationAdminResponse[];
       total: number;
     }>(this.URL, {
       params,

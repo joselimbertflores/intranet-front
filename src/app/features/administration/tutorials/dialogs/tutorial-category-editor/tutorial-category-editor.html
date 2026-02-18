@@ -1,0 +1,27 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div class="flex flex-col gap-1 pt-1">
+    <p-floatlabel variant="on">
+      <label>Nombre</label>
+      <input
+        pInputText
+        class="w-full"
+        formControlName="name"
+        [invalid]="formUtils.isInvalid(form.get('name'))"
+      />
+    </p-floatlabel>
+    @if (formUtils.isInvalid(form.get("name"))) {
+      <p-message severity="error" size="small" variant="simple">
+        {{ formUtils.getErrorMessage(form.get("name")) }}
+      </p-message>
+    }
+  </div>
+  <div class="p-dialog-footer">
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      (onClick)="close()"
+    />
+    <p-button type="submit" label="Guardar" />
+  </div>
+</form>

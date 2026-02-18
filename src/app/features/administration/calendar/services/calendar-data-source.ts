@@ -1,8 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-
-import { tap } from 'rxjs';
-
 import { environment } from '../../../../../environments/environment';
 import { CalendarEventResponse, FormCalendarProps } from '../interfaces';
 
@@ -35,11 +32,23 @@ export class CalendarDataSource {
     const params = new HttpParams({
       fromObject: { limit, offset, ...(term && { term }) },
     });
-    return this.http
-      .get<{
-        events: CalendarEventResponse[];
-        total: number;
-      }>(this.URL, { params })
-      .pipe(tap((resp) => console.log(resp)));
+    return this.http.get<{
+      events: CalendarEventResponse[];
+      total: number;
+    }>(this.URL, { params });
+  }
+
+  getOne(id: string) {
+    return this.http.get<CalendarEventResponse>(`${this.URL}/${id}`);
+  }
+
+  toggleCommunication(id: string, isActive: boolean) {
+    return this.http.patch(`${this.URL}/communications/${id}/deactivate`, {
+      isActive,
+    });
+  }
+
+  remove(id: string) {
+    return this.http.delete(`${this.URL}/${id}`);
   }
 }

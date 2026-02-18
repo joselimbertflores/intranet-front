@@ -1,2 +1,1 @@
-export * from './directory-contact-editor/directory-contact-editor';
-export * from './directory-section-editor/directory-section-editor';
+export * from "./directory-editor/directory-editor"

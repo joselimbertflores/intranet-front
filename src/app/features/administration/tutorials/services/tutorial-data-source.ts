@@ -1,27 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { catchError, EMPTY, forkJoin, map, of, switchMap } from 'rxjs';
-
+import { TutorialCategoryResponse, TutorialResponse } from '../../interfaces';
 import { environment } from '../../../../../environments/environment';
-import { TutorialResponse } from '../../interfaces';
 
-interface TutorialProps {
-  title: string;
-  description: string;
-  videos: VideoItem[];
-  image?: ImageItem;
-}
-
-interface VideoItem {
-  title: string;
-  fileUrl: string;
-  file?: File;
-}
-
-interface ImageItem {
-  file?: File;
-  fileUrl?: string;
+interface PaginatioParams {
+  term: string;
+  limit: number;
+  offset: number;
 }
 
 @Injectable({
@@ -29,74 +15,31 @@ interface ImageItem {
 })
 export class TutorialDataSource {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/assistance`;
+  private readonly URL = `${environment.baseUrl}/tutorials`;
 
-  findAll() {
+  findAll({ limit, offset, term }: PaginatioParams) {
+    const params = new HttpParams({
+      fromObject: { limit, offset, ...(term && { term }) },
+    });
     return this.http.get<{ tutorials: TutorialResponse[]; total: number }>(
-      `${this.URL}`
+      `${this.URL}`,
+      { params },
     );
   }
 
-  create(tutorial: TutorialProps) {
-    console.log(tutorial);
-    const { videos, image, ...props } = tutorial;
-
-    return this.buildUploadTask(videos, image).pipe(
-      switchMap(([image, ...videos]) => {
-        console.log({ ...props, image, videos });
-        return this.http.post(`${this.URL}`, {
-          ...props,
-          image,
-          videos,
-        });
-      })
-    );
+  create(dto: object) {
+    return this.http.post(`${this.URL}`, dto);
   }
 
-  update(id: string, tutorial: TutorialProps) {
-    const { videos, image, ...props } = tutorial;
-    return this.buildUploadTask(videos, image).pipe(
-      switchMap(([image, ...videos]) => {
-        return this.http.patch(`${this.URL}/${id}`, {
-          ...props,
-          image,
-          videos,
-        });
-      })
-    );
+  update(id: string, dto: object) {
+    return this.http.patch(`${this.URL}/${id}`, dto);
   }
 
-  private buildUploadTask(items: VideoItem[], image?: ImageItem) {
-    return forkJoin([
-      image?.file
-        ? this.uploadFile(image.file, 'image')
-        : of(image?.fileUrl?.split('/').pop()),
-
-      ...items.map(({ file, title, fileUrl }) => {
-        if (!file) {
-          return of({
-            title,
-            fileName: fileUrl.split('/').pop(),
-          });
-        }
-        return this.uploadFile(file, 'video').pipe(
-          map((fileName) => ({ title, fileName }))
-        );
-      }),
-    ]);
+  getCategories() {
+    return this.http.get<TutorialCategoryResponse[]>(`${this.URL}/categories`);
   }
 
-  private uploadFile(file: File, type: 'image' | 'video') {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http
-      .post<{ fileName: string }>(
-        `${environment.baseUrl}/files/tutorial-${type}`,
-        formData
-      )
-      .pipe(
-        map(({ fileName }) => fileName),
-        catchError(() => EMPTY)
-      );
+  getOne(id: string) {
+    return this.http.get<TutorialResponse>(`${this.URL}/${id}`);
   }
 }

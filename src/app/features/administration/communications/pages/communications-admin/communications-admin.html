@@ -18,7 +18,7 @@
   [rowsPerPageOptions]="[10, 25, 50]"
   currentPageReportTemplate="{first} - {last} de {totalRecords}"
   [showCurrentPageReport]="true"
-  class="text-sm"
+  class="text-xs"
   size="small"
   (onPage)="chagePage($event)"
 >
@@ -34,18 +34,30 @@
       <th>Tipo</th>
       <th>Cite</th>
       <th>Referencia</th>
+      <th>Archivo</th>
       <th>Fecha</th>
+      <th>Evento</th>
       <th>Estado</th>
-      <th></th>
+      <th style="width: 3rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-item>
     <tr>
       <td>{{ item.type.name }}</td>
       <td>{{ item.code }}</td>
-      <td>{{ item.reference ?? "----" }}</td>
-      <td></td>
+      <td>{{ item.reference }}</td>
+      <td>
+        <a
+          [href]="item.file.url"
+          target="_blank"
+          title="Abrir PDF"
+          class="underline text-primary"
+        >
+          {{ item.file.originalName }}
+        </a>
+      </td>
       <td>{{ item.createdAt | date: "short" }}</td>
+      <td>{{ item.eventId ? "SI" : "NO" }}</td>
       <td>
         @if (item.isActive) {
           <p-tag severity="success" value="Activo" />
@@ -55,20 +67,26 @@
       </td>
       <td>
         <div class="flex gap-x-2">
-          <p-button
-            icon="pi pi-pencil"
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text"
             size="small"
-            (click)="openCommunicationDialog(item)"
-            severity="secondary"
-            rounded
-          />
+            [rounded]="true"
+            (click)="openMenu(item, $event); menu.toggle($event)"
+          ></button>
         </div>
       </td>
     </tr>
   </ng-template>
   <ng-template #emptymessage>
     <tr>
-      <td colspan="6">Sin resultados.</td>
+      <td colspan="8">
+        <div class="py-2">Sin resultados.</div>
+      </td>
     </tr>
   </ng-template>
 </p-table>
+
+<p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
+<p-confirmdialog />

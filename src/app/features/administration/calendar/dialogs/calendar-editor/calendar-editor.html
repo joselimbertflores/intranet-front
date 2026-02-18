@@ -1,7 +1,185 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  <calendar-event-form [eventForm]="form" [(isRecurring)]="isRecurring" />
+<form #eventForm="ngForm" [formGroup]="form" (ngSubmit)="save()">
+  <div [formGroup]="form">
+    <div class="space-y-6 pt-2">
+      <div class="flex flex-col gap-1">
+        <p-floatlabel variant="on">
+          <input
+            pInputText
+            id="titleTxt"
+            class="w-full"
+            formControlName="title"
+            [invalid]="formUtils.isInvalid(form.get('title'))"
+          />
+          <label for="titleTxt">Titulo</label>
+        </p-floatlabel>
+        @if (formUtils.isInvalid(form.get("title"))) {
+          <p-message severity="error" size="small" variant="simple">
+            {{ formUtils.getErrorMessage(form.get("title")) }}
+          </p-message>
+        }
+      </div>
+
+      <p-floatlabel variant="on">
+        <label for="referencTxt">Descripción</label>
+        <textarea
+          id="referencTxt"
+          pTextarea
+          rows="2"
+          class="w-full"
+          formControlName="description"
+          [invalid]="formUtils.isInvalid(form.get('description'))"
+        ></textarea>
+      </p-floatlabel>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2">
+        <div class="flex flex-col gap-1">
+          <p-floatlabel variant="on" class="w-full">
+            <p-datepicker
+              [showTime]="!isAllDay"
+              hourFormat="24"
+              class="w-full"
+              appendTo="body"
+              inputId="startDatePicker"
+              formControlName="startDate"
+              [invalid]="formUtils.isInvalid(form.get('startDate'))"
+            >
+            </p-datepicker>
+            <label for="startDatePicker">Inicio</label>
+          </p-floatlabel>
+          @if (formUtils.isInvalid(form.get("startDate"))) {
+            <p-message severity="error" size="small" variant="simple">
+              {{ formUtils.getErrorMessage(form.get("startDate")) }}
+            </p-message>
+          }
+        </div>
+        @if (!isAllDay) {
+          <p-floatlabel variant="on" class="w-full">
+            <p-datepicker
+              formControlName="endDate"
+              [showTime]="true"
+              hourFormat="24"
+              class="w-full"
+              appendTo="body"
+              inputId="endDatePicker"
+            >
+            </p-datepicker>
+            <label for="endDatePicker">Fin</label>
+          </p-floatlabel>
+        }
+      </div>
+      <div class="flex gap-6 px-2">
+        <div class="flex items-center">
+          <p-checkbox
+            inputId="isActiveCheck"
+            name="pizza"
+            [binary]="true"
+            formControlName="isActive"
+          />
+          <label for="isActiveCheck" class="ml-2"> Activo </label>
+        </div>
+        <div class="flex items-center">
+          <p-checkbox
+            inputId="allDayCheck"
+            formControlName="allDay"
+            [binary]="true"
+            (onChange)="onAllDayToggle()"
+          >
+          </p-checkbox>
+          <label for="allDayCheck" class="ml-1 font-medium">Todo el día</label>
+        </div>
+
+        <div class="flex items-center">
+          <p-checkbox
+            inputId="recurrenceCheck"
+            [(ngModel)]="isRecurring"
+            [ngModelOptions]="{ standalone: true }"
+            [binary]="true"
+          >
+          </p-checkbox>
+
+          <label for="recurrenceCheck" class="ml-1 font-medium">
+            Repetir
+          </label>
+        </div>
+      </div>
+
+      @if (isRecurring()) {
+        <div formGroupName="recurrence">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @let frecuencyInvalid =
+              form.get("recurrence")?.hasError("requiredFrequency") &&
+              eventForm.submitted;
+            <div class="flex flex-col gap-1">
+              <p-floatlabel variant="on">
+                <p-select
+                  inputId="frequencySelect"
+                  [options]="frequencies"
+                  formControlName="frequency"
+                  [invalid]="frecuencyInvalid"
+                  appendTo="body"
+                  class="w-full"
+                >
+                </p-select>
+                <label for="frequencySelect">Frecuencia</label>
+              </p-floatlabel>
+              @if (frecuencyInvalid) {
+                <p-message severity="error" size="small" variant="simple">
+                  Este campo es requerido.
+                </p-message>
+              }
+            </div>
+            <p-floatlabel variant="on">
+              <p-inputNumber
+                [min]="1"
+                suffix=" vez / veces"
+                class="w-full"
+                inputId="intervalTxt"
+                formControlName="interval"
+              />
+              <label for="intervalTxt">Cada</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="on">
+              <p-datepicker
+                formControlName="until"
+                dateFormat="yy-mm-dd"
+                class="w-full"
+                appendTo="body"
+                [showClear]="true"
+              />
+              <label for="untilDatePicker">Hasta</label>
+            </p-floatlabel>
+
+            @if (form.get("recurrence.frequency")!.value === "WEEKLY") {
+              @let byWeekDaysInvalid =
+                form.get("recurrence")?.hasError("weeklyRequiresDays") &&
+                eventForm.submitted;
+              <div class="flex flex-col gap-1">
+                <p-floatlabel variant="on">
+                  <p-multiselect
+                    [options]="weekDays"
+                    formControlName="byWeekDays"
+                    class="w-full"
+                    appendTo="body"
+                    inputId="byWeekDaysSelect"
+                    [invalid]="byWeekDaysInvalid"
+                  />
+                  <label for="byWeekDaysSelect">Días de la semana</label>
+                </p-floatlabel>
+                @if (byWeekDaysInvalid) {
+                  <p-message severity="error" size="small" variant="simple">
+                    Este campo es requerido.
+                  </p-message>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
   <div class="p-dialog-footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" [disabled]="form.invalid" />
+    <p-button type="submit" label="Guardar" />
   </div>
 </form>

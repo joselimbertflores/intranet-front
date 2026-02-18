@@ -5,6 +5,7 @@ export interface FormCalendarProps {
   endDate: Date | null;
   allDay: boolean;
   recurrence?: RecurrenceConfig;
+  communicationId?: string;
 }
 
 export interface RecurrenceConfig {

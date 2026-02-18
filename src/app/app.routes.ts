@@ -96,9 +96,19 @@ export const routes: Routes = [
           import('./features/administration/calendar/pages/calendar-admin/calendar-admin'),
       },
       {
-        path: 'tutorials-manage',
+        path: 'tutorials',
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorial-admin/tutorial-admin'),
+      },
+      {
+        path: 'tutorials/:id',
+        loadComponent: () =>
+          import('./features/administration/tutorials/pages/tutorial-detail-admin/tutorial-detail-admin'),
+      },
+      {
+        path: 'tutorial-categories',
+        loadComponent: () =>
+          import('./features/administration/tutorials/pages/tutorial-category-admin/tutorial-category-admin'),
       },
       {
         path: 'users',

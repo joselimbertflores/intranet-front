@@ -1,51 +1,55 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MenuItem } from 'primeng/api';
+import { CommonModule } from '@angular/common';
 
-import { MenuModule } from 'primeng/menu';
+import { PanelMenuModule } from 'primeng/panelmenu';
+import { MenuItem } from 'primeng/api';
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterModule, MenuModule],
+  imports: [RouterModule, PanelMenuModule, CommonModule],
   template: `
-    <div class="h-full flex flex-col overflow-y-auto">
-      <p-menu [model]="menu" styleClass="h-full sm:p-2">
-        <ng-template #start>
-          <div class="flex items-center p-2 mb-2">
-            <img src="images/icons/app.png" class="h-8" alt="Icon app" />
-            <span class="text-lg ml-3 font-semibold">Intranet</span>
-          </div>
-        </ng-template>
-        <ng-template #submenuheader let-item>
-          <span class="text-primary font-bold">{{ item.label }}</span>
-        </ng-template>
+    <div class="h-full flex flex-col overflow-y-auto sm:p-2">
+      <p-panelMenu [model]="menu" class="w-full" [multiple]="true">
         <ng-template #item let-item>
           <a
             pRipple
             [routerLink]="item.routerLink"
-            routerLinkActive="bg-primary-100 rounded-xl"
-            class="flex items-center p-menu-item-link"
+            [routerLinkActiveOptions]="{ exact: !item.items }"
+            routerLinkActive="bg-primary-100 !text-primary-700 rounded-lg"
+            class="flex items-center gap-x-4 px-4 py-2 text-surface-700 hover:bg-surface-100 hover:rounded-lg transition-colors mb-1"
           >
-            <span [class]="item.icon"></span>
-            <span class="ml-2">{{ item.label }}</span>
+            @if (item.icon) {
+              <i [class]="item.icon"></i>
+            }
+
+            <span [ngClass]="{ 'font-medium': item.items }">
+              {{ item.label }}
+            </span>
+
+            @if (item.items) {
+              <i
+                class="pi pi-chevron-down ml-auto transition-transform duration-200"
+                [ngClass]="{ 'rotate-180': item.expanded }"
+                style="font-size: 12px;"
+              ></i>
+            }
           </a>
         </ng-template>
-      </p-menu>
+      </p-panelMenu>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: `
-    :host ::ng-deep .p-menu {
-      border: none !important;
-    }
-  `,
 })
 export class Sidebar {
   private authDataSource = inject(AuthDataSource);
   menu: MenuItem[] = [
     {
       label: 'Configuraciones',
+      icon: 'pi pi-cog',
+      separator: true,
+      expanded: true,
       items: [
         {
           label: 'Contenido',
@@ -56,15 +60,17 @@ export class Sidebar {
     },
     {
       label: 'Repositorio',
+      icon: 'pi pi-folder',
+      expanded: true,
       items: [
         {
           label: 'Secciones',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-table',
           routerLink: 'document-sections',
         },
         {
           label: 'Tipos de documentos',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-list',
           routerLink: 'document-types',
         },
 
@@ -77,40 +83,55 @@ export class Sidebar {
     },
     {
       label: 'Institucional',
+      icon: 'pi pi-building',
+      expanded: true,
       items: [
         {
           label: 'Comunicados',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-clipboard',
           routerLink: 'communications-manage',
         },
         {
           label: 'Calendario',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-calendar',
           routerLink: 'calendar-manage',
         },
         {
-          label: 'Tutoriales',
-          icon: 'pi pi-video',
-          routerLink: 'tutorials-manage',
+          label: 'Directorio telefonico',
+          icon: 'pi pi-phone',
+          routerLink: 'directory',
         },
         {
-          label: 'Directorio telefonico',
-          icon: 'pi pi-video',
-          routerLink: 'directory',
+          label: 'Tutoriales',
+          icon: 'pi pi-book',
+          items: [
+            {
+              label: 'Categorias',
+              icon: 'pi pi-align-center',
+              routerLink: 'tutorial-categories',
+            },
+            {
+              label: 'Contenido',
+              icon: 'pi pi-align-left',
+              routerLink: 'tutorials',
+            },
+          ],
         },
       ],
     },
     {
       label: 'Accesso',
+      icon: 'pi pi-lock',
+      expanded: true,
       items: [
         {
           label: 'Usuarios',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-users',
           routerLink: 'users',
         },
         {
           label: 'Roles',
-          icon: 'pi pi-objects-column',
+          icon: 'pi pi-shield',
           routerLink: 'roles',
         },
       ],

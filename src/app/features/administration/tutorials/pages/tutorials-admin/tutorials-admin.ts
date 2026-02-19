@@ -6,24 +6,31 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterModule } from '@angular/router';
 
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 
-import { TutorialDataSource } from '../../services';
-import { TutorialEditor } from '../../dialogs';
 import { SearchInputComponent } from '../../../../../shared';
-import { RouterLink } from "@angular/router";
+import { TutorialDataSource } from '../../services';
 import { TutorialResponse } from '../../interfaces';
+import { TutorialEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-tutorial-admin',
-  imports: [TableModule, ButtonModule, SearchInputComponent, RouterLink],
-  templateUrl: './tutorial-admin.html',
+  selector: 'app-tutorials-admin',
+  imports: [
+    RouterModule,
+    TableModule,
+    ButtonModule,
+    TagModule,
+    SearchInputComponent,
+  ],
+  templateUrl: './tutorials-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class TutorialAdmin {
+export default class TutorialsAdmin {
   private dialogService = inject(DialogService);
   private tutorialData = inject(TutorialDataSource);
 

@@ -3,13 +3,13 @@ import {
   Component,
   inject,
   OnInit,
-  signal,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormGroup,
   ReactiveFormsModule,
+  FormBuilder,
+  ValidatorFn,
   Validators,
+  FormGroup,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -18,6 +18,7 @@ import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { MessageModule } from 'primeng/message';
 import { EditorModule } from 'primeng/editor';
 import { ButtonModule } from 'primeng/button';
 
@@ -26,11 +27,19 @@ import { FileIcon, FileSizePipe } from '../../../../../shared';
 import { FormUtils } from '../../../../../helpers';
 import { TutorialDataSource } from '../../services';
 
-interface DialogData {
+export interface TutorialBLockDialogData {
+  type: TutorialBlockType;
   tutorialId: string;
-  blockType: TutorialBlockType;
   block?: TutorialBlockResponse;
 }
+
+const BLOCK_EXTENSIONS: Record<TutorialBlockType, string[]> = {
+  IMAGE: ['jpg', 'jpeg', 'png', 'webp'],
+  VIDEO_FILE: ['mp4'],
+  FILE: ['pdf', 'pptx'],
+  TEXT: [],
+  VIDEO_URL: [],
+};
 @Component({
   selector: 'app-tutorial-block-editor',
   imports: [
@@ -40,6 +49,7 @@ interface DialogData {
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
+    MessageModule,
     ButtonModule,
     EditorModule,
     FileIcon,
@@ -54,8 +64,8 @@ export class TutorialBlockEditor implements OnInit {
   private formBuilder = inject(FormBuilder);
   private tutorialDataSource = inject(TutorialDataSource);
 
-  readonly data: DialogData = inject(DynamicDialogConfig).data;
-  formUtils = FormUtils;
+  readonly data: TutorialBLockDialogData = inject(DynamicDialogConfig).data;
+  readonly formUtils = FormUtils;
 
   blockForm: FormGroup = this.formBuilder.group({
     content: [null],
@@ -63,14 +73,13 @@ export class TutorialBlockEditor implements OnInit {
 
   file: File | null = null;
 
-  previewUrl = signal<string | null>(null);
-
   ngOnInit(): void {
+    this.setValidatorsForType(this.data.type);
     this.loadForm();
   }
 
   save() {
-    if (this.blockForm.invalid) return this.blockForm.markAllAsTouched();
+    if (!this.isFormValid) return this.blockForm.markAllAsTouched();
     const saveObservable = this.data.block
       ? this.tutorialDataSource.updateBlock(
           this.data.block.id,
@@ -81,7 +90,7 @@ export class TutorialBlockEditor implements OnInit {
           this.data.tutorialId,
           {
             ...this.blockForm.value,
-            type: this.data.blockType,
+            type: this.data.type,
           },
           this.file,
         );
@@ -100,27 +109,49 @@ export class TutorialBlockEditor implements OnInit {
     this.file = file;
   }
 
-  private loadForm() {
-    if (this.data.blockType === 'VIDEO_URL' || this.data.blockType === 'TEXT') {
-      this.blockForm.get('content')?.addValidators(Validators.required);
-      this.blockForm.updateValueAndValidity();
-    }
+  getFileAccept(): string | undefined {
+    const exts = BLOCK_EXTENSIONS[this.data.type];
+    if (!exts || exts.length === 0) return undefined;
+    return exts.map((e) => `.${e}`).join(',');
+  }
 
+  getAllowedExtensionsLabel(): string {
+    return BLOCK_EXTENSIONS[this.data.type]
+      ?.map((e) => e.toUpperCase())
+      .join(', ');
+  }
+
+  get isFormValid() {
+    return this.data.type === 'TEXT' || this.data.type === 'VIDEO_URL'
+      ? this.blockForm.valid
+      : this.blockForm.valid && (!!this.file || this.data.block);
+  }
+
+  private loadForm() {
     if (this.data.block) {
       this.blockForm.patchValue({ content: this.data.block.content ?? '' });
-      this.previewUrl.set(this.data.block.file?.url ?? null);
     }
   }
 
-  onFileChange(event: Event) {
-    const [file] = (event.target as HTMLInputElement).files ?? [];
-    if (!file) return;
-    this.file = file;
-    if (this.previewUrl() !== null) {
-      URL.revokeObjectURL(this.previewUrl()!);
+  private setValidatorsForType(type: TutorialBlockType): void {
+    let validors: ValidatorFn[] = [];
+    switch (type) {
+      case 'VIDEO_URL':
+        validors = [
+          Validators.required,
+          Validators.pattern(
+            /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
+          ),
+        ];
+        break;
+      case 'TEXT':
+        validors = [Validators.required];
+        break;
+      default:
+        break;
     }
 
-    // preview local
-    this.previewUrl.set(URL.createObjectURL(file));
+    this.blockForm.get('content')?.setValidators(validors);
+    this.blockForm.updateValueAndValidity();
   }
 }

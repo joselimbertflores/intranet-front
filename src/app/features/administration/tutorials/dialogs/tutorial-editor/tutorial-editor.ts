@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   FormArray,
   FormGroup,
@@ -19,11 +13,13 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
 import { TutorialDataSource } from '../../services';
 import { TutorialResponse } from '../../interfaces';
+import { FormUtils } from '../../../../../helpers';
 
 @Component({
   selector: 'tutorial-editor',
@@ -32,9 +28,10 @@ import { TutorialResponse } from '../../interfaces';
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
+    CheckboxModule,
+    MessageModule,
     ButtonModule,
     SelectModule,
-    CheckboxModule,
   ],
   templateUrl: './tutorial-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,7 +39,6 @@ import { TutorialResponse } from '../../interfaces';
 export class TutorialEditor {
   private dialogRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
-  private destroyRef = inject(DestroyRef);
   private tutorialData = inject(TutorialDataSource);
 
   readonly data?: TutorialResponse = inject(DynamicDialogConfig).data;
@@ -57,13 +53,14 @@ export class TutorialEditor {
       ],
     ],
     summary: [''],
-    categoryId: ['', Validators.required],
+    categoryId: [''],
     isPublished: [true],
   });
 
   categories = toSignal(this.tutorialData.getCategories(), {
     initialValue: [],
   });
+  formUtils = FormUtils;
 
   constructor() {}
 
@@ -72,6 +69,8 @@ export class TutorialEditor {
   }
 
   save() {
+    if (this.tutorialForm.invalid) return;
+
     const subscription = this.data
       ? this.tutorialData.update(this.data.id, this.tutorialForm.value)
       : this.tutorialData.create(this.tutorialForm.value);
@@ -91,6 +90,7 @@ export class TutorialEditor {
 
   private loadForm(): void {
     if (!this.data) return;
-    this.tutorialForm.patchValue(this.data);
+    const { category, ...rest } = this.data;
+    this.tutorialForm.patchValue({ ...rest, categoryId: category.id });
   }
 }

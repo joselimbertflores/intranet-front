@@ -71,19 +71,19 @@ export const routes: Routes = [
         title: 'Tipos de documentos',
         path: 'document-types',
         loadComponent: () =>
-          import('./features/administration/institutional-documents/pages/document-types-admin/document-types-admin'),
+          import('./features/administration/document-records/pages/document-types-admin/document-types-admin'),
       },
       {
         title: 'Secciones de documentos',
         path: 'document-sections',
         loadComponent: () =>
-          import('./features/administration/institutional-documents/pages/sections-admin/sections-admin'),
+          import('./features/administration/document-records/pages/sections-admin/sections-admin'),
       },
       {
         title: 'Documentos',
         path: 'documents',
         loadComponent: () =>
-          import('./features/administration/institutional-documents/pages/document-admin/document-admin'),
+          import('./features/administration/document-records/pages/document-admin/document-admin'),
       },
       {
         path: 'communications-manage',
@@ -98,7 +98,7 @@ export const routes: Routes = [
       {
         path: 'tutorials',
         loadComponent: () =>
-          import('./features/administration/tutorials/pages/tutorial-admin/tutorial-admin'),
+          import('./features/administration/tutorials/pages/tutorials-admin/tutorials-admin'),
       },
       {
         path: 'tutorials/:id',
@@ -108,7 +108,7 @@ export const routes: Routes = [
       {
         path: 'tutorial-categories',
         loadComponent: () =>
-          import('./features/administration/tutorials/pages/tutorial-category-admin/tutorial-category-admin'),
+          import('./features/administration/tutorials/pages/tutorial-categories-admin/tutorial-categories-admin'),
       },
       {
         path: 'users',

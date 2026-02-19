@@ -15,7 +15,8 @@ const iconMap: Record<string, string> = {
   jpg: 'pi pi-image text-orange-400',
   jpeg: 'pi pi-image text-orange-400',
   zip: 'pi pi-box text-yellow-600',
-  rar: 'pi pi-box text-yellow-600', 
+  rar: 'pi pi-box text-yellow-600',
+  mp4: 'pi pi-video text-purple-600',
 };
 
 @Component({

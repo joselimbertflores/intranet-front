@@ -1,7 +1,61 @@
-<form [formGroup]="blockForm" (ngSubmit)="save()">
+<form [formGroup]="blockForm" (ngSubmit)="save()" #formReference="ngForm">
   <div class="mt-1">
-    @switch (data.blockType) {
-      @case ("TEXT") {
+    @if (data.type !== "TEXT" && data.type !== "VIDEO_URL") {
+      <div class="flex flex-col gap-1">
+        <p-fileUpload
+          [auto]="false"
+          [multiple]="false"
+          [accept]="getFileAccept()"
+          [showCancelButton]="false"
+          [showUploadButton]="false"
+          chooseLabel="Seleccionar"
+          (onSelect)="selectFile($event)"
+        >
+          <ng-template #content let-files>
+            @if (files?.length > 0) {
+              @let file = files[0];
+              <div class="flex items-center gap-x-4 p-2">
+                <file-icon [fileName]="file.name" />
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-medium truncate">
+                    {{ file.name }}
+                  </span>
+                  <span class="text-xs text-surface-500">
+                    {{ file.size | fileSize }}
+                  </span>
+                </div>
+              </div>
+            } @else if (data.block?.file) {
+              <div class="flex items-center gap-x-4 p-2">
+                <file-icon [fileName]="data.block?.file!.originalName" />
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-medium truncate">
+                    {{ data.block?.file!.originalName }}
+                  </span>
+                  <span class="text-xs text-surface-500">
+                    {{ data.block?.file!.size | fileSize }}
+                  </span>
+                </div>
+              </div>
+            } @else {
+              <div class="p-2 text-center">
+                <span class="text-sm text-surface-500">
+                  Extensiones permitidas: {{ getAllowedExtensionsLabel() }}
+                </span>
+              </div>
+            }
+          </ng-template>
+        </p-fileUpload>
+        @if (formReference.submitted && !file) {
+          <p-message severity="error" size="small" variant="simple">
+            El video es requerido.
+          </p-message>
+        }
+      </div>
+    }
+
+    @if (data.type === "TEXT") {
+      <div class="flex flex-col gap-1 mt-6">
         <p-editor
           formControlName="content"
           [style]="{ height: '300px' }"
@@ -9,154 +63,61 @@
         >
           <ng-template #header>
             <span class="ql-formats">
-              <button class="ql-bold" aria-label="Negrita"></button>
-              <button class="ql-italic" aria-label="Cursiva"></button>
-              <button class="ql-underline" aria-label="Subrayado"></button>
+              <button class="ql-bold"></button>
+              <button class="ql-italic"></button>
+              <button class="ql-underline"></button>
+              <button class="ql-code"></button>
             </span>
+
             <span class="ql-formats">
-              <button
-                class="ql-list"
-                value="ordered"
-                aria-label="Lista ordenada"
-              ></button>
-              <button
-                class="ql-list"
-                value="bullet"
-                aria-label="Lista con viñetas"
-              ></button>
+              <button class="ql-list" value="ordered"></button>
+              <button class="ql-list" value="bullet"></button>
+              <button class="ql-blockquote"></button>
             </span>
+
             <span class="ql-formats">
-              <button class="ql-link" aria-label="Enlace"></button>
-              <button class="ql-clean" aria-label="Limpiar formato"></button>
+              <button class="ql-link"></button>
+              <button class="ql-clean"></button>
             </span>
           </ng-template>
         </p-editor>
-      }
-      @case ("IMAGE") {
-        <p-fileUpload
-          [auto]="false"
-          [multiple]="false"
-          accept="image/*"
-          [showCancelButton]="false"
-          [showUploadButton]="false"
-          chooseLabel="Seleccionar"
-          (onSelect)="selectFile($event)"
-        >
-          <ng-template #content let-files>
-            <div class="flex justify-center">
-              @if (files?.length > 0) {
-                <img [src]="files[0].objectURL" class="max-h-[300px]" />
-              } @else if (previewUrl()) {
-                <img [src]="previewUrl()" class="max-h-[300px]" />
-              } @else {
-                <span class="text-sm text-surface-500">
-                  Seleccione una imagen
-                </span>
-              }
-            </div>
-          </ng-template>
-        </p-fileUpload>
-        <p-floatlabel class="mt-8">
-          <input
-            id="content_txt" 
-            pInputText
-            formControlName="content"
-            autocomplete="off"
-            class="w-full"
-          />
-          <label for="content_txt">Descripcion (Opcional)</label>
-        </p-floatlabel>
-      }
-      @case ("VIDEO_URL") {
+        @if (formUtils.isInvalid(blockForm.get("content"))) {
+          <p-message severity="error" size="small" variant="simple">
+            {{ formUtils.getErrorMessage(blockForm.get("content")) }}
+          </p-message>
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col gap-1 mt-6">
         <p-floatlabel variant="on">
           <input
             pInputText
-            id="content_txt"
             type="url"
             class="w-full"
             autocomplete="off"
             formControlName="content"
+            []
+            [placeholder]="
+              data.type === 'VIDEO_URL'
+                ? 'https://www.youtube.com/watch?v=...'
+                : 'Descripción del bloque'
+            "
+            [invalid]="formUtils.isInvalid(blockForm.get('content'))"
           />
-          <label for="content_txt">URL del video</label>
+          <label>
+            @if (data.type === "VIDEO_URL") {
+              URL del video
+            } @else {
+              Descripción (Opcional)
+            }
+          </label>
         </p-floatlabel>
-      }
-      @case ("VIDEO_FILE") {
-        <p-fileUpload
-          mode="basic"
-          chooseLabel="Seleccionar archivo"
-          [auto]="false"
-          [customUpload]="true"
-        >
-        </p-fileUpload>
-        <p-floatlabel variant="on">
-          <input
-            pInputText
-            id="content_txt"
-            type="url"
-            class="w-full"
-            autocomplete="off"
-            formControlName="content"
-          />
-          <label for="content_txt">Descripcion (Opcional)</label>
-        </p-floatlabel>
-      }
-
-      @case ("FILE") {
-        <p-fileupload
-          #fileUpload
-          [multiple]="false"
-          mode="advanced"
-          chooseLabel="Seleccionar"
-          [customUpload]="true"
-          [showCancelButton]="false"
-          [showUploadButton]="false"
-        >
-          <ng-template #content let-files>
-            <div class="flex flex-col gap-8 pt-4">
-              @if (files && files.length > 0) {
-                <div class="flex items-center justify-between p-3">
-                  <div class="flex items-center gap-3 overflow-hidden">
-                    <file-icon [fileName]="files[0].name" class="shrink-0" />
-
-                    <div class="flex flex-col min-w-0">
-                      <span
-                        class="font-medium truncate text-sm"
-                        [title]="files[0].name"
-                      >
-                        {{ files[0].name }}
-                      </span>
-                      <span class="text-xs text-gray-500">
-                        {{ files[0].size | fileSize }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
-          </ng-template>
-
-          <ng-template #empty>
-            <div class="text-center text-sm">Seleccione un archivo.</div>
-          </ng-template>
-        </p-fileupload>
-
-        <p-floatlabel class="mt-8">
-          <input
-            id="content_txt"
-            pInputText
-            formControlName="content"
-            autocomplete="off"
-            class="w-full"
-          />
-          <label for="content_txt">Descripcion (Opcional)</label>
-        </p-floatlabel>
-      }
-
-      @default {
-        <div class="p-4 font-medium">
-          Formato {{ data.blockType }} desconocido.
-        </div>
-      }
+        @if (formUtils.isInvalid(blockForm.get("content"))) {
+          <p-message severity="error" size="small" variant="simple">
+            {{ formUtils.getErrorMessage(blockForm.get("content")) }}
+          </p-message>
+        }
+      </div>
     }
   </div>
   <div class="p-dialog-footer">
@@ -166,6 +127,6 @@
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button type="submit" label="Guardar" [disabled]="blockForm.invalid" />
+    <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />
   </div>
 </form>

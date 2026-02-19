@@ -7,22 +7,32 @@ import {
 
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogService } from 'primeng/dynamicdialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
 import { TutorialCategoryDataSource } from '../../services';
-import { TutorialCategoryEditor } from '../../dialogs';
 import { TutorialCategoryResponse } from '../../interfaces';
+import { TutorialCategoryEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-tutorial-category-admin',
-  imports: [TableModule, ButtonModule, ConfirmDialogModule],
-  templateUrl: './tutorial-category-admin.html',
+  selector: 'app-tutorial-categories-admin',
+  imports: [
+    TableModule,
+    ButtonModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+  ],
+  templateUrl: './tutorial-categories-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService],
 })
-export default class TutorialCategoryAdmin {
+export default class TutorialCategoriesAdmin {
   private dialogService = inject(DialogService);
   private tutorialCategoryDataSource = inject(TutorialCategoryDataSource);
   private confirmationService = inject(ConfirmationService);

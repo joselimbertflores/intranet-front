@@ -25,7 +25,7 @@ import { SelectModule } from 'primeng/select';
 import { PanelModule } from 'primeng/panel';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { PortalService } from '../../../services';
-import { DocumentDataSource } from '../../../../administration/institutional-documents/services/document-data-source';
+import { DocumentDataSource } from '../../../../administration/document-records/services/document-data-source';
 
 @Component({
   selector: 'filter-documents',

@@ -1,35 +1,34 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
-  input,
   output,
+  input,
 } from '@angular/core';
-
+import { CdkDragHandle, CdkDrag } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 import { TutorialBlockResponse } from '../../interfaces';
-import { DialogService } from 'primeng/dynamicdialog';
-import { TutorialBlockEditor } from '../../dialogs';
 
 @Component({
-  selector: 'app-tutorial-block-preview',
-  imports: [ButtonModule],
+  selector: 'tutorial-block-preview',
+  imports: [ButtonModule, CdkDrag, CdkDragHandle],
   template: `
     <div
       cdkDrag
-      class="group relative bg-surface-0 rounded-xl border border-surface-200 p-5 shadow-sm hover:border-primary-200"
+      class="group relative bg-surface-0 rounded-xl border border-surface-200 p-5 shadow-sm hover:border-primary-300 transition-colors"
     >
-      <div class="flex items-center justify-between mb-3 select-none">
+      <div class="flex items-center justify-between mb-4 select-none">
         <div class="flex items-center gap-3">
           <div
             cdkDragHandle
-            class="cursor-grab active:cursor-grabbing p-1 text-surface-400 hover:text-surface-600 transition-colors"
+            class="cursor-grab active:cursor-grabbing p-1 text-surface-400 hover:text-surface-700 transition-colors"
+            title="Arrastrar para reordenar"
           >
             <i class="pi pi-bars text-lg"></i>
           </div>
-
           <span
-            class="text-xs font-bold uppercase tracking-wider text-surface-500 bg-surface-100 px-2 py-1 rounded"
+            class="text-[10px] font-bold uppercase tracking-wider text-surface-600 bg-surface-100 px-2 py-1 rounded border border-surface-200"
           >
             {{ data().type }}
           </span>
@@ -44,9 +43,9 @@ import { TutorialBlockEditor } from '../../dialogs';
             [rounded]="true"
             [text]="true"
             size="small"
+            title="Editar bloque"
             (click)="edit.emit()"
           ></button>
-
           <button
             pButton
             icon="pi pi-trash"
@@ -54,33 +53,35 @@ import { TutorialBlockEditor } from '../../dialogs';
             [text]="true"
             size="small"
             severity="danger"
+            title="Eliminar bloque"
             (click)="delete.emit()"
           ></button>
         </div>
       </div>
 
-      <div class="pl-2">
+      <div class="pl-2 sm:pl-8">
         @switch (data().type) {
           @case ('TEXT') {
             <div
-              class="prose prose-sm max-w-none text-surface-700"
+              class="prose prose-sm max-w-none text-surface-700 wrap-break-word overflow-hidden"
               [innerHTML]="data().content"
             ></div>
           }
 
           @case ('IMAGE') {
-            <figure class="flex flex-col items-center gap-2">
+            <figure class="flex flex-col items-center gap-2 m-0">
               <div
-                class="rounded-lg border border-surface-100 overflow-hidden bg-surface-50"
+                class="rounded-lg border border-surface-100 overflow-hidden bg-surface-50 w-full flex justify-center"
               >
                 <img
                   [src]="data().file?.url"
+                  [alt]="data().content || 'Imagen del tutorial'"
                   loading="lazy"
                   class="max-h-[350px] w-auto object-contain"
                 />
               </div>
               @if (data().content) {
-                <figcaption class="text-xs text-surface-500 italic">
+                <figcaption class="text-sm text-surface-500 italic mt-1">
                   {{ data().content }}
                 </figcaption>
               }
@@ -88,16 +89,28 @@ import { TutorialBlockEditor } from '../../dialogs';
           }
 
           @case ('VIDEO_URL') {
-            <div
-              class="aspect-video w-full rounded-lg overflow-hidden border border-surface-100 bg-black"
-            >
-              <!-- <iframe
-            [src]="sanitizeVideoUrl(data().content)"
-            class="w-full h-full"
-            frameborder="0"
-            allowfullscreen
-          ></iframe> -->
-            </div>
+            @let youtubeUrl = getYoutubeEmbedUrl(data().content);
+            @if (youtubeUrl) {
+              <div
+                class="aspect-video w-full rounded-lg overflow-hidden border border-surface-200 bg-black shadow-inner"
+              >
+                <iframe
+                  [src]="youtubeUrl"
+                  class="w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+            } @else {
+              <div
+                class="p-4 text-sm text-surface-500 border border-dashed
+             border-surface-300 rounded-lg text-center"
+              >
+                URL de YouTube no válida
+              </div>
+            }
           }
 
           @case ('VIDEO_FILE') {
@@ -105,12 +118,15 @@ import { TutorialBlockEditor } from '../../dialogs';
               <video
                 controls
                 preload="metadata"
-                class="w-full max-h-[350px] rounded-lg border border-surface-100 bg-black"
+                class="w-full max-h-[400px] rounded-lg border border-surface-200 bg-black shadow-inner"
               >
                 <source [src]="data().file?.url" type="video/mp4" />
+                Tu navegador no soporta el elemento de video.
               </video>
               @if (data().content) {
-                <p class="text-xs text-surface-500">{{ data().content }}</p>
+                <p class="text-xs text-surface-500 m-0">
+                  {{ data().content }}
+                </p>
               }
             </div>
           }
@@ -119,14 +135,27 @@ import { TutorialBlockEditor } from '../../dialogs';
             <a
               [href]="data().file?.url"
               target="_blank"
-              class="flex items-center gap-3 p-3 border border-surface-200 rounded-lg hover:bg-surface-50 transition-colors"
+              class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 transition-all no-underline group/file"
             >
-              <div class="p-2 bg-primary-50 text-primary-600 rounded-full">
-                <i class="pi pi-file"></i>
+              <div
+                class="p-3 bg-primary-50 text-primary-600 rounded-full group-hover/file:bg-primary-100 transition-colors"
+              >
+                <i class="pi pi-file-pdf text-xl"></i>
               </div>
-              <span class="text-sm font-medium text-surface-700">
-                {{ data().content || data().file?.originalName }}
-              </span>
+              <div class="flex flex-col">
+                <span
+                  class="text-sm font-semibold text-surface-800 group-hover/file:text-primary-700 transition-colors"
+                >
+                  {{
+                    data().content ||
+                      data().file?.originalName ||
+                      'Documento adjunto'
+                  }}
+                </span>
+                <span class="text-xs text-surface-500 mt-0.5"
+                  >Click para descargar o ver</span
+                >
+              </div>
             </a>
           }
         }
@@ -140,4 +169,26 @@ export class TutorialBlockPreview {
 
   edit = output<void>();
   delete = output<void>();
+
+  constructor(private sanitizer: DomSanitizer) {}
+
+  getYoutubeEmbedUrl(url: string | null): SafeResourceUrl | null {
+    if (url === null) return null;
+    const id = this.extractYoutubeId(url);
+    if (!id) return null;
+
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${id}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  }
+
+  private extractYoutubeId(url: string): string | null {
+    if (!url) return null;
+
+    const match =
+      url.match(/youtube\.com\/watch\?v=([^&]+)/) ||
+      url.match(/youtu\.be\/([^?&]+)/) ||
+      url.match(/youtube\.com\/shorts\/([^?&]+)/);
+
+    return match ? match[1] : null;
+  }
 }

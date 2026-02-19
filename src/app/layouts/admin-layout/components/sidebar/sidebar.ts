@@ -16,7 +16,7 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
           <a
             pRipple
             [routerLink]="item.routerLink"
-            [routerLinkActiveOptions]="{ exact: !item.items }"
+            [routerLinkActiveOptions]="{ exact: false }"
             routerLinkActive="bg-primary-100 !text-primary-700 rounded-lg"
             class="flex items-center gap-x-4 px-4 py-2 text-surface-700 hover:bg-surface-100 hover:rounded-lg transition-colors mb-1"
           >
@@ -112,7 +112,7 @@ export class Sidebar {
             },
             {
               label: 'Contenido',
-              icon: 'pi pi-align-left',
+              icon: 'pi pi-desktop',
               routerLink: 'tutorials',
             },
           ],

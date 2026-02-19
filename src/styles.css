@@ -1,6 +1,8 @@
 @import "tailwindcss";
-@plugin "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
+
+@plugin "tailwindcss-primeui";
+@plugin '@tailwindcss/typography';
 
 /* DIALOG CONFI */
 .p-dialog-content {

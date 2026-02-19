@@ -5,7 +5,11 @@ import { Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
-import { TutorialCategoryResponse, TutorialResponse } from '../interfaces';
+import {
+  TutorialBlockFileResponse,
+  TutorialCategoryResponse,
+  TutorialResponse,
+} from '../interfaces';
 
 interface PaginatioParams {
   term: string;
@@ -53,10 +57,13 @@ export class TutorialDataSource {
       : of(null);
     return task.pipe(
       switchMap((result) =>
-        this.http.post(`${this.URL}/${tutorialId}/block`, {
-          ...dto,
-          ...(result && { fileId: result.fileId }),
-        }),
+        this.http.post<TutorialBlockFileResponse>(
+          `${this.URL}/${tutorialId}/block`,
+          {
+            ...dto,
+            ...(result && { fileId: result.fileId }),
+          },
+        ),
       ),
     );
   }
@@ -67,11 +74,20 @@ export class TutorialDataSource {
       : of(null);
     return task.pipe(
       switchMap((result) =>
-        this.http.patch(`${this.URL}/block/${blockId}`, {
-          ...dto,
-          ...(result && { fileId: result.fileId }),
-        }),
+        this.http.patch<TutorialBlockFileResponse>(
+          `${this.URL}/block/${blockId}`,
+          {
+            ...dto,
+            ...(result && { fileId: result.fileId }),
+          },
+        ),
       ),
+    );
+  }
+
+  removeBlock(blockId: string) {
+    return this.http.delete<{ ok: boolean; message: string }>(
+      `${this.URL}/block/${blockId}`,
     );
   }
 

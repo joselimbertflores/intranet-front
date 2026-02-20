@@ -5,6 +5,8 @@ import {
   inject,
   input,
   signal,
+  viewChild,
+  ElementRef,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -25,6 +27,7 @@ import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
+import { TieredMenuModule } from 'primeng/tieredmenu';
 
 import { TutorialDataSource } from '../../services';
 
@@ -45,7 +48,8 @@ import { TutorialBlockPreview } from '../../components';
     CdkDragHandle,
     DividerModule,
     ConfirmDialogModule,
-    TutorialBlockPreview
+    TieredMenuModule,
+    TutorialBlockPreview,
   ],
   templateUrl: './tutorial-detail-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,6 +71,8 @@ export default class TutorialDetailAdmin {
   blocks = linkedSignal(() => this.tutorial.value()?.blocks ?? []);
 
   isReordered = signal(false);
+
+  endOfBlocks = viewChild.required<ElementRef<HTMLDivElement>>('endOfBlocks');
 
   readonly menuItems = [
     {
@@ -164,11 +170,21 @@ export default class TutorialDetailAdmin {
     const index = this.blocks().findIndex((b) => b.id === block.id);
     if (index === -1) {
       this.blocks.update((blocks) => [...blocks, block]);
+      this.scrollToEnd();
     } else {
       this.blocks.update((blocks) => {
         blocks[index] = block;
         return [...blocks];
       });
     }
+  }
+
+  private scrollToEnd() {
+    setTimeout(() => {
+      this.endOfBlocks().nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, 100);
   }
 }

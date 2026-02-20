@@ -54,7 +54,7 @@ import { TutorialBlockResponse } from '../../interfaces';
             size="small"
             severity="danger"
             title="Eliminar bloque"
-            (click)="delete.emit()"
+            (click)="remove.emit()"
           ></button>
         </div>
       </div>
@@ -168,7 +168,7 @@ export class TutorialBlockPreview {
   readonly data = input.required<TutorialBlockResponse>();
 
   edit = output<void>();
-  delete = output<void>();
+  remove = output<void>();
 
   constructor(private sanitizer: DomSanitizer) {}
 

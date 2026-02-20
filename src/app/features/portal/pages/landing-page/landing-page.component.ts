@@ -130,8 +130,8 @@ export default class LandingPageComponent {
   }
 
   openQuickAccess(item: QuickAccessResponse): void {
-    if (!item.redirectUrl) return;
-    this.navigateByLink(item.redirectUrl);
+    // if (!item.redirectUrl) return;
+    // this.navigateByLink(item.redirectUrl);
   }
 
   highlightTitle(item: HeroSlideResponse): string {

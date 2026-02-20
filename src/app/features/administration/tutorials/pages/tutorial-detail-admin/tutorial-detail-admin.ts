@@ -1,54 +1,59 @@
 import {
   ChangeDetectionStrategy,
   linkedSignal,
+  ElementRef,
+  viewChild,
   Component,
   inject,
-  input,
   signal,
-  viewChild,
-  ElementRef,
+  input,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import {
   moveItemInArray,
   CdkDragDrop,
   CdkDropList,
-  CdkDragHandle,
-  CdkDrag,
 } from '@angular/cdk/drag-drop';
 
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ButtonGroupModule } from 'primeng/buttongroup'
+import { TieredMenuModule } from 'primeng/tieredmenu';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
-import { TieredMenuModule } from 'primeng/tieredmenu';
 
-import { TutorialDataSource } from '../../services';
-
-import { TutorialBlockResponse, TutorialBlockType } from '../../interfaces';
-import { TutorialBLockDialogData, TutorialBlockEditor } from '../../dialogs';
+import {
+  TutorialBlockResponse,
+  TutorialBlockType,
+  TutorialResponse,
+} from '../../interfaces';
+import {
+  TutorialBLockDialogData,
+  TutorialBlockEditor,
+  TutorialEditor,
+} from '../../dialogs';
 import { TutorialBlockPreview } from '../../components';
+import { TutorialDataSource } from '../../services';
 
 @Component({
   selector: 'app-tutorial-detail-admin',
   imports: [
     CommonModule,
-    CdkDrag,
     MenuModule,
     TagModule,
     FormsModule,
     CdkDropList,
     ButtonModule,
-    CdkDragHandle,
     DividerModule,
     ConfirmDialogModule,
     TieredMenuModule,
+    ButtonGroupModule,
     TutorialBlockPreview,
   ],
   templateUrl: './tutorial-detail-admin.html',
@@ -56,10 +61,10 @@ import { TutorialBlockPreview } from '../../components';
   providers: [ConfirmationService],
 })
 export default class TutorialDetailAdmin {
-  private router = inject(Router);
+  private location: Location = inject(Location);
   private dialogService = inject(DialogService);
-  private tutorialDataSource = inject(TutorialDataSource);
   private confirmationService = inject(ConfirmationService);
+  private tutorialDataSource = inject(TutorialDataSource);
 
   id = input.required<string>();
 
@@ -69,9 +74,7 @@ export default class TutorialDetailAdmin {
   });
 
   blocks = linkedSignal(() => this.tutorial.value()?.blocks ?? []);
-
   isReordered = signal(false);
-
   endOfBlocks = viewChild.required<ElementRef<HTMLDivElement>>('endOfBlocks');
 
   readonly menuItems = [
@@ -104,6 +107,28 @@ export default class TutorialDetailAdmin {
 
   constructor() {}
 
+  openTutorialEditDialog(): void {
+    const dialogRef = this.dialogService.open(TutorialEditor, {
+      header: 'Editar tutorial',
+      draggable: false,
+      closable: true,
+      width: '30vw',
+      data: this.tutorial.value(),
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw',
+      },
+    });
+
+    dialogRef?.onClose.subscribe((result?: TutorialResponse) => {
+      if (!result) return;
+      this.tutorial.update((value) => {
+        if (!value) return;
+        return { ...value, ...result };
+      });
+    });
+  }
+
   openBlockDialog(type: TutorialBlockType, block?: TutorialBlockResponse) {
     const data: TutorialBLockDialogData = {
       tutorialId: this.id(),
@@ -112,12 +137,17 @@ export default class TutorialDetailAdmin {
     };
     const dialogRef = this.dialogService.open(TutorialBlockEditor, {
       header: block ? 'Editar bloque' : 'Agregar bloque',
-      width: '40vw',
-      closable: true,
       contentStyle: { overflow: 'visible' },
+      closable: true,
+      width: '40vw',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw',
+      },
       data,
     });
-    dialogRef?.onClose.subscribe((result: TutorialBlockResponse) => {
+    dialogRef?.onClose.subscribe((result?: TutorialBlockResponse) => {
+      if (!result) return;
       this.upsertBlock(result);
     });
   }
@@ -146,12 +176,12 @@ export default class TutorialDetailAdmin {
 
   reoderBlocks() {
     if (!this.isReordered()) return;
-    const orders = this.blocks().map((b, index) => ({
-      id: b.id,
+    const orders = this.blocks().map(({ id }, index) => ({
+      id,
       order: index + 1,
     }));
     this.tutorialDataSource
-      .updateBlockOrder(this.tutorial.value()!.id, orders)
+      .updateBlockOrder(this.id(), orders)
       .subscribe(() => {
         this.isReordered.set(false);
       });
@@ -163,7 +193,7 @@ export default class TutorialDetailAdmin {
   }
 
   goBack() {
-    this.router.navigate(['/admin/tutorials']); // Ajusta tu ruta
+    this.location.back();
   }
 
   private upsertBlock(block: TutorialBlockResponse) {

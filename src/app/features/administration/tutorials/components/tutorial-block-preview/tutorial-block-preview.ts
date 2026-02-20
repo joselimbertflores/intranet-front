@@ -3,16 +3,19 @@ import {
   Component,
   output,
   input,
+  computed,
+  inject,
 } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CdkDragHandle, CdkDrag } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { TutorialBlockResponse } from '../../interfaces';
+import { FileIcon } from '../../../../../shared';
 
 @Component({
   selector: 'tutorial-block-preview',
-  imports: [ButtonModule, CdkDrag, CdkDragHandle],
+  imports: [ButtonModule, CdkDrag, CdkDragHandle, FileIcon],
   template: `
     <div
       cdkDrag
@@ -89,13 +92,12 @@ import { TutorialBlockResponse } from '../../interfaces';
           }
 
           @case ('VIDEO_URL') {
-            @let youtubeUrl = getYoutubeEmbedUrl(data().content);
-            @if (youtubeUrl) {
+            @if (previewUrl()) {
               <div
                 class="aspect-video w-full rounded-lg overflow-hidden border border-surface-200 bg-black shadow-inner"
               >
                 <iframe
-                  [src]="youtubeUrl"
+                  [src]="previewUrl()"
                   class="w-full h-full"
                   frameborder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -105,8 +107,7 @@ import { TutorialBlockResponse } from '../../interfaces';
               </div>
             } @else {
               <div
-                class="p-4 text-sm text-surface-500 border border-dashed
-             border-surface-300 rounded-lg text-center"
+                class="p-4 text-sm text-surface-500 border border-dashed border-surface-300 rounded-lg text-center"
               >
                 URL de YouTube no válida
               </div>
@@ -132,31 +133,34 @@ import { TutorialBlockResponse } from '../../interfaces';
           }
 
           @case ('FILE') {
-            <a
-              [href]="data().file?.url"
-              target="_blank"
-              class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 transition-all no-underline group/file"
-            >
-              <div
-                class="p-3 bg-primary-50 text-primary-600 rounded-full group-hover/file:bg-primary-100 transition-colors"
-              >
-                <i class="pi pi-file-pdf text-xl"></i>
-              </div>
-              <div class="flex flex-col">
-                <span
-                  class="text-sm font-semibold text-surface-800 group-hover/file:text-primary-700 transition-colors"
+            <div class="flex flex-col gap-2">
+              @if (data().content) {
+                <div class="text-surface-700 text-sm">
+                  {{ data().content }}
+                </div>
+              }
+              @if (data().file) {
+                <a
+                  [href]="data().file?.url"
+                  target="_blank"
+                  class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-fit"
                 >
-                  {{
-                    data().content ||
-                      data().file?.originalName ||
-                      'Documento adjunto'
-                  }}
-                </span>
-                <span class="text-xs text-surface-500 mt-0.5"
-                  >Click para descargar o ver</span
-                >
-              </div>
-            </a>
+                  <file-icon [fileName]="data().file?.originalName ?? ''" />
+                  <div class="flex flex-col">
+                    <span
+                      class="text-sm font-semibold text-surface-800 group-hover/file:text-primary-700 transition-colors line-clamp-1"
+                    >
+                      {{ data().file?.originalName }}
+                    </span>
+                    <span
+                      class="text-xs text-surface-500 mt-0.5 uppercase tracking-wide"
+                    >
+                      ARCHIVO ADJUNTO
+                    </span>
+                  </div>
+                </a>
+              }
+            </div>
           }
         }
       </div>
@@ -165,14 +169,24 @@ import { TutorialBlockResponse } from '../../interfaces';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TutorialBlockPreview {
+  private sanitizer = inject(DomSanitizer);
   readonly data = input.required<TutorialBlockResponse>();
 
   edit = output<void>();
   remove = output<void>();
 
-  constructor(private sanitizer: DomSanitizer) {}
+  previewUrl = computed(() => {
+    switch (this.data().type) {
+      case 'VIDEO_URL':
+        return this.getYoutubeEmbedUrl(this.data().content);
+      default:
+        return null;
+    }
+  });
 
-  getYoutubeEmbedUrl(url: string | null): SafeResourceUrl | null {
+  constructor() {}
+
+  private getYoutubeEmbedUrl(url: string | null): SafeResourceUrl | null {
     if (url === null) return null;
     const id = this.extractYoutubeId(url);
     if (!id) return null;

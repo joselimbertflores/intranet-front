@@ -6,11 +6,18 @@ import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 
 import { ProfileOverlay, Sidebar } from './components';
-
+import { CdkScrollable } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterModule, ButtonModule, DrawerModule, Sidebar, ProfileOverlay],
+  imports: [
+    RouterModule,
+    ButtonModule,
+    DrawerModule,
+    Sidebar,
+    ProfileOverlay,
+    CdkScrollable,
+  ],
   templateUrl: './admin-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

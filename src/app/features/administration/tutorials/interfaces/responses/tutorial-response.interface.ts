@@ -13,6 +13,8 @@ export interface TutorialResponse {
   summary: string | null;
   isPublished: boolean;
   createdAt: string;
+}
+export interface TutorialDetailResponse extends TutorialResponse {
   category: TutorialCategoryResponse;
   blocks: TutorialBlockResponse[];
 }

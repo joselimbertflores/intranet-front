@@ -8,7 +8,7 @@ import { FileUploadService, UploadResult } from '../../../../shared';
 import {
   TutorialBlockFileResponse,
   TutorialCategoryResponse,
-  TutorialResponse,
+  TutorialDetailResponse,
 } from '../interfaces';
 
 interface PaginatioParams {
@@ -29,7 +29,7 @@ export class TutorialDataSource {
     const params = new HttpParams({
       fromObject: { limit, offset, ...(term && { term }) },
     });
-    return this.http.get<{ tutorials: TutorialResponse[]; total: number }>(
+    return this.http.get<{ tutorials: TutorialDetailResponse[]; total: number }>(
       `${this.URL}`,
       { params },
     );
@@ -48,7 +48,7 @@ export class TutorialDataSource {
   }
 
   getOne(id: string) {
-    return this.http.get<TutorialResponse>(`${this.URL}/${id}`);
+    return this.http.get<TutorialDetailResponse>(`${this.URL}/${id}`);
   }
 
   createBlock(tutorialId: string, dto: object, file: File | null) {

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { TutorialResponse } from '../../administration/tutorials/interfaces';
+import { TutorialDetailResponse } from '../../administration/tutorials/interfaces';
 
 
 @Injectable({
@@ -14,12 +14,12 @@ export class PortalTutorialData {
   constructor() {}
 
   getTutorials() {
-    return this.http.get<{ tutorials: TutorialResponse[]; total: number }>(
+    return this.http.get<{ tutorials: TutorialDetailResponse[]; total: number }>(
       this.URL
     );
   }
 
   findBySlug(slug: string) {
-    return this.http.get<TutorialResponse>(`${this.URL}/${slug}`);
+    return this.http.get<TutorialDetailResponse>(`${this.URL}/${slug}`);
   }
 }

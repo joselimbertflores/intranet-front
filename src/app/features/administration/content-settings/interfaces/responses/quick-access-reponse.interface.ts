@@ -1,7 +1,7 @@
 export interface QuickAccessResponse {
   id: number;
   name: string;
-  redirectUrl: string;
-  iconUrl: string;
+  url: string;
+  icon: string;
   order: number;
 }

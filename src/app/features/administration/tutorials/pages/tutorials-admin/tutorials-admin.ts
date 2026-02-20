@@ -15,7 +15,7 @@ import { TagModule } from 'primeng/tag';
 
 import { SearchInputComponent } from '../../../../../shared';
 import { TutorialDataSource } from '../../services';
-import { TutorialResponse } from '../../interfaces';
+import { TutorialDetailResponse } from '../../interfaces';
 import { TutorialEditor } from '../../dialogs';
 
 @Component({
@@ -58,7 +58,7 @@ export default class TutorialsAdmin {
     this.term.set(term);
   }
 
-  openEditorDialog(item?: TutorialResponse) {
+  openEditorDialog(item?: TutorialDetailResponse) {
     const dialogRef = this.dialogService.open(TutorialEditor, {
       header: item ? 'Editar tutorial' : 'Crear tutorial',
       draggable: false,
@@ -71,13 +71,13 @@ export default class TutorialsAdmin {
       },
     });
 
-    dialogRef?.onClose.subscribe((result?: TutorialResponse) => {
+    dialogRef?.onClose.subscribe((result?: TutorialDetailResponse) => {
       if (!result) return;
       this.upsertItem(result);
     });
   }
 
-  private upsertItem(item: TutorialResponse): void {
+  private upsertItem(item: TutorialDetailResponse): void {
     const index = this.dataSource().findIndex(({ id }) => item.id === id);
     if (index === -1) {
       this.dataSource.update((values) => [item, ...values]);

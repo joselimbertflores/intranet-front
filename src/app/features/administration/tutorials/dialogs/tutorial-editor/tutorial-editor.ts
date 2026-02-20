@@ -17,8 +17,8 @@ import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
+import { TutorialDetailResponse } from '../../interfaces';
 import { TutorialDataSource } from '../../services';
-import { TutorialResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
 
 @Component({
@@ -41,7 +41,7 @@ export class TutorialEditor {
   private formBuilder = inject(FormBuilder);
   private tutorialData = inject(TutorialDataSource);
 
-  readonly data?: TutorialResponse = inject(DynamicDialogConfig).data;
+  readonly data?: TutorialDetailResponse = inject(DynamicDialogConfig).data;
 
   tutorialForm: FormGroup = this.formBuilder.nonNullable.group({
     title: [

@@ -1,203 +1,3 @@
-<!-- <div class="space-y-8 pb-2 md:space-y-10">
-  <section class="rounded-2xl border border-surface-200 bg-white p-6 shadow-xs md:p-8">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-      <div class="flex items-start gap-4 md:items-center">
-        <div
-          class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50"
-        >
-          <img
-            src="images/icons/app.png"
-            alt="Icono de la intranet"
-            class="h-9 w-9 object-contain"
-          />
-        </div>
-
-        <div class="space-y-1.5">
-          <p class="text-xs font-medium tracking-[0.15em] text-surface-500 uppercase">
-            Portal publico interno
-          </p>
-          <h1 class="text-2xl font-semibold tracking-tight text-surface-900 md:text-3xl">
-            Intranet Institucional
-          </h1>
-          <p class="max-w-3xl text-sm text-surface-600 md:text-base">
-            Plataforma central de acceso a documentos, comunicados y servicios internos
-          </p>
-        </div>
-      </div>
-
-      <div class="hidden lg:flex">
-        <div
-          class="flex h-16 w-16 items-center justify-center rounded-2xl border border-surface-200 bg-surface-50"
-        >
-          <img
-            src="images/icons/alcaldia.png"
-            alt="Icono institucional"
-            class="h-10 w-10 object-contain"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="space-y-4">
-    <div>
-      <h2 class="text-xl font-semibold tracking-tight text-surface-900">Acceso rapido</h2>
-      <p class="text-sm text-surface-600">
-        Secciones de consulta frecuente para navegacion inmediata
-      </p>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
-      @for (item of quickAccessItems; track item.title) {
-        <a
-          [routerLink]="item.route"
-          class="group block rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-          [attr.aria-label]="'Ir a ' + item.title"
-        >
-          <p-card
-            styleClass="quick-access-card h-full overflow-hidden border border-surface-200 bg-white shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:border-primary-200 group-hover:shadow-md"
-          >
-            <ng-template #content>
-              <div class="flex h-full min-h-[8.5rem] flex-col items-start gap-4 p-4 md:p-5">
-                <div
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-700 transition-colors duration-200 group-hover:bg-primary-100"
-                >
-                  <i [class]="item.icon + ' text-lg'"></i>
-                </div>
-                <h3 class="text-sm font-medium leading-snug text-surface-900 md:text-base">
-                  {{ item.title }}
-                </h3>
-              </div>
-            </ng-template>
-          </p-card>
-        </a>
-      }
-    </div>
-  </section>
-
-  <section class="space-y-4">
-    <div>
-      <h2 class="text-xl font-semibold tracking-tight text-surface-900">Anuncios institucionales</h2>
-      <p class="text-sm text-surface-600">Informacion destacada para toda la institucion</p>
-    </div>
-
-    <div class="announcement-swiper overflow-hidden rounded-2xl border border-surface-200 shadow-xs">
-      <swiper-container #announcementSwiper init="false" class="block w-full">
-        @for (banner of announcementBanners; track banner.title) {
-          <swiper-slide>
-            <article
-              class="flex min-h-[11rem] flex-col justify-center bg-linear-to-r from-slate-800 via-slate-700 to-slate-600 px-6 py-7 text-surface-0 md:min-h-[12rem] md:px-10"
-            >
-              <p class="text-xs font-medium tracking-[0.14em] text-slate-200 uppercase">
-                Aviso institucional
-              </p>
-              <h3 class="mt-2 max-w-3xl text-lg leading-tight font-semibold md:text-2xl">
-                {{ banner.title }}
-              </h3>
-              <p class="mt-2 max-w-3xl text-sm text-slate-100 md:text-base">
-                {{ banner.detail }}
-              </p>
-            </article>
-          </swiper-slide>
-        }
-      </swiper-container>
-    </div>
-  </section>
-
-  <section class="space-y-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h2 class="text-xl font-semibold tracking-tight text-surface-900">Comunicados destacados</h2>
-        <p class="text-sm text-surface-600">
-          Publicaciones recientes para consulta institucional
-        </p>
-      </div>
-
-      <a
-        routerLink="/communications"
-        class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 hover:text-primary-600"
-      >
-        Ver todos los comunicados
-        <i class="pi pi-arrow-right text-xs"></i>
-      </a>
-    </div>
-
-    <p-carousel
-      styleClass="featured-communications-carousel"
-      [value]="featuredCommunications"
-      [numVisible]="3"
-      [numScroll]="1"
-      [circular]="true"
-      [autoplayInterval]="5500"
-      [showNavigators]="true"
-      [showIndicators]="false"
-      [responsiveOptions]="communicationsResponsiveOptions"
-    >
-      <ng-template pTemplate="item" let-item>
-        <a
-          [routerLink]="item.route"
-          class="group block h-full rounded-xl px-2 pb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-        >
-          <p-card
-            styleClass="communication-card h-full border border-surface-200 bg-white shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-md"
-          >
-            <ng-template #content>
-              <div class="flex min-h-52 flex-col gap-5 p-5">
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-100 text-surface-700">
-                  <i class="pi pi-file-pdf text-lg"></i>
-                </div>
-
-                <div class="space-y-2">
-                  <h3 class="line-clamp-3 text-base leading-snug font-semibold text-surface-900">
-                    {{ item.title }}
-                  </h3>
-                  <p class="text-sm text-surface-500">{{ item.publicationDate }}</p>
-                </div>
-              </div>
-            </ng-template>
-          </p-card>
-        </a>
-      </ng-template>
-    </p-carousel>
-  </section>
-
-  <section class="space-y-4 rounded-2xl border border-surface-200 bg-white p-5 shadow-xs md:p-6">
-    <div>
-      <h2 class="text-xl font-semibold tracking-tight text-surface-900">
-        Documentos mas descargados
-      </h2>
-      <p class="text-sm text-surface-600">
-        Referencias de consulta frecuente en la plataforma
-      </p>
-    </div>
-
-    <ul class="divide-y divide-surface-200">
-      @for (doc of mostDownloadedDocuments; track doc.title) {
-        <li class="flex items-start justify-between gap-4 py-3.5">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-start gap-3">
-              <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-700"
-              >
-                <i [class]="doc.icon + ' text-sm'"></i>
-              </div>
-
-              <div class="min-w-0">
-                <h3 class="truncate text-sm font-medium text-surface-900 md:text-base">
-                  {{ doc.title }}
-                </h3>
-                <p class="mt-0.5 text-xs text-surface-600 md:text-sm">
-                  {{ doc.downloadCount }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </li>
-      }
-    </ul>
-  </section>
-</div> -->
-
 <section
   class="w-full bg-linear-to-r from-surface-50 to-surface-100 border-b border-surface-200"
 >
@@ -216,7 +16,6 @@
 
         <!-- Text -->
         <div class="space-y-2">
-        
           <h1
             class="text-xl font-semibold tracking-tight text-surface-900 md:text-3xl"
           >
@@ -233,12 +32,272 @@
       <!-- Right: Institution emblem (desktop only) -->
       <div class="hidden md:flex items-center">
         <img
-          src="images/institution/institution-logo.png"
+          src="images/institution/alcaldia.webp"
           alt="Gobierno Autónomo Municipal de Sacaba"
           title="Gobierno Autónomo Municipal de Sacaba"
-          class="h-26 w-auto opacity-90"
+          class="h-20 w-auto opacity-90"
         />
       </div>
     </div>
   </div>
+</section>
+@if (data().quickAccess.length > 0) {
+  <section class="mx-auto max-w-7xl px-6 py-14">
+    <div class="mb-10">
+      <h2 class="text-2xl font-semibold text-surface-900">Accesos directos</h2>
+      <p class="mt-2 text-sm text-surface-600">
+        Acceso directo a sistemas y servicios institucionales.
+      </p>
+    </div>
+    <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+      @for (item of data().quickAccess; track $index) {
+        <!-- Grid -->
+        <a
+          [href]="item.url"
+          class="group flex flex-col items-center justify-center rounded-2xl border border-surface-300 bg-surface-0 p-6 text-center transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2"
+        >
+          <!-- Icon -->
+          <div
+            class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl transition group-hover:scale-105"
+            [style.backgroundColor]="item.color + '1A'"
+          >
+            <i
+              [class]="item.icon"
+              class="text-2xl"
+              [style.color]="item.color"
+            ></i>
+          </div>
+
+          <!-- Label -->
+          <span class="text-sm font-medium text-surface-800">
+            {{ item.name }}
+          </span>
+        </a>
+      }
+    </div>
+  </section>
+}
+
+<!-- Banners / Anuncios institucionales -->
+<section *ngIf="data().banners.length > 0" class="mx-auto max-w-7xl px-6 py-14">
+  <swiper-container
+    slides-per-view="1"
+    space-between="16"
+    [loop]="data().banners.length > 1"
+    [pagination]="true"
+    [autoplay]="data().banners.length > 1"
+    autoplay-delay="8000"
+    autoplay-disable-on-interaction="false"
+    autoplay-pause-on-mouse-enter="true"
+    class="block"
+  >
+    <swiper-slide *ngFor="let banner of data().banners">
+      <!-- Clickable banner -->
+      <ng-container *ngIf="banner.url; else noLink">
+        <a
+          [href]="banner.url"
+          [target]="banner.openInNewTab ? '_blank' : '_self'"
+          class="block focus:outline-none focus:ring-2"
+        >
+          <ng-container
+            *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"
+          ></ng-container>
+        </a>
+      </ng-container>
+
+      <!-- Non-clickable banner -->
+      <ng-template #noLink>
+        <ng-container
+          *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"
+        ></ng-container>
+      </ng-template>
+    </swiper-slide>
+  </swiper-container>
+
+  <!-- Banner content template -->
+  <ng-template #bannerContent let-banner>
+    <div
+      class="relative overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-sm"
+    >
+      <div class="flex flex-col gap-6 p-6">
+        <!-- Image (optional) -->
+        <img
+          *ngIf="banner.imageUrl"
+          [src]="banner.imageUrl"
+          alt=""
+          class="h-40 w-full rounded-xl object-cover sm:h-52"
+        />
+
+        <!-- Text -->
+        <div>
+          <h3 class="text-xl font-semibold text-surface-900">
+            {{ banner.title }}
+          </h3>
+
+          <p *ngIf="banner.subtitle" class="mt-2 text-sm text-surface-600">
+            {{ banner.subtitle }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</section>
+
+<!-- Comunicados destacados -->
+<section
+  *ngIf="data().communications.length > 0"
+  class="mx-auto max-w-7xl px-6 py-14"
+>
+  <!-- Section header -->
+  <div class="mb-10 flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold text-surface-900">Comunicados</h2>
+      <p class="mt-1 text-sm text-surface-600">Publicaciones oficiales</p>
+    </div>
+
+    <!-- Optional link -->
+    <a
+      routerLink="/communications"
+      class="text-sm font-medium text-primary-600 hover:underline"
+    >
+      Ver todos
+    </a>
+  </div>
+
+  <!-- Carousel -->
+  <p-carousel
+    [value]="data().communications"
+    [numVisible]="3"
+    [numScroll]="1"
+    [circular]="false"
+    [showIndicators]="false"
+    [showNavigators]="true"
+    [responsiveOptions]="responsiveOptions"
+  >
+    <ng-template pTemplate="item" let-item>
+      <div class="mx-auto max-w-xs py-4">
+        <a
+          [routerLink]="['/communications', item.id]"
+          class="group block h-full"
+        >
+          <div
+            class="flex h-full flex-col overflow-hidden rounded-2xl border border-surface-300 bg-surface-0 transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <!-- Preview -->
+            <div class="relative aspect-3/4 overflow-hidden bg-surface-100">
+              <img
+                *ngIf="item.previewUrl; else noPreview"
+                [src]="item.previewUrl"
+                alt=""
+                class="h-full w-full object-cover"
+              />
+            </div>
+
+            <ng-template #noPreview>
+              <div class="flex h-full w-full items-center justify-center">
+                <i class="pi pi-file-pdf text-4xl text-surface-400"></i>
+              </div>
+            </ng-template>
+
+            <!-- Content -->
+            <div class="flex flex-col grow gap-2 p-5">
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-surface-500"
+              >
+                {{ item.type }}
+              </span>
+              <h3
+                class="line-clamp-2 text-sm font-semibold text-surface-900 group-hover:text-primary-600 transition-colors"
+              >
+                {{ item.reference }}
+              </h3>
+              <div class="mt-auto pt-3">
+                <span
+                  class="text-xs font-medium text-surface-500 flex items-center gap-1.5"
+                >
+                  <i class="pi pi-calendar text-[10px]"></i>
+                  {{ item.createdAt | date: "dd MMM yyyy" }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </ng-template>
+  </p-carousel>
+</section>
+
+<!-- Documentos más descargados -->
+<!-- Documentos más descargados -->
+<section
+  *ngIf="data().documents.length > 0"
+  class="mx-auto max-w-7xl px-6 py-14"
+>
+  <!-- Header -->
+  <div class="mb-8 flex items-center justify-between">
+    <h2 class="text-2xl font-semibold text-surface-900">
+      Documentos más descargados
+    </h2>
+
+    <a
+      routerLink="/documents"
+      class="text-sm font-medium text-primary-600 hover:underline"
+    >
+      Ver todos
+    </a>
+  </div>
+
+  <!-- List -->
+  <ul
+    class="divide-y divide-surface-200 rounded-xl border border-surface-200 bg-white"
+  >
+    <li
+      *ngFor="let doc of data().documents"
+      class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-surface-50"
+    >
+      <!-- Left: document info -->
+      <div class="flex min-w-0 items-center gap-4">
+        <!-- Icon -->
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-100"
+        >
+          <i class="pi pi-file-pdf text-surface-600"></i>
+        </div>
+
+        <!-- Text -->
+        <div class="min-w-0">
+          <a
+            [href]="doc.file.url"
+            target="_blank"
+            class="block truncate text-sm font-medium text-surface-900 hover:underline"
+          >
+            {{ doc.title }}
+          </a>
+
+          <div class="mt-1 flex flex-wrap gap-x-3 text-xs text-surface-500">
+            <span *ngIf="doc.fiscalYear"> Gestión {{ doc.fiscalYear }} </span>
+            <span *ngIf="doc.section">
+              {{ doc.section }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: actions -->
+      <div class="flex shrink-0 items-center gap-4">
+        <span class="hidden text-xs text-surface-500 sm:inline">
+          {{ doc.file.downloadCount }} descargas
+        </span>
+
+        <a
+          [href]="doc.file.url"
+          target="_blank"
+          class="flex h-9 w-9 items-center justify-center rounded-lg text-surface-600 transition hover:bg-surface-100 hover:text-surface-900"
+          title="Descargar documento"
+        >
+          <i class="pi pi-download"></i>
+        </a>
+      </div>
+    </li>
+  </ul>
 </section>

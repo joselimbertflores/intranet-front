@@ -31,33 +31,42 @@ interface DocumentCache {
 @Injectable({
   providedIn: 'root',
 })
-export class PortalService {
+export class PortalDataSource {
   private readonly URL = `${environment.baseUrl}/portal`;
   private http = inject(HttpClient);
 
-  categoriesWithSections = toSignal(this.getCategoriesWithSections(), {
-    initialValue: [],
-  });
-  selectedCategoryId = signal<number | null>(null);
-  sections = computed(() => {
-    const id = this.selectedCategoryId();
-    return id
-      ? (this.categoriesWithSections()
-          .find((item) => item.id === id)
-          ?.sectionCategories.map((item) => item.section) ?? [])
-      : [];
-  });
+  // categoriesWithSections = toSignal(this.getCategoriesWithSections(), {
+  //   initialValue: [],
+  // });
+  // selectedCategoryId = signal<number | null>(null);
+  // sections = computed(() => {
+  //   const id = this.selectedCategoryId();
+  //   return id
+  //     ? (this.categoriesWithSections()
+  //         .find((item) => item.id === id)
+  //         ?.sectionCategories.map((item) => item.section) ?? [])
+  //     : [];
+  // });
 
   private documentsCache: Record<string, DocumentCache> = {};
 
   private _isPortalLoading = signal<boolean>(true);
   isPortalLoading = computed(() => this._isPortalLoading());
+
   portalData = toSignal(
     this.http.get<HomePortalDataResponse>(`${this.URL}/home`).pipe(
       finalize(() => {
         this._isPortalLoading.set(false);
       }),
     ),
+    {
+      initialValue: {
+        quickAccess: [],
+        banners: [],
+        communications: [],
+        documents: [],
+      },
+    },
   );
 
   isDocumentSearching = signal<boolean>(false);

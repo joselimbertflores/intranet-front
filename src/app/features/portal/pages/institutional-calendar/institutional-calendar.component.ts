@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import esLocale from '@fullcalendar/core/locales/es';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { PortalService } from '../../services';
+import { PortalDataSource } from '../../services';
 
 @Component({
   selector: 'app--institutional-calendar.component',
@@ -16,7 +16,7 @@ import { PortalService } from '../../services';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class InstitutionalCalendarComponent {
-  private portalService = inject(PortalService);
+  private portalService = inject(PortalDataSource);
   events: any[] = [];
 
   calendarOptions: CalendarOptions = {

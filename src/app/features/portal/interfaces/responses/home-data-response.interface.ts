@@ -1,8 +1,21 @@
-import { BannerResponse, QuickAccessResponse } from '../../../administration/content-settings/interfaces';
+import {
+  BannerResponse,
+  QuickAccessResponse,
+} from '../../../administration/content-settings/interfaces';
+import { PortalDocumentResponse } from './document-response.interface';
 
+export interface PortalCommunicationsResponse {
+  id: string;
+  reference: string;
+  code: string;
+  createdAt: string;
+  isActive: string;
+  type: string;
+  previewUrl: string;
+}
 export interface HomePortalDataResponse {
-  slides: BannerResponse[];
+  banners: BannerResponse[];
   quickAccess: QuickAccessResponse[];
-  communications: any[];
-  documents: any[];
+  communications: PortalCommunicationsResponse[];
+  documents: PortalDocumentResponse[];
 }

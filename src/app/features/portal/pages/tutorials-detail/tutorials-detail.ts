@@ -13,7 +13,7 @@ import { map } from 'rxjs';
 
 import { ButtonModule } from 'primeng/button';
 
-import { PortalTutorialData } from '../../services';
+import { PortalTutorialDataSource } from '../../services';
 import { ScrollStateService } from '../../../../shared';
 @Component({
   selector: 'app-tutorials-detail',
@@ -26,7 +26,7 @@ export default class TutorialsDetail {
   private location = inject(Location);
   private route = inject(ActivatedRoute);
   private scrollService = inject(ScrollStateService);
-  private portalTutorialService = inject(PortalTutorialData);
+  private portalTutorialService = inject(PortalTutorialDataSource);
 
   slug = input.required<string>();
 

@@ -1,4 +1,4 @@
-<section class="max-w-7xl mx-auto px-2 py-2 sm:py-6">
+<!-- <section class="max-w-7xl mx-auto px-2 py-2 sm:py-6">
   <header class="mb-4 text-center md:text-left">
     <h1 class="text-xl lg:text-3xl font-semibold text-primary-700">
       Directorio Telefónico
@@ -113,4 +113,124 @@
       </ng-template>
     </p-tree>
   </div>
+</section> -->
+<section class="bg-surface-50 border-b">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <h1 class="text-2xl md:text-3xl font-semibold">Directorio Telefónico</h1>
+    <p class="mt-2 text-sm md:text-base text-muted max-w-2xl">
+      Numeros internos y externos dentro del GAMS.
+    </p>
+  </div>
 </section>
+<section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+  <p-treetable
+    [value]="nodes()"
+    [scrollable]="true"
+    [tableStyle]="{ 'min-width': '50rem' }"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Name</th>
+        <th class="priority-2">Size</th>
+        <th class="priority-3">Type</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-rowNode let-rowData="rowData">
+      <tr [ttRow]="rowNode">
+        <td>
+          <div class="flex items-center gap-2">
+            <p-treetable-toggler [rowNode]="rowNode" />
+            <span>{{ rowData.name }}</span>
+            <span class="visibility-sm">
+              / {{ rowData.internalPhone }} / {{ rowData.landlinePhone }}
+            </span>
+          </div>
+        </td>
+        <td class="priority-2">{{ rowData.internalPhone }}</td>
+        <td class="priority-3">{{ rowData.landlinePhone }}</td>
+      </tr>
+    </ng-template>
+  </p-treetable>
+</section>
+<section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+  <p-tree
+    [value]="nodes()"
+    [filter]="true"
+    filterPlaceholder="Buscar contacto..."
+    class="w-full"
+  >
+    <ng-template let-node pTemplate="default">
+      <!-- Contenedor Flex: Columna en móvil, Fila en Desktop -->
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between w-full p-1 gap-2"
+      >
+        <!-- Nombre del contacto/depto -->
+        <div class="font-medium text-gray-900">
+          {{ node.data.name | json }}
+        </div>
+
+        <!-- Números de teléfono -->
+        <div class="flex gap-3 text-sm">
+          <div class="bg-blue-50 px-2 py-1 rounded border border-blue-100">
+            <span class="text-blue-600 font-bold text-xs mr-1">INT:</span>
+            <span class="text-gray-700 font-mono">{{
+              node.data.internalNumber
+            }}</span>
+          </div>
+          <div class="bg-green-50 px-2 py-1 rounded border border-green-100">
+            <span class="text-green-600 font-bold text-xs mr-1">EXT:</span>
+            <span class="text-gray-700 font-mono">{{
+              node.data.externalNumber
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-tree>
+
+  <p-tree
+    [value]="nodes()"
+    [filter]="true"
+    filterPlaceholder="Buscar contacto..."
+    class="w-full custom-tree bg-red-500"
+  >
+    <ng-template let-node pTemplate="default">
+      <!-- Contenedor principal con flex-1 para ocupar todo el ancho disponible -->
+      <div class="flex items-center justify-between w-full pr-2 bg-red-200">
+        <!-- Nombre: crece y empuja lo demás a la derecha -->
+        <span class="font-medium text-gray-800 flex-grow">
+          {{ node.data.name }}
+        </span>
+
+        <!-- Contenedor de números: alineado a la derecha -->
+        <div class="flex items-center gap-4 ml-4">
+          <!-- Extensión Interna -->
+          <div class="hidden sm:flex flex-col items-end">
+            <span
+              class="text-[10px] uppercase text-gray-400 font-bold leading-none"
+              >Interno</span
+            >
+            <span class="text-sm font-mono text-blue-700">{{
+              node.data.internalNumber
+            }}</span>
+          </div>
+
+          <!-- Número Externo -->
+          <div class="flex flex-col items-end min-w-[100px]">
+            <span
+              class="text-[10px] uppercase text-gray-400 font-bold leading-none text-right w-full"
+              >Externo</span
+            >
+            <span class="text-sm font-mono text-gray-700">{{
+              node.data.externalNumber
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-tree>
+</section>
+
+@for (item of treeDirectory(); track $index) {
+  <custom-tree-table [node]="item" />
+}

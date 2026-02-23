@@ -12,7 +12,7 @@ import { RouterLink } from "@angular/router";
 import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule } from 'primeng/paginator';
 
-import { PortalTutorialData } from '../../services';
+import { PortalTutorialDataSource } from '../../services';
 
 @Component({
   selector: 'app-tutorials-list',
@@ -21,7 +21,7 @@ import { PortalTutorialData } from '../../services';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TutorialsList {
-  private potalTutorialData = inject(PortalTutorialData);
+  private potalTutorialData = inject(PortalTutorialDataSource);
 
   private resource = rxResource({
     stream: () => this.potalTutorialData.getTutorials(),

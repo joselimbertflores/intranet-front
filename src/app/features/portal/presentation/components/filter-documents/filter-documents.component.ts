@@ -24,7 +24,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { PanelModule } from 'primeng/panel';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-import { PortalService } from '../../../services';
+import { PortalDataSource } from '../../../services';
 import { DocumentDataSource } from '../../../../administration/document-records/services/document-data-source';
 
 @Component({
@@ -185,7 +185,7 @@ import { DocumentDataSource } from '../../../../administration/document-records/
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilterDocumentsComponent {
-  private portalService = inject(PortalService);
+  private portalService = inject(PortalDataSource);
 
   private formBuilder = inject(FormBuilder);
 
@@ -251,7 +251,7 @@ export class FilterDocumentsComponent {
     this.filterForm().get('subtypeId')?.setValue(null);
     this.types.set([]);
     this.subtypes.set([]);
-    this.portalService.selectedCategoryId.set(value);
+    // this.portalService.selectedCategoryId.set(value);
   }
 
   selectSection(value: number) {

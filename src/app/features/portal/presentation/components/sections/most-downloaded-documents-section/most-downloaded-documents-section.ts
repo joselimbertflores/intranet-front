@@ -16,7 +16,7 @@ import {
   FileSizePipe,
   UiBreakpointObserver,
 } from '../../../../../../shared';
-import { PortalService } from '../../../../services';
+import { PortalDataSource } from '../../../../services';
 
 @Component({
   selector: 'most-downloaded-documents-section',
@@ -121,7 +121,7 @@ import { PortalService } from '../../../../services';
 })
 export class MostDownloadedDocumentsSection {
   private isMobile = inject(UiBreakpointObserver).isMobile;
-  private portalService = inject(PortalService);
+  private portalService = inject(PortalDataSource);
 
   documents = input.required<any[]>();
   visibleDocs = computed(() =>

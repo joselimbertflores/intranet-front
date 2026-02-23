@@ -7,7 +7,7 @@ import { TutorialDetailResponse } from '../../administration/tutorials/interface
 @Injectable({
   providedIn: 'root',
 })
-export class PortalTutorialData {
+export class PortalTutorialDataSource {
   private readonly URL = `${environment.baseUrl}/portal/assistance`;
   private http = inject(HttpClient);
 

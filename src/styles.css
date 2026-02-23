@@ -1,8 +1,12 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
+@import 'swiper/css';
+@import 'swiper/css/pagination';
+
 @plugin "tailwindcss-primeui";
 @plugin '@tailwindcss/typography';
+
 
 /* DIALOG CONFI */
 .p-dialog-content {

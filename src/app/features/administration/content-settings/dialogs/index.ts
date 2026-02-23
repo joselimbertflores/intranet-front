@@ -1,2 +1,2 @@
-export * from './hero-slide-editor/hero-slide-editor';
+export * from './banner-editor/banner-editor';
 export * from './quick-access-editor/quick-access-editor';

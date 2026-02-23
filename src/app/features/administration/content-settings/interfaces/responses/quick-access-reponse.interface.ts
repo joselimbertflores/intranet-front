@@ -4,4 +4,5 @@ export interface QuickAccessResponse {
   url: string;
   icon: string;
   order: number;
+  color: string;
 }

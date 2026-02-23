@@ -7,12 +7,21 @@ import { MenubarModule } from 'primeng/menubar';
 @Component({
   selector: 'app-portal-layout',
   imports: [RouterModule, MenubarModule],
-  templateUrl: './portal-layout.component.html',
+  templateUrl: './portal-layout.html',
+  styles: `
+    @media screen and (max-width: 960px) {
+      :host ::ng-deep .p-menubar .p-menubar-button {
+        margin-left: auto !important;
+      }
+
+      :host ::ng-deep .p-menubar .p-menubar-end {
+        margin-left: 0 !important;
+      }
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class PortalLayoutComponent {
-  readonly currentYear = new Date().getFullYear();
-
+export default class PortalLayout {
   readonly menuItems: MenuItem[] = [
     {
       label: 'Inicio',
@@ -27,7 +36,7 @@ export default class PortalLayoutComponent {
     {
       label: 'Comunicados',
       routerLink: '/communications',
-      routerLinkActiveOptions: { exact: true },
+      routerLinkActiveOptions: { exact: false },
     },
     {
       label: 'Calendario',

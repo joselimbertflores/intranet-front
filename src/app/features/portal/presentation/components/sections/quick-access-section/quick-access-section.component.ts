@@ -24,7 +24,7 @@ import { QuickAccessResponse } from '../../../../../administration/content-setti
           class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 place-items-center"
         >
           @for (access of quickAccess(); track $index) {
-          <a
+          <!-- <a
             [href]="access.redirectUrl"
             target="_blank"
             rel="noopener noreferrer"
@@ -55,7 +55,7 @@ import { QuickAccessResponse } from '../../../../../administration/content-setti
             >
               {{ access.name }}
             </span>
-          </a>
+          </a> -->
           }
         </div>
       </div>

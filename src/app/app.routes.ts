@@ -5,7 +5,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./layouts/portal-layout/portal-layout.component'),
+      import('./layouts/portal-layout/portal-layout'),
     children: [
       {
         path: '',

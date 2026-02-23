@@ -13,13 +13,14 @@ import {
   FormArray,
 } from '@angular/forms';
 import {
-  CdkDragDrop,
-  DragDropModule,
   moveItemInArray,
+  DragDropModule,
+  CdkDragDrop,
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ColorPickerModule } from 'primeng/colorpicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
@@ -40,6 +41,7 @@ import { FormUtils } from '../../../../../helpers';
     DragDropModule,
     MessageModule,
     ButtonModule,
+    ColorPickerModule,
   ],
   templateUrl: './quick-access-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,6 +109,10 @@ export class QuickAccessEditor {
       url: [
         data?.url ?? '',
         [Validators.required, Validators.pattern(/^https?:\/\/.+/i)],
+      ],
+      color: [
+        data?.color ?? '#2563EB',
+        [Validators.pattern(/^#[0-9A-Fa-f]{6}$/)],
       ],
     });
   }

@@ -4,7 +4,7 @@ import { catchError, switchMap, forkJoin, EMPTY, map, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { FileUploadService } from '../../../shared';
-import { HeroSlideResponse, QuickAccessResponse } from '../content-settings/interfaces';
+import { BannerResponse, QuickAccessResponse } from '../content-settings/interfaces';
 
 interface QuickAccessItem {
   name: string;
@@ -45,7 +45,7 @@ export class QuickAccessService {
     return this.buildUploadTask(items).pipe(
       map((newItems) => [...existingItems, ...newItems]),
       switchMap((allSItems) => {
-        return this.http.put<HeroSlideResponse[]>(this.URL, {
+        return this.http.put<BannerResponse[]>(this.URL, {
           items: allSItems,
         });
       })

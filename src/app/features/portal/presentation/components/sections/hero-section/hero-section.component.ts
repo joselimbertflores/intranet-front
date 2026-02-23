@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
-import { HeroSlideResponse } from '../../../../../administration/content-settings/interfaces';
+import { BannerResponse } from '../../../../../administration/content-settings/interfaces';
 
 @Component({
   selector: 'hero-section',
@@ -95,5 +95,5 @@ import { HeroSlideResponse } from '../../../../../administration/content-setting
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroSectionComponent {
-  slides = input<HeroSlideResponse[]>();
+  slides = input<BannerResponse[]>();
 }

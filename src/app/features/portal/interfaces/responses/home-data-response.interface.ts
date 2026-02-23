@@ -1,7 +1,7 @@
-import { HeroSlideResponse, QuickAccessResponse } from '../../../administration/content-settings/interfaces';
+import { BannerResponse, QuickAccessResponse } from '../../../administration/content-settings/interfaces';
 
 export interface HomePortalDataResponse {
-  slides: HeroSlideResponse[];
+  slides: BannerResponse[];
   quickAccess: QuickAccessResponse[];
   communications: any[];
   documents: any[];

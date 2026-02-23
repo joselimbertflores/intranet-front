@@ -1,0 +1,202 @@
+<div class="flex justify-end mb-4">
+  <p-button
+    [outlined]="true"
+    icon="pi pi-plus"
+    label="Agregar"
+    size="small"
+    (onClick)="addBanner()"
+  />
+</div>
+
+@if (hasErrorMessage()) {
+  <div class="mb-4">
+    <p-message [life]="3000" severity="error">
+      La imagen para cada elemento es requerida
+    </p-message>
+  </div>
+}
+
+<form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4">
+  @if (items.length === 0) {
+    <div
+      class="rounded-xl border border-surface-200 bg-surface-0 p-10 text-center"
+    >
+      <h3 class="text-lg font-semibold text-surface-900">Sin elementos</h3>
+      <p class="mt-1 mb-5 text-sm text-surface-500 max-w-sm mx-auto">
+        No se encontraron elementos para mostrar.
+      </p>
+    </div>
+  }
+  <div
+    cdkDropList
+    (cdkDropListDropped)="drop($event)"
+    class="flex flex-col gap-5 max-h-[450px] overflow-y-auto p-1"
+    formArrayName="items"
+    #scrollContainer
+  >
+    @for (control of items.controls; track control; let i = $index) {
+      <div
+        [formGroupName]="i"
+        cdkDrag
+        class="shrink-0 rounded-xl border border-surface-200 bg-surface-0 overflow-hidden hover:border-primary-300"
+      >
+        <div
+          class="flex items-center justify-between gap-3 bg-surface-50 border-b border-surface-200 px-4 py-2"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              cdkDragHandle
+              class="cursor-grab active:cursor-grabbing text-surface-400 hover:text-surface-700 p-1 -ml-1"
+              pTooltip="Arrastrar para reordenar"
+              tooltipPosition="top"
+            >
+              <i class="pi pi-bars text-lg"></i>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-surface-700"
+                >Banner #{{ i + 1 }}</span
+              >
+              @if (control.get("id")?.value) {
+                <p-tag severity="success" value="Guardado" [rounded]="true" />
+              } @else {
+                <p-tag severity="warn" value="Nuevo" [rounded]="true" />
+              }
+            </div>
+          </div>
+          <p-button
+            icon="pi pi-trash"
+            [text]="true"
+            size="small"
+            severity="danger"
+            (onClick)="removeBanner(i)"
+            pTooltip="Eliminar banner"
+            tooltipPosition="left"
+          />
+        </div>
+
+        <div class="p-5 grid grid-cols-1 gap-6 md:grid-cols-12">
+          <div class="md:col-span-4 flex flex-col gap-3">
+            <div
+              class="aspect-video w-full overflow-hidden rounded-xl border-2 transition-colors relative group cursor-pointer flex flex-col items-center justify-center"
+              [ngClass]="
+                bannerImages()[i]?.preview
+                  ? 'border-transparent bg-surface-900'
+                  : 'border-dashed border-surface-300 bg-surface-50 hover:bg-surface-100 hover:border-primary-400'
+              "
+              (click)="fileInput.click()"
+            >
+              @if (bannerImages()[i]?.preview) {
+                <img
+                  [src]="bannerImages()[i]?.preview"
+                  class="h-full w-full object-cover"
+                  alt="Vista previa del banner"
+                />
+                <div
+                  class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                >
+                  <div
+                    class="bg-white/20 backdrop-blur-sm text-white px-3 py-2 rounded-lg flex items-center gap-2"
+                  >
+                    <i class="pi pi-pencil"></i>
+                    <span class="text-sm font-medium">Cambiar imagen</span>
+                  </div>
+                </div>
+              } @else {
+                <i class="pi pi-image text-3xl text-surface-400 mb-2"></i>
+                <span class="text-sm font-medium text-surface-600"
+                  >Subir imagen</span
+                >
+              }
+            </div>
+
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              class="hidden"
+              (change)="onFileSelected($event, i)"
+            />
+          </div>
+
+          <div class="md:col-span-8 flex flex-col gap-y-5">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mt-1">
+              <p-floatlabel variant="on">
+                <label>Título (opcional)</label>
+                <input pInputText class="w-full" formControlName="title" />
+              </p-floatlabel>
+
+              <p-floatlabel variant="on">
+                <label>Subtítulo (opcional)</label>
+                <input pInputText class="w-full" formControlName="subtitle" />
+              </p-floatlabel>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3 mt-1">
+              <p-floatlabel variant="on">
+                <p-select
+                  [options]="linkTypeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  formControlName="linkType"
+                  class="w-full"
+                  styleClass="w-full"
+                  inputId="linkTypeTxt-{{ i }}"
+                  appendTo="body"
+                ></p-select>
+                <label for="linkTypeTxt-{{ i }}">Acción / Enlace</label>
+              </p-floatlabel>
+
+              <div class="md:col-span-2">
+                <p-floatlabel variant="on">
+                  <label>Ruta URL (Opcional)</label>
+                  <input pInputText class="w-full" formControlName="url" />
+                </p-floatlabel>
+              </div>
+            </div>
+
+            <div
+              class="flex flex-wrap items-center gap-6 mt-2 pt-4 border-t border-surface-100"
+            >
+              <div class="flex items-center gap-2">
+                <p-checkbox
+                  formControlName="isActive"
+                  binary="true"
+                  inputId="active-{{ i }}"
+                ></p-checkbox>
+                <label
+                  for="active-{{ i }}"
+                  class="text-sm font-medium text-surface-700 cursor-pointer select-none"
+                  >Banner Activo</label
+                >
+              </div>
+
+              <div class="flex items-center gap-2">
+                <p-checkbox
+                  formControlName="openInNewTab"
+                  binary="true"
+                  inputId="tab-{{ i }}"
+                ></p-checkbox>
+                <label
+                  for="tab-{{ i }}"
+                  class="text-sm text-surface-600 cursor-pointer select-none"
+                  >Abrir enlace en nueva pestaña</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="p-dialog-footer">
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      (onClick)="close()"
+    />
+    <p-button type="submit" label="Guardar" />
+  </div>
+</form>
+
+<p-confirmdialog />

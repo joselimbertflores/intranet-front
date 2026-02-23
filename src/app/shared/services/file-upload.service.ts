@@ -4,7 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 type FileContext =
-  | 'hero-section'
+  | 'banners'
   | 'documents'
   | 'quick-access'
   | 'communication'

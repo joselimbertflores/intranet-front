@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 
-import { PortalCommunicationService } from '../../services';
+import { PortalCommunicationDataSource } from '../../services';
 import { PdfDisplayComponent, ScrollStateService } from '../../../../shared';
 
 @Component({
@@ -25,7 +25,7 @@ export default class CommunicationDetail {
   private router = inject(Router);
   private location = inject(Location);
   private scrollService = inject(ScrollStateService);
-  private portalService = inject(PortalCommunicationService);
+  private portalService = inject(PortalCommunicationDataSource);
 
   id = input.required<string>();
 

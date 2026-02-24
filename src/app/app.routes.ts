@@ -25,7 +25,7 @@ export const routes: Routes = [
       {
         path: 'communications',
         loadComponent: () =>
-          import('./features/portal/pages/communications/communications.component'),
+          import('./features/portal/pages/communications/communications-page/communications-page'),
       },
       {
         path: 'communications/:id',
@@ -50,7 +50,7 @@ export const routes: Routes = [
       {
         path: 'directory',
         loadComponent: () =>
-          import('./features/portal/pages/directory/directory'),
+          import('./features/portal/pages/directory-page/directory-page'),
       },
     ],
   },

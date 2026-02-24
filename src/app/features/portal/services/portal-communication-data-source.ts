@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { of, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { FileUploadService } from '../../../shared';
+import { PortalCommunicationResponse } from '../interfaces';
 
 interface GetCommunicationsParams {
   limit: number;
@@ -14,7 +15,7 @@ interface GetCommunicationsParams {
 @Injectable({
   providedIn: 'root',
 })
-export class PortalCommunicationService {
+export class PortalCommunicationDataSource {
   private fileUploadService = inject(FileUploadService);
   private readonly URL = `${environment.baseUrl}/portal/communications`;
   private http = inject(HttpClient);
@@ -55,7 +56,7 @@ export class PortalCommunicationService {
       return of(this.cache[key]);
     }
     return this.http
-      .get<{ communications: any[]; total: number }>(this.URL, {
+      .get<{ communications: PortalCommunicationResponse[]; total: number }>(this.URL, {
         params,
       })
       .pipe(

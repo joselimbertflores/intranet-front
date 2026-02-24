@@ -1,0 +1,25 @@
+<section class="bg-surface-50 border-b">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <h1 class="text-2xl md:text-3xl font-semibold">Directorio Telefónico</h1>
+    <p class="mt-2 text-sm md:text-base text-muted max-w-2xl">
+      Numeros internos y externos dentro del GAMS.
+    </p>
+  </div>
+</section>
+<section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+  <div class="flex sm:justify-end">
+    <div class="w-full sm:w-1/4">
+      <search-input (search)="onSearch($event)" />
+    </div>
+  </div>
+  <div class="flex flex-col">
+    @for (node of filteredTree(); track node.id) {
+      <directory-node [node]="node" />
+    } @empty {
+      <div class="flex flex-col items-center justify-center py-12 text-muted">
+        <p class="text-lg font-medium">No se encontraron resultados</p>
+        <p class="text-xs mt-1 opacity-80">Intenta con otro nombre o número</p>
+      </div>
+    }
+  </div>
+</section>

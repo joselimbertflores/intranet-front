@@ -15,7 +15,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
             <img
               src="images/institution/slogan.png"
               alt="Gobierno Autónomo Municipal de Sacaba"
-              class="h-20 w-auto object-contain"
+              class="h-16 sm:h-20 w-auto object-contain"
             />
           </div>
 

@@ -16,8 +16,8 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { PortalCommunicationService } from '../../services';
 import { SearchInputComponent } from '../../../../shared';
+import { PortalCommunicationDataSource } from '../../services';
 @Component({
   selector: 'app-communications',
   imports: [
@@ -35,7 +35,7 @@ import { SearchInputComponent } from '../../../../shared';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CommunicationsComponent {
-  private portalCommunucationService = inject(PortalCommunicationService);
+  private portalCommunucationService = inject(PortalCommunicationDataSource);
   limit = signal(10);
   index = signal(0);
   offset = computed(() => this.limit() * this.index());

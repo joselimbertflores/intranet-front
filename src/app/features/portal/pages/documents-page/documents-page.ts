@@ -32,12 +32,12 @@ import {
   PortalDocumentResponse,
   DocSectionFilterResponse,
 } from '../../interfaces';
-import { PortalDocumentDataSource } from '../../datasources';
 import {
   FileIcon,
   FileSizePipe,
   SearchInputComponent,
 } from '../../../../shared';
+import { PortalDocumentDataSource } from '../../services';
 
 interface FilterQueryParams {
   term?: string;

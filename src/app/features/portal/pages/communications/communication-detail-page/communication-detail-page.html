@@ -1,0 +1,105 @@
+<section class="max-w-4xl mx-auto px-4 py-6">
+  <div class="mb-4">
+    <p-button
+      [text]="true"
+      label="Volver"
+      icon="pi pi-arrow-left"
+      severity="secondary"
+      (onClick)="goBack()"
+      [disabled]="resource.isLoading()"
+    />
+  </div>
+
+  @if (resource.isLoading()) {
+    <div
+      class="rounded-xl border border-surface-200 bg-surface-0 p-8 md:p-12 flex flex-col items-center justify-center min-h-[350px] shadow-sm"
+    >
+      <div class="mb-4">
+        <p-progress-spinner
+          strokeWidth="4"
+          [style]="{ width: '80px', height: '80px' }"
+        />
+      </div>
+      <h3 class="text-base font-semibold text-surface-900 mb-1">
+        Cargando detalle
+      </h3>
+      <p class="text-sm text-surface-500 animate-pulse">
+        Obteniendo la información del comunicado...
+      </p>
+    </div>
+  }
+
+  @if (!resource.isLoading() && resource.hasValue()) {
+    <div
+      class="rounded-xl border border-surface-200 bg-surface-0 p-5 md:p-8 shadow-sm"
+    >
+      <h1 class="text-lg md:text-xl font-semibold mb-4 text-surface-900">
+        Detalle del comunicado
+      </h1>
+
+      <div class="flex flex-wrap items-center gap-2 text-sm mb-6">
+        <span
+          class="inline-flex items-center rounded-full px-2.5 py-0.5 bg-primary-50 text-primary-700 font-medium"
+        >
+          {{ resource.value().type }}
+        </span>
+        <span class="text-surface-300">•</span>
+        <span class="text-surface-600">{{
+          resource.value().createdAt | date: "longDate"
+        }}</span>
+      </div>
+
+      <p
+        class="text-base md:text-lg leading-relaxed font-medium mb-2 text-surface-800"
+      >
+        {{ resource.value().reference }}
+      </p>
+
+      <div class="text-sm text-surface-500 mb-6">
+        CITE:
+        <span
+          class="font-mono bg-surface-50 px-2 py-0.5 rounded text-surface-700 border border-surface-100"
+          >{{ resource.value().code }}</span
+        >
+      </div>
+
+      @if (resource.value().attachment) {
+        <div class="mt-8 pt-6 border-t border-surface-100">
+          <h2 class="text-sm font-semibold text-surface-700 mb-3">
+            Documento adjunto
+          </h2>
+
+          <div
+            class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border border-surface-200 bg-surface-50 hover:bg-surface-100 transition-colors"
+          >
+            <i class="pi pi-file-pdf text-2xl text-red-500"></i>
+
+            <div class="flex-1 min-w-0">
+              <div
+                class="text-sm font-medium text-surface-900 truncate"
+                [title]="resource.value().attachment?.fileName"
+              >
+                {{ resource.value().attachment?.fileName }}
+              </div>
+              <div class="text-xs text-surface-500 mt-0.5">
+                {{ resource.value().attachment?.mimeType }}
+                <span class="mx-1">•</span>
+                {{ resource.value().attachment?.size ?? 0 | fileSize }}
+              </div>
+            </div>
+
+            <a
+              [href]="resource.value()!.attachment?.url"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-surface-200 bg-surface-0 text-sm font-medium text-surface-700 hover:bg-surface-50 hover:text-primary-600 focus:ring-2 focus:ring-primary-200 transition-all w-full sm:w-auto shadow-sm"
+            >
+              <i class="pi pi-external-link text-xs"></i>
+              Abrir
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

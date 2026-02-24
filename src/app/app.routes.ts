@@ -30,7 +30,7 @@ export const routes: Routes = [
       {
         path: 'communications/:id',
         loadComponent: () =>
-          import('./features/portal/pages/communication-detail/communication-detail'),
+          import('./features/portal/pages/communications/communication-detail-page/communication-detail-page'),
       },
       {
         path: 'calendar',

@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 
 import { CalendarDataSource } from '../../../calendar/services';
 import { CommunicationAdminDataSource } from '../../services';
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInput } from '../../../../../shared';
 import { CommunicationAdminResponse } from '../../interfaces';
 import { CalendarEditor } from '../../../calendar/dialogs';
 import { CommunicationEditor } from '../../dialogs';
@@ -32,7 +32,7 @@ import { CommunicationEditor } from '../../dialogs';
     TableModule,
     MenuModule,
     TagModule,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './communications-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

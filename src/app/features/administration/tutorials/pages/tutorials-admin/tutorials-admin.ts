@@ -13,7 +13,7 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInput } from '../../../../../shared';
 import { TutorialDataSource } from '../../services';
 import { TutorialDetailResponse } from '../../interfaces';
 import { TutorialEditor } from '../../dialogs';
@@ -25,7 +25,7 @@ import { TutorialEditor } from '../../dialogs';
     TableModule,
     ButtonModule,
     TagModule,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './tutorials-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

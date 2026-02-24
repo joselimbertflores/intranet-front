@@ -5,6 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -12,16 +13,22 @@ import { Router } from '@angular/router';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 
-import { PortalCommunicationDataSource } from '../../services';
-import { PdfDisplayComponent, ScrollStateService } from '../../../../shared';
+import { ScrollStateService, FileSizePipe } from '../../../../../shared';
+import { PortalCommunicationDataSource } from '../../../services';
 
 @Component({
-  selector: 'app-communication-detail',
-  imports: [CommonModule, ButtonModule, SkeletonModule, PdfDisplayComponent],
-  templateUrl: './communication-detail.html',
+  selector: 'app-communication-detail-page',
+  imports: [
+    CommonModule,
+    ButtonModule,
+    SkeletonModule,
+    ProgressSpinnerModule,
+    FileSizePipe,
+  ],
+  templateUrl: './communication-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class CommunicationDetail {
+export default class CommunicationDetailPage {
   private router = inject(Router);
   private location = inject(Location);
   private scrollService = inject(ScrollStateService);
@@ -29,9 +36,9 @@ export default class CommunicationDetail {
 
   id = input.required<string>();
 
-  communicationResource = rxResource({
+  resource = rxResource({
     params: () => ({ id: this.id() }),
-    stream: ({ params }) => this.portalService.getOne(params.id),
+    stream: ({ params }) => this.portalService.getDetail(params.id),
   });
 
   goBack() {
@@ -44,8 +51,8 @@ export default class CommunicationDetail {
   }
 
   download() {
-    if (!this.communicationResource.value()) return;
-    const { fileUrl, originalName } = this.communicationResource.value();
-    this.portalService.download(fileUrl, originalName);
+    if (!this.resource.value()) return;
+    // const { fileUrl, originalName } = this.resource.value();
+    // this.portalService.download(fileUrl, originalName);
   }
 }

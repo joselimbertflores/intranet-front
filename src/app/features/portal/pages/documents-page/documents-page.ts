@@ -35,7 +35,7 @@ import {
 import {
   FileIcon,
   FileSizePipe,
-  SearchInputComponent,
+  SearchInput,
 } from '../../../../shared';
 import { PortalDocumentDataSource } from '../../services';
 
@@ -61,7 +61,7 @@ interface FilterQueryParams {
     ButtonModule,
     PanelModule,
     DatePicker,
-    SearchInputComponent,
+    SearchInput,
     FileSizePipe,
     FileIcon,
   ],

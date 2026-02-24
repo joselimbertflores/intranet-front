@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { MenuItem } from 'primeng/api';
 
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInput } from '../../../../../shared';
 import { UserDataSource } from '../../services';
 import { UserEditor } from '../../dialogs';
 
@@ -25,7 +25,7 @@ import { UserEditor } from '../../dialogs';
     ButtonModule,
     TableModule,
     TagModule,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './users-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

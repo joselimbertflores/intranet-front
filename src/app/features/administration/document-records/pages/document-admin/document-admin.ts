@@ -23,7 +23,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 
-import { FileIcon, SearchInputComponent } from '../../../../../shared';
+import { FileIcon, SearchInput } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
 import {
@@ -47,7 +47,7 @@ import {
     TableModule,
     TagModule,
     FileIcon,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './document-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,6 +4,7 @@ export interface PortalCommunicationResponse {
   type: string;
   createdAt: string;
   previewImageUrl?: string | null;
+  code: string;
   attachment?: AttachmentCommunicationResponse;
 }
 
@@ -11,5 +12,5 @@ export interface AttachmentCommunicationResponse {
   fileName: string;
   mimeType: string;
   url: string;
-  size?: number;
+  size: number;
 }

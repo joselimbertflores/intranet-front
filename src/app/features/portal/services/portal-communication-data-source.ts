@@ -5,6 +5,7 @@ import { of, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { FileUploadService } from '../../../shared';
 import { PortalCommunicationResponse } from '../interfaces';
+import { CommunicationTypeResponse } from '../../administration/communications/interfaces';
 
 interface GetCommunicationsParams {
   limit: number;
@@ -20,7 +21,7 @@ export class PortalCommunicationDataSource {
   private readonly URL = `${environment.baseUrl}/portal/communications`;
   private http = inject(HttpClient);
 
-  detailCache: Record<string, any> = {};
+  detailCache: Record<string, PortalCommunicationResponse> = {};
 
   cache: Record<string, { communications: any[]; total: number }> = {};
 
@@ -28,14 +29,14 @@ export class PortalCommunicationDataSource {
 
   constructor() {}
 
-  getOne(id: string) {
+  getDetail(id: string) {
     if (this.detailCache[id]) {
       return of(this.detailCache[id]);
     }
-    return this.http.get(`${this.URL}/${id}`).pipe(
+    return this.http.get<PortalCommunicationResponse>(`${this.URL}/${id}`).pipe(
       tap((resp) => {
         this.detailCache[id] = resp;
-      })
+      }),
     );
   }
 
@@ -56,20 +57,23 @@ export class PortalCommunicationDataSource {
       return of(this.cache[key]);
     }
     return this.http
-      .get<{ communications: PortalCommunicationResponse[]; total: number }>(this.URL, {
-        params,
-      })
+      .get<{ communications: PortalCommunicationResponse[]; total: number }>(
+        this.URL,
+        {
+          params,
+        },
+      )
       .pipe(
         tap((resp) => {
           if (!isFilterMode) {
             this.cache[key] = resp;
           }
-        })
+        }),
       );
   }
 
-  getTypes() {
-    return this.http.get<any[]>(`${this.URL}/types`);
+  private getTypes() {
+    return this.http.get<CommunicationTypeResponse[]>(`${this.URL}/types`);
   }
 
   download(url: string, name: string) {

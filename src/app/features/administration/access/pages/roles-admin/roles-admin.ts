@@ -11,14 +11,14 @@ import { TableModule, TablePageEvent } from 'primeng/table';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInput } from '../../../../../shared';
 import { RoleDataSource } from '../../services';
 import { RoleResponse } from '../../interfaces';
 import { RoleEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-roles-admin',
-  imports: [ButtonModule, TableModule, SearchInputComponent],
+  imports: [ButtonModule, TableModule, SearchInput],
   templateUrl: './roles-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

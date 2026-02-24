@@ -16,7 +16,7 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
-import { SearchInputComponent } from '../../../../../shared';
+import { SearchInput } from '../../../../../shared';
 import { CalendarEventResponse } from '../../interfaces';
 import { CalendarDataSource } from '../../services';
 import { CalendarEditor } from '../../dialogs';
@@ -30,7 +30,7 @@ import { CalendarEditor } from '../../dialogs';
     TableModule,
     TagModule,
     MenuModule,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

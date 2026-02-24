@@ -42,7 +42,7 @@ import { InputTextModule } from 'primeng/inputtext';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchInputComponent implements OnInit {
+export class SearchInput implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   value = input<string | null>(null);

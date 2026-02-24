@@ -16,8 +16,8 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
-import { SearchInputComponent } from '../../../../shared';
 import { PortalCommunicationDataSource } from '../../services';
+import { SearchInput } from '../../../../shared';
 @Component({
   selector: 'app-communications',
   imports: [
@@ -29,7 +29,7 @@ import { PortalCommunicationDataSource } from '../../services';
     TooltipModule,
     SelectModule,
     ProgressBarModule,
-    SearchInputComponent,
+    SearchInput,
   ],
   templateUrl: './communications.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

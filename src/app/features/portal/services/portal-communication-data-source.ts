@@ -1,17 +1,22 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { of, tap } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { FileUploadService } from '../../../shared';
-import { PortalCommunicationResponse } from '../interfaces';
-import { CommunicationTypeResponse } from '../../administration/communications/interfaces';
 
-interface GetCommunicationsParams {
-  limit: number;
+import { CommunicationTypeResponse } from '../../administration/communications/interfaces';
+import { environment } from '../../../../environments/environment';
+import { PortalCommunicationResponse } from '../interfaces';
+import { FileUploadService } from '../../../shared';
+
+interface LoadCommunicationsParams {
   offset: number;
   term?: string;
   typeId?: number | null;
+}
+
+interface Cache {
+  communications: PortalCommunicationResponse[];
+  total: number;
 }
 @Injectable({
   providedIn: 'root',
@@ -22,10 +27,13 @@ export class PortalCommunicationDataSource {
   private http = inject(HttpClient);
 
   detailCache: Record<string, PortalCommunicationResponse> = {};
+  cache: Record<string, Cache> = {};
 
-  cache: Record<string, { communications: any[]; total: number }> = {};
+  restoreParams = signal(false);
+  paramsCache: object | null = null;
 
   types = toSignal(this.getTypes(), { initialValue: [] });
+  testCache = signal<PortalCommunicationDataSource[]>([]);
 
   constructor() {}
 
@@ -40,22 +48,22 @@ export class PortalCommunicationDataSource {
     );
   }
 
-  findAll(queryParams: GetCommunicationsParams) {
-    const { term, typeId, limit, offset } = queryParams;
+  loadMore(queryParams: LoadCommunicationsParams) {
+    const { term, typeId, offset } = queryParams;
     const isFilterMode = term || typeId;
-    const key = `${limit}-${offset}`;
+    // const key = `${limit}-${offset}`;
 
     const params = new HttpParams({
       fromObject: {
-        limit,
+        limit: 9,
         offset,
         ...(term && { term }),
         ...(typeId && { typeId }),
       },
     });
-    if (this.cache[key] && !isFilterMode) {
-      return of(this.cache[key]);
-    }
+    // if (this.cache[key] && !isFilterMode) {
+    //   return of(this.cache[key]);
+    // }
     return this.http
       .get<{ communications: PortalCommunicationResponse[]; total: number }>(
         this.URL,
@@ -63,13 +71,18 @@ export class PortalCommunicationDataSource {
           params,
         },
       )
-      .pipe(
-        tap((resp) => {
-          if (!isFilterMode) {
-            this.cache[key] = resp;
-          }
-        }),
-      );
+      .pipe
+      // tap((resp) => {
+      //   if (!isFilterMode) {
+      //     this.cache[key] = resp;
+      //   }
+      // }),
+      ();
+  }
+
+  getFilterParams(): object | null {
+    if (!this.restoreParams()) return null;
+    return this.paramsCache;
   }
 
   private getTypes() {

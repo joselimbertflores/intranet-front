@@ -14,7 +14,7 @@ import { map } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 
 import { PortalTutorialDataSource } from '../../services';
-import { ScrollStateService } from '../../../../shared';
+import { WindowScrollStore } from '../../../../shared';
 @Component({
   selector: 'app-tutorials-detail',
   imports: [CommonModule, ButtonModule],
@@ -25,7 +25,7 @@ export default class TutorialsDetail {
   private router = inject(Router);
   private location = inject(Location);
   private route = inject(ActivatedRoute);
-  private scrollService = inject(ScrollStateService);
+  private scrollService = inject(WindowScrollStore);
   private portalTutorialService = inject(PortalTutorialDataSource);
 
   slug = input.required<string>();
@@ -55,11 +55,11 @@ export default class TutorialsDetail {
   }
 
   goBack() {
-    this.scrollService.keepScroll();
-    if (window.history.length > 1) {
-      this.location.back();
-    } else {
-      this.router.navigate(['/communications']);
-    }
+    // this.scrollService.keepScroll();
+    // if (window.history.length > 1) {
+    //   this.location.back();
+    // } else {
+    //   this.router.navigate(['/communications']);
+    // }
   }
 }

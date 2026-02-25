@@ -8,6 +8,8 @@ import {
   provideRouter,
   withViewTransitions,
   withComponentInputBinding,
+  withInMemoryScrolling,
+  withDebugTracing,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeBo from '@angular/common/locales/es-BO';
@@ -40,6 +42,10 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
+      // withInMemoryScrolling({
+      //   scrollPositionRestoration: 'enabled', // 'enabled' is the key
+      // }),
+      // withDebugTracing(),
       withViewTransitions({ onViewTransitionCreated: handleTransitionCreated }),
       withComponentInputBinding(),
     ),

@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 
-import { ScrollStateService, FileSizePipe } from '../../../../../shared';
+import { WindowScrollStore, FileSizePipe } from '../../../../../shared';
 import { PortalCommunicationDataSource } from '../../../services';
 
 @Component({
@@ -31,10 +31,11 @@ import { PortalCommunicationDataSource } from '../../../services';
 export default class CommunicationDetailPage {
   private router = inject(Router);
   private location = inject(Location);
-  private scrollService = inject(ScrollStateService);
+  private scrollService = inject(WindowScrollStore);
   private portalService = inject(PortalCommunicationDataSource);
 
   id = input.required<string>();
+  
 
   resource = rxResource({
     params: () => ({ id: this.id() }),
@@ -42,12 +43,14 @@ export default class CommunicationDetailPage {
   });
 
   goBack() {
-    this.scrollService.keepScroll();
-    if (window.history.length > 1) {
-      this.location.back();
-    } else {
-      this.router.navigate(['/communications']);
-    }
+    this.portalService.restoreParams.set(true);
+    this.location.back();
+    // this.scrollService.keepScroll();
+    // if (window.history.length > 1) {
+    //   this.location.back();
+    // } else {
+    //   this.router.navigate(['/communications']);
+    // }
   }
 
   download() {

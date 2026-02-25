@@ -7,10 +7,16 @@ import {
   OnInit,
   viewChild,
 } from '@angular/core';
-import { NavigationStart, Router, RouterModule, Scroll } from '@angular/router';
+import {
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterModule,
+  Scroll,
+} from '@angular/router';
 
 import { PortalFooter, PortalNavbar } from './components';
-import { ScrollStateService } from '../../shared';
+import { WindowScrollStore } from '../../shared';
 import { filter, map } from 'rxjs';
 
 @Component({
@@ -21,34 +27,28 @@ import { filter, map } from 'rxjs';
 })
 export default class PortalLayout implements OnInit, AfterViewInit {
   private router = inject(Router);
-  private scrollStateService = inject(ScrollStateService);
+  // private scrollStore = inject(WindowScrollStore);
 
-  ngOnInit(): void {
-    this.scrollStateService.saveScrollPosition.subscribe(() => {
-      console.log('saveing scroll', window.scrollY);
-    });
-  }
+  ngOnInit(): void {}
+
+  ngAfterViewInit(): void {}
+
+  private currentRoute = '';
 
   constructor() {
-    inject(Router)
-      .events.pipe(
-        filter((event): event is Scroll => event instanceof Scroll),
-        map((event: Scroll) => event.position),
-      )
-      .subscribe((position) => {
-        console.log(position);
-        // this.viewportScroller.scrollToPosition(position || [0, 0]);
-      });
+    // this.initScrollSaving();
   }
 
-  ngAfterViewInit(): void {
-    this.listenScrollNavigation();
-  }
-
-  private listenScrollNavigation() {
-    this.router.events.subscribe((e) => {
-      if (e instanceof NavigationStart) {
-        console.log('saveing scroll', window.scrollY);
+  private initScrollSaving(): void {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        // console.log(event.navigationTrigger);
+        // if (this.currentRoute) {
+        //   this.scrollStore.save(this.currentRoute, window.scrollY);
+        // }
+      }
+      if (event instanceof NavigationEnd) {
+        this.currentRoute = event.urlAfterRedirects;
       }
     });
   }

@@ -9,7 +9,5 @@ export * from "./pipes/form-error-messages.pipe"
 export * from "./pipes/file-size-pipe"
 
 export * from "./services/file-upload.service"
-export * from "./services/scroll-state.service"
+export * from "./services/window-scroll-store"
 export * from "./services/ui-breakpoint-observer"
-
-export * from "./directives/scroll-restore-directive"

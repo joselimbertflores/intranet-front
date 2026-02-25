@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  @if (resource.isLoading() && !dataSource().length) {
+  <!-- @if (resource.isLoading() && !dataSource().length) {
     <div class="flex flex-col items-center justify-center py-16">
       <i
         class="pi pi-spin pi-spinner text-4xl mb-4"
@@ -35,17 +35,17 @@
         Cargando comunicados...
       </p>
     </div>
-  }
+  } -->
 
-  @if (dataSource().length) {
+  @if (communications().length) {
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      @for (item of dataSource(); track item.id) {
+      @for (item of communications(); track item.id) {
         <communication-card [data]="item" />
       }
     </div>
   }
 
-  @if (!resource.isLoading() && !dataSource().length) {
+  <!-- @if (!resource.isLoading() && !dataSource().length) {
     <div class="flex flex-col items-center justify-center py-16 text-center">
       <h3 class="text-lg font-semibold text-surface-900 mb-1">
         Sin resultados
@@ -55,14 +55,14 @@
         actual.
       </p>
     </div>
-  }
+  } -->
   @if (hasMore()) {
     <div class="flex justify-center pt-4">
       <p-button
         severity="secondary"
         [rounded]="true"
-        [loading]="resource.isLoading()"
-        [label]="resource.isLoading() ? ' Cargando…' : '  Cargar más'"
+        [loading]="isLoading()"
+        [label]="isLoading() ? ' Cargando…' : '  Cargar más'"
         (onClick)="loadMore()"
       />
     </div>

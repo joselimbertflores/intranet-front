@@ -35,7 +35,7 @@ export const routes: Routes = [
       {
         path: 'calendar',
         loadComponent: () =>
-          import('./features/portal/pages/institutional-calendar/institutional-calendar.component'),
+          import('./features/portal/pages/calendar-page/calendar-page'),
       },
       {
         path: 'tutorials',

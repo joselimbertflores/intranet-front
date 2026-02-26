@@ -43,7 +43,6 @@ export default class CommunicationDetailPage {
   });
 
   goBack() {
-    this.portalService.restoreParams.set(true);
     this.location.back();
     // this.scrollService.keepScroll();
     // if (window.history.length > 1) {

@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'portal-footer',
   imports: [],
   template: `
-    <footer class="bg-slate-50 border-t border-slate-300/40 pt-12 pb-8">
+    <footer class="bg-surface-50 border-t border-surface-300/40 pt-12 pb-8">
       <div class="max-w-7xl mx-auto px-6">
         <div
           class="flex flex-col md:flex-row items-center md:justify-between gap-8"

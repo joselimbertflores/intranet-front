@@ -71,10 +71,10 @@ import { TreeDirectoryNode } from '../../interfaces';
   `,
   styles: `
     .animate-accordion-down {
-      animation: accordionDown 300ms ease-in-out forwards;
+      animation: accordionDown 150ms ease-in-out forwards;
     }
     .animate-accordion-up {
-      animation: accordionUp 300ms ease-in-out forwards;
+      animation: accordionUp 150ms ease-in-out forwards;
     }
 
     @keyframes accordionDown {

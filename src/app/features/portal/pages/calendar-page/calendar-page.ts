@@ -10,12 +10,12 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import { PortalDataSource } from '../../services';
 
 @Component({
-  selector: 'app--institutional-calendar.component',
+  selector: 'app--calendar-page',
   imports: [FullCalendarModule],
-  templateUrl: './institutional-calendar.component.html',
+  templateUrl: './calendar-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class InstitutionalCalendarComponent {
+export default class CalendarPage {
   private portalService = inject(PortalDataSource);
   events: any[] = [];
 

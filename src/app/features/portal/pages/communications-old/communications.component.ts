@@ -54,7 +54,7 @@ export default class CommunicationsComponent {
       offset: this.offset(),
       typeId: this.typeId(),
     }),
-    stream: ({ params }) => this.portalCommunucationService.loadMore(params),
+    stream: ({ params }) => this.portalCommunucationService.getData(params),
   });
 
   download(item: any) {

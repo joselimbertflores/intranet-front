@@ -18,6 +18,16 @@ interface Cache {
   communications: PortalCommunicationResponse[];
   total: number;
 }
+
+export interface CommunicationsSnapshot {
+  items: PortalCommunicationResponse[];
+  total: number;
+  filters: {
+    term?: string;
+    typeId?: number | null;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -35,6 +45,9 @@ export class PortalCommunicationDataSource {
   types = toSignal(this.getTypes(), { initialValue: [] });
   testCache = signal<PortalCommunicationDataSource[]>([]);
 
+  private snapshot: CommunicationsSnapshot | null = null;
+  private shouldRestore = false;
+
   constructor() {}
 
   getDetail(id: string) {
@@ -48,14 +61,14 @@ export class PortalCommunicationDataSource {
     );
   }
 
-  loadMore(queryParams: LoadCommunicationsParams) {
+  getData(queryParams: LoadCommunicationsParams) {
     const { term, typeId, offset } = queryParams;
     const isFilterMode = term || typeId;
     // const key = `${limit}-${offset}`;
 
     const params = new HttpParams({
       fromObject: {
-        limit: 9,
+        limit: 6,
         offset,
         ...(term && { term }),
         ...(typeId && { typeId }),
@@ -78,6 +91,26 @@ export class PortalCommunicationDataSource {
       //   }
       // }),
       ();
+  }
+
+  saveSnapshot(snapshot: CommunicationsSnapshot) {
+    this.snapshot = snapshot;
+    this.shouldRestore = true;
+  }
+
+  consumeSnapshot(): CommunicationsSnapshot | null {
+    if (!this.shouldRestore) return null;
+
+    this.shouldRestore = false;
+
+    const snap = this.snapshot;
+    this.snapshot = null; // 🔥 one-shot
+    return snap;
+  }
+
+  clearSnapshot() {
+    this.snapshot = null;
+    this.shouldRestore = false;
   }
 
   getFilterParams(): object | null {

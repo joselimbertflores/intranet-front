@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -14,7 +19,7 @@ import { PortalCommunicationResponse } from '../../interfaces';
       class="group h-full flex flex-col rounded-xl border border-surface-300 bg-surface-0 hover:bg-surface-50 transition"
     >
       <a
-        [routerLink]="['/communications', data().id]"
+        (click)="open()"
         class="flex flex-col grow p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-200"
       >
         @if (data().previewImageUrl) {
@@ -62,5 +67,9 @@ import { PortalCommunicationResponse } from '../../interfaces';
 export class CommunicationCard {
   data = input.required<PortalCommunicationResponse>();
 
-  open() {}
+  onOpen = output<void>();
+
+  open() {
+    this.onOpen.emit();
+  }
 }

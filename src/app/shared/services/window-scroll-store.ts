@@ -12,7 +12,8 @@ export class WindowScrollStore {
   private isPopState = false;
 
   // Ruta anterior
-  private currentRoute: string | null = null;
+  // private currentRoute: string | null = null;
+  private currentRoute = this.router.url.split('?')[0];
 
   constructor() {
     this.init();
@@ -32,7 +33,7 @@ export class WindowScrollStore {
 
     window.scrollTo({ top: y });
 
-    // Remover data para evitar que effect de RxResource siga restableciendo scroll cuando paginacion cambia
+    // Remover data para evitar que algun effect de RxResource siga restableciendo scroll cuando paginacion cambia
     this.positions.delete(routeKey);
   }
 
@@ -47,7 +48,10 @@ export class WindowScrollStore {
       }
 
       if (event instanceof NavigationEnd) {
-        this.currentRoute = event.urlAfterRedirects;
+        //  Si tu ruta es /comunicaciones?page=2
+        console.log( event.urlAfterRedirects);
+        this.currentRoute = event.urlAfterRedirects.split('?')[0];
+        
       }
     });
   }

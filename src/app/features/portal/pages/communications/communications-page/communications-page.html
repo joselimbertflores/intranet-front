@@ -20,7 +20,7 @@
         optionValue="id"
         placeholder="Tipo"
         class="w-full"
-        [(ngModel)]="type"
+        [(ngModel)]="selectedType"
       />
     </div>
   </div>
@@ -37,10 +37,10 @@
     </div>
   } -->
 
-  @if (communications().length) {
+  @if (dataSource().length) {
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      @for (item of communications(); track item.id) {
-        <communication-card [data]="item" />
+      @for (item of dataSource(); track item.id) {
+        <communication-card [data]="item" (onOpen)="openDetail(item)" />
       }
     </div>
   }

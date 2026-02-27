@@ -16,47 +16,68 @@ import { PortalCommunicationResponse } from '../../interfaces';
   imports: [CommonModule, TagModule, RouterModule, NgOptimizedImage],
   template: `
     <article
-      class="group h-full flex flex-col rounded-xl border border-surface-300 bg-surface-0 hover:bg-surface-50 transition"
+      class="group relative h-full flex flex-col rounded-xl border border-surface-200 bg-surface-0 
+         hover:shadow-lg hover:border-primary-400 transition-all duration-300 ease-in-out cursor-pointer"
     >
       <a
         (click)="open()"
-        class="flex flex-col grow p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-200"
+        class="flex flex-col grow p-3 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-xl"
       >
-        @if (data().previewImageUrl) {
-          <div class="mb-3 h-36 w-full relative shrink-0">
+        <div
+          class="relative mb-4 overflow-hidden rounded-lg bg-surface-100 aspect-video shrink-0"
+        >
+          @if (data().previewImageUrl) {
             <img
               [ngSrc]="data().previewImageUrl!"
               fill
               priority
-              class="object-cover rounded-lg"
-              alt="Communication preview"
+              class="object-cover transition-transform duration-500 group-hover:scale-105"
+              alt="Document preview"
+            />
+            <div
+              class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"
+            ></div>
+          } @else {
+            <div class="flex flex-col items-center justify-center h-full gap-2">
+              <i class="pi pi-file-pdf text-4xl text-surface-300"></i>
+              <span
+                class="text-[10px] font-medium text-surface-400 uppercase tracking-wider"
+                >Sin Vista Previa</span
+              >
+            </div>
+          }
+
+          <div class="absolute top-2 left-2">
+            <p-tag
+              [value]="data().type"
+              [rounded]="true"
+              severity="secondary"
+              class="opacity-90 shadow-sm"
+              [style]="{ 'font-size': '10px', padding: '2px 8px' }"
             />
           </div>
-        } @else {
-          <div
-            class="mb-3 h-36 flex items-center justify-center bg-surface-50 rounded-lg shrink-0"
-          >
-            <i class="pi pi-file text-2xl text-surface-300"></i>
-          </div>
-        }
+        </div>
 
-        <div class="flex flex-col grow">
-          <div class="mb-2">
-            <span
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary-50 text-primary-700"
-            >
-              {{ data().type }}
-            </span>
-          </div>
-
+        <div class="flex flex-col grow px-1">
           <h3
-            class="text-sm font-semibold leading-snug mb-3 line-clamp-2 md:line-clamp-3 text-surface-900"
+            class="text-sm font-bold leading-tight mb-2 line-clamp-2 text-surface-900 group-hover:text-primary-600 transition-colors"
+            [title]="data().reference"
           >
             {{ data().reference }}
           </h3>
 
-          <div class="mt-auto text-xs text-surface-500">
-            {{ data().createdAt | date: 'longDate' }}
+          <div
+            class="mt-auto flex items-center justify-between border-t border-surface-100 pt-3"
+          >
+            <span
+              class="text-[11px] font-medium text-surface-500 flex items-center gap-1"
+            >
+              <i class="pi pi-calendar text-[10px]"></i>
+              {{ data().createdAt | date: 'mediumDate' }}
+            </span>
+            <i
+              class="pi pi-arrow-right text-xs text-surface-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all"
+            ></i>
           </div>
         </div>
       </a>

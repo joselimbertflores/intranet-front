@@ -71,13 +71,13 @@ export class PortalNavbar {
       routerLinkActiveOptions: { exact: true },
     },
     {
-      label: 'Multimedia',
-      routerLink: '/tutorials',
+      label: 'Directorio',
+      routerLink: '/directory',
       routerLinkActiveOptions: { exact: false },
     },
     {
-      label: 'Directorio',
-      routerLink: '/directory',
+      label: 'Tutoriales',
+      routerLink: '/tutorials',
       routerLinkActiveOptions: { exact: false },
     },
   ];

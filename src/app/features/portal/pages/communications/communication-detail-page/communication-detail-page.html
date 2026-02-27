@@ -1,5 +1,5 @@
 <section class="max-w-4xl mx-auto px-4 py-6">
-  <div class="mb-4">
+  <div class="mb-2">
     <p-button
       [text]="true"
       label="Volver"
@@ -56,11 +56,7 @@
       </p>
 
       <div class="text-sm text-surface-500 mb-6">
-        CITE:
-        <span
-          class="font-mono bg-surface-50 px-2 py-0.5 rounded text-surface-700 border border-surface-100"
-          >{{ resource.value().code }}</span
-        >
+        CITE: {{ resource.value().code }}
       </div>
 
       @if (resource.value().attachment) {

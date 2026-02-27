@@ -143,7 +143,7 @@ import { FileIcon } from '../../../../../shared';
                 <a
                   [href]="data().file?.url"
                   target="_blank"
-                  class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-fit"
+                  class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-full"
                 >
                   <file-icon [fileName]="data().file?.originalName ?? ''" />
                   <div class="flex flex-col">

@@ -9,7 +9,7 @@ import {
 import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 
-import { PrimengFileIconPipe } from '../../../pipes/primeng-file-icon.pipe';
+import { PrimengFileIconPipe } from '../../../pipes/primeng-file-icon';
 
 interface UploadedFile {
  id: string; 

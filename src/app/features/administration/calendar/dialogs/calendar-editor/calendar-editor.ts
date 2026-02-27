@@ -62,6 +62,7 @@ export class CalendarEditor implements OnInit {
   readonly currentDate = new Date();
   readonly data?: DialogData = inject(DynamicDialogConfig).data;
 
+  formSubmitted = signal(false);
   form: FormGroup = this.formBuilder.group({
     title: ['', [Validators.required, Validators.maxLength(150)]],
     description: [''],
@@ -110,7 +111,11 @@ export class CalendarEditor implements OnInit {
   ];
 
   save() {
-    if (this.form.invalid) return this.form.markAllAsTouched();
+    this.formSubmitted.set(true);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const saveObservable = this.data?.id
       ? this.calendarDataSource.update(this.data.id, this.form.value)
       : this.calendarDataSource.create({

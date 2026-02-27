@@ -56,6 +56,7 @@ export class CommunicationEditor {
   readonly types = this.communicationService.types;
   readonly formUtils = FormUtils;
 
+  formSubmitted = signal(false);
   form: FormGroup = this.formBuilder.group({
     reference: ['', [Validators.required, Validators.minLength(3)]],
     code: [
@@ -76,7 +77,11 @@ export class CommunicationEditor {
   }
 
   save() {
-    if (!this.isFormValid) return this.form.markAllAsTouched();
+    this.formSubmitted.set(true);
+    if (!this.isFormValid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const subscription = this.data
       ? this.communicationService.update(

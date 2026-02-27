@@ -7,6 +7,7 @@
         icon="pi pi-arrow-left"
         label="Volver"
         [text]="true"
+        size="small"
         (onClick)="goBack()"
       />
     </div>
@@ -14,10 +15,9 @@
       <p-button
         icon="pi pi-sort"
         aria-label="sort"
-        [outlined]="true"
-        severity="info"
+        severity="secondary"
         size="small"
-        label="Ordenar"
+        label="Guardar orden"
         [disabled]="!isReordered()"
         (onClick)="reoderBlocks()"
       />

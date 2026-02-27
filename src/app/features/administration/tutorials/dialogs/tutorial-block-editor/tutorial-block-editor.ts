@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   OnInit,
+  signal,
 } from '@angular/core';
 import {
   ReactiveFormsModule,
@@ -43,8 +44,8 @@ const BLOCK_EXTENSIONS: Record<TutorialBlockType, string[]> = {
 @Component({
   selector: 'app-tutorial-block-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
+    CommonModule,
     FileUploadModule,
     FloatLabelModule,
     InputTextModule,
@@ -52,8 +53,8 @@ const BLOCK_EXTENSIONS: Record<TutorialBlockType, string[]> = {
     MessageModule,
     ButtonModule,
     EditorModule,
-    FileIcon,
     FileSizePipe,
+    FileIcon,
   ],
   templateUrl: './tutorial-block-editor.html',
 
@@ -67,6 +68,7 @@ export class TutorialBlockEditor implements OnInit {
   readonly data: TutorialBLockDialogData = inject(DynamicDialogConfig).data;
   readonly formUtils = FormUtils;
 
+  formSubmitted = signal(false);
   blockForm: FormGroup = this.formBuilder.group({
     content: [null],
   });
@@ -79,7 +81,11 @@ export class TutorialBlockEditor implements OnInit {
   }
 
   save() {
-    if (!this.isFormValid) return this.blockForm.markAllAsTouched();
+    this.formSubmitted.set(true);
+    if (!this.isFormValid) {
+      this.blockForm.markAllAsTouched();
+      return;
+    }
     const saveObservable = this.data.block
       ? this.tutorialDataSource.updateBlock(
           this.data.block.id,
@@ -124,7 +130,7 @@ export class TutorialBlockEditor implements OnInit {
   get isFormValid() {
     return this.data.type === 'TEXT' || this.data.type === 'VIDEO_URL'
       ? this.blockForm.valid
-      : this.blockForm.valid && (!!this.file || this.data.block);
+      : this.blockForm.valid && (!!this.file || this.data.block !== undefined);
   }
 
   private loadForm() {

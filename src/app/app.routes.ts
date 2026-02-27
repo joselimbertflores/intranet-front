@@ -4,8 +4,7 @@ import { isAuthenticatedGuard } from './core/auth/is-authenticated-guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./layouts/portal-layout/portal-layout'),
+    loadComponent: () => import('./layouts/portal-layout/portal-layout'),
     children: [
       {
         path: '',
@@ -40,12 +39,12 @@ export const routes: Routes = [
       {
         path: 'tutorials',
         loadComponent: () =>
-          import('./features/portal/pages/tutorials-list/tutorials-list'),
+          import('./features/portal/pages/tutorials/tutorials-page/tutorials-page'),
       },
       {
         path: 'tutorials/:slug',
         loadComponent: () =>
-          import('./features/portal/pages/tutorials-detail/tutorials-detail'),
+          import('./features/portal/pages/tutorials/tutorials-detail-page/tutorials-detail-page'),
       },
       {
         path: 'directory',

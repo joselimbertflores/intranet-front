@@ -1,4 +1,4 @@
-<form #commForm="ngForm" [formGroup]="form" (ngSubmit)="save()">
+<form [formGroup]="form" (ngSubmit)="save()">
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-2 pt-1">
     <div class="sm:col-span-2">
       <div class="flex flex-col">
@@ -85,7 +85,7 @@
           [auto]="false"
           (onSelect)="selectFile($event)"
         />
-        @if (commForm.submitted && file() === null) {
+        @if (formSubmitted() && file() === null) {
           <p-message severity="error" size="small" variant="simple">
             Seleccione un archivo PDF.
           </p-message>

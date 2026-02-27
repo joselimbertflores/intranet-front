@@ -18,10 +18,6 @@ import { PortalCommunicationDataSource } from '../../../services';
 import { PortalCommunicationResponse } from '../../../interfaces';
 import { CommunicationCard } from '../../../components';
 
-interface TempLoadedData {
-  items: PortalCommunicationResponse[];
-  total: number;
-}
 @Component({
   selector: 'app-communications-page',
   imports: [
@@ -41,7 +37,7 @@ export default class CommunicationsPage implements OnInit {
 
   readonly types = this.comunicationDataSource.types;
 
-  readonly pageSize = 6;
+  readonly pageSize = 12;
   dataSource = signal<PortalCommunicationResponse[]>([]);
   dataSize = signal(0);
   isLoading = signal<boolean>(false);
@@ -50,8 +46,6 @@ export default class CommunicationsPage implements OnInit {
   term = signal('');
   type = signal<number | null>(null);
   restoreScroll = signal(false);
-
-  private unfilteredBackup: TempLoadedData | null = null;
 
   private readonly scrollKey = this.router.url;
 
@@ -68,38 +62,13 @@ export default class CommunicationsPage implements OnInit {
   }
 
   search(term: string) {
-    // TRANSICIÓN: sin filtros → con filtros
-    // “Hasta ahora NO había filtros y ahora SÍ se va a aplicar uno”, evita tocar nuevamente la data ya guardada antes de filtrar
-    if (!this.isFiltering() && term) {
-      this.unfilteredBackup = {
-        items: [...this.dataSource()],
-        total: this.dataSize(),
-      };
-    }
     this.term.set(term);
-    if (term) {
-      this.resetAndFetch();
-    } else {
-      this.restoreOrReload();
-    }
+    this.resetAndFetch();
   }
 
   filterByType(id: number | null) {
-    // TRANSICIÓN: sin filtros → con filtros
-    if (!this.isFiltering() && id !== null) {
-      this.unfilteredBackup = {
-        items: [...this.dataSource()],
-        total: this.dataSize(),
-      };
-    }
-
     this.type.set(id);
-
-    if (id !== null) {
-      this.resetAndFetch();
-    } else {
-      this.restoreOrReload();
-    }
+    this.resetAndFetch();
   }
 
   openDetail(item: PortalCommunicationResponse) {
@@ -112,48 +81,6 @@ export default class CommunicationsPage implements OnInit {
       },
     });
     this.router.navigate(['/communications', item.id]);
-  }
-
-  loadInitial() {
-    this.dataSource.set([]);
-    this.fetchMore();
-  }
-
-  applyFilter(term?: string, typeId?: number | null) {
-    // 👉 si antes NO había filtros, guardamos el estado actual
-    if (!this.isFiltering && (term || typeId !== null)) {
-      // Evitamos actualizar data cuando ya se filtra, se conservan los primeros datos
-      this.unfilteredBackup = {
-        items: [...this.dataSource()],
-        total: this.dataSize(),
-      };
-    }
-
-    this.term.set(term ?? '');
-    this.type.set(typeId ?? null);
-
-    // reiniciamos el listado filtrado
-    this.dataSource.set([]);
-    this.dataSize.set(0);
-    this.fetchMore();
-  }
-
-  clearFilters() {
-    this.term.set('');
-    this.type.set(null);
-
-    if (this.unfilteredBackup) {
-      // 👉 restauramos exactamente lo que había antes
-      this.dataSource.set(this.unfilteredBackup.items);
-      this.dataSize.set(this.unfilteredBackup.total);
-      this.unfilteredBackup = null; // one-shot
-      return;
-    }
-
-    // fallback (por seguridad)
-    this.dataSource.set([]);
-    this.dataSize.set(0);
-    this.fetchMore();
   }
 
   loadInitialData(): void {
@@ -202,15 +129,5 @@ export default class CommunicationsPage implements OnInit {
     this.dataSource.set([]);
     this.dataSize.set(0);
     this.fetchMore();
-  }
-
-  restoreOrReload() {
-    if (this.unfilteredBackup) {
-      this.dataSource.set(this.unfilteredBackup.items);
-      this.dataSize.set(this.unfilteredBackup.total);
-      this.unfilteredBackup = null;
-    } else {
-      this.resetAndFetch();
-    }
   }
 }

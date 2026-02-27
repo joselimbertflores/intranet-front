@@ -51,15 +51,14 @@ export class PortalCommunicationDataSource {
   }
 
   getData(queryParams: LoadCommunicationsParams) {
-    const { term, type: typeId, offset } = queryParams;
-    const isFilterMode = term !== '' || typeId !== null;
+    const { term, type, limit, offset } = queryParams;
 
     const params = new HttpParams({
       fromObject: {
-        limit: 6,
+        limit,
         offset,
         ...(term && { term }),
-        ...(typeId && { typeId }),
+        ...(type && { typeId: type }),
       },
     });
     return this.http.get<{

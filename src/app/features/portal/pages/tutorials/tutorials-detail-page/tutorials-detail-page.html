@@ -1,0 +1,133 @@
+<section class="max-w-4xl mx-auto px-4 pt-4 pb-6 space-y-8">
+  <div class="mb-4">
+    <p-button
+      [text]="true"
+      label="Volver"
+      icon="pi pi-arrow-left"
+      severity="secondary"
+      (onClick)="goBack()"
+      [disabled]="tutorial.isLoading()"
+    />
+  </div>
+
+  @if (!tutorial.isLoading() && tutorial.hasValue()) {
+    <header class="space-y-4">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+        @if (tutorial.value().category) {
+          <p-tag
+            severity="secondary"
+            [value]="tutorial.value().category"
+            [rounded]="true"
+          />
+        }
+        <time [attr.datetime]="tutorial.value().createdAt">
+          {{ tutorial.value().createdAt | date: "d MMMM, y" }}
+        </time>
+      </div>
+
+      <h1
+        class="text-2xl md:text-3xl font-semibold leading-tight text-surface-900"
+      >
+        {{ tutorial.value().title }}
+      </h1>
+
+      @if (tutorial.value().summary) {
+        <p class="text-base text-muted">
+          {{ tutorial.value().summary }}
+        </p>
+      }
+    </header>
+
+    <div class="border-t"></div>
+
+    <!-- Bloques -->
+    <div class="space-y-8">
+      @for (block of tutorial.value().blocks; track block.id) {
+        @switch (block.type) {
+          @case ("TEXT") {
+            <div
+              class="prose prose-sm max-w-none text-surface-700 wrap-break-word overflow-hidden"
+              [innerHTML]="block.content"
+            ></div>
+          }
+
+          @case ("IMAGE") {
+            @if (block.file?.url) {
+              <div class="flex justify-center">
+                <img
+                  [src]="block.file.url"
+                  [alt]="block.file.name || 'Imagen del tutorial'"
+                  class="rounded-xl border max-h-[560px] object-contain"
+                  loading="lazy"
+                />
+              </div>
+            }
+          }
+
+          @case ("VIDEO_URL") {
+            @if (block.content) {
+              <div class="rounded-xl border overflow-hidden">
+                <div class="aspect-video">
+                  <iframe
+                    class="w-full h-full"
+                    [src]="block.content | safeUrl"
+                    title="Video"
+                    frameborder="0"
+                    allowfullscreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+              </div>
+            }
+          }
+
+          @case ("VIDEO_FILE") {
+            @if (block.file?.url) {
+              <video
+                class="w-full rounded-xl border"
+                controls
+                preload="metadata"
+              >
+                <source [src]="block.file.url" [type]="block.file.mimeType" />
+                Tu navegador no soporta video HTML5.
+              </video>
+            }
+          }
+
+          @case ("FILE") {
+            @if (block.file?.url) {
+              <a
+                [href]="block.file.url"
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-4 p-4 border rounded-xl hover:bg-surface-50 transition group"
+              >
+                <file-icon [fileName]="block.file.name" />
+
+                <div class="min-w-0 flex-1">
+                  <div class="font-medium text-surface-900 truncate">
+                    {{ block.file.name }}
+                  </div>
+
+                  <div class="mt-1 flex items-center gap-2 text-xs text-muted">
+                    <span class="truncate">{{ block.file.mimeType }}</span>
+                    @if (block.file.size) {
+                      <span aria-hidden="true">·</span>
+                      <span>{{ block.file.size | fileSize }}</span>
+                    }
+                  </div>
+                </div>
+
+                <span
+                  class="text-sm text-muted group-hover:text-primary transition-colors"
+                >
+                  Abrir
+                </span>
+              </a>
+            }
+          }
+        }
+      }
+    </div>
+  }
+</section>

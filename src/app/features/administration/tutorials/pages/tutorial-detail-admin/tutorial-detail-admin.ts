@@ -19,7 +19,7 @@ import {
 } from '@angular/cdk/drag-drop';
 
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ButtonGroupModule } from 'primeng/buttongroup'
+import { ButtonGroupModule } from 'primeng/buttongroup';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService } from 'primeng/api';

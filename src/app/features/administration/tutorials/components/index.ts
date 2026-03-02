@@ -1,1 +1,1 @@
-export * from "./tutorial-block-preview/tutorial-block-preview"
+export * from "./tutorial-block-preview-editor/tutorial-block-preview-editor"

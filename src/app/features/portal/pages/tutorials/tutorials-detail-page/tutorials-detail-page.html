@@ -57,7 +57,7 @@
                 <img
                   [src]="block.file.url"
                   [alt]="block.file.name || 'Imagen del tutorial'"
-                  class="rounded-xl border max-h-[560px] object-contain"
+                  class="rounded-xl max-h-[560px] object-contain"
                   loading="lazy"
                 />
               </div>
@@ -66,17 +66,22 @@
 
           @case ("VIDEO_URL") {
             @if (block.content) {
-              <div class="rounded-xl border overflow-hidden">
-                <div class="aspect-video">
-                  <iframe
-                    class="w-full h-full"
-                    [src]="block.content | safeUrl"
-                    title="Video"
-                    frameborder="0"
-                    allowfullscreen
-                    loading="lazy"
-                  ></iframe>
-                </div>
+              <div class="aspect-video w-full overflow-hidden">
+                <iframe
+                  class="w-full h-full border-none"
+                  [src]="block.content | safeUrl"
+                  title="Video tutorial"
+                  allow="
+                    accelerometer;
+                    autoplay;
+                    clipboard-write;
+                    encrypted-media;
+                    gyroscope;
+                    picture-in-picture;
+                  "
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
               </div>
             }
           }

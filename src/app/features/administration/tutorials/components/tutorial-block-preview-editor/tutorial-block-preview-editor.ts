@@ -3,19 +3,16 @@ import {
   Component,
   output,
   input,
-  computed,
-  inject,
 } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CdkDragHandle, CdkDrag } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
 
+import { FileIcon, SafeUrlPipe } from '../../../../../shared';
 import { TutorialBlockResponse } from '../../interfaces';
-import { FileIcon } from '../../../../../shared';
 
 @Component({
-  selector: 'tutorial-block-preview',
-  imports: [ButtonModule, CdkDrag, CdkDragHandle, FileIcon],
+  selector: 'tutorial-block-preview-editor',
+  imports: [ButtonModule, CdkDrag, CdkDragHandle, FileIcon, SafeUrlPipe],
   template: `
     <div
       cdkDrag
@@ -92,24 +89,17 @@ import { FileIcon } from '../../../../../shared';
           }
 
           @case ('VIDEO_URL') {
-            @if (previewUrl()) {
-              <div
-                class="aspect-video w-full rounded-lg overflow-hidden border border-surface-200 bg-black shadow-inner"
-              >
+            @let url = data().content;
+            @if (url) {
+              <div class="aspect-video w-full overflow-hidden bg-black">
                 <iframe
-                  [src]="previewUrl()"
-                  class="w-full h-full"
-                  frameborder="0"
+                  class="w-full h-full border-none"
+                  [src]="url | safeUrl"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  title="Video tutorial"
                   allowfullscreen
                   loading="lazy"
                 ></iframe>
-              </div>
-            } @else {
-              <div
-                class="p-4 text-sm text-surface-500 border border-dashed border-surface-300 rounded-lg text-center"
-              >
-                URL de YouTube no válida
               </div>
             }
           }
@@ -168,41 +158,9 @@ import { FileIcon } from '../../../../../shared';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TutorialBlockPreview {
-  private sanitizer = inject(DomSanitizer);
+export class TutorialBlockPreviewEditor {
   readonly data = input.required<TutorialBlockResponse>();
 
   edit = output<void>();
   remove = output<void>();
-
-  previewUrl = computed(() => {
-    switch (this.data().type) {
-      case 'VIDEO_URL':
-        return this.getYoutubeEmbedUrl(this.data().content);
-      default:
-        return null;
-    }
-  });
-
-  constructor() {}
-
-  private getYoutubeEmbedUrl(url: string | null): SafeResourceUrl | null {
-    if (url === null) return null;
-    const id = this.extractYoutubeId(url);
-    if (!id) return null;
-
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${id}`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
-  }
-
-  private extractYoutubeId(url: string): string | null {
-    if (!url) return null;
-
-    const match =
-      url.match(/youtube\.com\/watch\?v=([^&]+)/) ||
-      url.match(/youtu\.be\/([^?&]+)/) ||
-      url.match(/youtube\.com\/shorts\/([^?&]+)/);
-
-    return match ? match[1] : null;
-  }
 }

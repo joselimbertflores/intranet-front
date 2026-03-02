@@ -79,7 +79,7 @@
     class="flex flex-col gap-4 mt-2"
   >
     @for (block of blocks(); track $index) {
-      <tutorial-block-preview
+      <tutorial-block-preview-editor
         [data]="block"
         (edit)="openBlockDialog(block.type, block)"
         (remove)="deleteBlock(block.id)"

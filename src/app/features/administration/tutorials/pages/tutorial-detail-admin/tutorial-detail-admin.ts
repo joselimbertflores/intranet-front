@@ -38,7 +38,7 @@ import {
   TutorialBlockEditor,
   TutorialEditor,
 } from '../../dialogs';
-import { TutorialBlockPreview } from '../../components';
+import { TutorialBlockPreviewEditor } from '../../components';
 import { TutorialDataSource } from '../../services';
 
 @Component({
@@ -54,7 +54,7 @@ import { TutorialDataSource } from '../../services';
     ConfirmDialogModule,
     TieredMenuModule,
     ButtonGroupModule,
-    TutorialBlockPreview,
+    TutorialBlockPreviewEditor,
   ],
   templateUrl: './tutorial-detail-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -104,8 +104,6 @@ export default class TutorialDetailAdmin {
       command: () => this.openBlockDialog('FILE'),
     },
   ];
-
-  constructor() {}
 
   openTutorialEditDialog(): void {
     const dialogRef = this.dialogService.open(TutorialEditor, {

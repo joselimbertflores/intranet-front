@@ -35,7 +35,7 @@ export class PortalCommunicationDataSource {
   types = toSignal(this.getTypes(), { initialValue: [] });
 
   private snapshot: CommunicationsSnapshot | null = null;
-  private shouldRestore = false;
+  // private shouldRestore = false;
 
   constructor() {}
 
@@ -71,13 +71,13 @@ export class PortalCommunicationDataSource {
 
   saveSnapshot(snapshot: CommunicationsSnapshot) {
     this.snapshot = snapshot;
-    this.shouldRestore = true;
+    // this.shouldRestore = true;
   }
 
   consumeSnapshot(): CommunicationsSnapshot | null {
-    if (!this.shouldRestore) return null;
+    // if (!this.shouldRestore) return null;
 
-    this.shouldRestore = false;
+    // this.shouldRestore = false;
 
     const snap = this.snapshot;
     this.snapshot = null;
@@ -86,7 +86,7 @@ export class PortalCommunicationDataSource {
 
   clearSnapshot() {
     this.snapshot = null;
-    this.shouldRestore = false;
+    // this.shouldRestore = false;
   }
 
   private getTypes() {

@@ -8,54 +8,56 @@
 </section>
 
 <section class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-  <!-- <div class="grid gap-4 sm:grid-cols-2">
-    @for (tutorial of dataSource(); track $index) {
-      <a
-        [routerLink]="['/tutorials', tutorial.slug]"
-        class="block p-5 border rounded-xl hover:border-primary-300 hover:bg-surface-50 transition"
-      >
-        <h2 class="font-medium text-lg">
-          {{ tutorial.title }}
-        </h2>
-        <p class="text-sm text-surface-600 mt-2">
-          {{ tutorial.summary }}
-        </p>
-      </a>
-    }
-  </div> -->
-
+  <div class="w-full flex flex-col gap-2 sm:flex-row justify-end mb-4">
+    <div class="w-full md:w-64">
+      <search-input [value]="term()" (search)="search($event)" />
+    </div>
+    <div class="w-full md:w-64">
+      <p-select
+        [showClear]="true"
+        [options]="categories()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Categoria"
+        class="w-full"
+        [ngModel]="category()"
+        (onChange)="filterByCategory($event.value)"
+      />
+    </div>
+  </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-2">
     @for (tutorial of dataSource(); track tutorial.id) {
       <a
-        [routerLink]="['/tutorials', tutorial.slug]"
-        class="group relative bg-surface-0 border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full no-underline"
+        class="group relative bg-surface-0 border border-surface-100 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full no-underline"
+        (click)="openDetail(tutorial)"
       >
         <div class="mb-4">
           <p-tag
             [value]="tutorial.category || 'General'"
-            severity="secondary"
-            style="font-size: 12px;"
+            style="font-size: 12px"
           />
         </div>
 
         <h3
-          class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors"
+          class="text-2xl font-bold text-surface-900 mb-3 group-hover:text-primary-600 transition-colors"
         >
           {{ tutorial.title }}
         </h3>
 
-        <p class="text-slate-600 leading-relaxed mb-6 line-clamp-3">
+        <p class="text-surface-600 leading-relaxed mb-6 line-clamp-3">
           {{ tutorial.summary }}
         </p>
 
         <div
-          class="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between"
+          class="mt-auto pt-6 border-t border-surface-50 flex items-center justify-between"
         >
-          <span class="text-sm text-slate-400 font-medium">
+          <span class="text-sm text-surface-400 font-medium">
             {{ tutorial.createdAt | date: "longDate" }}
           </span>
 
-          <span class="flex items-center text-primary-600 font-semibold text-sm">
+          <span
+            class="flex items-center text-primary-600 font-semibold text-sm"
+          >
             Ver tutorial
             <i
               class="pi pi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"
@@ -65,9 +67,38 @@
       </a>
     }
   </div>
-</section>
 
-<!-- 
-@if (hasMore()) {
-  <button class="mx-auto block" (click)="loadMore()">Cargar más</button>
-} -->
+  @if (isLoading() && !dataSource().length) {
+    <div class="flex flex-col items-center justify-center py-16">
+      <i
+        class="pi pi-spin pi-spinner text-4xl mb-4"
+        style="font-size: 2rem"
+      ></i>
+      <p class="font-medium text-surface-500 animate-pulse">
+        Cargando tutoriales...
+      </p>
+    </div>
+  }
+
+  @if (!isLoading() && !dataSource().length) {
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+      <h3 class="text-lg font-semibold text-surface-900 mb-1">
+        Sin resultados
+      </h3>
+      <p class="text-sm text-surface-500 max-w-sm">
+        Intente ajustar los filtros o busca con términos más generales.
+      </p>
+    </div>
+  }
+
+  @if (hasMore()) {
+    <div class="flex justify-center pt-4">
+      <p-button
+        [rounded]="true"
+        [loading]="isLoading()"
+        [label]="isLoading() ? ' Cargando....' : '  Cargar más'"
+        (onClick)="fetchMore()"
+      />
+    </div>
+  }
+</section>

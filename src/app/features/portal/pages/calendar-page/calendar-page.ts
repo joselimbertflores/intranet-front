@@ -1,87 +1,87 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild,
+} from '@angular/core';
 
+import {
+  EventApi,
+  CalendarOptions,
+  EventSourceFuncArg,
+  EventClickArg,
+} from '@fullcalendar/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions } from '@fullcalendar/core';
 import interactionPlugin from '@fullcalendar/interaction';
-import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
 import listPlugin from '@fullcalendar/list';
 import esLocale from '@fullcalendar/core/locales/es';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import { PortalDataSource } from '../../services';
+import { Popover, PopoverModule } from 'primeng/popover';
 
+import { PortalCommunicationResponse } from '../../interfaces';
+import { PortalCalendarDataSource } from '../../services';
 @Component({
   selector: 'app--calendar-page',
-  imports: [FullCalendarModule],
+  imports: [FullCalendarModule, PopoverModule],
   templateUrl: './calendar-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CalendarPage {
-  private portalService = inject(PortalDataSource);
-  events: any[] = [];
+  private calendarDataSource = inject(PortalCalendarDataSource);
+  calendarOptions: CalendarOptions;
+  selectedEvent?: EventApi;
+  dialogVisible = false;
 
-  calendarOptions: CalendarOptions = {
-    initialView: 'dayGridMonth',
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-    locale: esLocale,
+  popoverRef = viewChild.required<Popover>('op');
 
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,listWeek',
-    },
+  constructor() {
+    this.calendarOptions = this.buildCalendarOptions();
+  }
 
-    nowIndicator: true,
-    weekNumbers: true,
-    height: 'auto',
-    aspectRatio: 1.35,
+  openEventDialog(event: EventClickArg) {
+    // this.selectedEvent = event;
+    this.dialogVisible = true;
+    this.popoverRef()?.toggle(event.jsEvent);
+  }
 
-    dayMaxEventRows: 3, // o true (auto). Ej: 2 o 3 suele verse bien
-    moreLinkClick: 'popover', // abre popover con el resto
+  private fetchEventsForCalendar(
+    range: EventSourceFuncArg,
+    onSuccess: (events: PortalCommunicationResponse[]) => void,
+    onError: (err: any) => void,
+  ) {
+    this.calendarDataSource.getEvents(range.startStr, range.endStr).subscribe({
+      next: onSuccess,
+      error: onError,
+    });
+  }
 
-    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+  private buildCalendarOptions(): CalendarOptions {
+    return {
+      plugins: [dayGridPlugin, interactionPlugin, listPlugin],
+      initialView: 'dayGridMonth',
+      height: 'auto',
+      locale: esLocale,
+      firstDay: 1,
+      fixedWeekCount: false,
+      showNonCurrentDates: false,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,listMonth',
+      },
+      eventTimeFormat: { hour: '2-digit', minute: '2-digit' },
+      dayMaxEvents: 3,
+      events: (info, success, failure) => {
+        return this.fetchEventsForCalendar(info, success, failure);
+      },
+      eventClick: (info) => this.onEventClick(info),
+    };
+  }
 
-  
-
-
-    // ✅ FullCalendar pedirá eventos con el rango visible (start/end)
-    events: (info, success, failure) => {
-      this.portalService
-        .getCalendarRange(info.startStr, info.endStr)
-        .subscribe({
-          next: (data) => {
-            success(
-              data.map((e) => ({
-                id: e.id,
-                title: e.title,
-                start: e.start,
-                end: e.end,
-                allDay: e.allDay,
-                extendedProps: {
-                  parentId: e.parentId,
-                  communicationId: e.communicationId,
-                  description: e.description,
-                  type: e.type,
-                },
-                backgroundColor:
-                  e.color ?? (e.communicationId ? '#06b6d4' : '#3b82f6'),
-                borderColor: e.color ?? (e.communicationId ? '#0284c7' : '#2563eb'),
-                // si tu API manda url, lo puedes pasar aquí:
-                // url: e.url,
-              })),
-            );
-          },
-          error: (err) => failure(err),
-        });
-    },
-
-    eventClick: (info) => this.onEventClick(info),
-  };
-
-  constructor() {}
-
-  ngOnInit() {}
-
-  onEventClick(info: any) {
-   
+  private onEventClick(info: EventClickArg): void {
+    info.jsEvent.preventDefault();
+    console.log(info.event);
+    console.log(info.view);
+    this.popoverRef().toggle(info.jsEvent, info.el);
   }
 }

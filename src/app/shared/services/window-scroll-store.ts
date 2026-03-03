@@ -31,7 +31,6 @@ export class WindowScrollStore {
 
     if (!this.isPopState) return;
 
-    console.log('RESTORE SCROLL');
     window.scrollTo({ top: y });
 
     // Remover data para evitar que algun effect de RxResource siga restableciendo scroll cuando paginacion cambia
@@ -45,6 +44,7 @@ export class WindowScrollStore {
 
         if (this.currentRoute) {
           this.positions.set(this.currentRoute, window.scrollY);
+          console.log(this.positions);
         }
       }
 

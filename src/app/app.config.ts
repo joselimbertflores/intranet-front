@@ -8,24 +8,22 @@ import {
   provideRouter,
   withViewTransitions,
   withComponentInputBinding,
-  withInMemoryScrolling,
-  withDebugTracing,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeBo from '@angular/common/locales/es-BO';
 import { registerLocaleData } from '@angular/common';
 
 import { definePreset, palette } from '@primeuix/themes';
+import { DialogService } from 'primeng/dynamicdialog';
 import { providePrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
-import theme from '@primeuix/themes/aura';
 import { es } from 'primelocale/es.json';
+import theme from '@primeuix/themes/aura';
 
-import { routes } from './app.routes';
 import { handleTransitionCreated } from './core/router/view-transition.config';
 import { httpErrorInterceptor } from './core/http/http-error-interceptor';
 import { authInterceptor } from './core/auth/auth-interceptor';
-import { DialogService } from 'primeng/dynamicdialog';
+import { routes } from './app.routes';
 
 registerLocaleData(localeBo, 'es');
 
@@ -42,12 +40,8 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
-      // withInMemoryScrolling({
-      //   scrollPositionRestoration: 'enabled', // 'enabled' is the key
-      // }),
-      // withDebugTracing(),
-      withViewTransitions({ onViewTransitionCreated: handleTransitionCreated }),
       withComponentInputBinding(),
+      withViewTransitions({ onViewTransitionCreated: handleTransitionCreated }),
     ),
     provideHttpClient(
       withInterceptors([httpErrorInterceptor, authInterceptor]),

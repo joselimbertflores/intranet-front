@@ -66,11 +66,6 @@ export class PortalNavbar {
       routerLinkActiveOptions: { exact: false },
     },
     {
-      label: 'Calendario',
-      routerLink: '/calendar',
-      routerLinkActiveOptions: { exact: true },
-    },
-    {
       label: 'Directorio',
       routerLink: '/directory',
       routerLinkActiveOptions: { exact: false },
@@ -79,6 +74,11 @@ export class PortalNavbar {
       label: 'Tutoriales',
       routerLink: '/tutorials',
       routerLinkActiveOptions: { exact: false },
+    },
+    {
+      label: 'Calendario',
+      routerLink: '/calendar',
+      routerLinkActiveOptions: { exact: true },
     },
   ];
 }

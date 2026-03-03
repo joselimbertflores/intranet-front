@@ -20,7 +20,13 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-tutorials-page',
-  imports: [CommonModule,InputTextModule, PaginatorModule, RouterModule, TagModule],
+  imports: [
+    CommonModule,
+    InputTextModule,
+    PaginatorModule,
+    RouterModule,
+    TagModule,
+  ],
   templateUrl: './tutorials-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -30,6 +36,7 @@ export default class TutorialsPage implements OnInit {
   dataSource = signal<any[]>([]);
   dataSize = signal(0);
   isLoading = signal(false);
+  readonly pageSize = 12;
   // private resource = rxResource({
   //   stream: () => this.potalTutorialData.getTutorials(),
   //   defaultValue: { tutorials: [], total: 0 },

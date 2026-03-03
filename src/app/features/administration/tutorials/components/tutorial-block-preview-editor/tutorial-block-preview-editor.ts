@@ -124,11 +124,6 @@ import { TutorialBlockResponse } from '../../interfaces';
 
           @case ('FILE') {
             <div class="flex flex-col gap-2">
-              @if (data().content) {
-                <div class="text-surface-700 text-sm">
-                  {{ data().content }}
-                </div>
-              }
               @if (data().file) {
                 <a
                   [href]="data().file?.url"
@@ -149,6 +144,11 @@ import { TutorialBlockResponse } from '../../interfaces';
                     </span>
                   </div>
                 </a>
+              }
+              @if (data().content) {
+                <div class="text-surface-700 text-sm">
+                  {{ data().content }}
+                </div>
               }
             </div>
           }

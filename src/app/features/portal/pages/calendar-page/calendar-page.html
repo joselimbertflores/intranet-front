@@ -9,38 +9,60 @@
 
 <section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
   <full-calendar [options]="calendarOptions"></full-calendar>
-
-  <!-- <p-dialog
-    [(visible)]="dialogVisible"
-    [modal]="true"
-    [style]="{ width: '450px' }"
-    [draggable]="false"
-    [resizable]="false"
-    header="{{ selectedEvent?.title }}"
-  >
-    <div class="flex flex-col gap-3">
-      <div>
-        <b>Fecha:</b>
-        {{ selectedEvent?.start | date: "longDate" }}
-      </div>
-
-      <div *ngIf="selectedEvent?.extendedProps?.description">
-        {{ selectedEvent.extendedProps.description }}
-      </div>
-
-      <a
-        *ngIf="selectedEvent?.extendedProps?.communicationId"
-        [routerLink]="[
-          '/communications',
-          selectedEvent.extendedProps.communicationId,
-        ]"
-        class="text-primary font-medium"
-      >
-        Ver comunicado relacionado
-      </a>
-    </div>
-  </p-dialog> -->
 </section>
-<p-popover #op appendTo="body">
-  <div class="flex flex-col gap-4 w-[200px]">Hola</div>
+<p-popover #op appendTo="body" [dismissable]="true">
+  <div class="flex flex-col gap-3 w-72">
+    @if (selectedEvent()) {
+      <div class="text-base font-semibold text-surface-900 leading-tight">
+        {{ selectedEvent()?.title }}
+      </div>
+      <div class="flex items-center gap-2 text-sm text-surface-600">
+        <i class="pi pi-calendar"></i>
+        <span>
+          {{ selectedEvent()?.start | date: "longDate" }}
+        </span>
+      </div>
+      @if (selectedEvent()?.end) {
+        <div class="flex items-center gap-2 text-sm text-surface-600">
+          <i class="pi pi-clock"></i>
+          <span>
+            {{ selectedEvent()?.start | date: "shortTime" }}
+            -
+            {{ selectedEvent()?.end | date: "shortTime" }}
+          </span>
+        </div>
+      }
+      <div class="text-sm text-surface-700 leading-relaxed">
+        {{ selectedEvent()!.extendedProps["description"] }}
+      </div>
+      <!-- Información del comunicado -->
+      @if (selectedEvent()!.extendedProps["communication"]) {
+        <div class="border-t pt-2 flex flex-col gap-1 text-sm">
+          <span class="font-medium text-surface-800">
+            {{ selectedEvent()!.extendedProps["communication"].title }}
+          </span>
+
+          <!-- <span class="text-surface-600">
+            {{ }}
+          </span>
+
+          <span class="text-surface-600">
+            {{ selectedEvent()!.extendedProps.communication.reference }}
+          </span> -->
+        </div>
+        <div class="flex justify-end pt-1">
+          <a
+            [routerLink]="[
+              '/communications',
+              selectedEvent()!.extendedProps['communication'].id,
+            ]"
+            target="_blank"
+            class="text-primary font-medium text-sm hover:underline"
+          >
+            Ver detalle →
+          </a>
+        </div>
+      }
+    }
+  </div>
 </p-popover>

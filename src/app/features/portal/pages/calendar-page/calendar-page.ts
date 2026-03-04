@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 
@@ -18,41 +19,29 @@ import listPlugin from '@fullcalendar/list';
 import esLocale from '@fullcalendar/core/locales/es';
 import { Popover, PopoverModule } from 'primeng/popover';
 
-import { PortalCommunicationResponse } from '../../interfaces';
+import {
+  PortalCalendarResponse,
+  PortalCommunicationResponse,
+} from '../../interfaces';
 import { PortalCalendarDataSource } from '../../services';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app--calendar-page',
-  imports: [FullCalendarModule, PopoverModule],
+  imports: [CommonModule, RouterModule, FullCalendarModule, PopoverModule],
   templateUrl: './calendar-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CalendarPage {
   private calendarDataSource = inject(PortalCalendarDataSource);
   calendarOptions: CalendarOptions;
-  selectedEvent?: EventApi;
-  dialogVisible = false;
 
+  selectedEvent = signal<EventApi | null>(null);
   popoverRef = viewChild.required<Popover>('op');
 
   constructor() {
     this.calendarOptions = this.buildCalendarOptions();
-  }
-
-  openEventDialog(event: EventClickArg) {
-    // this.selectedEvent = event;
-    this.dialogVisible = true;
-    this.popoverRef()?.toggle(event.jsEvent);
-  }
-
-  private fetchEventsForCalendar(
-    range: EventSourceFuncArg,
-    onSuccess: (events: PortalCommunicationResponse[]) => void,
-    onError: (err: any) => void,
-  ) {
-    this.calendarDataSource.getEvents(range.startStr, range.endStr).subscribe({
-      next: onSuccess,
-      error: onError,
-    });
   }
 
   private buildCalendarOptions(): CalendarOptions {
@@ -72,7 +61,14 @@ export default class CalendarPage {
       eventTimeFormat: { hour: '2-digit', minute: '2-digit' },
       dayMaxEvents: 3,
       events: (info, success, failure) => {
-        return this.fetchEventsForCalendar(info, success, failure);
+        this.calendarDataSource
+          .getEvents(info.startStr, info.endStr)
+          .subscribe({
+            next: (data) => {
+              success(data.map((item) => this.mapToCalendarEvent(item)));
+            },
+            error: failure,
+          });
       },
       eventClick: (info) => this.onEventClick(info),
     };
@@ -80,8 +76,22 @@ export default class CalendarPage {
 
   private onEventClick(info: EventClickArg): void {
     info.jsEvent.preventDefault();
-    console.log(info.event);
-    console.log(info.view);
+    this.selectedEvent.set(info.event);
     this.popoverRef().toggle(info.jsEvent, info.el);
+  }
+
+  private mapToCalendarEvent(dto: PortalCalendarResponse) {
+    return {
+      id: dto.id,
+      title: dto.title,
+      start: dto.start,
+      end: dto.end,
+      allDay: dto.allDay,
+      extendedProps: {
+        description: dto.description,
+        isRecurring: dto.isRecurring,
+        communication: dto.communication,
+      },
+    };
   }
 }

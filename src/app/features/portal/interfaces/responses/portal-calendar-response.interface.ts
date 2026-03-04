@@ -1,13 +1,16 @@
-export interface CalendarEventDto {
+export interface PortalCalendarResponse {
   id: string;
   title: string;
   start: string;
   end?: string;
   allDay: boolean;
-  extendedProps: {
-    description?: string;
-    communicationId?: string;
-    isRecurring?: boolean;
-    originalEventId?: string;
+  description?: string;
+  location?: string;
+  communication?: {
+    id: string;
+    reference: string;
+    code: string;
+    type: string;
   };
+  isRecurring: boolean;
 }

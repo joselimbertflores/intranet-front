@@ -1,2 +1,2 @@
 export * from "./profile-overlay/profile-overlay"
-export * from "./sidebar/sidebar"
+export * from "./admin-sidebar/admin-sidebar"

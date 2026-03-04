@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { RouterModule } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 
-import { ProfileOverlay, Sidebar } from './components';
-import { CdkScrollable } from '@angular/cdk/scrolling';
+import { ProfileOverlay, AdminSidebar } from './components';
 
 @Component({
   selector: 'app-admin-layout',
@@ -14,7 +14,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
     RouterModule,
     ButtonModule,
     DrawerModule,
-    Sidebar,
+    AdminSidebar,
     ProfileOverlay,
     CdkScrollable,
   ],

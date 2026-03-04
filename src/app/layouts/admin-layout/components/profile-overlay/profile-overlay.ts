@@ -13,9 +13,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
+
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
-
-
 
 @Component({
   selector: 'profile-overlay',
@@ -90,7 +89,7 @@ export class ProfileOverlay {
     },
   ];
 
-  logout() {
+  logout(): void {
     this.authDataSource.logout().subscribe(() => {
       this.poppoverRef().hide();
       this.router.navigate(['/login']);

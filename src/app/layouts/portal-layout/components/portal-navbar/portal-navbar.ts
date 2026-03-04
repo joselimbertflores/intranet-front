@@ -1,10 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
+import { IconFieldModule } from 'primeng/iconfield';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
+import { RippleModule } from 'primeng/ripple';
 
 @Component({
   selector: 'portal-navbar',
-  imports: [MenubarModule],
+  imports: [CommonModule, MenubarModule, RouterModule, IconFieldModule, RippleModule],
   template: `
     <p-menubar [model]="menuItems" class="custom-navbar">
       <ng-template #start>
@@ -23,6 +28,30 @@ import { MenuItem } from 'primeng/api';
           </div>
 
           <span class="mx-3 h-6 w-px bg-surface-300 hidden md:block"></span>
+        </a>
+      </ng-template>
+
+      <ng-template #item let-item let-root="root">
+        <a
+          [routerLink]="item.routerLink"
+          routerLinkActive="text-primary"
+          [routerLinkActiveOptions]="{ exact: item.routerLink === '/' }"
+          pRipple
+          class="flex items-center px-3 py-1 gap-2"
+        >
+          @if (item.icons) {
+            <span [class]="item.icon"></span>
+          }
+          <span>{{ item.label }}</span>
+
+          @if (item.items) {
+            <i
+              [ngClass]="[
+                'ms-auto pi',
+                root ? 'pi-angle-down' : 'pi-angle-right',
+              ]"
+            ></i>
+          }
         </a>
       </ng-template>
 
@@ -45,6 +74,10 @@ import { MenuItem } from 'primeng/api';
         margin-left: 0 !important;
       }
     }
+    /*:host ::ng-deep .p-menubar .p-menubar-root-list {
+      justify-content: center;
+      flex-grow: 1;
+    }*/
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -53,6 +86,7 @@ export class PortalNavbar {
     {
       label: 'Inicio',
       routerLink: '/',
+      icon: 'pi pi-home',
       routerLinkActiveOptions: { exact: true },
     },
     {

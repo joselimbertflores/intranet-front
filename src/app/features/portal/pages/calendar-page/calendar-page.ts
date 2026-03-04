@@ -3,33 +3,34 @@ import {
   Component,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
-
-import {
-  EventApi,
-  CalendarOptions,
-  EventSourceFuncArg,
-  EventClickArg,
-} from '@fullcalendar/core';
-import { FullCalendarModule } from '@fullcalendar/angular';
-import interactionPlugin from '@fullcalendar/interaction';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import listPlugin from '@fullcalendar/list';
-import esLocale from '@fullcalendar/core/locales/es';
-import { Popover, PopoverModule } from 'primeng/popover';
-
-import {
-  PortalCalendarResponse,
-  PortalCommunicationResponse,
-} from '../../interfaces';
-import { PortalCalendarDataSource } from '../../services';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+import { EventApi, CalendarOptions, EventClickArg } from '@fullcalendar/core';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import interactionPlugin from '@fullcalendar/interaction';
+import esLocale from '@fullcalendar/core/locales/es';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import listPlugin from '@fullcalendar/list';
+
+import { PopoverModule } from 'primeng/popover';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+
+import { PortalCalendarResponse } from '../../interfaces';
+import { PortalCalendarDataSource } from '../../services';
+
 @Component({
   selector: 'app--calendar-page',
-  imports: [CommonModule, RouterModule, FullCalendarModule, PopoverModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    PopoverModule,
+    ButtonModule,
+    DialogModule,
+    FullCalendarModule,
+  ],
   templateUrl: './calendar-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,7 +39,7 @@ export default class CalendarPage {
   calendarOptions: CalendarOptions;
 
   selectedEvent = signal<EventApi | null>(null);
-  popoverRef = viewChild.required<Popover>('op');
+  displayDialog = signal(false);
 
   constructor() {
     this.calendarOptions = this.buildCalendarOptions();
@@ -48,18 +49,18 @@ export default class CalendarPage {
     return {
       plugins: [dayGridPlugin, interactionPlugin, listPlugin],
       initialView: 'dayGridMonth',
-      height: 'auto',
       locale: esLocale,
       firstDay: 1,
       fixedWeekCount: false,
-      showNonCurrentDates: false,
+      height: 'auto',
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
         right: 'dayGridMonth,listMonth',
       },
-      eventTimeFormat: { hour: '2-digit', minute: '2-digit' },
-      dayMaxEvents: 3,
+      eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+      eventClassNames: 'cursor-pointer',
+      // dayMaxEvents: 3,
       events: (info, success, failure) => {
         this.calendarDataSource
           .getEvents(info.startStr, info.endStr)
@@ -77,7 +78,7 @@ export default class CalendarPage {
   private onEventClick(info: EventClickArg): void {
     info.jsEvent.preventDefault();
     this.selectedEvent.set(info.event);
-    this.popoverRef().toggle(info.jsEvent, info.el);
+    this.displayDialog.set(true);
   }
 
   private mapToCalendarEvent(dto: PortalCalendarResponse) {

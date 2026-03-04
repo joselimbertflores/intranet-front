@@ -10,59 +10,71 @@
 <section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
   <full-calendar [options]="calendarOptions"></full-calendar>
 </section>
-<p-popover #op appendTo="body" [dismissable]="true">
-  <div class="flex flex-col gap-3 w-72">
-    @if (selectedEvent()) {
-      <div class="text-base font-semibold text-surface-900 leading-tight">
-        {{ selectedEvent()?.title }}
-      </div>
-      <div class="flex items-center gap-2 text-sm text-surface-600">
-        <i class="pi pi-calendar"></i>
-        <span>
-          {{ selectedEvent()?.start | date: "longDate" }}
+
+<p-dialog
+  [(visible)]="displayDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+  [style]="{ width: '600px' }"
+  header="Detalle del evento"
+  z
+>
+  @let event = selectedEvent();
+  @if (event) {
+    <div class="flex flex-col gap-y-6">
+      <div class="flex flex-col gap-y-2">
+        <span class="text-lg font-medium text-surface-900 leading-tight">
+          {{ event.title }}
         </span>
-      </div>
-      @if (selectedEvent()?.end) {
-        <div class="flex items-center gap-2 text-sm text-surface-600">
-          <i class="pi pi-clock"></i>
-          <span>
-            {{ selectedEvent()?.start | date: "shortTime" }}
-            -
-            {{ selectedEvent()?.end | date: "shortTime" }}
+        @if (event.extendedProps["description"]) {
+          <span class="text-sm text-surface-700 leading-relaxed">
+            {{ event.extendedProps["description"] }}
           </span>
+        }
+      </div>
+      <div>
+        @if (event.allDay) {
+          <div class="flex items-center gap-x-2">
+            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <span> {{ event.start | date: "longDate" }} </span>
+          </div>
+        } @else {
+          <div class="flex items-center gap-x-2">
+            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <span>Inicio: {{ event.start | date: "medium" }} </span>
+          </div>
+          <div class="flex items-center gap-x-2">
+            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <span>Fin: {{ event.end | date: "medium" }} </span>
+          </div>
+        }
+      </div>
+      @let communication = event.extendedProps["communication"];
+      @if (communication) {
+        <div class="flex flex-col gap-y-2 border-t border-surface-300 pt-2">
+          <span class="text-lg font-medium text-surface-900">
+            {{ communication.type | titlecase }}
+          </span>
+          <span class="text-sm text-surface-700 leading-relaxed">
+            {{ communication.reference }}
+          </span>
+          <span>CITE: {{ communication.code }}</span>
+        </div>
+        <div class="p-dialog-footer">
+          <div class="pt-4 border-t border-surface-100">
+            <a
+              [routerLink]="['/communications', communication.id]"
+              target="_blank"
+              pButton
+              label="Ver comunicado"
+              (click)="displayDialog.set(false)"
+            ></a>
+          </div>
         </div>
       }
-      <div class="text-sm text-surface-700 leading-relaxed">
-        {{ selectedEvent()!.extendedProps["description"] }}
-      </div>
-      <!-- Información del comunicado -->
-      @if (selectedEvent()!.extendedProps["communication"]) {
-        <div class="border-t pt-2 flex flex-col gap-1 text-sm">
-          <span class="font-medium text-surface-800">
-            {{ selectedEvent()!.extendedProps["communication"].title }}
-          </span>
-
-          <!-- <span class="text-surface-600">
-            {{ }}
-          </span>
-
-          <span class="text-surface-600">
-            {{ selectedEvent()!.extendedProps.communication.reference }}
-          </span> -->
-        </div>
-        <div class="flex justify-end pt-1">
-          <a
-            [routerLink]="[
-              '/communications',
-              selectedEvent()!.extendedProps['communication'].id,
-            ]"
-            target="_blank"
-            class="text-primary font-medium text-sm hover:underline"
-          >
-            Ver detalle →
-          </a>
-        </div>
-      }
-    }
-  </div>
-</p-popover>
+    </div>
+  }
+</p-dialog>

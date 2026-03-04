@@ -41,7 +41,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withComponentInputBinding(),
-      withViewTransitions({ onViewTransitionCreated: handleTransitionCreated }),
+      withViewTransitions({
+        // onViewTransitionCreated: handleTransitionCreated,
+        skipInitialTransition: true,
+      }),
     ),
     provideHttpClient(
       withInterceptors([httpErrorInterceptor, authInterceptor]),

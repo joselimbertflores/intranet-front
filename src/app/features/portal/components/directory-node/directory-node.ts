@@ -29,11 +29,11 @@ import { TreeDirectoryNode } from '../../interfaces';
         <div
           class="flex flex-1 flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-4"
         >
-          <div class="text-xs md:text-base font-medium text-surface-900">
+          <div class="text-sm md:text-base font-medium text-surface-900">
             {{ node().name }}
           </div>
 
-          <div class="flex flex-wrap gap-4 text-xs md:text-sm text-surface-600">
+          <div class="flex flex-wrap gap-4 text-sm md:text-sm text-surface-600">
             @if (node().internalPhone) {
               <span class="flex items-center gap-2">
                 <i style="font-size: 11px;" class="pi pi-phone"></i>

@@ -44,7 +44,6 @@ export class WindowScrollStore {
 
         if (this.currentRoute) {
           this.positions.set(this.currentRoute, window.scrollY);
-          console.log(this.positions);
         }
       }
 

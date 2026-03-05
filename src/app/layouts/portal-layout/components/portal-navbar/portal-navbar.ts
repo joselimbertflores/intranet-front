@@ -4,12 +4,21 @@ import { CommonModule } from '@angular/common';
 
 import { IconFieldModule } from 'primeng/iconfield';
 import { MenubarModule } from 'primeng/menubar';
-import { MenuItem } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
+import { MenuItem } from 'primeng/api';
+
+import { AppIcon } from '../../../../shared';
 
 @Component({
   selector: 'portal-navbar',
-  imports: [CommonModule, MenubarModule, RouterModule, IconFieldModule, RippleModule],
+  imports: [
+    CommonModule,
+    MenubarModule,
+    RouterModule,
+    IconFieldModule,
+    RippleModule,
+    AppIcon,
+  ],
   template: `
     <p-menubar [model]="menuItems" class="custom-navbar">
       <ng-template #start>
@@ -17,12 +26,13 @@ import { RippleModule } from 'primeng/ripple';
           routerLink="/"
           class="flex items-center gap-3 no-underline select-none"
         >
-          <img
+        <app-icon />
+          <!-- <img
             src="images/icons/app.png"
             alt="Logo"
             class="h-8 w-auto"
             loading="eager"
-          />
+          /> -->
           <div class="leading-tight text-base font-semibold text-surface-900">
             Intranet
           </div>

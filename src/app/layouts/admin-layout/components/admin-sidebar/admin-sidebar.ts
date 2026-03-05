@@ -6,18 +6,17 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
+import { AppIcon } from '../../../../shared';
 
 @Component({
   selector: 'app-admin-sidebar',
-  imports: [RouterModule, PanelMenuModule, CommonModule],
+  imports: [RouterModule, PanelMenuModule, CommonModule, AppIcon],
   template: `
     <div class="h-full flex flex-col bg-surface-0">
       <div
-        class="flex items-center gap-3 h-14 px-4 border-b border-surface-200"
+        class="flex items-center gap-3 h-14 sm:px-4 border-b border-surface-200"
       >
-        <!-- <img src="images/icons/app.svg" class="w-8 h-8 text-red-200" alt="logo" /> -->
-        <!-- <object data="images/icons/app-1.svg" type="image/svg+xml"></object> -->
-
+        <app-icon />
         <div class="flex flex-col leading-tight">
           <span class="font-semibold text-surface-900"> Intranet </span>
           <span class="text-xs text-surface-500"> Administracion </span>

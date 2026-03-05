@@ -3,6 +3,8 @@ export * from "./components/inputs/file-uploader/file-uploader.component"
 export * from "./components/inputs/search-input/search-input"
 export * from "./components/pdf-display/pdf-display.component"
 export * from "./components/file-icon/file-icon"
+export * from "./components/app-icon/app-icon"
+export * from "./components/theme-switcher/theme-switcher"
 
 export * from "./pipes/primeng-file-icon"
 export * from "./pipes/form-error-messages"

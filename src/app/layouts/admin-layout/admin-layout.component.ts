@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 
 import { ProfileOverlay, AdminSidebar } from './components';
+import { ThemeSwitcher } from '../../shared';
 
 @Component({
   selector: 'app-admin-layout',
@@ -17,6 +18,7 @@ import { ProfileOverlay, AdminSidebar } from './components';
     AdminSidebar,
     ProfileOverlay,
     CdkScrollable,
+    ThemeSwitcher
   ],
   templateUrl: './admin-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

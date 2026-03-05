@@ -1,303 +1,309 @@
-<section
-  class="w-full bg-linear-to-r from-surface-50 to-surface-100 border-b border-surface-200"
->
-  <div class="mx-auto max-w-7xl px-4 py-10 md:py-12">
-    <div
-      class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between"
-    >
-      <!-- Left: System identity -->
-      <div class="flex items-start gap-6 md:items-center">
-        <!-- System icon (image, no wrapper background) -->
-        <img
-          src="images/icons/app.png"
-          alt="Icono del sistema"
-          class="h-12 w-12 sm:h-20 sm:w-20 shrink-0 object-contain"
-        />
+<div class="landing-page relative isolate overflow-hidden pb-6">
+  <!-- <section class="relative overflow-hidden border-b border-surface-200/80">
+    <div class="landing-glow landing-glow-top"></div>
+    <div class="landing-glow landing-glow-mid"></div>
+    <div class="landing-grid-mask"></div>
 
-        <!-- Text -->
-        <div class="space-y-2">
-          <h1
-            class="text-xl font-semibold tracking-tight text-surface-900 md:text-3xl"
-          >
-            Intranet
-          </h1>
-
-          <p class="max-w-2xl text-sm text-surface-600 md:text-base">
-            Espacio central para la gestión y consulta de información
-            institucional.
-          </p>
-        </div>
-      </div>
-
-      <!-- Right: Institution emblem (desktop only) -->
-      <div class="hidden md:flex items-center">
-        <img
-          src="images/institution/alcaldia.webp"
-          alt="Gobierno Autónomo Municipal de Sacaba"
-          title="Gobierno Autónomo Municipal de Sacaba"
-          class="h-20 w-auto opacity-90"
-        />
-      </div>
-    </div>
-  </div>
-</section>
-@if (data().quickAccess.length > 0) {
-  <section class="mx-auto max-w-7xl px-6 py-14">
-    <div class="mb-10">
-      <h2 class="text-2xl font-semibold text-surface-900">Accesos directos</h2>
-      <p class="mt-2 text-sm text-surface-600">
-        Acceso directo a sistemas y servicios institucionales.
-      </p>
-    </div>
-    <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-      @for (item of data().quickAccess; track $index) {
-        <!-- Grid -->
-        <a
-          [href]="item.url"
-          class="group flex flex-col items-center justify-center rounded-2xl border border-surface-300 bg-surface-0 p-6 text-center transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2"
-        >
-          <!-- Icon -->
+    <div class="relative mx-auto max-w-7xl px-6 pb-16 pt-14 md:pb-24 md:pt-20">
+      <div class="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="animate-fade-in-up">
           <div
-            class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl transition group-hover:scale-105"
-            [style.backgroundColor]="item.color + '1A'"
+            class="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200/70 bg-primary-50/90 px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-primary-700 uppercase"
           >
-            <i
-              [class]="item.icon"
-              class="text-2xl"
-              [style.color]="item.color"
-            ></i>
+            Portal Institucional
           </div>
 
-          <!-- Label -->
-          <span class="text-sm font-medium text-surface-800">
-            {{ item.name }}
-          </span>
-        </a>
-      }
-    </div>
-  </section>
-}
+          <h1
+            class="font-display text-4xl leading-[1.05] font-bold tracking-tight text-surface-900 sm:text-5xl lg:text-6xl"
+          >
+            Plataforma central para gestionar la
+            <span class="bg-linear-to-r from-primary-700 via-primary-500 to-cyan-500 bg-clip-text text-transparent">
+              información pública interna
+            </span>
+          </h1>
 
-<!-- Banners / Anuncios institucionales -->
-<section *ngIf="data().banners.length > 0" class="mx-auto max-w-7xl px-6 py-14">
-  <swiper-container
-    slides-per-view="1"
-    space-between="16"
-    [loop]="data().banners.length > 1"
-    [pagination]="true"
-    [autoplay]="data().banners.length > 1"
-    autoplay-delay="8000"
-    autoplay-disable-on-interaction="false"
-    autoplay-pause-on-mouse-enter="true"
-    class="block"
-  >
-    <swiper-slide *ngFor="let banner of data().banners">
-      <!-- Clickable banner -->
-      <ng-container *ngIf="banner.url; else noLink">
-        <a
-          [href]="banner.url"
-          [target]="banner.openInNewTab ? '_blank' : '_self'"
-          class="block focus:outline-none focus:ring-2"
-        >
-          <ng-container
-            *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"
-          ></ng-container>
-        </a>
-      </ng-container>
-
-      <!-- Non-clickable banner -->
-      <ng-template #noLink>
-        <ng-container
-          *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"
-        ></ng-container>
-      </ng-template>
-    </swiper-slide>
-  </swiper-container>
-
-  <!-- Banner content template -->
-  <ng-template #bannerContent let-banner>
-    <div
-      class="relative overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-sm"
-    >
-      <div class="flex flex-col gap-6 p-6">
-        <!-- Image (optional) -->
-        <img
-          *ngIf="banner.imageUrl"
-          [src]="banner.imageUrl"
-          alt=""
-          class="h-40 w-full rounded-xl object-cover sm:h-52"
-        />
-
-        <!-- Text -->
-        <div>
-          <h3 class="text-xl font-semibold text-surface-900">
-            {{ banner.title }}
-          </h3>
-
-          <p *ngIf="banner.subtitle" class="mt-2 text-sm text-surface-600">
-            {{ banner.subtitle }}
+          <p class="mt-6 max-w-2xl text-base leading-relaxed text-surface-600 sm:text-lg">
+            Accede a documentos, comunicados, directorio institucional y servicios clave con una experiencia moderna, clara y optimizada para móviles.
           </p>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              routerLink="/documents"
+              class="inline-flex items-center gap-2 rounded-full bg-surface-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-surface-900/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
+            >
+              Explorar documentos
+              <i class="pi pi-arrow-right text-xs"></i>
+            </a>
+            <a
+              href="#accesos-directos"
+              class="inline-flex items-center gap-2 rounded-full border border-surface-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-surface-700 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700"
+            >
+              Accesos rápidos
+              <i class="pi pi-bolt text-xs"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="animate-fade-in-up animation-delay-200">
+          <div class="landing-glass-card relative overflow-hidden rounded-[2rem] border border-white/70 p-6 shadow-[0_28px_70px_rgba(2,6,23,0.14)] sm:p-8">
+            <div class="absolute -top-24 -right-10 h-48 w-48 rounded-full bg-primary-300/35 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-8 h-40 w-40 rounded-full bg-cyan-300/30 blur-3xl"></div>
+
+            <div class="relative">
+              <div class="mb-6 flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-surface-200">
+                  <img src="images/icons/app.webp" alt="Intranet" class="h-9 w-9 object-contain" />
+                </div>
+                <div>
+                  <p class="font-display text-xl leading-tight font-semibold text-surface-900">Intranet Institucional</p>
+                  <p class="text-sm text-surface-500">Gestión de información centralizada</p>
+                </div>
+              </div>
+
+              <img
+                src="images/institution/alcaldia.webp"
+                alt="Gobierno Autónomo Municipal de Sacaba"
+                title="Gobierno Autónomo Municipal de Sacaba"
+                class="landing-float mx-auto mb-7 h-16 w-auto opacity-90 sm:h-20"
+              />
+
+              <div class="grid grid-cols-3 gap-3">
+                <div class="rounded-2xl border border-surface-200/70 bg-white/70 p-4 text-center backdrop-blur-sm">
+                  <p class="font-display text-2xl leading-none font-bold text-surface-900">{{ data().quickAccess.length }}</p>
+                  <p class="mt-1 text-xs font-semibold tracking-wide text-surface-500 uppercase">Servicios</p>
+                </div>
+                <div class="rounded-2xl border border-surface-200/70 bg-white/70 p-4 text-center backdrop-blur-sm">
+                  <p class="font-display text-2xl leading-none font-bold text-surface-900">{{ data().communications.length }}</p>
+                  <p class="mt-1 text-xs font-semibold tracking-wide text-surface-500 uppercase">Comunicados</p>
+                </div>
+                <div class="rounded-2xl border border-surface-200/70 bg-white/70 p-4 text-center backdrop-blur-sm">
+                  <p class="font-display text-2xl leading-none font-bold text-surface-900">{{ data().documents.length }}</p>
+                  <p class="mt-1 text-xs font-semibold tracking-wide text-surface-500 uppercase">Documentos</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </ng-template>
-</section>
+  </section> -->
 
-<!-- Comunicados destacados -->
-<section
-  *ngIf="data().communications.length > 0"
-  class="mx-auto max-w-7xl px-6 py-14"
->
-  <!-- Section header -->
-  <div class="mb-10 flex items-center justify-between">
-    <div>
-      <h2 class="text-2xl font-semibold text-surface-900">Comunicados</h2>
-      <p class="mt-1 text-sm text-surface-600">Publicaciones oficiales</p>
-    </div>
+  @if (data().quickAccess.length > 0) {
+    <section id="accesos-directos" class="relative mx-auto max-w-7xl px-6 py-14 sm:py-16 lg:py-20">
+      <div class="mb-10 flex flex-col items-start gap-3 text-left sm:mb-12 sm:text-center sm:items-center">
+        <span class="rounded-full bg-surface-900 px-3 py-1 text-xs font-semibold tracking-[0.14em] text-white uppercase">Navegación rápida</span>
+        <h2 class="font-display text-3xl leading-tight font-semibold tracking-tight text-surface-900 sm:text-4xl">Accesos directos</h2>
+        <p class="max-w-2xl text-sm leading-relaxed text-surface-500 sm:text-base">
+          Módulos principales y herramientas frecuentes en un solo lugar.
+        </p>
+      </div>
 
-    <!-- Optional link -->
-    <a
-      routerLink="/communications"
-      class="text-sm font-medium text-primary-600 hover:underline"
-    >
-      Ver todos
-    </a>
-  </div>
-
-  <!-- Carousel -->
-  <p-carousel
-    [value]="data().communications"
-    [numVisible]="3"
-    [numScroll]="1"
-    [circular]="false"
-    [showIndicators]="false"
-    [showNavigators]="true"
-    [responsiveOptions]="responsiveOptions"
-  >
-    <ng-template pTemplate="item" let-item>
-      <div class="mx-auto max-w-xs py-4">
-        <a
-          [routerLink]="['/communications', item.id]"
-          class="group block h-full"
-        >
-          <div
-            class="flex h-full flex-col overflow-hidden rounded-2xl border border-surface-300 bg-surface-0 transition hover:-translate-y-1 hover:shadow-md"
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 sm:gap-5">
+        @for (item of data().quickAccess; track item.id) {
+          <a
+            [href]="item.url"
+            class="landing-quick-card group relative overflow-hidden rounded-[1.7rem] border border-surface-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <!-- Preview -->
-            <div class="relative aspect-3/4 overflow-hidden bg-surface-100">
-              <img
-                *ngIf="item.previewUrl; else noPreview"
-                [src]="item.previewUrl"
-                alt=""
-                class="h-full w-full object-cover"
-              />
+            <span class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" [style.background]="'radial-gradient(circle at 100% 0%, ' + item.color + '22 0, transparent 50%)'"></span>
+
+            <div
+              class="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border shadow-xs transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+              [style.backgroundColor]="item.color + '1A'"
+              [style.borderColor]="item.color + '33'"
+            >
+              <i [class]="item.icon" class="text-2xl" [style.color]="item.color"></i>
             </div>
 
-            <ng-template #noPreview>
-              <div class="flex h-full w-full items-center justify-center">
-                <i class="pi pi-file-pdf text-4xl text-surface-400"></i>
-              </div>
-            </ng-template>
+            <div class="relative flex items-end justify-between gap-3">
+              <span class="text-sm font-semibold leading-snug text-surface-700 sm:text-base">{{ item.name }}</span>
+              <i class="pi pi-arrow-up-right text-sm text-surface-400 transition-all duration-300 group-hover:text-primary-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
 
-            <!-- Content -->
-            <div class="flex flex-col grow gap-2 p-5">
-              <span
-                class="text-xs font-semibold uppercase tracking-wider text-surface-500"
+  <section *ngIf="data().banners.length > 0" class="relative mx-auto max-w-7xl px-6 py-8 sm:py-10">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 class="font-display text-3xl font-semibold tracking-tight text-surface-900 sm:text-4xl">Destacados</h2>
+        <p class="mt-2 text-sm text-surface-500 sm:text-base">Campañas, avisos y noticias relevantes del portal.</p>
+      </div>
+    </div>
+
+    <swiper-container
+      class="landing-swiper block pb-10"
+      slides-per-view="1"
+      space-between="24"
+      [breakpoints]="bannerBreakpoints"
+      [loop]="data().banners.length > 1"
+      [pagination]="true"
+      [autoplay]="data().banners.length > 1 ? autoplayConfig : false"
+    >
+      <swiper-slide *ngFor="let banner of data().banners">
+        <ng-container *ngIf="banner.url; else noLink">
+          <a [href]="banner.url" [target]="banner.openInNewTab ? '_blank' : '_self'" class="block focus:outline-none">
+            <ng-container *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"></ng-container>
+          </a>
+        </ng-container>
+
+        <ng-template #noLink>
+          <ng-container *ngTemplateOutlet="bannerContent; context: { $implicit: banner }"></ng-container>
+        </ng-template>
+      </swiper-slide>
+    </swiper-container>
+
+    <ng-template #bannerContent let-banner>
+      <div class="group overflow-hidden rounded-[2.2rem] border border-surface-200/70 bg-white shadow-[0_20px_55px_rgba(2,6,23,0.08)] transition-shadow duration-300 hover:shadow-[0_28px_65px_rgba(2,6,23,0.14)]">
+        <div class="grid min-h-[20rem] lg:grid-cols-[1fr_0.95fr]">
+          <div *ngIf="banner.imageUrl" class="relative overflow-hidden bg-surface-100">
+            <img [src]="banner.imageUrl" alt="" class="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105 lg:h-full" />
+            <div class="absolute inset-0 bg-linear-to-t from-surface-900/40 via-surface-900/5 to-transparent opacity-80"></div>
+          </div>
+
+          <div class="relative flex flex-col justify-center p-7 sm:p-10" [ngClass]="!banner.imageUrl ? 'lg:col-span-2' : ''">
+            <span class="mb-4 inline-flex w-fit rounded-full bg-primary-100 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-primary-700 uppercase">Contenido destacado</span>
+            <h3 class="font-display text-2xl leading-tight font-semibold text-surface-900 sm:text-3xl lg:text-4xl">{{ banner.title }}</h3>
+            <p *ngIf="banner.subtitle" class="mt-4 max-w-xl text-sm leading-relaxed text-surface-600 sm:text-base">{{ banner.subtitle }}</p>
+            <div *ngIf="banner.url" class="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-primary-700">
+              Ver información
+              <i class="pi pi-arrow-right text-xs transition-transform duration-300 group-hover:translate-x-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </section>
+
+  <section *ngIf="data().communications.length > 0" class="relative mx-auto max-w-7xl px-6 py-14 sm:py-16">
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="font-display text-3xl font-semibold tracking-tight text-surface-900 sm:text-4xl">Comunicados</h2>
+        <p class="mt-2 text-sm text-surface-500 sm:text-base">Publicaciones y avisos oficiales más recientes.</p>
+      </div>
+
+      <a
+        routerLink="/communications"
+        class="inline-flex items-center gap-2 rounded-full border border-surface-300 bg-white px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700"
+      >
+        Ver todos
+        <i class="pi pi-arrow-right text-xs"></i>
+      </a>
+    </div>
+
+    <p-carousel
+      [value]="data().communications"
+      [numVisible]="3"
+      [numScroll]="1"
+      [circular]="false"
+      [showIndicators]="true"
+      [showNavigators]="true"
+      [responsiveOptions]="responsiveOptions"
+      class="custom-carousel"
+    >
+      <ng-template pTemplate="item" let-item>
+        <div class="h-full px-3 py-3">
+          <a [routerLink]="['/communications', item.id]" class="group block h-full focus:outline-none">
+            <div class="flex h-full flex-col overflow-hidden rounded-[1.7rem] border border-surface-200/70 bg-white shadow-[0_8px_28px_rgba(2,6,23,0.06)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(2,6,23,0.12)]">
+              <div class="relative aspect-[4/3] overflow-hidden bg-surface-100">
+                <img *ngIf="item.previewUrl; else communicationNoPreview" [src]="item.previewUrl" alt="" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <ng-template #communicationNoPreview>
+                  <div class="flex h-full w-full items-center justify-center bg-surface-50">
+                    <i class="pi pi-file text-4xl text-surface-300"></i>
+                  </div>
+                </ng-template>
+                <div class="absolute inset-0 bg-linear-to-t from-surface-900/55 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                <span class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold tracking-[0.12em] text-surface-700 uppercase backdrop-blur-sm">
+                  {{ item.type }}
+                </span>
+              </div>
+
+              <div class="flex grow flex-col p-6">
+                <h3 class="line-clamp-2 text-base leading-snug font-semibold text-surface-900 transition-colors group-hover:text-primary-700">
+                  {{ item.reference }}
+                </h3>
+                <div class="mt-auto pt-4">
+                  <div class="h-px w-full bg-surface-200"></div>
+                  <div class="mt-3 flex items-center justify-between text-xs text-surface-500">
+                    <span class="inline-flex items-center gap-2">
+                      <i class="pi pi-calendar text-primary-500"></i>
+                      {{ item.createdAt | date: "dd MMM yyyy" }}
+                    </span>
+                    <i class="pi pi-arrow-right text-primary-600 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </section>
+
+  <section *ngIf="data().documents.length > 0" class="relative mx-auto max-w-7xl px-6 pb-12 pt-8 sm:pb-20 sm:pt-12">
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="font-display text-3xl font-semibold tracking-tight text-surface-900 sm:text-4xl">Documentos más descargados</h2>
+        <p class="mt-2 text-sm text-surface-500 sm:text-base">Normativas y recursos consultados con mayor frecuencia.</p>
+      </div>
+      <a
+        routerLink="/documents"
+        class="inline-flex items-center gap-2 rounded-full border border-surface-300 bg-white px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700"
+      >
+        Ir al directorio
+        <i class="pi pi-arrow-right text-xs"></i>
+      </a>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <article
+        *ngFor="let doc of data().documents"
+        class="group relative overflow-hidden rounded-[1.4rem] border border-surface-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-[0_14px_34px_rgba(2,6,23,0.08)] sm:p-5"
+      >
+        <div class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-linear-to-r from-primary-50/0 to-cyan-50/60"></div>
+
+        <div class="relative flex items-center justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-surface-200 bg-surface-50 text-surface-500 transition-colors duration-300 group-hover:border-primary-200 group-hover:bg-primary-50 group-hover:text-primary-700">
+              <i class="pi pi-file-pdf text-lg"></i>
+            </div>
+
+            <div class="min-w-0">
+              <a
+                [href]="doc.file.url"
+                target="_blank"
+                class="line-clamp-1 text-sm leading-snug font-semibold text-surface-900 transition-colors hover:text-primary-700 sm:text-base"
               >
-                {{ item.type }}
-              </span>
-              <h3
-                class="line-clamp-2 text-sm font-semibold text-surface-900 group-hover:text-primary-600 transition-colors"
-              >
-                {{ item.reference }}
-              </h3>
-              <div class="mt-auto pt-3">
-                <span
-                  class="text-xs font-medium text-surface-500 flex items-center gap-1.5"
-                >
-                  <i class="pi pi-calendar text-[10px]"></i>
-                  {{ item.createdAt | date: "dd MMM yyyy" }}
+                {{ doc.title }}
+              </a>
+
+              <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-surface-500">
+                <span *ngIf="doc.fiscalYear" class="rounded-md bg-surface-100 px-2 py-0.5 font-medium">Gestión {{ doc.fiscalYear }}</span>
+                <span *ngIf="doc.section" class="rounded-md bg-surface-100 px-2 py-0.5 font-medium">{{ doc.section }}</span>
+                <span class="sm:hidden inline-flex items-center gap-1.5 font-medium">
+                  <i class="pi pi-download text-[10px]"></i>{{ doc.file.downloadCount }}
                 </span>
               </div>
             </div>
           </div>
-        </a>
-      </div>
-    </ng-template>
-  </p-carousel>
-</section>
 
-<!-- Documentos más descargados -->
-<!-- Documentos más descargados -->
-<section
-  *ngIf="data().documents.length > 0"
-  class="mx-auto max-w-7xl px-6 py-14"
->
-  <!-- Header -->
-  <div class="mb-8 flex items-center justify-between">
-    <h2 class="text-2xl font-semibold text-surface-900">
-      Documentos más descargados
-    </h2>
-
-    <a
-      routerLink="/documents"
-      class="text-sm font-medium text-primary-600 hover:underline"
-    >
-      Ver todos
-    </a>
-  </div>
-
-  <!-- List -->
-  <ul
-    class="divide-y divide-surface-200 rounded-xl border border-surface-200 bg-white"
-  >
-    <li
-      *ngFor="let doc of data().documents"
-      class="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-surface-50"
-    >
-      <!-- Left: document info -->
-      <div class="flex min-w-0 items-center gap-4">
-        <!-- Icon -->
-        <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-100"
-        >
-          <i class="pi pi-file-pdf text-surface-600"></i>
-        </div>
-
-        <!-- Text -->
-        <div class="min-w-0">
-          <a
-            [href]="doc.file.url"
-            target="_blank"
-            class="block truncate text-sm font-medium text-surface-900 hover:underline"
-          >
-            {{ doc.title }}
-          </a>
-
-          <div class="mt-1 flex flex-wrap gap-x-3 text-xs text-surface-500">
-            <span *ngIf="doc.fiscalYear"> Gestión {{ doc.fiscalYear }} </span>
-            <span *ngIf="doc.section">
-              {{ doc.section }}
+          <div class="flex shrink-0 items-center gap-3">
+            <span class="hidden rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold text-surface-600 sm:block">
+              {{ doc.file.downloadCount }} descargas
             </span>
+
+            <a
+              [href]="doc.file.url"
+              target="_blank"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface-900 text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
+              title="Descargar documento"
+            >
+              <i class="pi pi-download text-sm"></i>
+            </a>
           </div>
         </div>
-      </div>
-
-      <!-- Right: actions -->
-      <div class="flex shrink-0 items-center gap-4">
-        <span class="hidden text-xs text-surface-500 sm:inline">
-          {{ doc.file.downloadCount }} descargas
-        </span>
-
-        <a
-          [href]="doc.file.url"
-          target="_blank"
-          class="flex h-9 w-9 items-center justify-center rounded-lg text-surface-600 transition hover:bg-surface-100 hover:text-surface-900"
-          title="Descargar documento"
-        >
-          <i class="pi pi-download"></i>
-        </a>
-      </div>
-    </li>
-  </ul>
-</section>
+      </article>
+    </div>
+  </section>
+</div>

@@ -23,17 +23,17 @@ register();
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LandingPageComponent {
-  private portalDataSource = inject(PortalDataSource);
+  private readonly portalDataSource = inject(PortalDataSource);
 
-  data = this.portalDataSource.portalData;
+  readonly data = this.portalDataSource.portalData;
 
-  autoplayConfig = {
+  readonly autoplayConfig = {
     delay: 8000,
     disableOnInteraction: false,
     pauseOnMouseEnter: true,
   };
 
-  bannerBreakpoints: SwiperOptions['breakpoints'] = {
+  readonly bannerBreakpoints: SwiperOptions['breakpoints'] = {
     768: {
       slidesPerView: 1,
       spaceBetween: 24,
@@ -48,21 +48,44 @@ export default class LandingPageComponent {
     },
   };
 
-  responsiveOptions = [
+  readonly responsiveOptions = [
     {
-      breakpoint: '1024px',
+      breakpoint: '1280px',
       numVisible: 3,
       numScroll: 1,
     },
     {
-      breakpoint: '768px',
+      breakpoint: '960px',
       numVisible: 2,
       numScroll: 1,
     },
     {
-      breakpoint: '560px',
+      breakpoint: '640px',
       numVisible: 1,
       numScroll: 1,
     },
   ];
+
+  communicationPreview(item: {
+    previewImageUrl?: string | null;
+    previewUrl?: string | null;
+  }) {
+    return item.previewImageUrl ?? item.previewUrl ?? null;
+  }
+
+  usesRouterLink(
+    url: string | null | undefined,
+    linkType?: string | null,
+    openInNewTab = false,
+  ) {
+    return !!url && !openInNewTab && !this.isExternalLink(url, linkType);
+  }
+
+  private isExternalLink(url: string, linkType?: string | null) {
+    if (linkType) {
+      return linkType === 'EXTERNAL';
+    }
+
+    return /^(https?:|mailto:|tel:)/i.test(url);
+  }
 }

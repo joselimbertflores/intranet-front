@@ -20,74 +20,86 @@ import { AppIcon } from '../../../../shared';
     AppIcon,
   ],
   template: `
-    <p-menubar [model]="menuItems" class="custom-navbar">
-      <ng-template #start>
-        <a
-          routerLink="/"
-          class="flex items-center gap-3 no-underline select-none"
-        >
-        <app-icon />
-          <!-- <img
-            src="images/icons/app.png"
-            alt="Logo"
-            class="h-8 w-auto"
-            loading="eager"
-          /> -->
-          <div class="leading-tight text-base font-semibold text-surface-900">
-            Intranet
+    <div class="max-w-7xl mx-auto w-full">
+      <p-menubar [model]="menuItems" [style]="{ border: 'none' }">
+        <ng-template #start>
+          <a
+            routerLink="/"
+            class="flex items-center gap-3 no-underline select-none"
+          >
+            <app-icon />
+            <div class="leading-tight text-base font-semibold text-surface-900">
+              Intranet
+            </div>
+          </a>
+        </ng-template>
+
+        <ng-template #item let-item let-root="root">
+          <a
+            [routerLink]="item.routerLink"
+            routerLinkActive="text-primary"
+            [routerLinkActiveOptions]="{ exact: item.routerLink === '/' }"
+            pRipple
+            class="flex items-center px-3 py-1 gap-2"
+          >
+            @if (item.icons) {
+              <span [class]="item.icon"></span>
+            }
+            <span>{{ item.label }}</span>
+
+            @if (item.items) {
+              <i
+                [ngClass]="[
+                  'ms-auto pi',
+                  root ? 'pi-angle-down' : 'pi-angle-right',
+                ]"
+              ></i>
+            }
+          </a>
+        </ng-template>
+
+        <!-- opcional: cosas a la derecha (sin auth por ahora) -->
+        <ng-template #end>
+          <div
+            class="hidden md:flex items-center gap-2 text-xs text-surface-600"
+          >
+            <span class="pi pi-globe"></span>
+            <!-- <span>Portal público interno</span> -->
           </div>
-
-          <span class="mx-3 h-6 w-px bg-surface-300 hidden md:block"></span>
-        </a>
-      </ng-template>
-
-      <ng-template #item let-item let-root="root">
-        <a
-          [routerLink]="item.routerLink"
-          routerLinkActive="text-primary"
-          [routerLinkActiveOptions]="{ exact: item.routerLink === '/' }"
-          pRipple
-          class="flex items-center px-3 py-1 gap-2"
-        >
-          @if (item.icons) {
-            <span [class]="item.icon"></span>
-          }
-          <span>{{ item.label }}</span>
-
-          @if (item.items) {
-            <i
-              [ngClass]="[
-                'ms-auto pi',
-                root ? 'pi-angle-down' : 'pi-angle-right',
-              ]"
-            ></i>
-          }
-        </a>
-      </ng-template>
-
-      <!-- opcional: cosas a la derecha (sin auth por ahora) -->
-      <ng-template #end>
-        <div class="hidden md:flex items-center gap-2 text-xs text-surface-600">
-          <span class="pi pi-globe"></span>
-          <span>Portal público interno</span>
-        </div>
-      </ng-template>
-    </p-menubar>
+        </ng-template>
+      </p-menubar>
+    </div>
   `,
   styles: `
-    @media screen and (max-width: 960px) {
-      :host ::ng-deep .p-menubar .p-menubar-button {
-        margin-left: auto !important;
-      }
-
-      :host ::ng-deep .p-menubar .p-menubar-end {
-        margin-left: 0 !important;
-      }
+    :host ::ng-deep .p-menubar {
+      /* Permite que los elementos se posicionen correctamente en el flex */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    /*:host ::ng-deep .p-menubar .p-menubar-root-list {
+
+    /* Mueve el botón de hamburguesa al final (derecha) */
+    :host ::ng-deep .p-menubar-button {
+      order: 2;
+      margin-left: auto; /* Empuja el botón hacia la derecha si no hay #end */
+    }
+
+    /* Asegura que el contenido #end esté antes o después según prefieras */
+    :host ::ng-deep .p-menubar-end {
+      order: 3;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Mantiene el logo a la izquierda */
+    :host ::ng-deep .p-menubar-start {
+      order: 1;
+    }
+
+    :host ::ng-deep .p-menubar-root-list {
       justify-content: center;
       flex-grow: 1;
-    }*/
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

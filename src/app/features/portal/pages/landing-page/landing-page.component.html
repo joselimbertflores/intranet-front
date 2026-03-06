@@ -1,216 +1,62 @@
-<div class="landing-page relative isolate overflow-hidden pb-8">
-  <section class="relative overflow-hidden border-b border-surface-200/70">
-    <div class="landing-glow landing-glow-top"></div>
-    <div class="landing-glow landing-glow-mid"></div>
-    <div class="landing-grid-mask"></div>
-
+<section
+  class="relative overflow-hidden bg-linear-to-br from-primary-100 via-surface-50 to-primary-300/40 py-20 md:py-28 border-b border-surface-200/70"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div
-      class="relative mx-auto max-w-7xl px-6 pb-16 pt-14 sm:pb-20 sm:pt-16 lg:px-8 lg:pb-24 lg:pt-20"
+      class="flex flex-col-reverse md:flex-row items-center gap-12 md:gap-16"
     >
-      <div class="grid items-center gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16">
-        <div class="max-w-3xl animate-fade-in-up">
-          <div
-            class="inline-flex items-center gap-3 rounded-full border border-primary-200/70 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm"
-          >
-            <img
-              src="images/icons/app.webp"
-              alt="Intranet"
-              class="h-10 w-10 rounded-full object-contain"
-            />
+      <!-- Left -->
+      <div
+        class="flex-1 flex flex-col items-center md:items-start text-center md:text-left"
+      >
+        <!-- Institutional context -->
+        <p
+          class="text-xs font-semibold uppercase tracking-widest text-primary-700"
+        >
+          Portal institucional
+        </p>
 
-            <div class="leading-tight">
-              <p
-                class="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-700"
-              >
-                Portal institucional
-              </p>
-              <p class="text-sm text-surface-500">
-                Gobierno Autónomo Municipal de Sacaba
-              </p>
-            </div>
-          </div>
+        <p class="text-sm text-surface-600 mt-1">
+          Gobierno Autónomo Municipal de Sacaba
+        </p>
+
+        <!-- System identity -->
+        <div class="flex items-center gap-4 mt-6">
+          <img
+            src="images/icons/app.webp"
+            alt="Intranet"
+            class="h-16 w-16 object-contain"
+          />
 
           <h1
-            class="mt-8 font-display text-4xl leading-[1.05] font-bold tracking-tight text-surface-900 sm:text-5xl lg:text-6xl"
+            class="text-4xl sm:text-6xl font-bold text-surface-900 tracking-tight"
           >
-            Intranet institucional para una gestión interna
-            <span
-              class="bg-linear-to-r from-primary-700 via-primary-500 to-cyan-500 bg-clip-text text-transparent"
-            >
-              más clara y conectada
-            </span>
+            Intranet
           </h1>
-
-          <p
-            class="mt-6 max-w-2xl text-base leading-relaxed text-surface-600 sm:text-lg"
-          >
-            Acceda de forma centralizada a comunicados, documentos, calendario
-            institucional, tutoriales y servicios internos desde una experiencia
-            limpia, consistente y optimizada para escritorio y móvil.
-          </p>
-
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a
-              routerLink="/documents"
-              class="inline-flex items-center gap-2 rounded-full bg-surface-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-surface-900/15 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
-            >
-              Explorar documentos
-              <i class="pi pi-arrow-right text-xs"></i>
-            </a>
-
-            <a
-              href="#accesos-directos"
-              class="inline-flex items-center gap-2 rounded-full border border-surface-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-surface-700 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700"
-            >
-              Accesos rápidos
-              <i class="pi pi-bolt text-xs"></i>
-            </a>
-          </div>
-
-          <div class="mt-10 grid gap-4 sm:grid-cols-3">
-            <div
-              class="rounded-[1.5rem] border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm"
-            >
-              <p
-                class="font-display text-3xl leading-none font-bold text-surface-900"
-              >
-                {{ data().quickAccess.length }}
-              </p>
-              <p
-                class="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500"
-              >
-                Accesos activos
-              </p>
-            </div>
-
-            <div
-              class="rounded-[1.5rem] border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm"
-            >
-              <p
-                class="font-display text-3xl leading-none font-bold text-surface-900"
-              >
-                {{ data().communications.length }}
-              </p>
-              <p
-                class="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500"
-              >
-                Comunicados
-              </p>
-            </div>
-
-            <div
-              class="rounded-[1.5rem] border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm"
-            >
-              <p
-                class="font-display text-3xl leading-none font-bold text-surface-900"
-              >
-                {{ data().documents.length }}
-              </p>
-              <p
-                class="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500"
-              >
-                Documentos
-              </p>
-            </div>
-          </div>
         </div>
 
-        <div class="animate-fade-in-up animation-delay-200">
-          <div
-            class="landing-glass-card relative overflow-hidden rounded-[2rem] border border-white/70 p-6 shadow-[0_28px_70px_rgba(15,23,42,0.12)] sm:p-8"
-          >
-            <div
-              class="absolute -right-12 -top-20 h-48 w-48 rounded-full bg-primary-300/35 blur-3xl"
-            ></div>
-            <div
-              class="absolute -bottom-24 -left-8 h-40 w-40 rounded-full bg-cyan-300/30 blur-3xl"
-            ></div>
-
-            <div class="relative">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p
-                    class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700"
-                  >
-                    Acceso centralizado
-                  </p>
-                  <h2
-                    class="mt-2 font-display text-2xl leading-tight font-semibold text-surface-900 sm:text-3xl"
-                  >
-                    Contenido prioritario en un solo espacio
-                  </h2>
-                </div>
-
-                <div
-                  class="hidden rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-700 sm:inline-flex"
-                >
-                  Portal interno
-                </div>
-              </div>
-
-              <div
-                class="mt-8 rounded-[1.8rem] border border-white/70 bg-white/80 p-6 text-center shadow-sm backdrop-blur-sm"
-              >
-                <img
-                  src="images/institution/alcaldia.webp"
-                  alt="Gobierno Autónomo Municipal de Sacaba"
-                  class="landing-float mx-auto h-20 w-auto object-contain opacity-95 sm:h-24"
-                />
-
-                <p class="mt-5 text-sm font-semibold text-surface-800">
-                  Gobierno Autónomo Municipal de Sacaba
-                </p>
-
-                <p class="mt-2 text-sm leading-relaxed text-surface-500">
-                  Información oficial, recursos internos y accesos de uso
-                  frecuente presentados con una navegación clara y consistente.
-                </p>
-              </div>
-
-              <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                <div
-                  class="rounded-[1.3rem] border border-surface-200/70 bg-white/70 p-4 backdrop-blur-sm"
-                >
-                  <div
-                    class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-50 text-primary-700"
-                  >
-                    <i class="pi pi-megaphone text-base"></i>
-                  </div>
-
-                  <p class="font-semibold text-surface-900">
-                    Avisos institucionales
-                  </p>
-
-                  <p class="mt-1 text-sm leading-relaxed text-surface-500">
-                    Comunicados recientes para consulta inmediata.
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-[1.3rem] border border-surface-200/70 bg-white/70 p-4 backdrop-blur-sm"
-                >
-                  <div
-                    class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700"
-                  >
-                    <i class="pi pi-folder-open text-base"></i>
-                  </div>
-
-                  <p class="font-semibold text-surface-900">
-                    Recursos y documentos
-                  </p>
-
-                  <p class="mt-1 text-sm leading-relaxed text-surface-500">
-                    Material institucional ordenado para su descarga.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Description -->
+        <p
+          class="mt-6 max-w-2xl text-base leading-relaxed text-surface-700 sm:text-lg"
+        >
+          Acceda de forma centralizada a comunicados, documentos, calendario
+          institucional, tutoriales y servicios internos desde una experiencia
+          limpia, consistente y optimizada para escritorio y móvil.
+        </p>
+      </div>
+      <!-- Right -->
+      <div class="flex-1 flex justify-center md:justify-end">
+        <img
+          src="images/institution/alcaldia.webp"
+          alt="Gobierno Autónomo Municipal de Sacaba"
+          class="h-20 w-auto object-contain sm:h-32"
+        />
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
+<div class="landing-page relative isolate overflow-hidden pb-8">
   @if (data().quickAccess.length > 0) {
     <section
       id="accesos-directos"
@@ -235,7 +81,9 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 sm:gap-5">
+      <div
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 sm:gap-5"
+      >
         @for (item of data().quickAccess; track item.id) {
           <a
             [href]="item.url"
@@ -367,7 +215,10 @@
         class="group overflow-hidden rounded-[2.2rem] border border-surface-200/70 bg-white shadow-[0_20px_55px_rgba(2,6,23,0.08)] transition-shadow duration-300 hover:shadow-[0_28px_65px_rgba(2,6,23,0.14)]"
       >
         <div class="grid min-h-[20rem] lg:grid-cols-[1fr_0.95fr]">
-          <div *ngIf="banner.imageUrl" class="relative overflow-hidden bg-surface-100">
+          <div
+            *ngIf="banner.imageUrl"
+            class="relative overflow-hidden bg-surface-100"
+          >
             <img
               [src]="banner.imageUrl"
               [alt]="banner.title"
@@ -425,7 +276,9 @@
     *ngIf="data().communications.length > 0"
     class="relative mx-auto max-w-7xl px-6 py-14 sm:py-16 lg:px-8"
   >
-    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div
+      class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+    >
       <div class="max-w-3xl">
         <span
           class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary-700"
@@ -474,7 +327,10 @@
             >
               <div class="relative aspect-[4/3] overflow-hidden bg-surface-100">
                 <ng-container
-                  *ngIf="communicationPreview(item) as preview; else communicationNoPreview"
+                  *ngIf="
+                    communicationPreview(item) as preview;
+                    else communicationNoPreview
+                  "
                 >
                   <img
                     [src]="preview"
@@ -484,7 +340,9 @@
                 </ng-container>
 
                 <ng-template #communicationNoPreview>
-                  <div class="flex h-full w-full items-center justify-center bg-surface-50">
+                  <div
+                    class="flex h-full w-full items-center justify-center bg-surface-50"
+                  >
                     <i class="pi pi-file text-4xl text-surface-300"></i>
                   </div>
                 </ng-template>
@@ -501,7 +359,9 @@
               </div>
 
               <div class="flex grow flex-col p-6">
-                <div class="inline-flex w-fit rounded-full bg-surface-100 px-3 py-1 text-[11px] font-semibold text-surface-600">
+                <div
+                  class="inline-flex w-fit rounded-full bg-surface-100 px-3 py-1 text-[11px] font-semibold text-surface-600"
+                >
                   Código {{ item.code }}
                 </div>
 
@@ -518,7 +378,7 @@
                   >
                     <span class="inline-flex items-center gap-2">
                       <i class="pi pi-calendar text-primary-500"></i>
-                      {{ item.createdAt | date: 'dd MMM yyyy' }}
+                      {{ item.createdAt | date: "dd MMM yyyy" }}
                     </span>
 
                     <i
@@ -538,7 +398,9 @@
     *ngIf="data().documents.length > 0"
     class="relative mx-auto max-w-7xl px-6 pb-12 pt-8 sm:pb-20 sm:pt-12 lg:px-8"
   >
-    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div
+      class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+    >
       <div class="max-w-3xl">
         <span
           class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary-700"
@@ -596,7 +458,9 @@
                 {{ doc.title }}
               </a>
 
-              <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-surface-500">
+              <div
+                class="mt-2 flex flex-wrap items-center gap-2 text-xs text-surface-500"
+              >
                 <span
                   *ngIf="doc.type"
                   class="rounded-md bg-surface-100 px-2 py-1 font-medium"

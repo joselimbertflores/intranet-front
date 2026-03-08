@@ -11,12 +11,28 @@ import type { SwiperOptions } from 'swiper/types';
 import { CarouselModule } from 'primeng/carousel';
 import { register } from 'swiper/element/bundle';
 import { PortalDataSource } from '../../services';
+import {
+  LandingBannersSection,
+  LandingCommunicationsSection,
+  LandingDocumentsSection,
+  LandingHeroSection,
+  LandingQuickAccessSection,
+} from '../../components';
 
 register();
 
 @Component({
   selector: 'landing-page',
-  imports: [CommonModule, RouterModule, CarouselModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CarouselModule,
+    LandingHeroSection,
+    LandingQuickAccessSection,
+    LandingBannersSection,
+    LandingCommunicationsSection,
+    LandingDocumentsSection,
+  ],
   templateUrl: './landing-page.component.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 

@@ -20,7 +20,7 @@ import { AppIcon } from '../../../../shared';
     AppIcon,
   ],
   template: `
-    <div class="max-w-7xl mx-auto w-full">
+    <div class="max-w-7xl mx-auto">
       <p-menubar [model]="menuItems" [style]="{ border: 'none' }">
         <ng-template #start>
           <a
@@ -60,45 +60,37 @@ import { AppIcon } from '../../../../shared';
 
         <!-- opcional: cosas a la derecha (sin auth por ahora) -->
         <ng-template #end>
-          <div
-            class="hidden md:flex items-center gap-2 text-xs text-surface-600"
-          >
+          <div class="flex items-center gap-2 text-xs text-surface-600">
             <span class="pi pi-globe"></span>
-            <!-- <span>Portal público interno</span> -->
           </div>
         </ng-template>
       </p-menubar>
     </div>
   `,
   styles: `
-    :host ::ng-deep .p-menubar {
-      /* Permite que los elementos se posicionen correctamente en el flex */
+    :host ::ng-deep .p-menubar-end {
+      order: 1;
+      margin-left: auto;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: flex-end;
     }
 
-    /* Mueve el botón de hamburguesa al final (derecha) */
     :host ::ng-deep .p-menubar-button {
       order: 2;
-      margin-left: auto; /* Empuja el botón hacia la derecha si no hay #end */
+      margin-left: 1rem;
     }
 
-    /* Asegura que el contenido #end esté antes o después según prefieras */
-    :host ::ng-deep .p-menubar-end {
-      order: 3;
-      display: flex;
-      align-items: center;
-    }
+    /* 2. Centrado corregido para Desktop */
+    @media screen and (min-width: 960px) {
+      :host ::ng-deep .p-menubar-start,
+      :host ::ng-deep .p-menubar-end {
+        flex: 1; /* Distribuye espacio igual en los laterales */
+      }
 
-    /* Mantiene el logo a la izquierda */
-    :host ::ng-deep .p-menubar-start {
-      order: 1;
-    }
-
-    :host ::ng-deep .p-menubar-root-list {
-      justify-content: center;
-      flex-grow: 1;
+      :host ::ng-deep .p-menubar .p-menubar-root-list {
+        justify-content: center;
+        flex-grow: 0; /* Evita que la lista crezca sola, dejando que los laterales la centren */
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

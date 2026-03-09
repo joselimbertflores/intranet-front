@@ -40,7 +40,7 @@ export class CommunicationAdminDataSource {
     return this.fileUploadService
       .uploadPdfForGeneratePreview(pdf, 'communication')
       .pipe(
-        switchMap(({ fileId }) =>
+        switchMap(({ id: fileId }) =>
           this.http.post(`${this.URL}`, {
             ...data,
             fileId,
@@ -60,7 +60,7 @@ export class CommunicationAdminDataSource {
       switchMap((result) =>
         this.http.patch(`${this.URL}/${id}`, {
           ...data,
-          ...(result && { fileId: result.fileId }),
+          ...(result && { fileId: result.id }),
         }),
       ),
     );

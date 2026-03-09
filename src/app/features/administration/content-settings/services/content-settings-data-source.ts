@@ -36,7 +36,7 @@ export class ContentSettingsDataSource {
     const uploads$ = items.map(({ file, ...props }) =>
       file
         ? this.fileUploadService.upload(file, 'banners').pipe(
-            map(({ fileId }) => ({
+            map(({ id: fileId }) => ({
               ...props,
               imageId: fileId,
             })),

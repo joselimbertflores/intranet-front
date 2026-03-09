@@ -77,8 +77,8 @@ export class DocumentDataSource {
     ).pipe(
       switchMap((uploadedFiles) => {
         const documentsToCreate = uploadedFiles.map((uploadedFile, index) => ({
-          fileId: uploadedFile.fileId,
-          title: documents[index].title ?? uploadedFile.originalName,
+          fileId: uploadedFile.id,
+          title: documents[index].title ?? uploadedFile.fileName,
         }));
         return this.http.post<DocumentManageResponse[]>(this.URL, {
           ...rest,
@@ -97,7 +97,7 @@ export class DocumentDataSource {
     return uploadTask$.pipe(
       switchMap((uploadedFile) => {
         return this.http.patch<DocumentManageResponse>(`${this.URL}/${id}`, {
-          title: title ?? uploadedFile?.originalName,
+          title: title ?? uploadedFile?.fileName,
 
           ...uploadedFile,
           fiscalYear: date.getFullYear(),

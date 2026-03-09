@@ -7,8 +7,11 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { register } from 'swiper/element/bundle';
+
 import { BannerResponse } from '../../../../administration/content-settings/interfaces';
 
+register();
 @Component({
   selector: 'landing-banners-section',
   imports: [CommonModule, RouterModule],

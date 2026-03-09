@@ -22,7 +22,7 @@ import { QuickAccessResponse } from '../../../../administration/content-settings
 
         <!-- Grid -->
         <div
-          class="grid grid-cols-2 gap-5 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          class="grid grid-cols-2 gap-5 sm:gap-6 md:grid-cols-3 lg:grid-cols-4"
         >
           @for (item of items(); track item.id) {
             <a

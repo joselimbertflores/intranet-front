@@ -61,7 +61,7 @@ export class TutorialDataSource {
           `${this.URL}/${tutorialId}/block`,
           {
             ...dto,
-            ...(result && { fileId: result.fileId }),
+            ...(result && { fileId: result.id }),
           },
         ),
       ),
@@ -78,7 +78,7 @@ export class TutorialDataSource {
           `${this.URL}/block/${blockId}`,
           {
             ...dto,
-            ...(result && { fileId: result.fileId }),
+            ...(result && { fileId: result.id }),
           },
         ),
       ),

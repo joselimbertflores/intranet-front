@@ -9,7 +9,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./features/portal/pages/landing-page/landing-page.component'),
+          import('./features/portal/pages/landing-page/landing-page'),
       },
       {
         path: 'repository',

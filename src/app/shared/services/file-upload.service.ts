@@ -29,8 +29,9 @@ export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
 }
 
 export interface UploadResult {
-  fileId: string;
-  originalName: string;
+  id: string;
+  fileName: string;
+  message: string;
 }
 
 @Injectable({

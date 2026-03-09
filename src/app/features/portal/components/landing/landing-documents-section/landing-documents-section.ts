@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { PortalDocumentResponse } from '../../../interfaces';
 
 @Component({
   selector: 'landing-documents-section',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -33,10 +34,12 @@ import { PortalDocumentResponse } from '../../../interfaces';
 
           <a
             routerLink="/documents"
-            class="inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900"
+            class="group inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             Ver todos
-            <i class="pi pi-arrow-right text-xs"></i>
+            <i
+              class="pi pi-arrow-right text-xs transition-transform duration-300 ease-out group-hover:translate-x-1"
+            ></i>
           </a>
         </div>
 
@@ -49,7 +52,7 @@ import { PortalDocumentResponse } from '../../../interfaces';
             [href]="doc.file.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="group flex flex-col gap-4 p-5 transition-colors duration-200 hover:bg-surface-50/50 sm:flex-row sm:items-center sm:justify-between"
+            class="group flex flex-col gap-4 p-5 transition-all duration-300 ease-out hover:bg-surface-50/70 sm:flex-row sm:items-center sm:justify-between"
           >
             <!-- Left -->
             <div class="flex min-w-0 items-center gap-4">
@@ -89,7 +92,7 @@ import { PortalDocumentResponse } from '../../../interfaces';
               </span>
 
               <span
-                class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-white transition group-hover:bg-primary-700"
+                class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-white transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-primary-700"
               >
                 <i class="pi pi-download text-xs"></i>
               </span>

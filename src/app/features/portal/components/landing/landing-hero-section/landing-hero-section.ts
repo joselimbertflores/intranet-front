@@ -17,12 +17,12 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           >
             <!-- Institutional context -->
             <p
-              class="text-xs font-semibold uppercase tracking-widest text-primary-700"
+              class="hero-reveal hero-delay-1 text-xs font-semibold uppercase tracking-widest text-primary-700"
             >
               Portal institucional
             </p>
 
-            <p class="text-sm text-surface-600 mt-1">
+            <p class="hero-reveal hero-delay-2 mt-1 text-sm text-surface-600">
               Gobierno Autónomo Municipal de Sacaba
             </p>
 
@@ -31,11 +31,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
               <img
                 src="images/icons/app.webp"
                 alt="Intranet"
-                class="h-16 w-16 object-contain"
+                class="hero-scale-in hero-delay-3 h-16 w-16 object-contain"
               />
 
               <h1
-                class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-surface-950 tracking-tight"
+                class="hero-reveal hero-delay-4 text-5xl sm:text-6xl md:text-7xl font-extrabold text-surface-950 tracking-tight"
               >
                 Intranet
               </h1>
@@ -43,7 +43,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
             <!-- Description -->
             <p
-              class="mt-6 max-w-2xl text-base leading-relaxed text-surface-700 sm:text-lg"
+              class="hero-reveal hero-delay-5 mt-6 max-w-2xl text-base leading-relaxed text-surface-700 sm:text-lg"
             >
               Acceda de forma centralizada a comunicados, documentos, calendario
               institucional, tutoriales y servicios internos desde una
@@ -56,12 +56,106 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
             <img
               src="images/institution/alcaldia.webp"
               alt="Gobierno Autónomo Municipal de Sacaba"
-              class="h-20 w-auto object-contain sm:h-32"
+              class="hero-logo hero-delay-6 h-20 w-auto object-contain sm:h-32"
             />
           </div>
         </div>
       </div>
     </section>
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .hero-reveal,
+    .hero-scale-in,
+    .hero-logo {
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .hero-reveal {
+      animation: hero-fade-up 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .hero-scale-in {
+      animation: hero-scale-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .hero-logo {
+      animation: hero-logo-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .hero-delay-1 {
+      animation-delay: 80ms;
+    }
+
+    .hero-delay-2 {
+      animation-delay: 160ms;
+    }
+
+    .hero-delay-3 {
+      animation-delay: 240ms;
+    }
+
+    .hero-delay-4 {
+      animation-delay: 320ms;
+    }
+
+    .hero-delay-5 {
+      animation-delay: 420ms;
+    }
+
+    .hero-delay-6 {
+      animation-delay: 520ms;
+    }
+
+    @keyframes hero-fade-up {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1.25rem, 0);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    @keyframes hero-scale-in {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1rem, 0) scale(0.94);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+
+    @keyframes hero-logo-in {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 1rem, 0) scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-reveal,
+      .hero-scale-in,
+      .hero-logo {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

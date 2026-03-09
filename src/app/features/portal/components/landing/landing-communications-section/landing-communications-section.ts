@@ -35,10 +35,12 @@ import { RouterModule } from '@angular/router';
 
           <a
             routerLink="/communications"
-            class="inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="group inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             Ver todos
-            <i class="pi pi-arrow-right text-xs"></i>
+            <i
+              class="pi pi-arrow-right text-xs transition-transform duration-300 ease-out group-hover:translate-x-1"
+            ></i>
           </a>
         </div>
 
@@ -59,7 +61,7 @@ import { RouterModule } from '@angular/router';
             <div class="flex justify-center p-3">
               <a
                 [routerLink]="['/communications', item.id]"
-                class="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-2xl ring-1 ring-surface-200/80 bg-surface-0 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                class="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-2xl ring-1 ring-surface-200/80 bg-surface-0 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 <!-- Preview -->
                 <div
@@ -109,7 +111,7 @@ import { RouterModule } from '@angular/router';
                     </span>
 
                     <i
-                      class="pi pi-arrow-right text-primary-600 opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100"
+                      class="pi pi-arrow-right text-primary-600 opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100"
                     ></i>
                   </div>
                 </div>
@@ -139,7 +141,7 @@ export class LandingCommunicationsSection {
     {
       breakpoint: '1024px',
       numVisible: 2,
-        numScroll: 1,
+      numScroll: 1,
     },
     {
       breakpoint: '768px',

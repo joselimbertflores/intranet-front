@@ -16,11 +16,11 @@ register();
   selector: 'landing-banners-section',
   imports: [CommonModule, RouterModule],
   template: `
-    <section class="relative py-8 sm:py-10 lg:py-14">
+    <section class="relative py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mb-8 max-w-3xl">
           <span
-            class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700"
+            class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700 ring-1 ring-inset ring-primary-700/10"
           >
             Destacados
           </span>
@@ -93,7 +93,7 @@ register();
 
         <ng-template #bannerContent let-banner>
           <div
-            class="group h-full overflow-hidden rounded-3xl border border-surface-200 bg-surface-0 shadow-sm transition-all duration-500 hover:border-surface-300 hover:shadow-xl flex flex-col lg:grid lg:grid-cols-5 min-h-[26rem]"
+            class="group h-full overflow-hidden rounded-3xl border border-surface-200 bg-surface-0 shadow-sm transition-all duration-500 ease-out hover:border-surface-300/80 hover:shadow-2xl flex flex-col lg:grid lg:grid-cols-5 min-h-[26rem]"
           >
             <div
               class="relative w-full aspect-video lg:aspect-auto lg:h-full lg:col-span-3 bg-surface-100"

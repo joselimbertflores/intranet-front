@@ -6,7 +6,7 @@ import { PortalDocumentResponse } from '../../../interfaces';
   selector: 'landing-documents-section',
   imports: [CommonModule],
   template: `
-    <section class="py-16">
+    <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <!-- Header -->
         <div
@@ -14,7 +14,7 @@ import { PortalDocumentResponse } from '../../../interfaces';
         >
           <div class="max-w-3xl">
             <span
-              class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700"
+              class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700 ring-1 ring-inset ring-primary-700/10"
             >
               Documentos
             </span>
@@ -33,7 +33,7 @@ import { PortalDocumentResponse } from '../../../interfaces';
 
           <a
             routerLink="/documents"
-            class="inline-flex items-center gap-2 rounded-full border border-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:border-surface-300 hover:bg-surface-50 hover:text-primary-700"
+            class="inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900"
           >
             Ver todos
             <i class="pi pi-arrow-right text-xs"></i>
@@ -42,14 +42,14 @@ import { PortalDocumentResponse } from '../../../interfaces';
 
         <!-- Document list -->
         <div
-          class="divide-y divide-surface-200 rounded-xl border border-surface-200 bg-surface-0"
+          class="divide-y divide-surface-100 rounded-xl border border-surface-200 bg-surface-0 overflow-hidden"
         >
           <a
             *ngFor="let doc of documents()"
             [href]="doc.file.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="group flex flex-col gap-4 p-5 transition hover:bg-surface-50 sm:flex-row sm:items-center sm:justify-between"
+            class="group flex flex-col gap-4 p-5 transition-colors duration-200 hover:bg-surface-50/50 sm:flex-row sm:items-center sm:justify-between"
           >
             <!-- Left -->
             <div class="flex min-w-0 items-center gap-4">

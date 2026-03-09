@@ -8,7 +8,7 @@ import { RouterModule } from '@angular/router';
   selector: 'landing-communications-section',
   imports: [RouterModule, CommonModule, CarouselModule],
   template: `
-    <section class="py-16">
+    <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <!-- Header -->
         <div
@@ -16,7 +16,7 @@ import { RouterModule } from '@angular/router';
         >
           <div class="max-w-3xl">
             <span
-              class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700"
+              class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700 ring-1 ring-inset ring-primary-700/10"
             >
               Comunicados
             </span>
@@ -35,7 +35,7 @@ import { RouterModule } from '@angular/router';
 
           <a
             routerLink="/communications"
-            class="inline-flex items-center gap-2 rounded-full border border-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:border-surface-300 hover:bg-surface-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             Ver todos
             <i class="pi pi-arrow-right text-xs"></i>
@@ -59,7 +59,7 @@ import { RouterModule } from '@angular/router';
             <div class="flex justify-center p-3">
               <a
                 [routerLink]="['/communications', item.id]"
-                class="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                class="group flex w-full max-w-[320px] flex-col overflow-hidden rounded-2xl ring-1 ring-surface-200/80 bg-surface-0 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 <!-- Preview -->
                 <div

@@ -5,7 +5,7 @@ import { QuickAccessResponse } from '../../../../administration/content-settings
   selector: 'landing-quick-access-section',
   imports: [],
   template: `
-    <section class="py-16">
+    <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
         <!-- Section header -->
         <div class="mb-10 max-w-2xl">
@@ -30,12 +30,8 @@ import { QuickAccessResponse } from '../../../../administration/content-settings
               target="_blank"
               rel="noopener noreferrer"
               [attr.aria-label]="'Abrir ' + item.name"
-              class="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-0 p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg focus:outline-none"
+              class="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-0 p-5 shadow-sm hover:shadow-md ring-1 ring-surface-200 hover:ring-surface-300 transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-surface-0/80 focus:outline-none"
             >
-              <!-- Border -->
-              <div
-                class="absolute inset-0 rounded-2xl border border-surface-200"
-              ></div>
 
               <!-- Hover glow -->
               <div

@@ -76,3 +76,18 @@
     transform: none !important;
   }
 }
+
+.landing-enter-fade-up,
+.landing-enter-scale-in,
+.landing-enter-fade-left,
+.landing-enter-slide-up {
+  will-change: transform, opacity;
+}
+
+.landing-enter-fade-up,
+.landing-enter-scale-in,
+.landing-enter-fade-left,
+.landing-enter-slide-up {
+  backface-visibility: hidden;
+}
+

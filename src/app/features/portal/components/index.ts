@@ -1,7 +1,2 @@
 export * from "./directory-node/directory-node"
 export * from "./communication-card/communication-card"
-export * from "./landing/landing-hero-section/landing-hero-section"
-export * from "./landing/landing-quick-access-section/landing-quick-access-section"
-export * from "./landing/landing-banners-section/landing-banners-section"
-export * from "./landing/landing-communications-section/landing-communications-section"
-export * from "./landing/landing-documents-section/landing-documents-section"

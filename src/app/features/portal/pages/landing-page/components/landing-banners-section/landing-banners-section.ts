@@ -8,8 +8,8 @@ import {
 import { RouterModule } from '@angular/router';
 
 import { register } from 'swiper/element/bundle';
+import { BannerResponse } from '../../../../../administration/content-settings/interfaces';
 
-import { BannerResponse } from '../../../../administration/content-settings/interfaces';
 
 register();
 @Component({

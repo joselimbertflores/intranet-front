@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { PortalCommunicationResponse } from '../../../interfaces';
-import { CommonModule } from '@angular/common';
 import { CarouselModule } from 'primeng/carousel';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { PortalCommunicationResponse } from '../../../../interfaces';
 
 @Component({
   selector: 'landing-communications-section',

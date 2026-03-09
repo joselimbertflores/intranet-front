@@ -16,6 +16,7 @@ export class WindowScrollStore {
   private currentRoute = this.router.url.split('?')[0];
 
   constructor() {
+    console.log('SCROLL RESTORE SERVICE');
     this.init();
   }
 
@@ -27,6 +28,7 @@ export class WindowScrollStore {
    */
   restoreScroll(routeKey: string): void {
     const y = this.positions.get(routeKey);
+    console.log('RESTORING', y);
     if (!y || y <= 0) return;
 
     if (!this.isPopState) return;

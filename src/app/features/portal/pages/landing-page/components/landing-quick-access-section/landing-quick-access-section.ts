@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { QuickAccessResponse } from '../../../../administration/content-settings/interfaces';
+import { QuickAccessResponse } from '../../../../../administration/content-settings/interfaces';
 
 @Component({
   selector: 'landing-quick-access-section',
@@ -32,7 +32,6 @@ import { QuickAccessResponse } from '../../../../administration/content-settings
               [attr.aria-label]="'Abrir ' + item.name"
               class="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-0 p-5 shadow-sm hover:shadow-md ring-1 ring-surface-200 hover:ring-surface-300 transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-surface-0/80 focus:outline-none"
             >
-
               <!-- Hover glow -->
               <div
                 class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"

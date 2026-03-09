@@ -9,7 +9,7 @@ import {
   LandingDocumentsSection,
   LandingQuickAccessSection,
   LandingCommunicationsSection,
-} from '../../components';
+} from './components';
 
 @Component({
   selector: 'landing-page',
@@ -32,7 +32,10 @@ export default class LandingPage {
 
   readonly data = this.portalDataSource.portalData;
   readonly isLoading = this.portalDataSource.isPortalLoading;
-  readonly quickAccessSkeletons = Array.from({ length: 8 }, (_, index) => index);
+  readonly quickAccessSkeletons = Array.from(
+    { length: 8 },
+    (_, index) => index,
+  );
   readonly communicationSkeletons = Array.from(
     { length: 3 },
     (_, index) => index,

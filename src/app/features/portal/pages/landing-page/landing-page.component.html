@@ -1,15 +1,29 @@
-<landing-hero-section />
+<main class="min-h-screen bg-linear-to-b from-surface-50 via-surface-0 to-surface-100/70">
+  <landing-hero-section />
 
-@if (data().quickAccess.length > 0) {
-  <landing-quick-access-section [items]="data().quickAccess" />
-}
-@if (data().banners.length > 0) {
-  <landing-banners-section [banners]="data().banners" />
-}
-@if (data().communications.length > 0) {
-  <landing-communications-section [communications]="data().communications" />
-}
+  <div class="relative pb-16 sm:pb-20">
+    <div
+      class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-primary-100/25 to-transparent"
+    ></div>
 
-@if (data().documents.length > 0) {
-  <landing-documents-section [documents]="data().documents" />
-}
+    <div class="relative">
+      @if (data().quickAccess.length > 0) {
+        <landing-quick-access-section [items]="data().quickAccess" />
+      }
+
+      @if (data().banners.length > 0) {
+        <landing-banners-section [banners]="data().banners" />
+      }
+
+      @if (data().communications.length > 0) {
+        <landing-communications-section
+          [communications]="data().communications"
+        />
+      }
+
+      @if (data().documents.length > 0) {
+        <landing-documents-section [documents]="data().documents" />
+      }
+    </div>
+  </div>
+</main>

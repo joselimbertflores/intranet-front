@@ -55,6 +55,7 @@ import { RoleResponse } from '../../interfaces';
           />
           <label for="description">Descripcion</label>
         </p-floatlabel>
+        {{ roleForm.value | json }}
         <p-listbox
           [options]="permissions()"
           [group]="true"
@@ -104,7 +105,7 @@ export class RoleEditor {
         label: item.action,
         value: item.id,
       })),
-    }))
+    })),
   );
 
   roleForm: FormGroup = this._formBuilder.nonNullable.group({

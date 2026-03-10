@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   imports: [],
   template: `
     <section
-      class="relative overflow-hidden bg-linear-to-br from-primary-50/80 via-surface-0 to-primary-100/40 pt-24 pb-20 md:pt-32 md:pb-28 border-b border-surface-200/50"
+      class="relative overflow-hidden bg-linear-to-br from-primary-100/80 via-surface-0 to-primary-200/40 pt-24 pb-20 md:pt-32 md:pb-28 border-b border-surface-200/50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
@@ -35,7 +35,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
               />
 
               <h1
-                class="hero-reveal hero-delay-4 text-5xl sm:text-6xl md:text-7xl font-extrabold text-surface-950 tracking-tight"
+                class="hero-reveal hero-delay-4 text-5xl sm:text-6xl md:text-7xl font-bold text-surface-950 tracking-tight"
               >
                 Intranet
               </h1>

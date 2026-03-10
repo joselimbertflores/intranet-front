@@ -2,13 +2,15 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+
+
 import { PortalCommunicationResponse } from '../../../../interfaces';
 
 @Component({
   selector: 'landing-communications-section',
   imports: [RouterModule, CommonModule, CarouselModule],
   template: `
-    <section class="py-16 md:py-24">
+    <section class="py-16 md:py-24" pAnimateOnScroll>
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <!-- Header -->
         <div

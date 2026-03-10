@@ -8,6 +8,7 @@ import {
   provideRouter,
   withViewTransitions,
   withComponentInputBinding,
+  withInMemoryScrolling,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import localeBo from '@angular/common/locales/es-BO';
@@ -20,7 +21,6 @@ import { MessageService } from 'primeng/api';
 import { es } from 'primelocale/es.json';
 import theme from '@primeuix/themes/aura';
 
-import { handleTransitionCreated } from './core/router/view-transition.config';
 import { httpErrorInterceptor } from './core/http/http-error-interceptor';
 import { authInterceptor } from './core/auth/auth-interceptor';
 import { routes } from './app.routes';
@@ -41,6 +41,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withComponentInputBinding(),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'disabled',
+        anchorScrolling: 'enabled',
+      }),
       withViewTransitions({
         // onViewTransitionCreated: handleTransitionCreated,
         skipInitialTransition: true,

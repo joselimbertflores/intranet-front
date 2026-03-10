@@ -7,16 +7,23 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { AnimateOnScroll } from 'primeng/animateonscroll';
 import { register } from 'swiper/element/bundle';
-import { BannerResponse } from '../../../../../administration/content-settings/interfaces';
 
+import { BannerResponse } from '../../../../../administration/content-settings/interfaces';
 
 register();
 @Component({
   selector: 'landing-banners-section',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AnimateOnScroll],
   template: `
-    <section class="relative py-16 md:py-24">
+    <section
+      class="relative py-16 md:py-24"
+      pAnimateOnScroll
+      enterClass="animate-enter fade-in-0 slide-in-from-r-8 animate-duration-500 ease-out"
+      [once]="true"
+      [threshold]="0.2"
+    >
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mb-8 max-w-3xl">
           <span

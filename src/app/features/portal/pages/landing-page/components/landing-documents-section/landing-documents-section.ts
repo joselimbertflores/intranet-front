@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
 import { PortalDocumentResponse } from '../../../../interfaces';
 
 @Component({
@@ -47,57 +48,60 @@ import { PortalDocumentResponse } from '../../../../interfaces';
         <div
           class="divide-y divide-surface-100 rounded-xl border border-surface-200 bg-surface-0 overflow-hidden"
         >
-          <a
-            *ngFor="let doc of documents()"
-            [href]="doc.file.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group flex flex-col gap-4 p-5 transition-all duration-300 ease-out hover:bg-surface-50/70 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <!-- Left -->
-            <div class="flex min-w-0 items-center gap-4">
-              <div
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-600 transition group-hover:bg-primary-50 group-hover:text-primary-700"
-              >
-                <i class="pi pi-file-pdf"></i>
-              </div>
-
-              <div class="min-w-0">
-                <h3
-                  class="truncate text-sm font-semibold text-surface-900 group-hover:text-primary-700 sm:text-base"
-                >
-                  {{ doc.title }}
-                </h3>
-
+          @for (doc of documents(); track doc.id; let i = $index) {
+            <a
+              [href]="doc.file.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group flex flex-col gap-4 p-5 transition-all duration-300 ease-out hover:bg-surface-50/70 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <!-- Left -->
+              <div class="flex min-w-0 items-center gap-4">
                 <div
-                  class="mt-1 flex flex-wrap items-center gap-2 text-xs text-surface-500"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-600 transition group-hover:bg-primary-50 group-hover:text-primary-700"
                 >
-                  <span *ngIf="doc.type">
-                    {{ doc.type }}
-                  </span>
+                  <i class="pi pi-file-pdf"></i>
+                </div>
 
-                  <span *ngIf="doc.section"> • {{ doc.section }} </span>
+                <div class="min-w-0">
+                  <h3
+                    class="truncate text-sm font-semibold text-surface-900 group-hover:text-primary-700 sm:text-base"
+                  >
+                    {{ doc.title }}
+                  </h3>
 
-                  <span *ngIf="doc.fiscalYear">
-                    • Gestión {{ doc.fiscalYear }}
-                  </span>
+                  <div
+                    class="mt-1 flex flex-wrap items-center gap-2 text-xs text-surface-500"
+                  >
+                    <span *ngIf="doc.type">
+                      {{ doc.type }}
+                    </span>
+
+                    <span *ngIf="doc.section"> • {{ doc.section }} </span>
+
+                    <span *ngIf="doc.fiscalYear">
+                      • Gestión {{ doc.fiscalYear }}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Right -->
-            <div class="flex items-center gap-5 text-sm text-surface-500">
-              <span class="text-xs font-medium">
-                {{ doc.file.downloadCount }} descargas
-              </span>
-
-              <span
-                class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-white transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-primary-700"
+              <!-- Right -->
+              <div
+                class="flex items-center gap-5 text-sm text-surface-500 justify-between sm:justify-end"
               >
-                <i class="pi pi-download text-xs"></i>
-              </span>
-            </div>
-          </a>
+                <span class="text-xs font-medium">
+                  {{ doc.file.downloadCount }} descargas
+                </span>
+
+                <span
+                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-white transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-primary-700"
+                >
+                  <i class="pi pi-download text-xs"></i>
+                </span>
+              </div>
+            </a>
+          }
         </div>
       </div>
     </section>

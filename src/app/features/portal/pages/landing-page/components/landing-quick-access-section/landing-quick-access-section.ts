@@ -1,11 +1,18 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { AnimateOnScroll } from 'primeng/animateonscroll';
+
 import { QuickAccessResponse } from '../../../../../administration/content-settings/interfaces';
 
 @Component({
   selector: 'landing-quick-access-section',
-  imports: [],
+  imports: [AnimateOnScroll],
   template: `
-    <section class="py-16 md:py-24">
+    <section
+      class="py-16 md:py-24"
+      pAnimateOnScroll
+      enterClass="animate-enter fade-in slide-in-from-b-6 animate-duration-500"
+      [once]="true"
+    >
       <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
         <!-- Section header -->
         <div class="mb-10 max-w-2xl">
@@ -24,8 +31,14 @@ import { QuickAccessResponse } from '../../../../../administration/content-setti
         <div
           class="grid grid-cols-2 gap-5 sm:gap-6 md:grid-cols-3 lg:grid-cols-4"
         >
-          @for (item of items(); track item.id) {
+          @for (item of items(); track item.id; let i = $index) {
             <a
+              pAnimateOnScroll
+              [enterClass]="
+                'animate-enter fade-in slide-in-from-b-4 animate-duration-400 animate-delay-' +
+                i * 100
+              "
+              [once]="true"
               [href]="item.url"
               target="_blank"
               rel="noopener noreferrer"

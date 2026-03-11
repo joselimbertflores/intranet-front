@@ -1,10 +1,10 @@
 <form [formGroup]="userForm" (ngSubmit)="save()">
   <div class="flex flex-col">
     <div class="flow-root">
-      <dl class="-my-3 divide-y divide-gray-200">
+      <dl class="-my-3 divide-y divide-surface-200">
         <div class="grid grid-cols-1 gap-1 py-2 sm:grid-cols-4 sm:gap-4">
-          <dt class="font-medium text-gray-900">Nombre</dt>
-          <dd class="text-gray-700 sm:col-span-3">
+          <dt class="font-medium text-surface-900">Nombre</dt>
+          <dd class="text-surface-700 sm:col-span-3">
             {{ data.fullName | titlecase }}
           </dd>
         </div>
@@ -31,7 +31,7 @@
         <ng-template #item let-option>
           <div class="flex flex-col ml-2">
             <p class="font-medium text-primary">{{ option.name }}</p>
-            <span class="text-xs">{{ option.description }}</span>
+            <span class="text-xs">{{ option.description ?? "----" }}</span>
           </div>
         </ng-template>
       </p-listbox>

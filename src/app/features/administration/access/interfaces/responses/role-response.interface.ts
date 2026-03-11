@@ -1,13 +1,17 @@
 export interface RoleResponse {
   id: string;
   name: string;
-  description: null;
+  description: string | null;
   permissions: PermissionResponse[];
 }
 
 export interface PermissionResponse {
   id: string;
   resource: string;
-  actions: any[];
+  action: string;
 }
 
+export interface PermissionsCatalog {
+  resource: string;
+  permissions: { id: number; action: string }[];
+}

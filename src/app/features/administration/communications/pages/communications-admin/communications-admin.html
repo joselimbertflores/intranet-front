@@ -21,6 +21,7 @@
   class="text-sm"
   size="small"
   (onPage)="chagePage($event)"
+  [loading]="isLoading()"
 >
   <ng-template #caption>
     <div class="flex sm:justify-end">
@@ -31,10 +32,10 @@
   </ng-template>
   <ng-template #header>
     <tr>
+      <th>Adjunto</th>
       <th>Tipo</th>
       <th>Cite</th>
       <th>Referencia</th>
-      <th>Archivo</th>
       <th>Fecha</th>
       <th>Evento</th>
       <th>Estado</th>
@@ -43,9 +44,6 @@
   </ng-template>
   <ng-template #body let-item>
     <tr>
-      <td>{{ item.type.name }}</td>
-      <td>{{ item.code }}</td>
-      <td>{{ item.reference }}</td>
       <td>
         <a
           [href]="item.file.url"
@@ -53,9 +51,12 @@
           title="Abrir PDF"
           class="underline text-primary"
         >
-          {{ item.file.originalName }}
+          Documento
         </a>
       </td>
+      <td>{{ item.type.name }}</td>
+      <td>{{ item.code }}</td>
+      <td class="truncate max-w-[200px]">{{ item.reference }}</td>
       <td>{{ item.createdAt | date: "short" }}</td>
       <td>{{ item.eventId ? "SI" : "NO" }}</td>
       <td>
@@ -70,9 +71,10 @@
           <button
             pButton
             icon="pi pi-ellipsis-v"
-            class="p-button-text"
             size="small"
+            [text]="true"
             [rounded]="true"
+            [outlined]="true"
             (click)="openMenu(item, $event); menu.toggle($event)"
           ></button>
         </div>

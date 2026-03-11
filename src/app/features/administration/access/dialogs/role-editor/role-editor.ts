@@ -55,16 +55,18 @@ import { RoleResponse } from '../../interfaces';
           />
           <label for="description">Descripcion</label>
         </p-floatlabel>
-        {{ roleForm.value | json }}
         <p-listbox
           [options]="permissions()"
           [group]="true"
           [checkbox]="true"
           [multiple]="true"
-          scrollHeight="400px"
+          scrollHeight="350px"
           [showToggleAll]="false"
           formControlName="permissionIds"
         >
+          <ng-template #header>
+            <span class="racking-wide">Listado de permisos</span>
+          </ng-template>
           <ng-template let-permission #group>
             <div class="font-bold mt-2 border-b">
               {{ permission.label | uppercase }}
@@ -84,7 +86,7 @@ import { RoleResponse } from '../../interfaces';
           severity="secondary"
           (onClick)="close()"
         />
-        <p-button label="Guardar" type="submit" [disabled]="roleForm.invalid" />
+        <p-button label="Guardar" type="submit" />
       </div>
     </form>
   `,
@@ -93,22 +95,22 @@ import { RoleResponse } from '../../interfaces';
 export class RoleEditor {
   private roleDataSource = inject(RoleDataSource);
   private dialogRef = inject(DynamicDialogRef);
-  private _formBuilder = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
 
   readonly data?: RoleResponse = inject(DynamicDialogConfig).data;
 
   permissions = computed<SelectItemGroup[]>(() =>
-    this.roleDataSource.permissions().map(({ resource, actions }) => ({
+    this.roleDataSource.permissions().map(({ resource, permissions }) => ({
       value: resource,
       label: resource,
-      items: actions.map((item) => ({
+      items: permissions.map((item) => ({
         label: item.action,
         value: item.id,
       })),
     })),
   );
 
-  roleForm: FormGroup = this._formBuilder.nonNullable.group({
+  roleForm: FormGroup = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
     description: [''],
     permissionIds: ['', [Validators.required, Validators.minLength(1)]],
@@ -119,6 +121,7 @@ export class RoleEditor {
   }
 
   save() {
+    if (this.roleForm.invalid) return this.roleForm.markAllAsTouched();
     const saveObservable = this.data
       ? this.roleDataSource.update(this.data.id, this.roleForm.value)
       : this.roleDataSource.create(this.roleForm.value);

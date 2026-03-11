@@ -66,6 +66,8 @@ export default class CommunicationsAdmin {
     return this.communicationResource.value().total;
   });
 
+  isLoading = this.communicationResource.isLoading;
+
   menuItems: MenuItem[] = [];
 
   onSearch(term: string) {

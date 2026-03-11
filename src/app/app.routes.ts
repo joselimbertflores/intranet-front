@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { isAuthenticatedGuard } from './core/auth/is-authenticated-guard';
+import { isAuthenticatedGuard, permissionGuard } from './core/auth/guards';
 
 export const routes: Routes = [
   {
@@ -67,69 +67,100 @@ export const routes: Routes = [
           import('./features/administration/dashboard/pages/admin-home/admin-home'),
       },
       {
-        title: 'Tipos de documentos',
         path: 'document-types',
+        title: 'Administracion - Tipos documento',
+        data: { resource: 'documents' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/document-types-admin/document-types-admin'),
       },
       {
-        title: 'Secciones de documentos',
         path: 'document-sections',
+        title: 'Administracion - Secciones documento',
+        data: { resource: 'documents' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/sections-admin/sections-admin'),
       },
       {
-        title: 'Documentos',
         path: 'documents',
+        title: 'Administracion - Documentos',
+        data: { resource: 'documents' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/document-admin/document-admin'),
       },
       {
         path: 'communications-manage',
+        title: 'Administracion - Comunicados',
+        data: { resource: 'communications' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/communications/pages/communications-admin/communications-admin'),
       },
       {
         path: 'calendar-manage',
+        title: 'Administracion - Calendarios',
+        data: { resource: 'communications' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/calendar/pages/calendar-admin/calendar-admin'),
       },
       {
         path: 'tutorials',
+        title: 'Administracion - Tutoriales',
+        data: { resource: 'tutorials' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorials-admin/tutorials-admin'),
       },
       {
         path: 'tutorials/:id',
+        title: 'Administracion - Detalle tutorial',
+        data: { resource: 'tutorials' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorial-detail-admin/tutorial-detail-admin'),
       },
       {
         path: 'tutorial-categories',
+        title: 'Administracion - Categorias tutorial',
+        data: { resource: 'tutorials' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorial-categories-admin/tutorial-categories-admin'),
       },
       {
-        path: 'users',
-        title: 'Usuarios',
-        loadComponent: () =>
-          import('./features/administration/access/pages/users-admin/users-admin'),
-      },
-      {
-        path: 'roles',
-        title: 'Roles',
-        loadComponent: () =>
-          import('./features/administration/access/pages/roles-admin/roles-admin'),
-      },
-      {
         path: 'content-settings',
+        title: 'Administracion - Contenido',
+        data: { resource: 'content' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/content-settings/pages/content-settings-list/content-settings-list'),
       },
       {
         path: 'directory',
+        title: 'Administracion - Directorio',
+        data: { resource: 'content' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/directory/pages/directory-admin/directory-admin'),
+      },
+      {
+        path: 'users',
+        title: 'Administracion - Usuarios',
+        data: { resource: 'users' },
+        canActivate: [permissionGuard],
+        loadComponent: () =>
+          import('./features/administration/access/pages/users-admin/users-admin'),
+      },
+      {
+        path: 'roles',
+        title: 'Administracion - Roles',
+        data: { resource: 'users' },
+        canActivate: [permissionGuard],
+        loadComponent: () =>
+          import('./features/administration/access/pages/roles-admin/roles-admin'),
       },
     ],
   },

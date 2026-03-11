@@ -3,8 +3,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../../../environments/environment';
-import { PermissionResponse, RoleResponse } from '../interfaces';
-import { tap } from 'rxjs';
+import {
+  PermissionsCatalog,
+  RoleResponse,
+} from '../interfaces';
 
 interface FindRolesParams {
   term: string;
@@ -19,11 +21,7 @@ export class RoleDataSource {
   private URL = `${environment.baseUrl}/roles`;
 
   permissions = toSignal(
-    this.http.get<PermissionResponse[]>(`${this.URL}/permissions`).pipe(
-      tap((resp) => {
-        console.log(resp);
-      }),
-    ),
+    this.http.get<PermissionsCatalog[]>(`${this.URL}/permissions`),
     { initialValue: [] },
   );
 
@@ -41,8 +39,9 @@ export class RoleDataSource {
     const params = new HttpParams({
       fromObject: { limit, offset, ...(term && { term }) },
     });
-    return this.http.get<{ roles: RoleResponse[]; total: number }>(this.URL, {
-      params,
-    });
+    return this.http
+      .get<{ roles: RoleResponse[]; total: number }>(this.URL, {
+        params,
+      })
   }
 }

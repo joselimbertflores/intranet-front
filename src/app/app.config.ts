@@ -24,6 +24,7 @@ import theme from '@primeuix/themes/aura';
 import { httpErrorInterceptor } from './core/http/http-error-interceptor';
 import { authInterceptor } from './core/auth/auth-interceptor';
 import { routes } from './app.routes';
+import { handleTransitionCreated } from './core/router/view-transition.config';
 
 registerLocaleData(localeBo, 'es');
 
@@ -46,7 +47,7 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
       withViewTransitions({
-        // onViewTransitionCreated: handleTransitionCreated,
+        onViewTransitionCreated: handleTransitionCreated,
         skipInitialTransition: true,
       }),
     ),

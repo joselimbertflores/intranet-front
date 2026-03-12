@@ -92,7 +92,7 @@ export class ProfileOverlay {
   logout(): void {
     this.authDataSource.logout().subscribe(() => {
       this.poppoverRef().hide();
-      this.router.navigate(['/login']);
+      this.router.navigate(['/'], { replaceUrl: true });
     });
   }
 }

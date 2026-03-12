@@ -38,7 +38,9 @@ export class AuthDataSource {
   }
 
   logout() {
-    return this.http.get(`${this.URL}/logout`, { withCredentials: true });
+    return this.http
+      .post(`${this.URL}/logout`, {}, { withCredentials: true })
+      .pipe(tap(() => this._user.set(null)));
   }
 
   checkAuthStatus() {

@@ -1,11 +1,13 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Directorio</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    size="small"
-    (onClick)="openDirectoryDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openDirectoryDialog()"
+    />
+  }
 </div>
 
 <p-treeTable
@@ -56,16 +58,18 @@
       <td>{{ rowData.internalPhone ?? "----" }}</td>
       <td>{{ rowData.landlinePhone ?? "----" }}</td>
       <td style="width: 3rem">
-        <div class="flex gap-x-2">
-          <button
-            pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text"
-            size="small"
-            [rounded]="true"
-            (click)="openMenu(rowNode, $event); menu.toggle($event)"
-          ></button>
-        </div>
+        @if (hasRowActions()) {
+          <div class="flex gap-x-2">
+            <button
+              pButton
+              icon="pi pi-ellipsis-v"
+              class="p-button-text"
+              size="small"
+              [rounded]="true"
+              (click)="openMenu(rowNode, $event); menu.toggle($event)"
+            ></button>
+          </div>
+        }
       </td>
     </tr>
   </ng-template>

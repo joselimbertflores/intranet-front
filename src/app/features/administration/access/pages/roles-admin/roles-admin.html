@@ -1,12 +1,14 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Roles</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    iconPos="left"
-    size="small"
-    (onClick)="openRoleDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      iconPos="left"
+      size="small"
+      (onClick)="openRoleDialog()"
+    />
+  }
 </div>
 
 <p-table
@@ -39,13 +41,15 @@
       <td>{{ item.description }}</td>
       <td>{{ item.permissions.length }}</td>
       <td>
-        <p-button
-          [text]="true"
-          [rounded]="true"
-          icon="pi pi-pencil"
-          size="small"
-          (click)="openRoleDialog(item)"
-        />
+        @if (canUpdate()) {
+          <p-button
+            [text]="true"
+            [rounded]="true"
+            icon="pi pi-pencil"
+            size="small"
+            (click)="openRoleDialog(item)"
+          />
+        }
       </td>
     </tr>
   </ng-template>

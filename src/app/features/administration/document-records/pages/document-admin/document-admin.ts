@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -23,6 +24,8 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { FileIcon, SearchInput } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
@@ -57,12 +60,19 @@ export default class DocumentAdmin {
   private documentDataSource = inject(DocumentDataSource);
   private dialogService = inject(DialogService);
   private formBuilder = inject(FormBuilder);
+  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
   dataSource = signal<DocumentManageResponse[]>([]);
   dataSize = signal<number>(0);
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.UPDATE),
+  );
 
   filterForm: FormGroup = this.formBuilder.group({
     sectionId: [null],

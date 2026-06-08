@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -13,6 +14,8 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SearchInput } from '../../../../../shared';
 import { TutorialDataSource } from '../../services';
 import { TutorialDetailResponse } from '../../interfaces';
@@ -33,10 +36,17 @@ import { TutorialEditor } from '../../dialogs';
 export default class TutorialsAdmin {
   private dialogService = inject(DialogService);
   private tutorialData = inject(TutorialDataSource);
+  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   offset = signal(0);
   term = signal('');
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.UPDATE),
+  );
   dataResource = rxResource({
     params: () => ({
       limit: this.limit(),

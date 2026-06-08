@@ -1,26 +1,25 @@
 export interface AuthUser {
   id: string;
-  fullName: string;
   externalKey: string;
+  fullName: string;
   isActive: boolean;
-  roles: AuthRole[];
-}
-
-export interface AuthRole {
-  id: string;
-  name: string;
-  permissions: AuthPermission[];
-}
-
-export interface AuthPermission {
-  resource: Resource;
-  action: string;
+  permissions: string[];
 }
 
 export enum Resource {
   USERS = 'users',
-  COMMUNICATIONS = 'communications',
+  ROLES = 'roles',
   DOCUMENTS = 'documents',
+  COMMUNICATIONS = 'communications',
+  CALENDAR = 'calendar',
+  DIRECTORY = 'directory',
   TUTORIALS = 'tutorials',
   CONTENT = 'content',
+}
+
+export enum PermissionAction {
+  CREATE = 'create',
+  READ = 'read',
+  UPDATE = 'update',
+  DELETE = 'delete',
 }

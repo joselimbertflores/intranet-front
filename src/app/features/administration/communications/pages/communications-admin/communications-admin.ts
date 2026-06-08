@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -16,6 +17,8 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { CalendarDataSource } from '../../../calendar/services';
 import { CommunicationAdminDataSource } from '../../services';
 import { SearchInput } from '../../../../../shared';
@@ -43,10 +46,23 @@ export default class CommunicationsAdmin {
   private communicationServce = inject(CommunicationAdminDataSource);
   private calendarDataSource = inject(CalendarDataSource);
   private confirmationService = inject(ConfirmationService);
+  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   offset = signal(0);
   term = signal('');
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.COMMUNICATIONS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.COMMUNICATIONS, PermissionAction.UPDATE),
+  );
+  canCreateCalendar = computed(() =>
+    this.authDataSource.can(Resource.CALENDAR, PermissionAction.CREATE),
+  );
+  canUpdateCalendar = computed(() =>
+    this.authDataSource.can(Resource.CALENDAR, PermissionAction.UPDATE),
+  );
   communicationResource = rxResource({
     params: () => ({
       offset: this.offset(),
@@ -128,29 +144,45 @@ export default class CommunicationsAdmin {
   }
 
   openMenu(row: CommunicationAdminResponse, event: Event) {
+    const items: MenuItem[] = [];
+
+    if (this.canUpdate()) {
+      items.push(
+        {
+          label: 'Editar',
+          icon: 'pi pi-pencil',
+          command: () => this.openCommunicationDialog(row),
+        },
+        {
+          label: row.isActive ? 'Desactivar' : 'Activar',
+          icon: 'pi pi-trash',
+          command: () =>
+            this.toogleCommunication(row.id, row.isActive, event),
+        },
+      );
+    }
+
+    if (row.eventId ? this.canUpdateCalendar() : this.canCreateCalendar()) {
+      items.push({
+        label: 'Configurar evento',
+        icon: 'pi pi-calendar',
+        command: () => this.opendEventDialog(row),
+      });
+    }
+
     this.menuItems = [
       {
         label: 'Opciones',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'pi pi-pencil',
-            command: () => this.openCommunicationDialog(row),
-          },
-          {
-            label: row.isActive ? 'Desactivar' : 'Activar',
-            icon: 'pi pi-trash',
-            command: () =>
-              this.toogleCommunication(row.id, row.isActive, event),
-          },
-          {
-            label: 'Configurar evento',
-            icon: 'pi pi-calendar',
-            command: () => this.opendEventDialog(row),
-          },
-        ],
+        items,
       },
     ];
+  }
+
+  hasRowActions(row: CommunicationAdminResponse): boolean {
+    return (
+      this.canUpdate() ||
+      (row.eventId ? this.canUpdateCalendar() : this.canCreateCalendar())
+    );
   }
 
   private toogleCommunication(id: string, isActive: boolean, event: Event) {

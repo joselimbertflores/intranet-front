@@ -37,25 +37,29 @@ import { TutorialBlockResponse } from '../../interfaces';
         <div
           class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         >
-          <button
-            pButton
-            icon="pi pi-pencil"
-            [rounded]="true"
-            [text]="true"
-            size="small"
-            title="Editar bloque"
-            (click)="edit.emit()"
-          ></button>
-          <button
-            pButton
-            icon="pi pi-trash"
-            [rounded]="true"
-            [text]="true"
-            size="small"
-            severity="danger"
-            title="Eliminar bloque"
-            (click)="remove.emit()"
-          ></button>
+          @if (canEdit()) {
+            <button
+              pButton
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              title="Editar bloque"
+              (click)="edit.emit()"
+            ></button>
+          }
+          @if (canRemove()) {
+            <button
+              pButton
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              severity="danger"
+              title="Eliminar bloque"
+              (click)="remove.emit()"
+            ></button>
+          }
         </div>
       </div>
 
@@ -163,4 +167,6 @@ export class TutorialBlockPreviewEditor {
 
   edit = output<void>();
   remove = output<void>();
+  canEdit = input(true);
+  canRemove = input(true);
 }

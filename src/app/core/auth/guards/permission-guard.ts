@@ -7,15 +7,11 @@ export const permissionGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authDataSource = inject(AuthDataSource);
 
-  const permissions = authDataSource.permissions();
+  const permission = route.data['permission'];
+  if (typeof permission !== 'string') return true;
 
-  const resource = route.data['resource'];
-  if (!resource) return true;
-
-  const hasPermission = permissions.some((p) => p.resource === resource);
-
-  if (!hasPermission) {
-    return new RedirectCommand(router.parseUrl('/admin'));
+  if (!authDataSource.hasPermission(permission)) {
+    return new RedirectCommand(router.parseUrl('/admin/forbidden'));
   }
 
   return true;

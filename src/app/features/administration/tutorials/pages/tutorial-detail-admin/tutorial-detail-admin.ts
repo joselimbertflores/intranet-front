@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   ElementRef,
+  computed,
   viewChild,
   Component,
   inject,
@@ -28,6 +29,8 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import {
   TutorialBlockResponse,
   TutorialBlockType,
@@ -65,8 +68,18 @@ export default class TutorialDetailAdmin {
   private dialogService = inject(DialogService);
   private confirmationService = inject(ConfirmationService);
   private tutorialDataSource = inject(TutorialDataSource);
+  private authDataSource = inject(AuthDataSource);
 
   id = input.required<string>();
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.UPDATE),
+  );
+  canDelete = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.DELETE),
+  );
 
   tutorial = rxResource({
     params: () => ({ id: this.id() }),

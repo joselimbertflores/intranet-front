@@ -96,12 +96,14 @@
         </div>
       </div>
     </p-popover>
-    <p-button
-      label="Agregar"
-      icon="pi pi-plus"
-      size="small"
-      (onClick)="openCreateDialog()"
-    />
+    @if (canCreate()) {
+      <p-button
+        label="Agregar"
+        icon="pi pi-plus"
+        size="small"
+        (onClick)="openCreateDialog()"
+      />
+    }
   </div>
 </div>
 
@@ -158,13 +160,15 @@
         }
       </td>
       <td>
-        <p-button
-          icon="pi pi-pencil"
-          size="small"
-          (click)="openUpdateDialog(item)"
-          severity="secondary"
-          rounded
-        />
+        @if (canUpdate()) {
+          <p-button
+            icon="pi pi-pencil"
+            size="small"
+            (click)="openUpdateDialog(item)"
+            severity="secondary"
+            rounded
+          />
+        }
       </td>
     </tr>
   </ng-template>

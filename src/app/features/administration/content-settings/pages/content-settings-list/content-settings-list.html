@@ -17,18 +17,20 @@
           Cambie las imagenes a mostrar en el banner principal
         </div>
       </div>
-      <div class="flex justify-end">
-        <button
-          pButton
-          [rounded]="true"
-          [outlined]="true"
-          severity="secondary"
-          class="shrink-0"
-          (click)="showHeroSectionDialog()"
-        >
-          <i pButtonIcon class="pi pi-pen-to-square"></i>
-        </button>
-      </div>
+      @if (canUpdate()) {
+        <div class="flex justify-end">
+          <button
+            pButton
+            [rounded]="true"
+            [outlined]="true"
+            severity="secondary"
+            class="shrink-0"
+            (click)="showHeroSectionDialog()"
+          >
+            <i pButtonIcon class="pi pi-pen-to-square"></i>
+          </button>
+        </div>
+      }
     </div>
 
     <div class="border-t border-surface-200 dark:border-surface-700"></div>
@@ -42,18 +44,20 @@
           Agregue o elimine accesos directos para otros sistemas
         </div>
       </div>
-      <div class="flex justify-end">
-        <button
-          pButton
-          [rounded]="true"
-          [outlined]="true"
-          severity="secondary"
-          class="shrink-0"
-          (click)="showQuickAccessDialog()"
-        >
-          <i pButtonIcon class="pi pi-pen-to-square"></i>
-        </button>
-      </div>
+      @if (canUpdate()) {
+        <div class="flex justify-end">
+          <button
+            pButton
+            [rounded]="true"
+            [outlined]="true"
+            severity="secondary"
+            class="shrink-0"
+            (click)="showQuickAccessDialog()"
+          >
+            <i pButtonIcon class="pi pi-pen-to-square"></i>
+          </button>
+        </div>
+      }
     </div>
   </div>
 </div>

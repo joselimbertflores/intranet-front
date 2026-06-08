@@ -1,11 +1,13 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Tipos de Documentos</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    size="small"
-    (onClick)="openDocumentTypeDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openDocumentTypeDialog()"
+    />
+  }
 </div>
 
 <p-table
@@ -60,13 +62,15 @@
       </td>
 
       <td>
-        <p-button
-          icon="pi pi-pencil"
-          size="small"
-          (click)="openDocumentTypeDialog(item)"
-          severity="secondary"
-          rounded
-        />
+        @if (canUpdate()) {
+          <p-button
+            icon="pi pi-pencil"
+            size="small"
+            (click)="openDocumentTypeDialog(item)"
+            severity="secondary"
+            rounded
+          />
+        }
       </td>
     </tr>
   </ng-template>

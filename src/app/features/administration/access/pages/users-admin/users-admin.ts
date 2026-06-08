@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -14,6 +15,8 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { MenuItem } from 'primeng/api';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SearchInput } from '../../../../../shared';
 import { UserDataSource } from '../../services';
 import { UserEditor } from '../../dialogs';
@@ -33,10 +36,14 @@ import { UserEditor } from '../../dialogs';
 export default class UsersAdmin {
   private dialogService = inject(DialogService);
   private clientDataSource = inject(UserDataSource);
+  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.USERS, PermissionAction.UPDATE),
+  );
   roleResource = rxResource({
     params: () => ({
       offset: this.offset(),

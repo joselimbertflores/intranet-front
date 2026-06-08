@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, map, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthUser, Resource } from './auth.types';
+import { AuthUser, PermissionAction, Resource } from './auth.types';
 
 @Injectable({
   providedIn: 'root',
@@ -16,10 +16,10 @@ export class AuthDataSource {
   private _user = signal<AuthUser | null>(null);
   user = computed(() => this._user());
 
-  permissions = computed(() => {
+  private readonly _permissions = computed<string[]>(() => {
     const user = this._user();
     if (!user) return [];
-    return user.roles.flatMap((r) => r.permissions);
+    return user.permissions;
   });
 
   constructor() {}
@@ -50,12 +50,21 @@ export class AuthDataSource {
         tap(({ user }) => this._user.set(user)),
         map(() => true),
         catchError(() => {
+          this._user.set(null);
           return of(false);
         }),
       );
   }
 
-  hasResource(resource: Resource): boolean {
-    return this.permissions().some((p) => p.resource === resource);
+  permissions(): string[] {
+    return this._permissions();
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.permissions().includes(permission);
+  }
+
+  can(resource: Resource, action: PermissionAction | string): boolean {
+    return this.hasPermission(`${resource}:${action}`);
   }
 }

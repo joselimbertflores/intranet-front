@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 
 import { DialogService } from 'primeng/dynamicdialog';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -8,6 +13,8 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
 import { DocumentTypeDataSource } from '../../services';
 import { DocumentTypeEditor } from '../../dialogs';
@@ -28,8 +35,15 @@ import { DocumentTypeEditor } from '../../dialogs';
 export default class DocumentTypesAdmin {
   private sectionService = inject(DocumentTypeDataSource);
   private dialogService = inject(DialogService);
+  private authDataSource = inject(AuthDataSource);
 
   dataSource = this.sectionService.dataSource;
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.UPDATE),
+  );
 
   openDocumentTypeDialog(item?: DocumentTypeWithSubTypesResponse) {
     this.dialogService.open(DocumentTypeEditor, {

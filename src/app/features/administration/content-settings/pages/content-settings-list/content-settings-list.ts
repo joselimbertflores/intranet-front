@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { BannerEditor, QuickAccessEditor } from '../../dialogs';
 
 @Component({
@@ -14,6 +21,11 @@ import { BannerEditor, QuickAccessEditor } from '../../dialogs';
 })
 export default class ContentSettingsList {
   private dialogService = inject(DialogService);
+  private authDataSource = inject(AuthDataSource);
+
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.CONTENT, PermissionAction.UPDATE),
+  );
 
   showHeroSectionDialog(): void {
     this.dialogService.open(BannerEditor, {

@@ -1,12 +1,14 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Tutoriales</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    iconPos="left"
-    size="small"
-    (onClick)="openEditorDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      iconPos="left"
+      size="small"
+      (onClick)="openEditorDialog()"
+    />
+  }
 </div>
 <div class="card">
   <p-table
@@ -56,13 +58,15 @@
               severity="secondary"
               rounded
             />
-            <p-button
-              icon="pi pi-pencil"
-              size="small"
-              (click)="openEditorDialog(item)"
-              severity="secondary"
-              rounded
-            />
+            @if (canUpdate()) {
+              <p-button
+                icon="pi pi-pencil"
+                size="small"
+                (click)="openEditorDialog(item)"
+                severity="secondary"
+                rounded
+              />
+            }
           </div>
         </td>
       </tr>

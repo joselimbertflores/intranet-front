@@ -38,13 +38,15 @@
           }
         </td>
         <td>
-          <p-button
-            [text]="true"
-            [rounded]="true"
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openUserDialog(item)"
-          />
+          @if (canUpdate()) {
+            <p-button
+              [text]="true"
+              [rounded]="true"
+              icon="pi pi-pencil"
+              size="small"
+              (click)="openUserDialog(item)"
+            />
+          }
         </td>
       </tr>
     </ng-template>

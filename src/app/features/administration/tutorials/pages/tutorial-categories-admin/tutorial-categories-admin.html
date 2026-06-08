@@ -1,12 +1,14 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Categorias tutoriales</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    iconPos="left"
-    size="small"
-    (onClick)="openEditorDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      iconPos="left"
+      size="small"
+      (onClick)="openEditorDialog()"
+    />
+  }
 </div>
 
 <p-table
@@ -45,20 +47,24 @@
       <td>{{ item.name }}</td>
       <td>
         <div class="flex gap-x-2">
-          <p-button
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openEditorDialog(item)"
-            severity="secondary"
-            rounded
-          />
-          <p-button
-            icon="pi pi-trash"
-            size="small"
-            (click)="remove(item)"
-            severity="secondary"
-            rounded
-          />
+          @if (canUpdate()) {
+            <p-button
+              icon="pi pi-pencil"
+              size="small"
+              (click)="openEditorDialog(item)"
+              severity="secondary"
+              rounded
+            />
+          }
+          @if (canDelete()) {
+            <p-button
+              icon="pi pi-trash"
+              size="small"
+              (click)="remove(item)"
+              severity="secondary"
+              rounded
+            />
+          }
         </div>
       </td>
     </tr>

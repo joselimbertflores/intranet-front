@@ -11,15 +11,18 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
-import { Resource } from '../../../../core/auth/auth.types';
+import { PermissionAction, Resource } from '../../../../core/auth/auth.types';
 import { AppIcon } from '../../../../shared';
+
+const readPermission = (resource: Resource) =>
+  `${resource}:${PermissionAction.READ}`;
 
 interface SidebarItem {
   label: string;
   icon: string;
   expanded?: boolean;
   routerLink?: string;
-  resource?: Resource;
+  permission?: string;
   items?: SidebarItem[];
 }
 @Component({
@@ -71,13 +74,6 @@ interface SidebarItem {
 export class AdminSidebar {
   private authDataSource = inject(AuthDataSource);
 
-  // Si el padre tiene items → se ignora su resource.
-  // Si no tiene items, entonces sí se usa resource.
-
-  // Esto evita inconsistencias como:
-  // - El padre permitido pero todos los hijos prohibidos.
-  // - O el padre bloqueando hijos que sí deberían mostrarse.
-
   readonly menu: SidebarItem[] = [
     {
       label: 'Configuraciones',
@@ -88,7 +84,7 @@ export class AdminSidebar {
           label: 'Contenido',
           icon: 'pi pi-objects-column',
           routerLink: 'content-settings',
-          resource: Resource.CONTENT,
+          permission: readPermission(Resource.CONTENT),
         },
       ],
     },
@@ -101,20 +97,20 @@ export class AdminSidebar {
           label: 'Secciones',
           icon: 'pi pi-table',
           routerLink: 'document-sections',
-          resource: Resource.DOCUMENTS,
+          permission: readPermission(Resource.DOCUMENTS),
         },
         {
           label: 'Tipos de documentos',
           icon: 'pi pi-list',
           routerLink: 'document-types',
-          resource: Resource.DOCUMENTS,
+          permission: readPermission(Resource.DOCUMENTS),
         },
 
         {
           label: 'Documentos',
           icon: 'pi pi-file',
           routerLink: 'documents',
-          resource: Resource.DOCUMENTS,
+          permission: readPermission(Resource.DOCUMENTS),
         },
       ],
     },
@@ -127,19 +123,19 @@ export class AdminSidebar {
           label: 'Comunicados',
           icon: 'pi pi-clipboard',
           routerLink: 'communications-manage',
-          resource: Resource.COMMUNICATIONS,
+          permission: readPermission(Resource.COMMUNICATIONS),
         },
         {
           label: 'Calendario',
           icon: 'pi pi-calendar',
           routerLink: 'calendar-manage',
-          resource: Resource.COMMUNICATIONS,
+          permission: readPermission(Resource.CALENDAR),
         },
         {
           label: 'Directorio telefonico',
           icon: 'pi pi-phone',
           routerLink: 'directory',
-          resource: Resource.CONTENT,
+          permission: readPermission(Resource.DIRECTORY),
         },
         {
           label: 'Tutoriales',
@@ -149,13 +145,13 @@ export class AdminSidebar {
               label: 'Categorias',
               icon: 'pi pi-align-center',
               routerLink: 'tutorial-categories',
-              resource: Resource.TUTORIALS,
+              permission: readPermission(Resource.TUTORIALS),
             },
             {
               label: 'Contenido',
               icon: 'pi pi-desktop',
               routerLink: 'tutorials',
-              resource: Resource.TUTORIALS,
+              permission: readPermission(Resource.TUTORIALS),
             },
           ],
         },
@@ -170,13 +166,13 @@ export class AdminSidebar {
           label: 'Usuarios',
           icon: 'pi pi-users',
           routerLink: 'users',
-          resource: Resource.USERS,
+          permission: readPermission(Resource.USERS),
         },
         {
           label: 'Roles',
           icon: 'pi pi-shield',
           routerLink: 'roles',
-          resource: Resource.USERS,
+          permission: readPermission(Resource.ROLES),
         },
       ],
     },
@@ -186,18 +182,14 @@ export class AdminSidebar {
 
   private filterMenu(items: SidebarItem[]): MenuItem[] {
     return items
-      .map(({ resource, items, ...props }) => {
+      .map(({ permission, items, ...props }) => {
         if (items) {
           const children = this.filterMenu(items);
           return children.length ? { ...props, items: children } : null;
         }
-        if (!resource) return props;
+        if (!permission) return props;
 
-        return this.authDataSource
-          .permissions()
-          .some((permission) => permission.resource === resource)
-          ? props
-          : null;
+        return this.authDataSource.hasPermission(permission) ? props : null;
       })
       .filter((item) => item !== null);
   }

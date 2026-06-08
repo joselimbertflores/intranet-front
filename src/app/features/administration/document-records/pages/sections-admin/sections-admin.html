@@ -1,11 +1,13 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Secciones</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    size="small"
-    (onClick)="openSectionDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openSectionDialog()"
+    />
+  }
 </div>
 
 <p-treeTable
@@ -69,20 +71,24 @@
 
       <td>
         <div class="flex gap-x-2">
-          <p-button
-            size="small"
-            icon="pi pi-plus"
-            [rounded]="true"
-            [text]="true"
-            (click)="addChild(rowData)"
-          />
-          <p-button
-            size="small"
-            icon="pi pi-pencil"
-            [rounded]="true"
-            [text]="true"
-            (click)="openSectionDialog(rowNode)"
-          />
+          @if (canCreate()) {
+            <p-button
+              size="small"
+              icon="pi pi-plus"
+              [rounded]="true"
+              [text]="true"
+              (click)="addChild(rowData)"
+            />
+          }
+          @if (canUpdate()) {
+            <p-button
+              size="small"
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              (click)="openSectionDialog(rowNode)"
+            />
+          }
         </div>
       </td>
     </tr>

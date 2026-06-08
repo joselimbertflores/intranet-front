@@ -1,11 +1,13 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Comunicados</h2>
-  <p-button
-    label="Agregar"
-    icon="pi pi-plus"
-    size="small"
-    (onClick)="openCommunicationDialog()"
-  />
+  @if (canCreate()) {
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openCommunicationDialog()"
+    />
+  }
 </div>
 <p-table
   #table
@@ -67,17 +69,19 @@
         }
       </td>
       <td>
-        <div class="flex gap-x-2">
-          <button
-            pButton
-            icon="pi pi-ellipsis-v"
-            size="small"
-            [text]="true"
-            [rounded]="true"
-            [outlined]="true"
-            (click)="openMenu(item, $event); menu.toggle($event)"
-          ></button>
-        </div>
+        @if (hasRowActions(item)) {
+          <div class="flex gap-x-2">
+            <button
+              pButton
+              icon="pi pi-ellipsis-v"
+              size="small"
+              [text]="true"
+              [rounded]="true"
+              [outlined]="true"
+              (click)="openMenu(item, $event); menu.toggle($event)"
+            ></button>
+          </div>
+        }
       </td>
     </tr>
   </ng-template>

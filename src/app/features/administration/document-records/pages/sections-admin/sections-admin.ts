@@ -17,6 +17,8 @@ import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SectionTreeNodeResponse } from '../../interfaces';
 import { DocumentSectionEditor } from '../../dialogs';
 import { SectionDataSource } from '../../services';
@@ -40,8 +42,15 @@ import { SectionDataSource } from '../../services';
 export default class SectionsAdmin {
   private dialogService = inject(DialogService);
   private sectionService = inject(SectionDataSource);
+  private authDataSource = inject(AuthDataSource);
 
   sections = this.sectionService.sections;
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.UPDATE),
+  );
   treeSections = computed(() => {
     const nodes = this.sections().map((section) => this.toTreeNode(section));
     this.restoreExpanded(nodes);

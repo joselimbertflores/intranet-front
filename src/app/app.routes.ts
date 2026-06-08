@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { isAuthenticatedGuard, permissionGuard } from './core/auth/guards';
+import { PermissionAction, Resource } from './core/auth/auth.types';
+
+const readPermission = (resource: Resource) =>
+  `${resource}:${PermissionAction.READ}`;
 
 export const routes: Routes = [
   {
@@ -67,9 +71,15 @@ export const routes: Routes = [
           import('./features/administration/dashboard/pages/admin-home/admin-home'),
       },
       {
+        path: 'forbidden',
+        title: 'Administracion - Acceso denegado',
+        loadComponent: () =>
+          import('./features/administration/dashboard/pages/admin-forbidden/admin-forbidden'),
+      },
+      {
         path: 'document-types',
         title: 'Administracion - Tipos documento',
-        data: { resource: 'documents' },
+        data: { permission: readPermission(Resource.DOCUMENTS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/document-types-admin/document-types-admin'),
@@ -77,7 +87,7 @@ export const routes: Routes = [
       {
         path: 'document-sections',
         title: 'Administracion - Secciones documento',
-        data: { resource: 'documents' },
+        data: { permission: readPermission(Resource.DOCUMENTS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/sections-admin/sections-admin'),
@@ -85,7 +95,7 @@ export const routes: Routes = [
       {
         path: 'documents',
         title: 'Administracion - Documentos',
-        data: { resource: 'documents' },
+        data: { permission: readPermission(Resource.DOCUMENTS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/document-records/pages/document-admin/document-admin'),
@@ -93,7 +103,7 @@ export const routes: Routes = [
       {
         path: 'communications-manage',
         title: 'Administracion - Comunicados',
-        data: { resource: 'communications' },
+        data: { permission: readPermission(Resource.COMMUNICATIONS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/communications/pages/communications-admin/communications-admin'),
@@ -101,7 +111,7 @@ export const routes: Routes = [
       {
         path: 'calendar-manage',
         title: 'Administracion - Calendarios',
-        data: { resource: 'communications' },
+        data: { permission: readPermission(Resource.CALENDAR) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/calendar/pages/calendar-admin/calendar-admin'),
@@ -109,7 +119,7 @@ export const routes: Routes = [
       {
         path: 'tutorials',
         title: 'Administracion - Tutoriales',
-        data: { resource: 'tutorials' },
+        data: { permission: readPermission(Resource.TUTORIALS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorials-admin/tutorials-admin'),
@@ -117,7 +127,7 @@ export const routes: Routes = [
       {
         path: 'tutorials/:id',
         title: 'Administracion - Detalle tutorial',
-        data: { resource: 'tutorials' },
+        data: { permission: readPermission(Resource.TUTORIALS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorial-detail-admin/tutorial-detail-admin'),
@@ -125,7 +135,7 @@ export const routes: Routes = [
       {
         path: 'tutorial-categories',
         title: 'Administracion - Categorias tutorial',
-        data: { resource: 'tutorials' },
+        data: { permission: readPermission(Resource.TUTORIALS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/tutorials/pages/tutorial-categories-admin/tutorial-categories-admin'),
@@ -133,7 +143,7 @@ export const routes: Routes = [
       {
         path: 'content-settings',
         title: 'Administracion - Contenido',
-        data: { resource: 'content' },
+        data: { permission: readPermission(Resource.CONTENT) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/content-settings/pages/content-settings-list/content-settings-list'),
@@ -141,7 +151,7 @@ export const routes: Routes = [
       {
         path: 'directory',
         title: 'Administracion - Directorio',
-        data: { resource: 'content' },
+        data: { permission: readPermission(Resource.DIRECTORY) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/directory/pages/directory-admin/directory-admin'),
@@ -149,7 +159,7 @@ export const routes: Routes = [
       {
         path: 'users',
         title: 'Administracion - Usuarios',
-        data: { resource: 'users' },
+        data: { permission: readPermission(Resource.USERS) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/access/pages/users-admin/users-admin'),
@@ -157,7 +167,7 @@ export const routes: Routes = [
       {
         path: 'roles',
         title: 'Administracion - Roles',
-        data: { resource: 'users' },
+        data: { permission: readPermission(Resource.ROLES) },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./features/administration/access/pages/roles-admin/roles-admin'),

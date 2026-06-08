@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -16,6 +17,8 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SearchInput } from '../../../../../shared';
 import { CalendarEventResponse } from '../../interfaces';
 import { CalendarDataSource } from '../../services';
@@ -40,10 +43,21 @@ export default class CalendarAdmin {
   private dialogService = inject(DialogService);
   private calendarDataSource = inject(CalendarDataSource);
   private confirmationService = inject(ConfirmationService);
+  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   term = signal('');
   offset = signal(0);
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.CALENDAR, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.CALENDAR, PermissionAction.UPDATE),
+  );
+  canDelete = computed(() =>
+    this.authDataSource.can(Resource.CALENDAR, PermissionAction.DELETE),
+  );
+  hasRowActions = computed(() => this.canUpdate() || this.canDelete());
   resource = rxResource({
     params: () => ({
       offset: this.offset(),
@@ -87,21 +101,28 @@ export default class CalendarAdmin {
   }
 
   openMenu(row: CalendarEventResponse, event: Event) {
+    const items: MenuItem[] = [];
+
+    if (this.canUpdate()) {
+      items.push({
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        command: () => this.openEventDialog(row),
+      });
+    }
+
+    if (this.canDelete()) {
+      items.push({
+        label: 'Eliminar',
+        icon: 'pi pi-calendar',
+        command: () => this.remove(row.id, event),
+      });
+    }
+
     this.menuItems = [
       {
         label: 'Opciones',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'pi pi-pencil',
-            command: () => this.openEventDialog(row),
-          },
-          {
-            label: 'Eliminar',
-            icon: 'pi pi-calendar',
-            command: () => this.remove(row.id, event),
-          },
-        ],
+        items,
       },
     ];
   }

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
+  computed,
   inject,
 } from '@angular/core';
 
@@ -14,6 +15,8 @@ import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { TutorialCategoryDataSource } from '../../services';
 import { TutorialCategoryResponse } from '../../interfaces';
 import { TutorialCategoryEditor } from '../../dialogs';
@@ -36,8 +39,18 @@ export default class TutorialCategoriesAdmin {
   private dialogService = inject(DialogService);
   private tutorialCategoryDataSource = inject(TutorialCategoryDataSource);
   private confirmationService = inject(ConfirmationService);
+  private authDataSource = inject(AuthDataSource);
 
   dataSource = linkedSignal(() => this.tutorialCategoryDataSource.categories());
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.UPDATE),
+  );
+  canDelete = computed(() =>
+    this.authDataSource.can(Resource.TUTORIALS, PermissionAction.DELETE),
+  );
 
   openEditorDialog(item?: TutorialCategoryResponse) {
     const dialogRef = this.dialogService.open(TutorialCategoryEditor, {

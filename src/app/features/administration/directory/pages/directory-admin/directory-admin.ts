@@ -29,6 +29,8 @@ import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { MenuModule } from 'primeng/menu';
 
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
+import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { TreeDirectoryResponse } from '../../interfaces';
 import { DirectoryDataSource } from '../services';
 import { DirectoryEditor } from '../../dialogs';
@@ -59,9 +61,22 @@ export default class DirectoryAdmin implements OnInit {
   private dialogService = inject(DialogService);
   private directoryDataSource = inject(DirectoryDataSource);
   private confirmationService = inject(ConfirmationService);
+  private authDataSource = inject(AuthDataSource);
 
   treeDirectory = signal<TreeDirectoryResponse[]>([]);
   expandedKeys = new Set<string>();
+  canCreate = computed(() =>
+    this.authDataSource.can(Resource.DIRECTORY, PermissionAction.CREATE),
+  );
+  canUpdate = computed(() =>
+    this.authDataSource.can(Resource.DIRECTORY, PermissionAction.UPDATE),
+  );
+  canDelete = computed(() =>
+    this.authDataSource.can(Resource.DIRECTORY, PermissionAction.DELETE),
+  );
+  hasRowActions = computed(
+    () => this.canCreate() || this.canUpdate() || this.canDelete(),
+  );
   nodes = computed(() => {
     return this.treeDirectory().map((item) => this.toTreeNode(item));
   });
@@ -142,29 +157,39 @@ export default class DirectoryAdmin implements OnInit {
   }
 
   openMenu(row: TreeTableNode<TreeDirectoryResponse>, event: Event) {
+    const items: MenuItem[] = [];
+
+    if (this.canUpdate()) {
+      items.push({
+        label: 'Editar',
+        icon: 'pi pi-pencil',
+        command: () =>
+          this.openDirectoryDialog(row.node?.data, row.node?.expanded),
+      });
+    }
+
+    if (this.canDelete()) {
+      items.push({
+        label: 'Eliminar',
+        icon: 'pi pi-trash',
+        command: () => {
+          if (row.node?.data) this.remove(row.node?.data, event);
+        },
+      });
+    }
+
+    if (this.canCreate()) {
+      items.push({
+        label: 'Agregar subdirectorio',
+        icon: 'pi pi-plus',
+        command: () => this.addChildDirectory(row),
+      });
+    }
+
     this.menuItems = [
       {
         label: 'Opciones',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'pi pi-pencil',
-            command: () =>
-              this.openDirectoryDialog(row.node?.data, row.node?.expanded),
-          },
-          {
-            label: 'Eliminar',
-            icon: 'pi pi-trash',
-            command: () => {
-              if (row.node?.data) this.remove(row.node?.data, event);
-            },
-          },
-          {
-            label: 'Agregar subdirectorio',
-            icon: 'pi pi-plus',
-            command: () => this.addChildDirectory(row),
-          },
-        ],
+        items,
       },
     ];
   }

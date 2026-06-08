@@ -9,7 +9,7 @@ import { AuthUser, Resource } from './auth.types';
   providedIn: 'root',
 })
 export class AuthDataSource {
-  private readonly URL = `${environment.baseUrl}/auth`;
+  private readonly URL = `${environment.baseUrl}/api/auth`;
 
   private http = inject(HttpClient);
 
@@ -31,7 +31,7 @@ export class AuthDataSource {
       localStorage.removeItem('login');
     }
     return this.http.post(
-      `${this.URL}/login`,
+      `${environment.baseUrl}/login`,
       { login, password },
       { withCredentials: true },
     );
@@ -45,7 +45,7 @@ export class AuthDataSource {
 
   checkAuthStatus() {
     return this.http
-      .get<{ user: AuthUser }>(`${this.URL}/status`, { withCredentials: true })
+      .get<{ user: AuthUser }>(`${this.URL}/me`, { withCredentials: true })
       .pipe(
         tap(({ user }) => this._user.set(user)),
         map(() => true),

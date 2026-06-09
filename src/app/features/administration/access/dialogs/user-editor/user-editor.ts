@@ -1,35 +1,36 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormGroup,
   Validators,
   FormBuilder,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ListboxModule } from 'primeng/listbox';
 import { ButtonModule } from 'primeng/button';
 
-import { UserDataSource } from '../../services';
 import { UserResponse } from '../../interfaces';
+import { UserApi } from '../../services';
 
 @Component({
   selector: 'app-user-editor',
   imports: [CommonModule, ReactiveFormsModule, ListboxModule, ButtonModule],
   templateUrl: './user-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserEditor {
-  private userDataSource = inject(UserDataSource);
+  private userApi = inject(UserApi);
   private dialogRef = inject(DynamicDialogRef);
 
   readonly data: UserResponse = inject(DynamicDialogConfig).data;
+
   userForm: FormGroup = inject(FormBuilder).nonNullable.group({
     roleIds: [[], [Validators.required, Validators.minLength(1)]],
   });
 
-  roles = this.userDataSource.roles;
+  roles = toSignal(this.userApi.getRoles(), { initialValue: [] });
 
   ngOnInit() {
     this.loadForm();
@@ -37,7 +38,7 @@ export class UserEditor {
 
   save() {
     const { roleIds } = this.userForm.value;
-    this.userDataSource.update(this.data.id, roleIds).subscribe((resp) => {
+    this.userApi.update(this.data.id, roleIds).subscribe((resp) => {
       this.dialogRef.close(resp);
     });
   }
@@ -47,8 +48,6 @@ export class UserEditor {
   }
 
   private loadForm() {
-    this.userForm.patchValue({
-      roleIds: this.data.roles.map(({ id }) => id),
-    });
+    this.userForm.patchValue({ roleIds: this.data.roles.map(({ id }) => id) });
   }
 }

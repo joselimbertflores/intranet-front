@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -15,58 +14,48 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { MenuItem } from 'primeng/api';
 
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SearchInput } from '../../../../../shared';
-import { UserDataSource } from '../../services';
+import { UserResponse } from '../../interfaces';
+import { UserApi } from '../../services';
 import { UserEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-users-admin',
-  imports: [
-    CommonModule,
-    ButtonModule,
-    TableModule,
-    TagModule,
-    SearchInput,
-  ],
+  imports: [CommonModule, ButtonModule, TableModule, TagModule, SearchInput],
   templateUrl: './users-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class UsersAdmin {
   private dialogService = inject(DialogService);
-  private clientDataSource = inject(UserDataSource);
-  private authDataSource = inject(AuthDataSource);
+  private userApi = inject(UserApi);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
-  canUpdate = computed(() =>
-    this.authDataSource.can(Resource.USERS, PermissionAction.UPDATE),
-  );
-  roleResource = rxResource({
+
+  userResource = rxResource({
     params: () => ({
       offset: this.offset(),
       limit: this.limit(),
       term: this.searchTerm(),
     }),
     stream: ({ params }) =>
-      this.clientDataSource.findAll(params.limit, params.offset, params.term),
+      this.userApi.findAll(params.limit, params.offset, params.term),
   });
 
   dataSource = linkedSignal(() => {
-    if (!this.roleResource.hasValue()) return [];
-    return this.roleResource.value().users;
+    if (!this.userResource.hasValue()) return [];
+    return this.userResource.value().users;
   });
 
   dataSize = linkedSignal(() => {
-    if (!this.roleResource.hasValue()) return 0;
-    return this.roleResource.value().total;
+    if (!this.userResource.hasValue()) return 0;
+    return this.userResource.value().total;
   });
 
   menuOptions = signal<MenuItem[]>([]);
 
-  openUserDialog(user?: any) {
+  openUserDialog(user?: UserResponse) {
     const dialogRef = this.dialogService.open(UserEditor, {
       header: user ? 'Editar usuario' : 'Crear usuario',
       modal: true,
@@ -80,7 +69,7 @@ export default class UsersAdmin {
         '640px': '90vw',
       },
     });
-    dialogRef?.onClose.subscribe((result?: any) => {
+    dialogRef?.onClose.subscribe((result?: UserResponse) => {
       if (!result) return;
       this.updateItemDataSource(result);
     });
@@ -96,7 +85,7 @@ export default class UsersAdmin {
     this.offset.set(event.first);
   }
 
-  private updateItemDataSource(item: any): void {
+  private updateItemDataSource(item: UserResponse): void {
     const index = this.dataSource().findIndex(({ id }) => item.id === id);
     if (index === -1) {
       this.dataSource.update((values) => [item, ...values]);

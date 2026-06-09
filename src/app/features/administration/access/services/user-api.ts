@@ -14,13 +14,9 @@ interface roles {
 @Injectable({
   providedIn: 'root',
 })
-export class UserDataSource {
+export class UserApi {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/users`;
-
-  roles = toSignal(this.http.get<roles[]>(`${this.URL}/roles`), {
-    initialValue: [],
-  });
+  private readonly URL = `${environment.baseUrl}/api/users`;
 
   findAll(limit: number, offset: number, term?: string) {
     const params = new HttpParams({
@@ -33,5 +29,9 @@ export class UserDataSource {
 
   update(id: string, roleIds: string[]) {
     return this.http.patch(`${this.URL}/${id}`, { roleIds });
+  }
+
+  getRoles() {
+    return this.http.get<roles[]>(`${this.URL}/roles`);
   }
 }

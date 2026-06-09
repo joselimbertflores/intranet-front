@@ -6,12 +6,15 @@ export interface RoleResponse {
 }
 
 export interface PermissionResponse {
-  id: string;
+  id: number;
   resource: string;
   action: string;
 }
 
-export interface PermissionsCatalog {
+export interface GroupedPermissionResponse {
   resource: string;
-  permissions: { id: number; action: string }[];
+  permissions: {
+    id: number;
+    action: string;
+  }[];
 }

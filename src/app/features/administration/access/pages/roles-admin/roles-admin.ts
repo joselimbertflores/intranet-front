@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   linkedSignal,
   Component,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -12,10 +11,8 @@ import { TableModule, TablePageEvent } from 'primeng/table';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
 
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { SearchInput } from '../../../../../shared';
-import { RoleDataSource } from '../../services';
+import { RoleApi } from '../../services';
 import { RoleResponse } from '../../interfaces';
 import { RoleEditor } from '../../dialogs';
 
@@ -27,18 +24,12 @@ import { RoleEditor } from '../../dialogs';
 })
 export default class RolesAdmin {
   private dialogService = inject(DialogService);
-  private roleDataSource = inject(RoleDataSource);
-  private authDataSource = inject(AuthDataSource);
+  private roleDataSource = inject(RoleApi);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
-  canCreate = computed(() =>
-    this.authDataSource.can(Resource.ROLES, PermissionAction.CREATE),
-  );
-  canUpdate = computed(() =>
-    this.authDataSource.can(Resource.ROLES, PermissionAction.UPDATE),
-  );
+
   roleResource = rxResource({
     params: () => ({
       offset: this.offset(),
@@ -70,7 +61,7 @@ export default class RolesAdmin {
       draggable: false,
       closeOnEscape: true,
       closable: true,
-      width: '30vw',
+      width: '35vw',
       data: role,
       breakpoints: {
         '960px': '75vw',

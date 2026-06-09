@@ -11,18 +11,15 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../core/auth/auth.types';
+import { Resource } from '../../../../core/auth/auth.types';
 import { AppIcon } from '../../../../shared';
-
-const readPermission = (resource: Resource) =>
-  `${resource}:${PermissionAction.READ}`;
 
 interface SidebarItem {
   label: string;
   icon: string;
   expanded?: boolean;
   routerLink?: string;
-  permission?: string;
+  resource?: Resource;
   items?: SidebarItem[];
 }
 @Component({
@@ -84,7 +81,7 @@ export class AdminSidebar {
           label: 'Contenido',
           icon: 'pi pi-objects-column',
           routerLink: 'content-settings',
-          permission: readPermission(Resource.CONTENT),
+          resource: Resource.CONTENT,
         },
       ],
     },
@@ -97,20 +94,20 @@ export class AdminSidebar {
           label: 'Secciones',
           icon: 'pi pi-table',
           routerLink: 'document-sections',
-          permission: readPermission(Resource.DOCUMENTS),
+          resource: Resource.DOCUMENTS,
         },
         {
           label: 'Tipos de documentos',
           icon: 'pi pi-list',
           routerLink: 'document-types',
-          permission: readPermission(Resource.DOCUMENTS),
+          resource: Resource.DOCUMENTS,
         },
 
         {
           label: 'Documentos',
           icon: 'pi pi-file',
           routerLink: 'documents',
-          permission: readPermission(Resource.DOCUMENTS),
+          resource: Resource.DOCUMENTS,
         },
       ],
     },
@@ -123,19 +120,19 @@ export class AdminSidebar {
           label: 'Comunicados',
           icon: 'pi pi-clipboard',
           routerLink: 'communications-manage',
-          permission: readPermission(Resource.COMMUNICATIONS),
+          resource: Resource.COMMUNICATIONS,
         },
         {
           label: 'Calendario',
           icon: 'pi pi-calendar',
           routerLink: 'calendar-manage',
-          permission: readPermission(Resource.CALENDAR),
+          resource: Resource.CALENDAR,
         },
         {
           label: 'Directorio telefonico',
           icon: 'pi pi-phone',
           routerLink: 'directory',
-          permission: readPermission(Resource.DIRECTORY),
+          resource: Resource.DIRECTORY,
         },
         {
           label: 'Tutoriales',
@@ -145,13 +142,13 @@ export class AdminSidebar {
               label: 'Categorias',
               icon: 'pi pi-align-center',
               routerLink: 'tutorial-categories',
-              permission: readPermission(Resource.TUTORIALS),
+              resource: Resource.TUTORIALS,
             },
             {
               label: 'Contenido',
               icon: 'pi pi-desktop',
               routerLink: 'tutorials',
-              permission: readPermission(Resource.TUTORIALS),
+              resource: Resource.TUTORIALS,
             },
           ],
         },
@@ -166,13 +163,13 @@ export class AdminSidebar {
           label: 'Usuarios',
           icon: 'pi pi-users',
           routerLink: 'users',
-          permission: readPermission(Resource.USERS),
+          resource: Resource.USERS,
         },
         {
           label: 'Roles',
           icon: 'pi pi-shield',
           routerLink: 'roles',
-          permission: readPermission(Resource.ROLES),
+          resource: Resource.ROLES,
         },
       ],
     },
@@ -182,14 +179,16 @@ export class AdminSidebar {
 
   private filterMenu(items: SidebarItem[]): MenuItem[] {
     return items
-      .map(({ permission, items, ...props }) => {
+      .map(({ resource, items, ...props }) => {
         if (items) {
           const children = this.filterMenu(items);
           return children.length ? { ...props, items: children } : null;
         }
-        if (!permission) return props;
+        if (!resource) return props;
 
-        return this.authDataSource.hasPermission(permission) ? props : null;
+        return this.authDataSource.hasAnyResourcePermission(resource)
+          ? props
+          : null;
       })
       .filter((item) => item !== null);
   }

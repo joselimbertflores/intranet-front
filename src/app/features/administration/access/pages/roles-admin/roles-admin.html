@@ -1,24 +1,23 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Roles</h2>
-  @if (canCreate()) {
-    <p-button
-      label="Agregar"
-      icon="pi pi-plus"
-      iconPos="left"
-      size="small"
-      (onClick)="openRoleDialog()"
-    />
-  }
+  <p-button
+    label="Agregar"
+    icon="pi pi-plus"
+    iconPos="left"
+    size="small"
+    (onClick)="openRoleDialog()"
+  />
 </div>
 
 <p-table
   #table
+  size="small"
   [value]="dataSource()"
   [totalRecords]="dataSize()"
   [rows]="limit()"
   [paginator]="true"
+  [loading]="roleResource.isLoading()"
   (onPage)="changePage($event)"
-  size="small"
 >
   <ng-template #caption>
     <div class="flex sm:justify-end">
@@ -41,15 +40,13 @@
       <td>{{ item.description }}</td>
       <td>{{ item.permissions.length }}</td>
       <td>
-        @if (canUpdate()) {
-          <p-button
-            [text]="true"
-            [rounded]="true"
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openRoleDialog(item)"
-          />
-        }
+        <p-button
+          [text]="true"
+          [rounded]="true"
+          icon="pi pi-pencil"
+          size="small"
+          (click)="openRoleDialog(item)"
+        />
       </td>
     </tr>
   </ng-template>

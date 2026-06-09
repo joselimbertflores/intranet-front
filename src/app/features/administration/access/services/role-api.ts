@@ -3,10 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../../../environments/environment';
-import {
-  PermissionsCatalog,
-  RoleResponse,
-} from '../interfaces';
+import { GroupedPermissionResponse, RoleResponse } from '../interfaces';
 
 interface FindRolesParams {
   term: string;
@@ -16,32 +13,31 @@ interface FindRolesParams {
 @Injectable({
   providedIn: 'root',
 })
-export class RoleDataSource {
+export class RoleApi {
   private http = inject(HttpClient);
-  private URL = `${environment.baseUrl}/roles`;
+  private URL = `${environment.baseUrl}/api/roles`;
 
   permissions = toSignal(
-    this.http.get<PermissionsCatalog[]>(`${this.URL}/permissions`),
+    this.http.get<GroupedPermissionResponse[]>(`${this.URL}/permissions`),
     { initialValue: [] },
   );
 
   constructor() {}
 
   create(form: object) {
-    return this.http.post(this.URL, form);
+    return this.http.post<RoleResponse>(this.URL, form);
   }
 
   update(id: string, form: object) {
-    return this.http.patch(`${this.URL}/${id}`, form);
+    return this.http.patch<RoleResponse>(`${this.URL}/${id}`, form);
   }
 
   findAll({ term, limit, offset }: FindRolesParams) {
     const params = new HttpParams({
       fromObject: { limit, offset, ...(term && { term }) },
     });
-    return this.http
-      .get<{ roles: RoleResponse[]; total: number }>(this.URL, {
-        params,
-      })
+    return this.http.get<{ roles: RoleResponse[]; total: number }>(this.URL, {
+      params,
+    });
   }
 }

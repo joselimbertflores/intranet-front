@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, map, of, tap } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
 import { AuthUser, PermissionAction, Resource } from './auth.types';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -66,5 +66,11 @@ export class AuthDataSource {
 
   can(resource: Resource, action: PermissionAction | string): boolean {
     return this.hasPermission(`${resource}:${action}`);
+  }
+
+  hasAnyResourcePermission(resource: Resource): boolean {
+    return this.permissions().some((permission) =>
+      permission.startsWith(`${resource}:`),
+    );
   }
 }

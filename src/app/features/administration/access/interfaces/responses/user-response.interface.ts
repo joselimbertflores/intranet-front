@@ -9,3 +9,10 @@ export interface UserRolesResponse {
   name: string;
   description: string;
 }
+
+export interface IdentityCandidateResponse {
+  externalKey: string;
+  fullName: string;
+  email: string | null;
+  login: string;
+}

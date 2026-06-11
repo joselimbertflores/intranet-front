@@ -14,10 +14,10 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { MenuItem } from 'primeng/api';
 
+import { UserEditor, UserImporter } from '../../dialogs';
 import { SearchInput } from '../../../../../shared';
 import { UserResponse } from '../../interfaces';
 import { UserApi } from '../../services';
-import { UserEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-users-admin',
@@ -62,7 +62,7 @@ export default class UsersAdmin {
       draggable: false,
       closeOnEscape: true,
       closable: true,
-      width: '40vw',
+      width: '30vw',
       data: user,
       breakpoints: {
         '960px': '75vw',
@@ -71,7 +71,26 @@ export default class UsersAdmin {
     });
     dialogRef?.onClose.subscribe((result?: UserResponse) => {
       if (!result) return;
-      this.updateItemDataSource(result);
+      this.upsertItem(result);
+    });
+  }
+
+  openImportUserDialog() {
+    const dialogRef = this.dialogService.open(UserImporter, {
+      header: 'Importar usuario',
+      modal: true,
+      draggable: false,
+      closeOnEscape: true,
+      closable: true,
+      width: '30vw',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw',
+      },
+    });
+    dialogRef?.onClose.subscribe((result?: UserResponse) => {
+      if (!result) return;
+      this.upsertItem(result);
     });
   }
 
@@ -85,7 +104,7 @@ export default class UsersAdmin {
     this.offset.set(event.first);
   }
 
-  private updateItemDataSource(item: UserResponse): void {
+  private upsertItem(item: UserResponse): void {
     const index = this.dataSource().findIndex(({ id }) => item.id === id);
     if (index === -1) {
       this.dataSource.update((values) => [item, ...values]);

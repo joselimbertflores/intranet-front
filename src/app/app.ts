@@ -10,4 +10,17 @@ import { Toast } from 'primeng/toast';
 })
 export class App {
   protected readonly title = signal('intranet-frontend');
+
+  readonly toastBreakpoints = {
+    '920px': {
+      width: '70%',
+      right: '1rem',
+      left: '1rem',
+    },
+    '640px': {
+      width: 'calc(100% - 2rem)',
+      right: '1rem',
+      left: '1rem',
+    },
+  };
 }

@@ -8,43 +8,114 @@ import { catchError, throwError } from 'rxjs';
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const messageService = inject(MessageService);
+
   return next(req).pipe(
     catchError((error) => {
-      if (error instanceof HttpErrorResponse) {
-        let messageConfig: ToastMessageOptions = {};
+      if (!(error instanceof HttpErrorResponse)) {
+        return throwError(() => error);
+      }
+
+      const detail = getErrorMessage(error);
+
+      const messageConfig: ToastMessageOptions = (() => {
         switch (error.status) {
-          case 400:
-            messageConfig = {
-              severity: 'warn',
-              summary: 'Solictud incorrecta',
-              detail:
-                typeof error.error['message'] === 'string'
-                  ? error.error['message']
-                  : 'No se pudo realizar la solicitud.',
-            };
-            break;
-          case 500:
-            messageConfig = {
+          case 0:
+            return {
               severity: 'error',
-              summary: 'Ha ocurrido un error interno',
-              detail: 'No se pudo procesar la solicitud.',
+              summary: 'Sin conexión',
+              detail: 'No se pudo conectar con el servidor.',
             };
-            break;
+
+          case 400:
+            return {
+              severity: 'warn',
+              summary: 'Solicitud incorrecta',
+              detail,
+            };
+
+          case 401:
+            return {
+              severity: 'warn',
+              summary: 'Sesión no válida',
+              detail: 'Debe iniciar sesión nuevamente.',
+            };
 
           case 403:
-            messageConfig = {
-              severity: 'info',
+            return {
+              severity: 'warn',
               summary: 'Acceso denegado',
               detail: 'No tiene los permisos requeridos.',
             };
-            break;
+
+          case 404:
+            return {
+              severity: 'warn',
+              summary: 'No encontrado',
+              detail: 'El recurso solicitado no existe.',
+            };
+
+          case 409:
+            return {
+              severity: 'warn',
+              summary: 'Conflicto',
+              detail,
+            };
+
+          case 422:
+            return {
+              severity: 'warn',
+              summary: 'Datos inválidos',
+              detail,
+            };
+
+          case 500:
+            return {
+              severity: 'error',
+              summary: 'Error interno',
+              detail: 'No se pudo procesar la solicitud.',
+            };
 
           default:
-            break;
+            return {
+              severity: 'error',
+              summary: 'Error inesperado',
+              detail: detail || 'Ocurrió un error al procesar la solicitud.',
+            };
         }
-        messageService.add({ ...messageConfig, life: 3000 });
-      }
+      })();
+
+      messageService.add({
+        ...messageConfig,
+        life: 3000,
+      });
+
       return throwError(() => error);
-    })
+    }),
   );
 };
+
+function getErrorMessage(error: HttpErrorResponse): string {
+  const responseError = error.error;
+
+  if (!responseError) {
+    return 'Ocurrió un error al procesar la solicitud.';
+  }
+
+  if (typeof responseError === 'string') {
+    return responseError;
+  }
+
+  if (Array.isArray(responseError.message)) {
+    return responseError.message.join('\n');
+  }
+
+  if (typeof responseError.message === 'string') {
+    return responseError.message;
+  }
+
+  if (typeof responseError.error === 'string') {
+    return responseError.error;
+  }
+
+  return 'Ocurrió un error al procesar la solicitud.';
+}

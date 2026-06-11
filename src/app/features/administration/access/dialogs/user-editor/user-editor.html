@@ -10,7 +10,42 @@
         </div>
       </dl>
     </div>
-    <div class="mt-6">
+
+    <div class="flex flex-col gap-1 mt-6">
+      <p-floatlabel class="w-full" variant="on">
+        <p-multiselect
+          inputId="localRole"
+          formControlName="roleIds"
+          [options]="roles()"
+          optionLabel="name"
+          optionValue="id"
+          appendTo="body"
+          [fluid]="true"
+          filterPlaceHolder="Nombre rol"
+          [invalid]="formUtils.isInvalid(userForm.get('roleIds'))"
+        >
+          <ng-template #item let-option>
+            <div class="flex flex-col">
+              <span class="font-medium text-surface-900">{{
+                option.name
+              }}</span>
+              <span class="text-xs text-surface-600">
+                {{ option.description }}
+              </span>
+            </div>
+          </ng-template>
+        </p-multiselect>
+        <label for="localRole">Roles del usuario *</label>
+      </p-floatlabel>
+
+      @if (formUtils.isInvalid(userForm.get("roleIds"))) {
+        <p-message severity="error" size="small" variant="simple">
+          Seleccione al menos un rol local para el usuario.
+        </p-message>
+      }
+    </div>
+
+    <!-- <div class="mt-6">
       <p-listbox
         [options]="roles()"
         [multiple]="true"
@@ -35,7 +70,7 @@
           </div>
         </ng-template>
       </p-listbox>
-    </div>
+    </div> -->
   </div>
   <div class="p-dialog-footer">
     <p-button

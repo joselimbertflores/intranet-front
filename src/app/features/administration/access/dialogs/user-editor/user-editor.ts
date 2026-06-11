@@ -1,3 +1,4 @@
+import { TitleCasePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
   FormGroup,
@@ -6,18 +7,27 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ListboxModule } from 'primeng/listbox';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 
+import { FormUtils } from '../../../../../helpers';
 import { UserResponse } from '../../interfaces';
 import { UserApi } from '../../services';
 
 @Component({
   selector: 'app-user-editor',
-  imports: [CommonModule, ReactiveFormsModule, ListboxModule, ButtonModule],
+  imports: [
+    ReactiveFormsModule,
+    MultiSelectModule,
+    FloatLabelModule,
+    ButtonModule,
+    MessageModule,
+    TitleCasePipe,
+  ],
   templateUrl: './user-editor.html',
 })
 export class UserEditor {
@@ -25,9 +35,9 @@ export class UserEditor {
   private dialogRef = inject(DynamicDialogRef);
 
   readonly data: UserResponse = inject(DynamicDialogConfig).data;
-
+  formUtils = FormUtils;
   userForm: FormGroup = inject(FormBuilder).nonNullable.group({
-    roleIds: [[], [Validators.required, Validators.minLength(1)]],
+    roleIds: ['', Validators.required],
   });
 
   roles = toSignal(this.userApi.getRoles(), { initialValue: [] });

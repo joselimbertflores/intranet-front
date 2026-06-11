@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../../../environments/environment';
-import { UserResponse } from '../interfaces';
+import { IdentityCandidateResponse, UserResponse } from '../interfaces';
 
 interface roles {
   id: string;
@@ -33,5 +33,21 @@ export class UserApi {
 
   getRoles() {
     return this.http.get<roles[]>(`${this.URL}/roles`);
+  }
+
+  findIdentityCandidates(term: string) {
+    return this.http.get<IdentityCandidateResponse[]>(
+      `${this.URL}/identity-candidates`,
+      {
+        params: new HttpParams({ fromObject: { term } }),
+      },
+    );
+  }
+
+  importFromIdentity(externalKey: string, roleIds: string[]) {
+    return this.http.post<UserResponse>(`${this.URL}/import-from-identity`, {
+      externalKey,
+      roleIds,
+    });
   }
 }

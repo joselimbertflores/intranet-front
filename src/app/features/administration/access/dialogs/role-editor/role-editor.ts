@@ -60,7 +60,7 @@ interface PermissionView {
   ],
   template: `
     <form [formGroup]="roleForm" (ngSubmit)="save()">
-      <div class=" space-y-4 pt-2">
+      <div class="space-y-4 pt-2">
         <p-floatlabel variant="on">
           <input
             id="name"
@@ -81,6 +81,10 @@ interface PermissionView {
           />
           <label for="description">Descripcion</label>
         </p-floatlabel>
+        <label class="flex items-center gap-2 px-2 py-2">
+          <p-checkbox formControlName="isAutoAssigned" [binary]="true" />
+          <span>Autoasignar</span>
+        </label>
 
         <div class="mt-6 space-y-2">
           @for (group of permissions(); track group.resource) {
@@ -161,6 +165,7 @@ export class RoleEditor {
       [],
       [Validators.required, Validators.minLength(1)],
     ),
+    isAutoAssigned: [false],
   });
 
   ngOnInit() {
@@ -231,6 +236,7 @@ export class RoleEditor {
       name: props.name,
       description: props.description ?? '',
       permissionIds: permissions.map(({ id }) => id),
+      isAutoAssigned: props.isAutoAssigned,
     });
   }
 }

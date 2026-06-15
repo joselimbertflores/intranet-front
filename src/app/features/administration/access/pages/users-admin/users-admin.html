@@ -29,20 +29,14 @@
       <tr>
         <th>Nombre</th>
         <th>Roles</th>
-        <th class="w-[150px]">Estado</th>
         <th style="width: 2rem"></th>
       </tr>
     </ng-template>
     <ng-template #body let-item>
       <tr>
         <td>{{ item.fullName | titlecase }}</td>
-        <td>{{ item.roles.length }}</td>
         <td>
-          @if (item.isActive) {
-            <p-tag severity="success" value="Habilitado" />
-          } @else {
-            <p-tag severity="warn" value="Deshabilitado" />
-          }
+          {{ item.roles.length > 0 ? item.roles.length : "Sin asignar" }}
         </td>
         <td>
           <p-button

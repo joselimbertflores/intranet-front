@@ -3,6 +3,7 @@ export interface RoleResponse {
   name: string;
   description: string | null;
   permissions: PermissionResponse[];
+  isAutoAssigned: boolean;
 }
 
 export interface PermissionResponse {

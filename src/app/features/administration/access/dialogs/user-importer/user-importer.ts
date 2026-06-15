@@ -1,7 +1,7 @@
 import { TitleCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   FormGroup,
   Validators,
@@ -72,6 +72,12 @@ export class UserImporter {
   roles = toSignal(this.userApi.getRoles(), { initialValue: [] });
   selectedCandidate = computed(() => this.selectedCandidateSignal());
 
+  constructor() {
+    effect(() => {
+      this.setAutoAssignedRoles();
+    });
+  }
+
   searchCandidates(event: AutoCompleteCompleteEvent): void {
     const term = event.query.trim();
 
@@ -137,6 +143,16 @@ export class UserImporter {
         return 'El usuario ya existe en este cliente.';
       default:
         return 'No se pudo importar el usuario. Intente nuevamente.';
+    }
+  }
+
+  private setAutoAssignedRoles() {
+    const roleIds = this.roles()
+      .filter(({ isAutoAssigned }) => isAutoAssigned)
+      .map(({ id }) => id);
+
+    if (roleIds.length > 0) {
+      this.form.get('roleIds')?.setValue(roleIds);
     }
   }
 }

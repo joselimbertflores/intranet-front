@@ -9,6 +9,7 @@ interface roles {
   id: string;
   name: string;
   description: string;
+  isAutoAssigned: boolean;
 }
 
 @Injectable({

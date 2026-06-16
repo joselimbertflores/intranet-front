@@ -10,7 +10,7 @@ import { SectionTreeNodeResponse } from '../interfaces';
 export class SectionDataSource {
   private http = inject(HttpClient);
 
-  private readonly URL = `${environment.baseUrl}/sections`;
+  private readonly URL = `${environment.baseUrl}/api/sections`;
 
   readonly sections = signal<SectionTreeNodeResponse[]>([]);
 

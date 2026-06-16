@@ -52,7 +52,7 @@ interface GetDocumentsParams {
 })
 export class DocumentDataSource {
   private readonly http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/documents`;
+  private readonly URL = `${environment.baseUrl}/api/documents`;
   private readonly fileUploadService = inject(FileUploadService);
 
   constructor() {}

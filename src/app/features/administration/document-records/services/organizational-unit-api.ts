@@ -7,23 +7,21 @@ import { SectionTreeNodeResponse } from '../interfaces';
 @Injectable({
   providedIn: 'root',
 })
-export class SectionDataSource {
+export class OrganizationalUnitApi {
   private http = inject(HttpClient);
 
-  private readonly URL = `${environment.baseUrl}/api/sections`;
+  private readonly URL = `${environment.baseUrl}/api/organizational-units`;
 
   readonly sections = signal<SectionTreeNodeResponse[]>([]);
 
   constructor() {
-    this.getTreeSections();
+    this.loadTree();
   }
 
-  getTreeSections() {
-    return this.http
-      .get<SectionTreeNodeResponse[]>(this.URL)
-      .subscribe((data) => {
-        this.sections.set(data);
-      });
+  loadTree() {
+    this.http.get<SectionTreeNodeResponse[]>(this.URL).subscribe((data) => {
+      this.sections.set(data);
+    });
   }
 
   create(form: object) {

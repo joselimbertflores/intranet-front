@@ -1,24 +1,23 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Tipos de Documentos</h2>
-  @if (canCreate()) {
-    <p-button
-      label="Agregar"
-      icon="pi pi-plus"
-      size="small"
-      (onClick)="openDocumentTypeDialog()"
-    />
-  }
+  <p-button
+    label="Agregar"
+    icon="pi pi-plus"
+    size="small"
+    (onClick)="openDocumentTypeDialog()"
+  />
 </div>
 
 <p-table
   #table
+  [lazy]="true"
   [value]="dataSource()"
-  [totalRecords]="dataSource.length"
-  [globalFilterFields]="['name']"
+  [totalRecords]="dataSize()"
   [paginator]="true"
   [rows]="10"
-  [rowsPerPageOptions]="[10, 25, 50]"
-  [globalFilterFields]="['name']"
+  [first]="offset()"
+  [rows]="limit()"
+  [rowsPerPageOptions]="[10, 25, 40, 50]"
   [showCurrentPageReport]="true"
   currentPageReportTemplate="{first} - {last} de {totalRecords}"
   size="small"
@@ -62,15 +61,13 @@
       </td>
 
       <td>
-        @if (canUpdate()) {
-          <p-button
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openDocumentTypeDialog(item)"
-            severity="secondary"
-            rounded
-          />
-        }
+        <p-button
+          icon="pi pi-pencil"
+          size="small"
+          (click)="openDocumentTypeDialog(item)"
+          severity="secondary"
+          rounded
+        />
       </td>
     </tr>
   </ng-template>

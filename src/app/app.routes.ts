@@ -87,7 +87,7 @@ export const routes: Routes = [
         data: { resource: Resource.DOCUMENTS },
         canActivate: [resourceGuard],
         loadComponent: () =>
-          import('./features/administration/document-records/pages/sections-admin/sections-admin'),
+          import('./features/administration/document-records/pages/organizational-unit-admin/organizational-unit-admin'),
       },
       {
         path: 'documents',

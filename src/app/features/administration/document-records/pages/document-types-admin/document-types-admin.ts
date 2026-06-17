@@ -3,6 +3,8 @@ import {
   Component,
   computed,
   inject,
+  linkedSignal,
+  signal,
 } from '@angular/core';
 
 import { DialogService } from 'primeng/dynamicdialog';
@@ -14,10 +16,14 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
+import {
+  PermissionAction,
+  Resource,
+} from '../../../../../core/auth/auth.types';
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
 import { DocumentTypeDataSource } from '../../services';
 import { DocumentTypeEditor } from '../../dialogs';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-document-types-admin',
@@ -33,17 +39,31 @@ import { DocumentTypeEditor } from '../../dialogs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DocumentTypesAdmin {
-  private sectionService = inject(DocumentTypeDataSource);
+  private docTypeApi = inject(DocumentTypeDataSource);
   private dialogService = inject(DialogService);
-  private authDataSource = inject(AuthDataSource);
 
-  dataSource = this.sectionService.dataSource;
-  canCreate = computed(() =>
-    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.CREATE),
-  );
-  canUpdate = computed(() =>
-    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.UPDATE),
-  );
+  limit = signal(10);
+  offset = signal(0);
+  searchTerm = signal('');
+
+  docTypeResource = rxResource({
+    params: () => ({
+      offset: this.offset(),
+      limit: this.limit(),
+      term: this.searchTerm(),
+    }),
+    stream: ({ params }) => this.docTypeApi.findAll(params.limit, params.offset, params.term),
+  });
+
+  dataSource = linkedSignal(() => {
+    if (!this.docTypeResource.hasValue()) return [];
+    return this.docTypeResource.value().data;
+  });
+
+  dataSize = linkedSignal(() => {
+    if (!this.docTypeResource.hasValue()) return 0;
+    return this.docTypeResource.value().total;
+  });
 
   openDocumentTypeDialog(item?: DocumentTypeWithSubTypesResponse) {
     this.dialogService.open(DocumentTypeEditor, {

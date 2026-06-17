@@ -1,10 +1,16 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { DocumentTypeWithSubTypesResponse } from '../interfaces';
+
+interface FilterParas {
+  limit?: number;
+  offset?: number;
+  term?: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -14,17 +20,32 @@ export class DocumentTypeDataSource {
 
   private readonly URL = `${environment.baseUrl}/api/document-types`;
 
-  resource = toSignal(this.http.get<DocumentTypeWithSubTypesResponse[]>(this.URL), {
-    initialValue: [],
-  });
+  resource = toSignal(
+    this.http.get<DocumentTypeWithSubTypesResponse[]>(this.URL),
+    {
+      initialValue: [],
+    },
+  );
   dataSource = linkedSignal(() => this.resource());
 
+  findAll(limit: number, offset: number, term: string) {
+    const params = new HttpParams({
+      fromObject: { limit, offset, ...(term && { term }) },
+    });
+    return this.http.get<{
+      data: DocumentTypeWithSubTypesResponse[];
+      total: number;
+    }>(this.URL, { params });
+  }
+
   create(form: object) {
-    return this.http.post<DocumentTypeWithSubTypesResponse>(this.URL, form).pipe(
-      tap((resp) => {
-        this.addItem(resp);
-      }),
-    );
+    return this.http
+      .post<DocumentTypeWithSubTypesResponse>(this.URL, form)
+      .pipe(
+        tap((resp) => {
+          this.addItem(resp);
+        }),
+      );
   }
 
   update(id: number, form: object) {

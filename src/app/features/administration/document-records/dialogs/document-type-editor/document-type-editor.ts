@@ -54,7 +54,7 @@ export class DocumentTypeEditor {
       [Validators.required, Validators.minLength(3), Validators.maxLength(50)],
     ],
     subtypes: this.formBuilder.array([]),
-    isActive: [true, Validators.required],
+    isActive: [true],
   });
 
   formUtils = FormUtils;

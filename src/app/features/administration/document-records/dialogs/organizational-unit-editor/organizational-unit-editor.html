@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-6 pt-2">
+  <div class="flex flex-col gap-y-4 pt-2">
     <div class="flex flex-col gap-1">
       <p-floatlabel variant="on">
         <label>Nombre</label>
@@ -27,7 +27,7 @@
       <label for="parentLabel">Seccion superior</label>
     </p-floatlabel>
     <div class="flex items-center">
-      <p-checkbox name="pizza" [binary]="true" formControlName="isActive" />
+      <p-checkbox [binary]="true" formControlName="isActive" />
       <label class="ml-2"> Activo </label>
     </div>
   </div>

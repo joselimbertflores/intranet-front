@@ -16,7 +16,7 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
 import { SectionTreeNodeResponse } from '../../interfaces';
-import { SectionDataSource } from '../../services';
+import { OrganizationalUnitApi } from '../../services';
 import { FormUtils } from '../../../../../helpers';
 
 interface DialogData {
@@ -24,7 +24,7 @@ interface DialogData {
   parent?: SectionTreeNodeResponse;
 }
 @Component({
-  selector: 'app-document-section-editor',
+  selector: 'app-organizational-unit-editor',
   imports: [
     ReactiveFormsModule,
     FloatLabelModule,
@@ -35,15 +35,16 @@ interface DialogData {
     ButtonModule,
     FormsModule,
   ],
-  templateUrl: './document-section-editor.html',
+  templateUrl: './organizational-unit-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentSectionEditor {
+export class OrganizationalUnitEditor {
   private diagloRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
-  private sectionService = inject(SectionDataSource);
+  private sectionService = inject(OrganizationalUnitApi);
 
   readonly data: DialogData = inject(DynamicDialogConfig).data;
+
   readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.nonNullable.group({

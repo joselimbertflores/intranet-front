@@ -86,12 +86,12 @@ export class AdminSidebar {
       ],
     },
     {
-      label: 'Repositorio',
+      label: 'Documentacion',
       icon: 'pi pi-folder',
       expanded: true,
       items: [
         {
-          label: 'Secciones',
+          label: 'Organizacion',
           icon: 'pi pi-table',
           routerLink: 'document-sections',
           resource: Resource.DOCUMENTS,

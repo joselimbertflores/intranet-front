@@ -1,21 +1,15 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { DocumentTypeWithSubTypesResponse } from '../interfaces';
 
-interface FilterParas {
-  limit?: number;
-  offset?: number;
-  term?: string;
-}
-
 @Injectable({
   providedIn: 'root',
 })
-export class DocumentTypeDataSource {
+export class DocumentTypeDatasource {
   private http = inject(HttpClient);
 
   private readonly URL = `${environment.baseUrl}/api/document-types`;
@@ -27,6 +21,10 @@ export class DocumentTypeDataSource {
     },
   );
   dataSource = linkedSignal(() => this.resource());
+
+  // * For sync table with remove option in editor dialog
+  private subtypeRemoved = new Subject<{ typeId: number; subtypeId: number }>();
+  subtypeRemoved$ = this.subtypeRemoved.asObservable();
 
   findAll(limit: number, offset: number, term: string) {
     const params = new HttpParams({
@@ -58,21 +56,27 @@ export class DocumentTypeDataSource {
       );
   }
 
-  removeSubtype(typeId: number, subtypeId: number) {
+  removeSubtype(id: number) {
     return this.http
       .delete<{
         ok: boolean;
         message: string;
-      }>(`${this.URL}/subtype/${subtypeId}`)
-      .pipe(
-        tap(({ ok }) => {
-          if (!ok) return;
-          this.removeSubItem(typeId, subtypeId);
-        }),
-      );
+      }>(`${this.URL}/subtype/${id}`)
+      .pipe
+      // tap(({ ok }) => {
+      //   if (ok) {
+      //     this.removeSubItem(parentId, id);
+      //   }
+      // }),
+      ();
+  }
+
+  emitSubtypeRemoved(typeId: number, subtypeId: number) {
+    this.subtypeRemoved.next({ typeId, subtypeId });
   }
 
   private addItem(newItem: DocumentTypeWithSubTypesResponse) {
+    console.log(this.dataSource());
     const index = this.dataSource().findIndex((item) => item.id === newItem.id);
     if (index !== -1) {
       this.dataSource.update((values) => {
@@ -84,12 +88,12 @@ export class DocumentTypeDataSource {
     }
   }
 
-  private removeSubItem(typeId: number, subtypeId: number) {
-    const typeIndex = this.dataSource().findIndex(({ id }) => id === typeId);
-    if (typeIndex === -1) return;
+  private removeSubItem(parentId: number, subtypeId: number) {
+    const index = this.dataSource().findIndex(({ id }) => id === parentId);
+    if (index === -1) return;
     this.dataSource.update((values) => {
-      values[typeIndex].subtypes = values[typeIndex].subtypes?.filter(
-        (subtype) => subtype.id !== subtypeId,
+      values[index].subtypes = values[index].subtypes.filter(
+        ({ id }) => id !== subtypeId,
       );
       return [...values];
     });

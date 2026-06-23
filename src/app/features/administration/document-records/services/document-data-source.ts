@@ -1,30 +1,25 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { inject, Injectable } from '@angular/core';
+
+import { forkJoin, Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
+import { FileUploadService, UploadResult } from '../../../../shared';
 import {
-  FileUploadService,
-  UploadedFileResponse,
-  UploadResult,
-} from '../../../../shared';
-import {
-  DocumentManageResponse,
-  DocumentSubtypeResponse,
-  DocumentTypeResponse,
   DocumentTypeWithSubTypesResponse,
   SectionTreeNodeResponse,
+  DocumentManageResponse,
 } from '../interfaces';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { TreeNode } from 'primeng/api';
 
 interface CreateDocumentProps {
-  sectionId: number;
-  typeId: number;
-  subtypeId: number;
-  date: Date;
-  documents: DocumentRecord[];
+  organizationalUnitId: string;
+  documentTypeId: number;
+  documentSubtypeId?: number | null;
+  year?: number | null;
   files: File[];
+  documents: DocumentRecord[];
 }
 
 interface UpdateDocumentProps {
@@ -55,6 +50,11 @@ export class DocumentDataSource {
   private readonly URL = `${environment.baseUrl}/api/documents`;
   private readonly fileUploadService = inject(FileUploadService);
 
+  organizationUnitsTree = toSignal(this.getOrganizationTree(), {
+    initialValue: [],
+  });
+  documentTypes = toSignal(this.getDocumentTypes(), { initialValue: [] });
+
   constructor() {}
 
   findAll({ date, ...props }: GetDocumentsParams) {
@@ -71,18 +71,19 @@ export class DocumentDataSource {
   }
 
   create(data: CreateDocumentProps) {
-    const { documents, files, date, ...rest } = data;
+    const { documents, files, year, ...rest } = data;
     return forkJoin(
       files.map((file) => this.fileUploadService.upload(file, 'documents')),
     ).pipe(
       switchMap((uploadedFiles) => {
         const documentsToCreate = uploadedFiles.map((uploadedFile, index) => ({
           fileId: uploadedFile.id,
-          title: documents[index].title ?? uploadedFile.fileName,
+          title: documents[index].title.trim(),
         }));
+
         return this.http.post<DocumentManageResponse[]>(this.URL, {
           ...rest,
-          fiscalYear: date.getFullYear(),
+          ...(year && { year }),
           documents: documentsToCreate,
         });
       }),
@@ -97,7 +98,7 @@ export class DocumentDataSource {
     return uploadTask$.pipe(
       switchMap((uploadedFile) => {
         return this.http.patch<DocumentManageResponse>(`${this.URL}/${id}`, {
-          title: title ?? uploadedFile?.fileName,
+          title: title ?? uploadedFile?.name,
 
           ...uploadedFile,
           fiscalYear: date.getFullYear(),
@@ -106,10 +107,10 @@ export class DocumentDataSource {
     );
   }
 
-  getTreeSections() {
-    return this.http
-      .get<SectionTreeNodeResponse[]>(`${this.URL}/sections/tree`)
-      .pipe(map((resp) => this.toTreeNode(resp)));
+  getOrganizationTree() {
+    return this.http.get<SectionTreeNodeResponse[]>(
+      `${this.URL}/organizational-units/tree`,
+    );
   }
 
   getDocumentTypes() {

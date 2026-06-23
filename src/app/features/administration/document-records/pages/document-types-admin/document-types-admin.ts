@@ -1,29 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { linkedSignal, Component, inject, signal } from '@angular/core';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DialogService } from 'primeng/dynamicdialog';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import {
-  PermissionAction,
-  Resource,
-} from '../../../../../core/auth/auth.types';
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
 import { DocumentTypeDatasource } from '../../services';
+import { SearchInput } from '../../../../../shared';
 import { DocumentTypeEditor } from '../../dialogs';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-document-types-admin',
@@ -31,15 +17,12 @@ import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
     TagModule,
     TableModule,
     ButtonModule,
-    IconFieldModule,
-    InputIconModule,
-    InputTextModule,
+    SearchInput,
   ],
   templateUrl: './document-types-admin.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DocumentTypesAdmin {
-  private docTypeApi = inject(DocumentTypeDatasource);
+  private docTypeDataSource = inject(DocumentTypeDatasource);
   private dialogService = inject(DialogService);
 
   limit = signal(10);
@@ -53,7 +36,7 @@ export default class DocumentTypesAdmin {
       term: this.searchTerm(),
     }),
     stream: ({ params }) =>
-      this.docTypeApi.findAll(params.limit, params.offset, params.term),
+      this.docTypeDataSource.findAll(params.limit, params.offset, params.term),
   });
 
   constructor() {
@@ -77,22 +60,38 @@ export default class DocumentTypesAdmin {
       draggable: false,
       closable: true,
       width: '40vw',
-      data: item ? { ...item } : undefined,
+      data: item,
       breakpoints: {
         '960px': '75vw',
         '640px': '90vw',
       },
     });
-    ref?.onClose.subscribe((result) => {
-      // if (!result) return;
-      // actualizar
-      console.log('CLOSE DIALOG', result);
-      // if (!result?.changed) return;
+    ref?.onClose.subscribe((result?: DocumentTypeWithSubTypesResponse) => {
+      if (!result) return;
+      this.upsertItem(result);
     });
   }
 
-  listenRemoveSubtypeEvent() {
-    this.docTypeApi.subtypeRemoved$
+  search(term: string) {
+    this.searchTerm.set(term);
+    this.offset.set(0);
+  }
+
+  private upsertItem(newItem: DocumentTypeWithSubTypesResponse) {
+    const index = this.dataSource().findIndex((item) => item.id === newItem.id);
+    if (index !== -1) {
+      this.dataSource.update((values) => {
+        values[index] = newItem;
+        return [...values];
+      });
+    } else {
+      this.dataSource.update((values) => [newItem, ...values]);
+      this.dataSize.update((value) => (value += 1));
+    }
+  }
+
+  private listenRemoveSubtypeEvent(): void {
+    this.docTypeDataSource.subtypeRemoved$
       .pipe(takeUntilDestroyed())
       .subscribe(({ typeId, subtypeId }) => {
         this.dataSource.update((types) =>

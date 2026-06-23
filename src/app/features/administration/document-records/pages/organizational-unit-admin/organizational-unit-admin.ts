@@ -14,7 +14,7 @@ import { TagModule } from 'primeng/tag';
 
 import { SectionTreeNodeResponse } from '../../interfaces';
 import { OrganizationalUnitEditor } from '../../dialogs';
-import { OrganizationalUnitApi } from '../../services';
+import { OrganizationalUnitDatasource } from '../../services';
 
 @Component({
   selector: 'app-organizational-unit-admin',
@@ -32,7 +32,7 @@ import { OrganizationalUnitApi } from '../../services';
 })
 export default class OrganizationalUnitAdmin {
   private dialogService = inject(DialogService);
-  private orgUnitApi = inject(OrganizationalUnitApi);
+  private orgUnitApi = inject(OrganizationalUnitDatasource);
 
   treeSections = computed(() =>
     this.orgUnitApi.sections().map((section) => this.toTreeNode(section)),

@@ -30,7 +30,7 @@ export interface UploadedPdfThumbnailResponse extends UploadedFileResponse {
 
 export interface UploadResult {
   id: string;
-  fileName: string;
+  name: string;
   message: string;
 }
 
@@ -40,7 +40,7 @@ export interface UploadResult {
 export class FileUploadService {
   constructor() {}
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/files`;
+  private readonly URL = `${environment.baseUrl}/api/files`;
 
   getFile(url: string) {
     return this.http.get(url, { responseType: 'blob' });

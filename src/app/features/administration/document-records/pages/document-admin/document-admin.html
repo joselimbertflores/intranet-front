@@ -11,7 +11,7 @@
       [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
     />
     <p-popover #filterPopover>
-      <div class="flex flex-col w-[600px] gap-y-6">
+      <div class="flex flex-col w-full sm:w-[600px] gap-y-6">
         <div class="flex items-center justify-between px-2">
           <span class="text-lg font-semibold text-surface-700"> Filtros </span>
           <p-button
@@ -26,19 +26,19 @@
         <form [formGroup]="filterForm" class="flex flex-col gap-y-4">
           <p-floatlabel variant="on">
             <p-treeSelect
+              size="small"
               class="w-full"
-              [options]="treeSections()"
+              [options]="organizationTree()"
               selectionMode="single"
               appendTo="body"
               [filter]="true"
               [showClear]="true"
-              filterPlaceholder="Buscar seccion"
+              filterPlaceholder="Buscar unidad"
               emptyMessage="Sin resultados"
-          
               (onNodeSelect)="selectSection($event.node.data)"
             >
             </p-treeSelect>
-            <label for="sectionDoc">Sección</label>
+            <label for="sectionDoc">Unidad organizacional</label>
           </p-floatlabel>
           <p-floatlabel class="w-full" variant="on">
             <p-select
@@ -47,7 +47,7 @@
               class="w-full"
               [filter]="true"
               [showClear]="true"
-              [options]="types()"
+              [options]="documentTypes()"
               (onChange)="selectType($event.value)"
             />
             <label for="type">Tipo</label>
@@ -96,14 +96,12 @@
         </div>
       </div>
     </p-popover>
-    @if (canCreate()) {
-      <p-button
-        label="Agregar"
-        icon="pi pi-plus"
-        size="small"
-        (onClick)="openCreateDialog()"
-      />
-    }
+    <p-button
+      label="Agregar"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openCreateDialog()"
+    />
   </div>
 </div>
 
@@ -147,9 +145,9 @@
           <span class="ml-2 font-semibold">{{ item.title }}</span>
         </div>
       </td>
-      <td>{{ item.section.name }}</td>
-      <td>{{ item.type.name }}</td>
-      <td>{{ item.subtype?.name ?? "----" }}</td>
+      <td>{{ item.organizationalUnit.name }}</td>
+      <td>{{ item.documentType.name }}</td>
+      <td>{{ item.documentSubtype?.name ?? "----" }}</td>
 
       <td>{{ item.fiscalYear }}</td>
       <td>
@@ -160,15 +158,13 @@
         }
       </td>
       <td>
-        @if (canUpdate()) {
-          <p-button
-            icon="pi pi-pencil"
-            size="small"
-            (click)="openUpdateDialog(item)"
-            severity="secondary"
-            rounded
-          />
-        }
+        <p-button
+          icon="pi pi-pencil"
+          size="small"
+          (click)="openUpdateDialog(item)"
+          severity="secondary"
+          rounded
+        />
       </td>
     </tr>
   </ng-template>

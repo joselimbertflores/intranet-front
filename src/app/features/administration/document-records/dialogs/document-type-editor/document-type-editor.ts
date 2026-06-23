@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
 import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
   FormArray,
   FormGroup,
-  Validators,
-  FormBuilder,
-  ReactiveFormsModule,
 } from '@angular/forms';
 
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -45,11 +45,11 @@ interface SubTypeOption {
 })
 export class DocumentTypeEditor {
   private formBuilder = inject(FormBuilder);
-  private diagloRef = inject(DynamicDialogRef);
   private confirmationService = inject(ConfirmationService);
   private docTypeDatasource = inject(DocumentTypeDatasource);
 
-  data: DocumentTypeWithSubTypesResponse | undefined =
+  diagloRef = inject(DynamicDialogRef);
+  readonly data: DocumentTypeWithSubTypesResponse | undefined =
     inject(DynamicDialogConfig).data;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
@@ -61,9 +61,7 @@ export class DocumentTypeEditor {
     isActive: [true],
   });
 
-  formUtils = FormUtils;
-
-  private hasChanges = false;
+  readonly formUtils = FormUtils;
 
   ngOnInit() {
     this.loadForm();
@@ -78,10 +76,6 @@ export class DocumentTypeEditor {
     subscription.subscribe((data) => {
       this.diagloRef.close(data);
     });
-  }
-
-  close() {
-    this.diagloRef.close(this.hasChanges ? this.data : undefined);
   }
 
   addSubtype(subtype?: DocumentSubtypeResponse) {
@@ -124,52 +118,12 @@ export class DocumentTypeEditor {
         severity: 'danger',
       },
       accept: () => {
-        this.subtypes.removeAt(index);
-        this.docTypeDatasource.emitSubtypeRemoved(typeId, subtypeId);
+        this.docTypeDatasource.removeSubtype(subtypeId).subscribe(() => {
+          this.subtypes.removeAt(index);
+          this.docTypeDatasource.emitSubtypeRemoved(typeId, subtypeId);
+        });
       },
     });
-  }
-
-  removeSubtype(index: number): void {
-    const subTypeControl = this.subtypes.at(index);
-    if (!subTypeControl) return;
-
-    const subtype: SubTypeOption = subTypeControl.value;
-
-    const subtypeId = subtype.id;
-    const parentId = this.data?.id;
-
-    if (subtypeId && parentId) {
-      this.confirmationService.confirm({
-        header: 'Confirmar eliminación',
-        message: `¿Eliminar el subtipo "${subtype.name}"?`,
-        icon: 'pi pi-info-circle',
-        rejectButtonProps: {
-          label: 'Cancelar',
-          severity: 'secondary',
-          outlined: true,
-        },
-        acceptButtonProps: {
-          label: 'Eliminar',
-          severity: 'danger',
-        },
-        accept: () => {
-          // this.documentTypeDataSource
-          //   .removeSubtype(parentId, subtypeId)
-          //   .subscribe(() => {
-          //     this.subTypes.removeAt(index);
-          //   });
-          if (this.data) {
-            this.data.subtypes = this.data.subtypes.filter(
-              (item) => item.id !== subtypeId,
-            );
-          }
-        },
-      });
-    } else {
-      this.subtypes.removeAt(index);
-      // this.diagloRef.close
-    }
   }
 
   get subtypes() {
@@ -177,12 +131,13 @@ export class DocumentTypeEditor {
   }
 
   private loadForm() {
-    console.log(this.data);
     if (!this.data) return;
     const { subtypes, ...props } = this.data;
+
     subtypes.forEach((item) => {
       this.addSubtype(item);
     });
+
     this.form.patchValue(props);
   }
 }

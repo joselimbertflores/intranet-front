@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -11,37 +6,36 @@ import {
   FormArray,
   FormGroup,
 } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { map, Observable } from 'rxjs';
 
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { DatePickerModule } from 'primeng/datepicker';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
+import { TreeNodeSelectEvent } from 'primeng/tree';
 import { MessageModule } from 'primeng/message';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TreeNode } from 'primeng/api';
 
-import { DocumentDataSource } from '../../services';
-import {
-  DocumentSubtypeResponse,
-  DocumentTypeWithSubTypesResponse,
-} from '../../interfaces';
-import { FileSizePipe } from '../../pipes';
 import { CustomFormValidator, FormUtils } from '../../../../../helpers';
-import { TreeNodeSelectEvent } from 'primeng/tree';
+import { DocumentDataSource } from '../../services';
 import { FileIcon } from '../../../../../shared';
+import { FileSizePipe } from '../../pipes';
+import {
+  DocumentTypeWithSubTypesResponse,
+  DocumentSubtypeResponse,
+  SectionTreeNodeResponse,
+} from '../../interfaces';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-document-create',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    DatePickerModule,
+    TreeSelectModule,
     FloatLabelModule,
     InputTextModule,
     StepperModule,
@@ -50,20 +44,17 @@ import { FileIcon } from '../../../../../shared';
     ButtonModule,
     FileSizePipe,
     FileIcon,
-    TreeSelectModule,
   ],
   templateUrl: './document-create.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentCreate {
   private formBuilder = inject(FormBuilder);
-  private documentDataSource = inject(DocumentDataSource);
   private diagloRef = inject(DynamicDialogRef);
+  private documentDataSource = inject(DocumentDataSource);
 
-  readonly currentDate = new Date();
-  readonly minDateValue: Date = new Date(2000, 0, 1);
-  readonly maxDateValue = new Date(this.currentDate.getFullYear() + 1, 11, 31);
-
+  readonly MIN_YEAR = 2000;
+  readonly MAX_YEAR = new Date().getFullYear() + 1;
+  readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
   readonly FILE_RULES = {
     maxSizeMB: 20,
     allowedExtensions: [
@@ -84,30 +75,52 @@ export class DocumentCreate {
       'ogg',
     ],
   };
+
+  readonly acceptAttribute = this.FILE_RULES.allowedExtensions
+    .map((ext) => ext.trim().toLowerCase())
+    .map((ext) => (ext.startsWith('.') ? ext : `.${ext}`))
+    .join(',');
+
+  readonly allowedExtensionsLabel = this.FILE_RULES.allowedExtensions
+    .map((ext) => ext.toUpperCase())
+    .join(', ');
+
   readonly formUtils = FormUtils;
 
-  form: FormGroup = this.formBuilder.nonNullable.group({
-    sectionId: [null, Validators.required],
-    typeId: [null, Validators.required],
-    subtypeId: [{ value: null, disabled: true }],
+  form: FormGroup = this.formBuilder.group({
+    organizationalUnitId: [null, Validators.required],
+    documentTypeId: [null, Validators.required],
+    documentSubtypeId: [{ value: null, disabled: true }],
+    year: [null],
     documents: this.formBuilder.array([]),
-    date: [this.currentDate, Validators.required],
   });
 
-  readonly sectionsTree = toSignal(this.documentDataSource.getTreeSections(), {
-    initialValue: [],
-  });
-  readonly types = toSignal(this.documentDataSource.getDocumentTypes(), {
-    initialValue: [],
-  });
-  readonly subtypes = signal<DocumentSubtypeResponse[]>([]);
+  organizationTree = computed(() =>
+    this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
+  );
+  documentTypes = computed(() => this.documentDataSource.documentTypes());
+  documentSubtypes = signal<DocumentSubtypeResponse[]>([]);
 
   files = signal<File[]>([]);
   hasInvalidFiles = signal(false);
 
+  private invalidFileMessageTimer?: ReturnType<typeof setTimeout>;
+
+  isSaving = signal(false);
+
   save() {
+    if (this.isSaving()) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSaving.set(true);
+
     this.documentDataSource
       .create({ ...this.form.value, files: this.files() })
+      .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe((resp) => {
         this.diagloRef.close(resp);
       });
@@ -118,10 +131,7 @@ export class DocumentCreate {
   }
 
   removeFile(index: number) {
-    this.files.update((files) => {
-      files.splice(index, 1);
-      return [...files];
-    });
+    this.files.update((files) => files.filter((_, i) => i !== index));
     this.documentsFormArray.removeAt(index);
   }
 
@@ -143,24 +153,18 @@ export class DocumentCreate {
     }
   }
 
-  selectSection(event: TreeNodeSelectEvent) {
-    this.form.patchValue({ sectionId: event.node.key });
+  selectOrganizationUnit(event: TreeNodeSelectEvent) {
+    this.form.get('organizationalUnitId')?.setValue(event.node.data);
   }
 
-  selectType(type: DocumentTypeWithSubTypesResponse) {
-    this.subtypes.set(type.subtypes);
-    this.form.patchValue({ typeId: type.id, subtypeId: null });
-    this.form.get('subtypeId')?.enable();
-  }
-
-  get allowedExtensionsLabel(): string {
-    return this.FILE_RULES.allowedExtensions
-      .map((ext) => ext.toUpperCase())
-      .join(', ');
-  }
-
-  get acceptAttribute(): string {
-    return this.FILE_RULES.allowedExtensions.map((ext) => `.${ext}`).join(',');
+  selectDocumentType(type: DocumentTypeWithSubTypesResponse) {
+    this.documentSubtypes.set(type.subtypes);
+    this.form.patchValue({ documentTypeId: type.id, documentSubtypeId: null });
+    if (type.subtypes.length > 0) {
+      this.form.get('documentSubtypeId')?.enable();
+    } else {
+      this.form.get('documentSubtypeId')?.disable();
+    }
   }
 
   get documentsFormArray() {
@@ -196,11 +200,6 @@ export class DocumentCreate {
     );
   }
 
-  private removeExtension(fileName: string): string {
-    const lastDot = fileName.lastIndexOf('.');
-    return lastDot === -1 ? fileName : fileName.substring(0, lastDot);
-  }
-
   private addAttachment(file: File) {
     this.files.update((files) => [...files, file]);
     this.documentsFormArray.push(this.createDocumentForm(file));
@@ -208,7 +207,7 @@ export class DocumentCreate {
 
   private createDocumentForm(file: File) {
     return this.formBuilder.group({
-      displayName: [
+      title: [
         this.removeExtension(file.name),
         [
           Validators.required,
@@ -221,10 +220,36 @@ export class DocumentCreate {
     });
   }
 
-  private showInvalidFileMessage() {
+  private showInvalidFileMessage(): void {
     this.hasInvalidFiles.set(true);
-    setTimeout(() => {
+
+    if (this.invalidFileMessageTimer) {
+      clearTimeout(this.invalidFileMessageTimer);
+    }
+
+    this.invalidFileMessageTimer = setTimeout(() => {
       this.hasInvalidFiles.set(false);
     }, 3000);
+  }
+
+  private toTreeNodes(nodes: SectionTreeNodeResponse[]): TreeNode<string>[] {
+    return nodes.map((node) => ({
+      key: node.id,
+      label: node.name.toUpperCase(),
+      data: node.id,
+      children: node.children ? this.toTreeNodes(node.children) : [],
+    }));
+  }
+
+  private buildYearOptions(minYear: number, maxYear: number) {
+    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
+      const year = maxYear - index;
+      return { label: String(year), value: year };
+    });
+  }
+
+  private removeExtension(fileName: string): string {
+    const lastDot = fileName.lastIndexOf('.');
+    return lastDot === -1 ? fileName : fileName.substring(0, lastDot);
   }
 }

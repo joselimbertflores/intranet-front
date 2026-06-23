@@ -16,7 +16,7 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 
 import { SectionTreeNodeResponse } from '../../interfaces';
-import { OrganizationalUnitApi } from '../../services';
+import { OrganizationalUnitDatasource } from '../../services';
 import { FormUtils } from '../../../../../helpers';
 
 interface DialogData {
@@ -41,7 +41,7 @@ interface DialogData {
 export class OrganizationalUnitEditor {
   private diagloRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
-  private sectionService = inject(OrganizationalUnitApi);
+  private sectionService = inject(OrganizationalUnitDatasource);
 
   readonly data: DialogData = inject(DynamicDialogConfig).data;
 

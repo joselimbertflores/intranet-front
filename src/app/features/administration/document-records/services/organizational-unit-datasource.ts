@@ -7,7 +7,7 @@ import { SectionTreeNodeResponse } from '../interfaces';
 @Injectable({
   providedIn: 'root',
 })
-export class OrganizationalUnitApi {
+export class OrganizationalUnitDatasource {
   private http = inject(HttpClient);
 
   private readonly URL = `${environment.baseUrl}/api/organizational-units`;

@@ -13,8 +13,8 @@
   [lazy]="true"
   [value]="dataSource()"
   [totalRecords]="dataSize()"
+  [loading]="docTypeResource.isLoading()"
   [paginator]="true"
-  [rows]="10"
   [first]="offset()"
   [rows]="limit()"
   [rowsPerPageOptions]="[10, 25, 40, 50]"
@@ -25,18 +25,7 @@
   <ng-template #caption>
     <div class="flex sm:justify-end">
       <div class="w-full sm:w-1/4">
-        <p-iconfield iconPosition="left">
-          <p-inputicon>
-            <i class="pi pi-search"></i>
-          </p-inputicon>
-          <input
-            pInputText
-            type="text"
-            (input)="table.filterGlobal($event.target.value, 'contains')"
-            placeholder="Buscar"
-            class="w-full"
-          />
-        </p-iconfield>
+        <search-input (search)="search($event)" />
       </div>
     </div>
   </ng-template>
@@ -44,14 +33,14 @@
     <tr>
       <th>Nombre</th>
       <th>Subtipos</th>
-      <th>Estado</th>
+      <th class="w-[120px]">Estado</th>
       <th style="width: 3rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-item>
     <tr>
       <td>{{ item.name }}</td>
-      <td>{{ item.subtypes.length > 0 ? item.subtypes.length : "-" }}</td>
+      <td>{{ item.subtypes.length > 0 ? item.subtypes.length : "Ninguno" }}</td>
       <td>
         @if (item.isActive) {
           <p-tag severity="success" value="Activo"></p-tag>

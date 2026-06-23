@@ -1,17 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TableModule, TablePageEvent } from 'primeng/table';
 import { TreeSelectModule } from 'primeng/treeselect';
@@ -24,16 +17,16 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import { FileIcon, SearchInput } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
 import {
   DocumentManageResponse,
   DocumentSubtypeResponse,
+  SectionTreeNodeResponse,
   DocumentTypeWithSubTypesResponse,
 } from '../../interfaces';
+import { TreeNode } from 'primeng/api';
 
 @Component({
   selector: 'app-document-admin',
@@ -53,40 +46,32 @@ import {
     SearchInput,
   ],
   templateUrl: './document-admin.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DialogService],
 })
 export default class DocumentAdmin {
   private documentDataSource = inject(DocumentDataSource);
   private dialogService = inject(DialogService);
   private formBuilder = inject(FormBuilder);
-  private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
   dataSource = signal<DocumentManageResponse[]>([]);
   dataSize = signal<number>(0);
-  canCreate = computed(() =>
-    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.CREATE),
-  );
-  canUpdate = computed(() =>
-    this.authDataSource.can(Resource.DOCUMENTS, PermissionAction.UPDATE),
-  );
 
   filterForm: FormGroup = this.formBuilder.group({
-    sectionId: [null],
-    typeId: [null],
-    subtypeId: [{ value: null, disabled: true }],
-    date: [null],
+    organizationalUnitId: [null],
+    documentTypeId: [null],
+    documentSubtypeId: [{ value: null, disabled: true }],
+    year: [null],
+    status: [],
   });
 
-  treeSections = toSignal(this.documentDataSource.getTreeSections(), {
-    initialValue: [],
-  });
-  types = toSignal(this.documentDataSource.getDocumentTypes(), {
-    initialValue: [],
-  });
+  documentTypes = computed(() => this.documentDataSource.documentTypes());
+  organizationTree = computed(() =>
+    this.toTreeNode(this.documentDataSource.organizationUnitsTree()),
+  );
+
   subtypes = signal<DocumentSubtypeResponse[]>([]);
 
   ngOnInit() {
@@ -108,7 +93,6 @@ export default class DocumentAdmin {
   }
 
   selectSection(id: string) {
-    console.log(id);
     this.filterForm.patchValue({ sectionId: id });
   }
 
@@ -151,9 +135,11 @@ export default class DocumentAdmin {
     const diagloRef = this.dialogService.open(DocumentCreate, {
       header: 'Crear Documentación',
       modal: true,
-      focusOnShow: false,
-      closable: true,
       draggable: false,
+      focusOnShow: false,
+      closable: false,
+      closeOnEscape: false,
+      dismissableMask: false,
       width: '50vw',
       breakpoints: {
         '960px': '75vw',
@@ -170,9 +156,11 @@ export default class DocumentAdmin {
     const diagloRef = this.dialogService.open(DocumentEdit, {
       header: 'Editar Documentación',
       modal: true,
-      focusOnShow: false,
-      closable: true,
       draggable: false,
+      focusOnShow: false,
+      closable: false,
+      closeOnEscape: false,
+      dismissableMask: false,
       data: item,
       width: '40vw',
       breakpoints: {
@@ -203,5 +191,14 @@ export default class DocumentAdmin {
       this.dataSource.update((values) => [newItem, ...values]);
       this.dataSize.update((value) => (value += 1));
     }
+  }
+
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
+    return nodes.map((node) => ({
+      key: node.id,
+      label: node.name.toUpperCase(),
+      data: node.id,
+      children: node.children ? this.toTreeNode(node.children) : [],
+    }));
   }
 }

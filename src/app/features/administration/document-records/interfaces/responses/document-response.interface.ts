@@ -1,42 +1,29 @@
 export interface DocumentManageResponse {
   id: string;
   title: string;
-  fiscalYear: number;
-  section: Section;
-  type: Type;
-  subtype: Subtype;
-  file: File;
-  fileId: number;
-  isActive: boolean;
+  year: number;
+  organizationalUnit: {
+    id: string;
+    name: string;
+  };
+  documentType: {
+    id: number;
+    name: string;
+  };
+  documentSubtype: {
+    id: number;
+    name: string;
+  } | null;
+  status: string;
   createdAt: string;
   updatedAt: string;
+  file: StoredFile;
 }
 
-export interface File {
-  id: number;
-  storedName: string;
+interface StoredFile {
+  id: string;
   originalName: string;
   mimeType: string;
   sizeBytes: string;
-  storageKey: string;
-  status: string;
-  parentFileId: null;
-  createdBy: null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Section {
-  id: string;
-  name: string;
-}
-
-export interface Subtype {
-  id: number;
-  name: string;
-}
-
-export interface Type {
-  id: number;
-  name: string;
+  url: string;
 }

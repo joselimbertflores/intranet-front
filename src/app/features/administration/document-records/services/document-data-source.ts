@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 
-import { forkJoin, Observable, of, switchMap } from 'rxjs';
+import { forkJoin, Observable, of, switchMap, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
@@ -33,13 +33,14 @@ interface DocumentRecord {
 }
 
 interface GetDocumentsParams {
-  limit?: number;
-  offset?: number;
-  term?: string;
-  sectionId?: number;
-  typeId?: number;
-  subtypeId?: number;
-  date?: Date;
+  limit?: number | null;
+  offset?: number | null;
+  term?: string | null;
+  organizationalUnitId?: string | null;
+  documentTypeId?: number | null;
+  documentSubtypeId?: number | null;
+  year?: number | null;
+  status?: string | null;
 }
 
 @Injectable({
@@ -55,19 +56,16 @@ export class DocumentDataSource {
   });
   documentTypes = toSignal(this.getDocumentTypes(), { initialValue: [] });
 
-  constructor() {}
-
-  findAll({ date, ...props }: GetDocumentsParams) {
+  findAll(filterParams: GetDocumentsParams) {
     const params = new HttpParams({
-      fromObject: this.removeEmptyParams({
-        ...props,
-        fiscalYear: date?.getFullYear(),
-      }),
+      fromObject: this.removeEmptyParams(filterParams),
     });
-    return this.http.get<{
-      documents: DocumentManageResponse[];
-      total: number;
-    }>(this.URL, { params });
+    return this.http
+      .get<{
+        documents: DocumentManageResponse[];
+        total: number;
+      }>(this.URL, { params })
+      .pipe(tap((resp) => console.log(resp)));
   }
 
   create(data: CreateDocumentProps) {
@@ -81,7 +79,7 @@ export class DocumentDataSource {
           title: documents[index].title.trim(),
         }));
 
-        return this.http.post<DocumentManageResponse[]>(this.URL, {
+        return this.http.post<DocumentManageResponse[]>(`${this.URL}/batch`, {
           ...rest,
           ...(year && { year }),
           documents: documentsToCreate,

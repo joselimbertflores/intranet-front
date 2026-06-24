@@ -10,7 +10,7 @@
             <dt class="font-medium text-surface-900">Sección:</dt>
 
             <dd class="text-gray-700 sm:col-span-2">
-              {{ data.section.name }}
+              {{ data.organizationalUnit.name }}
             </dd>
           </div>
 
@@ -18,7 +18,7 @@
             <dt class="font-medium text-gray-900">Tipo:</dt>
 
             <dd class="text-gray-700 sm:col-span-2">
-              {{ data.type.name }}
+              {{ data.documentType.name }}
             </dd>
           </div>
 
@@ -26,7 +26,7 @@
             <dt class="font-medium text-gray-900">Subtipo:</dt>
 
             <dd class="text-gray-700 sm:col-span-2">
-              {{ data.subtype?.name || "—" }}
+              {{ data.documentSubtype?.name || "—" }}
             </dd>
           </div>
         </dl>
@@ -104,7 +104,7 @@
             <dt class="font-medium text-surface-900">Tamaño:</dt>
 
             <dd class="text-surface-700 sm:col-span-2">
-              {{ data.file.sizeBytes| fileSize }}
+              {{ data.file.sizeBytes | fileSize }}
             </dd>
           </div>
 

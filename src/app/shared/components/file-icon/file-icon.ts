@@ -29,7 +29,7 @@ export class FileIcon {
   fileName = input.required<string>();
 
   iconClass = computed(() => {
-    const ext = this.fileName().split('.').pop()?.toLowerCase() || '';
+    const ext = this.fileName().trim().split('.').pop()?.toLowerCase() || '';
     return iconMap[ext] || 'pi pi-file text-gray-500';
   });
 }

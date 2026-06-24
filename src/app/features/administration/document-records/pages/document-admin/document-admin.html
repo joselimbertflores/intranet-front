@@ -11,31 +11,34 @@
       [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
     />
     <p-popover #filterPopover>
-      <div class="flex flex-col w-full sm:w-[600px] gap-y-6">
+      <div class="flex flex-col w-[90vw] sm:w-[650px] gap-y-4">
         <div class="flex items-center justify-between px-2">
-          <span class="text-lg font-semibold text-surface-700"> Filtros </span>
+          <span class="text-lg font-semibold text-surface-700">
+            Filtros avanzados
+          </span>
           <p-button
             icon="pi pi-times"
+            severity="secondary"
+            size="small"
             [text]="true"
             [rounded]="true"
-            severity="secondary"
             (click)="filterPopover.hide()"
-            size="small"
           />
         </div>
-        <form [formGroup]="filterForm" class="flex flex-col gap-y-4">
+        <form [formGroup]="filterForm" class="flex flex-col gap-y-4 mt-2">
           <p-floatlabel variant="on">
             <p-treeSelect
+              inputId="sectionDoc"
               size="small"
               class="w-full"
-              [options]="organizationTree()"
               selectionMode="single"
               appendTo="body"
               [filter]="true"
               [showClear]="true"
               filterPlaceholder="Buscar unidad"
               emptyMessage="Sin resultados"
-              (onNodeSelect)="selectSection($event.node.data)"
+              formControlName="organizationalUnitNode"
+              [options]="organizationTree()"
             >
             </p-treeSelect>
             <label for="sectionDoc">Unidad organizacional</label>
@@ -44,13 +47,15 @@
             <p-select
               inputId="type"
               optionLabel="name"
+              optionValue="id"
               class="w-full"
               [filter]="true"
               [showClear]="true"
               [options]="documentTypes()"
-              (onChange)="selectType($event.value)"
+              (onChange)="selectDocumentType($event.value)"
+              formControlName="documentTypeId"
             />
-            <label for="type">Tipo</label>
+            <label for="type">Tipo de documento</label>
           </p-floatlabel>
           <p-floatlabel class="w-full" variant="on">
             <p-select
@@ -60,26 +65,43 @@
               class="w-full"
               [filter]="true"
               [showClear]="true"
-              [options]="subtypes()"
-              formControlName="subtypeId"
+              [options]="documentSubTypes()"
+              formControlName="documentSubtypeId"
             />
-            <label for="subtype">Subtipo</label>
+            <label for="subtype">Subtipo de documento</label>
           </p-floatlabel>
-          <p-floatlabel variant="on">
-            <p-datepicker
-              inputId="yearInput"
-              view="year"
-              dateFormat="yy"
-              showIcon
-              iconDisplay="input"
-              appendTo="body"
-              [readonlyInput]="true"
-              [fluid]="true"
-              [showClear]="true"
-              formControlName="date"
-            />
-            <label for="yearInput">Gestión</label>
-          </p-floatlabel>
+
+          <div class="flex flex-col sm:flex-row gap-2">
+            <p-floatlabel class="w-full" variant="on">
+              <p-select
+                [options]="yearOptions"
+                [filter]="true"
+                [showClear]="true"
+                filterPlaceholder="Buscar gestión"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                class="w-full"
+                emptyMessage="Sin elementos"
+                inputId="yearInput"
+                formControlName="year"
+              />
+              <label for="yearInput">Gestión</label>
+            </p-floatlabel>
+            <p-floatlabel class="w-full" variant="on">
+              <p-select
+                [options]="statusOptions"
+                [showClear]="true"
+                filterPlaceholder="Buscar gestión"
+                appendTo="body"
+                class="w-full"
+                emptyMessage="Sin elementos"
+                inputId="statusInput"
+                formControlName="status"
+              />
+              <label for="statusInput">Estado</label>
+            </p-floatlabel>
+          </div>
         </form>
         <div class="flex justify-end gap-x-2">
           <p-button
@@ -89,7 +111,7 @@
             (onClick)="clearFilters(); filterPopover.hide()"
           />
           <p-button
-            label="Aplicar filtros"
+            label="Aplicar"
             size="small"
             (onClick)="applyFilters(); filterPopover.hide()"
           />
@@ -106,18 +128,19 @@
 </div>
 
 <p-table
-  [paginator]="true"
-  [lazy]="true"
-  size="small"
   [value]="dataSource()"
   [totalRecords]="dataSize()"
   (onPage)="chagePage($event)"
   [first]="offset()"
   [rows]="limit()"
   [showCurrentPageReport]="true"
+  [loading]="isLoading()"
+  [lazy]="true"
+  [paginator]="true"
   currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  [rowsPerPageOptions]="[10, 25, 50]"
+  [rowsPerPageOptions]="[10, 25, 40, 50]"
   class="text-sm"
+  size="small"
 >
   <ng-template #caption>
     <div class="flex sm:justify-end">
@@ -142,19 +165,25 @@
       <td>
         <div class="flex items-center">
           <file-icon [fileName]="item.file.originalName" />
-          <span class="ml-2 font-semibold">{{ item.title }}</span>
+          <span class="ml-2 font-medium">{{ item.title }}</span>
         </div>
       </td>
       <td>{{ item.organizationalUnit.name }}</td>
       <td>{{ item.documentType.name }}</td>
       <td>{{ item.documentSubtype?.name ?? "----" }}</td>
 
-      <td>{{ item.fiscalYear }}</td>
+      <td>{{ item.year }}</td>
       <td>
-        @if (item.isActive) {
-          <p-tag severity="success" value="Activo"></p-tag>
-        } @else {
-          <p-tag severity="danger" value="Inactivo"></p-tag>
+        @switch (item.status) {
+          @case ("ACTIVE") {
+            <p-tag severity="success" value="Activo" />
+          }
+          @case ("INACTIVE") {
+            <p-tag severity="danger" value="Inactivo" />
+          }
+          @default {
+            <p-tag severity="secondary" [value]="item.status" />
+          }
         }
       </td>
       <td>

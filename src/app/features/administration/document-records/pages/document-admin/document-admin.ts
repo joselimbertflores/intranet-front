@@ -24,9 +24,9 @@ import {
   DocumentManageResponse,
   DocumentSubtypeResponse,
   SectionTreeNodeResponse,
-  DocumentTypeWithSubTypesResponse,
 } from '../../interfaces';
 import { TreeNode } from 'primeng/api';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-document-admin',
@@ -60,32 +60,45 @@ export default class DocumentAdmin {
   dataSize = signal<number>(0);
 
   filterForm: FormGroup = this.formBuilder.group({
-    organizationalUnitId: [null],
+    organizationalUnitNode: [null as TreeNode<string> | null],
     documentTypeId: [null],
     documentSubtypeId: [{ value: null, disabled: true }],
     year: [null],
-    status: [],
+    status: [null],
   });
 
   documentTypes = computed(() => this.documentDataSource.documentTypes());
   organizationTree = computed(() =>
     this.toTreeNode(this.documentDataSource.organizationUnitsTree()),
   );
+  documentSubTypes = signal<DocumentSubtypeResponse[]>([]);
 
-  subtypes = signal<DocumentSubtypeResponse[]>([]);
+  readonly statusOptions = [
+    { value: 'ACTIVE', label: 'Activos' },
+    { value: 'INACTIVE', label: 'Inactivos' },
+  ];
+  readonly MIN_YEAR = 2000;
+  readonly MAX_YEAR = new Date().getFullYear() + 1;
+  readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
+
+  isLoading = signal(false);
 
   ngOnInit() {
     this.getData();
   }
 
   getData() {
+    const { organizationalUnitNode, ...props } = this.filterForm.value;
+    this.isLoading.set(true);
     this.documentDataSource
       .findAll({
         limit: this.limit(),
         offset: this.offset(),
         term: this.searchTerm(),
-        ...this.filterForm.value,
+        ...props,
+        organizationalUnitId: organizationalUnitNode?.data,
       })
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe(({ documents, total }) => {
         this.dataSource.set(documents);
         this.dataSize.set(total);
@@ -96,15 +109,22 @@ export default class DocumentAdmin {
     this.filterForm.patchValue({ sectionId: id });
   }
 
-  selectType(value: DocumentTypeWithSubTypesResponse | null) {
-    if (!value) {
-      this.filterForm.patchValue({ typeId: null, subtypeId: null });
-      this.filterForm.get('subtypeId')?.disable();
-      this.subtypes.set([]);
+  selectDocumentType(selectedId: number | null) {
+    const control = this.filterForm.get('documentSubtypeId');
+    control?.setValue(null);
+
+    if (selectedId) {
+      const documentType = this.documentTypes().find(
+        ({ id }) => id === selectedId,
+      );
+      this.documentSubTypes.set(documentType?.subtypes ?? []);
+      if (documentType?.subtypes.length) {
+        control?.enable();
+      } else {
+        control?.disable();
+      }
     } else {
-      this.filterForm.patchValue({ subtypeId: null, typeId: value.id });
-      this.filterForm.get('subtypeId')?.enable();
-      this.subtypes.set(value.subtypes);
+      this.documentSubTypes.set([]);
     }
   }
 
@@ -193,12 +213,19 @@ export default class DocumentAdmin {
     }
   }
 
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode<string>[] {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),
       data: node.id,
-      children: node.children ? this.toTreeNode(node.children) : [],
+      children: node.children.length ? this.toTreeNode(node.children) : [],
     }));
+  }
+
+  private buildYearOptions(minYear: number, maxYear: number) {
+    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
+      const year = maxYear - index;
+      return { label: String(year), value: year };
+    });
   }
 }

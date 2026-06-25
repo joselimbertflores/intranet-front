@@ -1,169 +1,216 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-4 pt-2">
-    <p-floatlabel variant="on">
-      <p-treeSelect
-        inputId="orgUnit"
-        class="w-full"
-        appendTo="body"
-        [filter]="true"
-        filterPlaceholder="Buscar unidad"
-        emptyMessage="Sin resultados"
-        formControlName="organizationalUnitNode"
-        [invalid]="formUtils.isInvalid(form.get('organizationalUnitNode'))"
-        [options]="organizationTree()"
-      />
-      <label for="orgUnit">Unidad organizacional *</label>
-    </p-floatlabel>
-    <p-floatlabel class="w-full" variant="on">
-      <p-select
-        [options]="documentTypes()"
-        optionLabel="name"
-        optionValue="id"
-        appendTo="body"
-        class="w-full"
-        inputId="docType"
-        [filter]="true"
-        emptyMessage="Sin elementos"
-        filterPlaceholder="Nombre del tipo"
-        formControlName="documentTypeId"
-        [invalid]="formUtils.isInvalid(form.get('documentTypeId'))"
-        (onChange)="selectDocumentType($event.value)"
-      />
-      <label for="docType">Tipo de documento *</label>
-    </p-floatlabel>
-    <p-floatlabel class="w-full" variant="on">
-      <p-select
-        [options]="documentSubtypes()"
-        optionLabel="name"
-        optionValue="id"
-        appendTo="body"
-        class="w-full"
-        emptyMessage="Sin elementos"
-        inputId="docSubType"
-        [filter]="true"
-        filterPlaceholder="Nombre del subtipo"
-        formControlName="documentSubtypeId"
-        [showClear]="true"
-      />
-      <label for="docSubType">Subtipo (Opcional)</label>
-    </p-floatlabel>
+<form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+  <section class="space-y-4 mt-2">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="md:col-span-4">
+        <p-floatlabel variant="on">
+          <input
+            pInputText
+            id="docName"
+            formControlName="title"
+            class="w-full"
+            [invalid]="formUtils.isInvalid(form.get('title'))"
+          />
+          <label for="docName">Nombre del documento *</label>
+        </p-floatlabel>
+      </div>
 
-    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="md:col-span-4">
+        <p-floatlabel variant="on">
+          <p-treeSelect
+            inputId="orgUnit"
+            class="w-full"
+            appendTo="body"
+            [filter]="true"
+            filterPlaceholder="Buscar unidad"
+            emptyMessage="Sin resultados"
+            formControlName="organizationalUnitNode"
+            [invalid]="formUtils.isInvalid(form.get('organizationalUnitNode'))"
+            [options]="organizationTree()"
+          />
+          <label for="orgUnit">Unidad organizacional *</label>
+        </p-floatlabel>
+      </div>
+
+      <div class="md:col-span-2">
+        <p-floatlabel class="w-full" variant="on">
+          <p-select
+            inputId="docType"
+            class="w-full"
+            appendTo="body"
+            [options]="documentTypes()"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterPlaceholder="Nombre del tipo"
+            emptyMessage="Sin elementos"
+            formControlName="documentTypeId"
+            [invalid]="formUtils.isInvalid(form.get('documentTypeId'))"
+            (onChange)="selectDocumentType($event.value)"
+          />
+          <label for="docType">Tipo de documento *</label>
+        </p-floatlabel>
+      </div>
+      <div class="md:col-span-2">
+        <p-floatlabel class="w-full" variant="on">
+          <p-select
+            inputId="docSubType"
+            class="w-full"
+            appendTo="body"
+            [options]="documentSubtypes()"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            [showClear]="true"
+            filterPlaceholder="Nombre del subtipo"
+            emptyMessage="Sin elementos"
+            formControlName="documentSubtypeId"
+          />
+          <label for="docSubType">Subtipo</label>
+        </p-floatlabel>
+      </div>
+
+      <app-year-selector formControlName="year" />
+
       <p-floatlabel class="w-full" variant="on">
         <p-select
-          [options]="yearOptions"
-          [filter]="true"
-          [showClear]="true"
-          filterPlaceholder="Buscar gestión"
+          inputId="statusInput"
+          class="w-full"
+          appendTo="body"
+          [options]="documentStatusOptions"
           optionLabel="label"
           optionValue="value"
-          appendTo="body"
-          class="w-full"
           emptyMessage="Sin elementos"
-          inputId="yearInput"
-          formControlName="year"
-        />
-        <label for="yearInput">Gestión (Opcional)</label>
-      </p-floatlabel>
-      <p-floatlabel class="w-full" variant="on">
-        <p-select
-          [options]="documentStatusOptions"
-          filterPlaceholder="Buscar gestión"
-          appendTo="body"
-          class="w-full"
-          emptyMessage="Sin elementos"
-          inputId="statusInput"
           formControlName="status"
+          [invalid]="formUtils.isInvalid(form.get('status'))"
         />
-        <label for="statusInput">Estado</label>
+        <label for="statusInput">Estado *</label>
       </p-floatlabel>
     </div>
-    <p-floatlabel variant="on">
-      <input pInputText id="docName" formControlName="title" class="w-full" />
-      <label for="docName">Nombre del documento</label>
-    </p-floatlabel>
-  </div>
+  </section>
 
-  <div class="mt-4">
-    <div class="rounded-2xl border border-surface-200 p-4">
-      <h3 class="leading-6 font-medium text-surface-900 mb-4">Archivo</h3>
-      <div class="flow-root">
-        <dl class="-my-3 divide-y divide-surface-200 text-sm">
-          <div class="grid grid-cols-1 gap-1 py-1 sm:grid-cols-3 sm:gap-4">
-            <dt class="font-medium text-surface-900">Nombre original:</dt>
-            <dd class="text-surface-700 sm:col-span-2">
-              <div class="flex items-center gap-x-2">
-                <file-icon [mimeType]="data.file.mimeType" />
-                <span>{{ data.file.originalName }}</span>
-              </div>
-            </dd>
-          </div>
-          <div class="grid grid-cols-1 gap-1 py-1 sm:grid-cols-3 sm:gap-4">
-            <dt class="font-medium text-surface-900">Descargas:</dt>
-
-            <dd class="text-surface-700 sm:col-span-2">
-              <!-- {{ data.downloadCount }} -->
-            </dd>
-          </div>
-
-          <div class="grid grid-cols-1 gap-1 py-1 sm:grid-cols-3 sm:gap-4">
-            <dt class="font-medium text-surface-900">Tamaño:</dt>
-
-            <dd class="text-surface-700 sm:col-span-2">
-              {{ data.file.sizeBytes | fileSize }}
-            </dd>
-          </div>
-
-          <div class="grid grid-cols-1 gap-1 py-1 sm:grid-cols-3 sm:gap-4">
-            <dt class="font-medium text-surface-900">Fecha creación:</dt>
-
-            <dd class="text-surface-700 sm:col-span-2">
-              {{ data.createdAt | date: "short" }}
-            </dd>
-          </div>
-          <div class="grid grid-cols-1 gap-1 py-1 sm:grid-cols-3 sm:gap-4">
-            <dt class="font-medium text-surface-900">Fecha edición:</dt>
-
-            <dd class="text-surface-700 sm:col-span-2">
-              {{ data.updatedAt | date: "short" }}
-            </dd>
-          </div>
-        </dl>
+  <section class="rounded-xl border border-surface-200 p-4">
+    <div
+      class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+    >
+      <div>
+        <h3 class="text-sm font-semibold text-surface-900">Archivo actual</h3>
+        <p class="text-xs text-surface-500">
+          Este archivo se mantendrá si no se selecciona uno nuevo
+        </p>
       </div>
 
-      <div class="mt-6 space-y-3">
-        <div class="flex items-center gap-2">
-          <p-checkbox
-            [(ngModel)]="replaceFile"
-            binary="true"
-            [ngModelOptions]="{ standalone: true }"
-            (onChange)="onReplaceChange($event.checked)"
-          ></p-checkbox>
-          <label class="text-sm text-surface-600"> Reemplazar archivo </label>
-        </div>
+      <div class="flex gap-2">
+        <p-button
+          type="button"
+          label="Ver"
+          icon="pi pi-external-link"
+          size="small"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="openFile(data.file.url)"
+        />
 
-        @if (replaceFile()) {
-          <p-fileUpload
-            mode="basic"
-            class="w-full"
-            [customUpload]="true"
-            [auto]="false"
-            [maxFileSize]="maxFileSizeBytes"
-            [accept]="acceptAttribute"
-            chooseLabel="Seleccionar"
-            (onSelect)="onSelectFile($event)"
-            invalidFileSizeMessageSummary="Tamaño máximo"
-            [invalidFileSizeMessageDetail]="maxFileSizeLabel"
-            invalidFileTypeMessageSummary="Formatos permitidos:"
-            [invalidFileTypeMessageDetail]="allowedExtensionsLabel"
-          />
-        }
+        <p-button
+          type="button"
+          label="Descargar"
+          icon="pi pi-download"
+          size="small"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="downloadFile(data.file.url)"
+        />
       </div>
     </div>
-  </div>
+
+    <div class="mt-4 flex items-center gap-3 rounded-xl bg-surface-50 p-3">
+      <file-icon [mimeType]="data.file.mimeType" />
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-medium text-surface-900">
+          {{ data.file.originalName }}
+        </p>
+        <p class="text-xs text-surface-500">
+          {{ data.file.sizeBytes | fileSize }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-xl border border-surface-200 p-4">
+    <div class="flex items-center gap-3">
+      <p-checkbox
+        [binary]="true"
+        [ngModel]="replaceFile()"
+        [ngModelOptions]="{ standalone: true }"
+        (onChange)="onReplaceChange($event.checked)"
+      />
+      <div>
+        <label class="text-sm font-medium text-surface-900">
+          Reemplazar archivo
+        </label>
+        <p class="text-xs text-surface-500">
+          Al guardar, el archivo actual será reemplazado por el nuevo archivo
+          seleccionado.
+        </p>
+      </div>
+    </div>
+
+    @if (replaceFile()) {
+      <div class="mt-4 space-y-3">
+        <p-fileUpload
+          mode="basic"
+          class="w-full"
+          [customUpload]="true"
+          [auto]="false"
+          [maxFileSize]="maxFileSizeBytes"
+          [accept]="acceptAttribute"
+          chooseLabel="Seleccionar"
+          invalidFileSizeMessageSummary="Tamaño máximo"
+          [invalidFileSizeMessageDetail]="maxFileSizeLabel"
+          invalidFileTypeMessageSummary="Formatos permitidos:"
+          [invalidFileTypeMessageDetail]="allowedExtensionsLabel"
+          (onSelect)="onSelectFile($event)"
+        />
+      </div>
+    }
+  </section>
+
+  <section class="rounded-xl border border-surface-200 p-4">
+    <h3 class="text-sm font-semibold text-surface-900">
+      Información del registro
+    </h3>
+
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+      <div>
+        <p class="text-xs text-surface-500">Creado</p>
+        <p class="font-medium text-surface-800">
+          {{ data.createdAt | date: "short" }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-xs text-surface-500">Última edición</p>
+        <p class="font-medium text-surface-800">
+          {{ data.updatedAt | date: "short" }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-xs text-surface-500">Descargas</p>
+        <p class="font-medium text-surface-800">
+          {{ data.downloadCount }}
+        </p>
+      </div>
+    </div>
+  </section>
 
   <div class="p-dialog-footer">
-    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      [disabled]="isSaving()"
+      (onClick)="close()"
+    />
+    <p-button type="submit" label="Guardar" [loading]="isSaving()" />
   </div>
 </form>

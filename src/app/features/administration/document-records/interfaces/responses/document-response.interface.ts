@@ -18,6 +18,7 @@ export interface DocumentManageResponse {
   createdAt: string;
   updatedAt: string;
   file: StoredFile;
+  downloadCount: number;
 }
 
 interface StoredFile {

@@ -1,41 +1,32 @@
 import { CommonModule } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
   ReactiveFormsModule,
+  FormBuilder,
+  FormsModule,
   Validators,
 } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { DatePickerModule } from 'primeng/datepicker';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { TreeNode } from 'primeng/api';
 
+import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
+import { FileIcon, YearSelector } from '../../../../../shared';
 import { FileSizePipe } from '../../pipes';
 import {
   DocumentManageResponse,
   DocumentSubtypeResponse,
-  DocumentTypeWithSubTypesResponse,
   SectionTreeNodeResponse,
 } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
-import { FileIcon } from '../../../../../shared';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { TreeNode } from 'primeng/api';
 import { FormUtils } from '../../../../../helpers';
-import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-document-edit',
@@ -44,59 +35,27 @@ import { MessageModule } from 'primeng/message';
     CommonModule,
     ReactiveFormsModule,
     FileUploadModule,
+    FloatLabelModule,
+    TreeSelectModule,
     InputTextModule,
     CheckboxModule,
-    FloatLabelModule,
-    DatePickerModule,
+    MessageModule,
     SelectModule,
     FileSizePipe,
     ButtonModule,
-    MessageModule,
     FileIcon,
-    TreeSelectModule,
+    YearSelector,
   ],
-
   templateUrl: './document-edit.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentEdit implements OnInit {
   private formBuilder = inject(FormBuilder);
   private diagloRef = inject(DynamicDialogRef);
   private documentDataSource = inject(DocumentDataSource);
 
-  readonly currentDate = new Date();
-  readonly minDateValue: Date = new Date(2000, 0, 1);
-  readonly maxDateValue = new Date(this.currentDate.getFullYear() + 1, 11, 31);
-
-
-  readonly FILE_RULES = {
-    maxSizeMB: 20,
-    allowedExtensions: [
-      'pdf',
-      'odt',
-      'ods',
-      'odp',
-      'docx',
-      'xlsx',
-      'pptx',
-      'jpg',
-      'jpeg',
-      'png',
-      'webp',
-      'mp4',
-      'webm',
-      'mp3',
-      'ogg',
-    ],
-  };
-
   readonly data: DocumentManageResponse = inject(DynamicDialogConfig).data;
 
-  // form: FormGroup = this.formBuilder.nonNullable.group({
-  //   displayName: ['', Validators.required],
-  //   date: [null, Validators.required],
-  //   status: ['', Validators.required],
-  // });
+  readonly formUtils = FormUtils;
 
   form = this.formBuilder.group({
     title: ['', Validators.required],
@@ -107,33 +66,48 @@ export class DocumentEdit implements OnInit {
     documentTypeId: [null as number | null, Validators.required],
     documentSubtypeId: [{ value: null as number | null, disabled: true }],
     year: [null as number | null],
-    status: [null as string | null],
+    status: [null as string | null, Validators.required],
   });
+  isSaving = signal(false);
 
-  selectedFile: File | null = null;
-  replaceFile = signal(false);
-
+  // Catalogs
   organizationTree = computed(() =>
     this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
   );
   documentTypes = computed(() => this.documentDataSource.documentTypes());
   documentSubtypes = signal<DocumentSubtypeResponse[]>([]);
-  readonly MIN_YEAR = 2000;
-  readonly MAX_YEAR = new Date().getFullYear() + 1;
-  readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
   readonly documentStatusOptions = [
     { value: 'ACTIVE', label: 'Activo' },
     { value: 'INACTIVE', label: 'Inactivo' },
   ];
 
-  readonly formUtils = FormUtils;
+  // File config
+  readonly fileRules = DOCUMENT_FILE_RULES;
+  readonly acceptAttribute = this.fileRules.allowedExtensions
+    .map((ext) => ext.trim().toLowerCase())
+    .map((ext) => (ext.startsWith('.') ? ext : `.${ext}`))
+    .join(',');
+  readonly allowedExtensionsLabel = this.fileRules.allowedExtensions
+    .map((ext) => ext.toUpperCase())
+    .join(', ');
+  readonly maxFileSizeBytes = this.fileRules.maxSizeMB * 1024 * 1024;
+  readonly maxFileSizeLabel = `${this.fileRules.maxSizeMB} MB`;
+
+  selectedFile = signal<File | null>(null);
+  replaceFile = signal(false);
 
   ngOnInit(): void {
     this.loadForm();
   }
 
   save() {
-    if (!this.isFormValid) return;
+    if (this.isSaving()) return;
+
+    if (this.form.invalid || (this.replaceFile() && !this.selectedFile())) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    // this.isSaving.set(true);
     // this.documentDataSource
     //   .update(this.data.id, {
     //     ...this.form.value,
@@ -146,68 +120,41 @@ export class DocumentEdit implements OnInit {
     this.diagloRef.close();
   }
 
-  selectDocumentType(type: DocumentTypeWithSubTypesResponse) {
-    this.documentSubtypes.set(type.subtypes);
-    this.form.get('documentSubtypeId')?.setValue(null);
-    if (type.subtypes.length > 0) {
-      this.form.get('documentSubtypeId')?.enable();
+  selectDocumentType(id: number) {
+    const selectedType = this.documentTypes().find((item) => item.id === id);
+    this.documentSubtypes.set(selectedType?.subtypes ?? []);
+
+    const control = this.form.controls['documentSubtypeId'];
+    control.setValue(null);
+
+    if (selectedType?.subtypes.length) {
+      control.enable();
     } else {
-      this.form.get('documentSubtypeId')?.disable();
+      control.disable();
     }
   }
 
   onSelectFile(event: FileSelectEvent): void {
     const [file] = Array.from(event.files) ?? [];
-    if (!file || !this.validateFile(file)) return;
-    this.selectedFile = file;
-    // this.form.get('displayName')?.setValue(this.removeExtension(file.name));
+    if (!file) return;
+    this.selectedFile.set(file);
   }
 
   onReplaceChange(checked: boolean) {
+    this.replaceFile.set(checked);
     if (!checked) {
-      this.selectedFile = null;
+      this.selectedFile.set(null);
     }
   }
 
-  get allowedExtensionsLabel(): string {
-    return this.FILE_RULES.allowedExtensions.join(', ');
+  downloadFile(url: string): void {
+    const fileUrl = new URL(url);
+    fileUrl.searchParams.set('download', 'true');
+    window.open(fileUrl.toString(), '_blank', 'noopener,noreferrer');
   }
 
-  get acceptAttribute(): string {
-    return this.FILE_RULES.allowedExtensions.map((ext) => `.${ext}`).join(',');
-  }
-
-  get maxFileSizeBytes(): number {
-    return this.FILE_RULES.maxSizeMB * 1024 * 1024;
-  }
-
-  get maxFileSizeLabel(): string {
-    return `${this.FILE_RULES.maxSizeMB} MB`;
-  }
-
-  get isFormValid() {
-    return this.form.valid && (!this.replaceFile() || !!this.selectedFile);
-  }
-
-  private validateFile(file: File): boolean {
-    const ext = file.name.split('.').pop()?.toLowerCase();
-
-    if (!ext || !this.FILE_RULES.allowedExtensions.includes(ext)) {
-      return false;
-    }
-
-    const maxSizeBytes = this.maxFileSizeBytes;
-
-    if (file.size > maxSizeBytes) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private removeExtension(fileName: string): string {
-    const lastDot = fileName.lastIndexOf('.');
-    return lastDot === -1 ? fileName : fileName.substring(0, lastDot);
+  openFile(url: string): void {
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   private loadForm() {
@@ -261,12 +208,5 @@ export class DocumentEdit implements OnInit {
     }
 
     return null;
-  }
-
-  private buildYearOptions(minYear: number, maxYear: number) {
-    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
-      const year = maxYear - index;
-      return { label: String(year), value: year };
-    });
   }
 }

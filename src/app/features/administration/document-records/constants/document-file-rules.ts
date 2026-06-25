@@ -1,0 +1,20 @@
+export const DOCUMENT_FILE_RULES = {
+  maxSizeMB: 20,
+  allowedExtensions: [
+    'pdf',
+    'odt',
+    'ods',
+    'odp',
+    'docx',
+    'xlsx',
+    'pptx',
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'mp4',
+    'webm',
+    'mp3',
+    'ogg',
+  ],
+} as const;

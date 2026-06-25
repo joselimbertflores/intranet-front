@@ -25,8 +25,9 @@ import {
   DocumentSubtypeResponse,
   SectionTreeNodeResponse,
 } from '../../interfaces';
-import { TreeNode } from 'primeng/api';
+import { MenuItem, TreeNode } from 'primeng/api';
 import { finalize } from 'rxjs';
+import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-document-admin',
@@ -40,6 +41,7 @@ import { finalize } from 'rxjs';
     PopoverModule,
     SelectModule,
     ButtonModule,
+    MenuModule,
     TableModule,
     TagModule,
     FileIcon,
@@ -82,6 +84,7 @@ export default class DocumentAdmin {
   readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
 
   isLoading = signal(false);
+  menuItems: MenuItem[] = [];
 
   ngOnInit() {
     this.getData();
@@ -192,6 +195,32 @@ export default class DocumentAdmin {
       if (!result) return;
       this.upsertItem(result);
     });
+  }
+
+  setMenuItems(row: DocumentManageResponse) {
+    this.menuItems = [
+      {
+        label: 'Opciones',
+        items: [
+          {
+            label: 'Editar',
+            icon: 'pi pi-fw pi-pencil',
+            command: () => this.openUpdateDialog(row),
+          },
+          {
+            label: 'Descargar archivo',
+            icon: 'pi pi-download',
+            command: () => this.downloadFile(row.file.url),
+          },
+        ],
+      },
+    ];
+  }
+
+  downloadFile(url: string): void {
+    const fileUrl = new URL(url);
+    fileUrl.searchParams.set('download', 'true');
+    window.open(fileUrl.toString(), '_blank', 'noopener,noreferrer');
   }
 
   get activeFiltersCount(): number {

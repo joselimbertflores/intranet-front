@@ -134,7 +134,7 @@ import { TutorialBlockResponse } from '../../interfaces';
                   target="_blank"
                   class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-full"
                 >
-                  <file-icon [fileName]="data().file?.originalName ?? ''" />
+                  <!-- <file-icon [fileName]="data().file?.originalName ?? ''" /> -->
                   <div class="flex flex-col">
                     <span
                       class="text-sm font-semibold text-surface-800 group-hover/file:text-primary-700 transition-colors line-clamp-1"

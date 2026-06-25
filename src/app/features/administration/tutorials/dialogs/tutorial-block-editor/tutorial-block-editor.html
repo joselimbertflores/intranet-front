@@ -15,7 +15,7 @@
             @if (files?.length > 0) {
               @let file = files[0];
               <div class="flex items-center gap-x-4 p-2">
-                <file-icon [fileName]="file.name" />
+                <!-- <file-icon [mimeType]="file." /> -->
                 <div class="flex flex-col min-w-0">
                   <span class="text-sm font-medium truncate">
                     {{ file.name }}
@@ -27,7 +27,7 @@
               </div>
             } @else if (data.block?.file) {
               <div class="flex items-center gap-x-4 p-2">
-                <file-icon [fileName]="data.block?.file!.originalName" />
+                <!-- <file-icon [fileName]="data.block?.file!.originalName" /> -->
                 <div class="flex flex-col min-w-0">
                   <span class="text-sm font-medium truncate">
                     {{ data.block?.file!.originalName }}

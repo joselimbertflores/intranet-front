@@ -151,10 +151,9 @@
   </ng-template>
   <ng-template #header>
     <tr>
-      <th>Nombre</th>
-      <th>Seccion</th>
-      <th>Tipo</th>
-      <th>Subtipo</th>
+      <th>Documento</th>
+      <th>Clasificación</th>
+      <th>Unidad</th>
       <th>Gestión</th>
       <th>Estado</th>
       <th style="width: 3rem"></th>
@@ -163,16 +162,35 @@
   <ng-template #body let-item>
     <tr>
       <td>
-        <div class="flex items-center">
-          <file-icon [fileName]="item.file.originalName" />
-          <span class="ml-2 font-medium">{{ item.title }}</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <file-icon [mimeType]="item.file.mimeType" />
+          <span class="font-medium truncate">
+            {{ item.title }}
+          </span>
         </div>
       </td>
-      <td>{{ item.organizationalUnit.name }}</td>
-      <td>{{ item.documentType.name }}</td>
-      <td>{{ item.documentSubtype?.name ?? "----" }}</td>
-
-      <td>{{ item.year }}</td>
+      <td>
+        <div class="flex flex-col text-xs">
+          <span class="font-medium">
+            {{ item.documentType.name }}
+          </span>
+          @if (item.documentSubtype) {
+            <span class="text-surface-500">
+              {{ item.documentSubtype.name }}
+            </span>
+          } @else {
+            <span class="text-surface-400"> Sin subtipo </span>
+          }
+        </div>
+      </td>
+      <td>
+        <span class="line-clamp-2">
+          {{ item.organizationalUnit.name }}
+        </span>
+      </td>
+      <td>
+        {{ item.year ?? "-" }}
+      </td>
       <td>
         @switch (item.status) {
           @case ("ACTIVE") {
@@ -187,12 +205,19 @@
         }
       </td>
       <td>
+        <p-menu
+          #menu
+          [model]="menuItems"
+          [popup]="true"
+          appendTo="body"
+          (onShow)="setMenuItems(item)"
+        />
         <p-button
-          icon="pi pi-pencil"
-          size="small"
-          (click)="openUpdateDialog(item)"
           severity="secondary"
-          rounded
+          [rounded]="true"
+          size="small"
+          (click)="menu.toggle($event)"
+          icon="pi pi-ellipsis-v"
         />
       </td>
     </tr>

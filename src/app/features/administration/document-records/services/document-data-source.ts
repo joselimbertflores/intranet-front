@@ -13,7 +13,7 @@ import {
 } from '../interfaces';
 import { TreeNode } from 'primeng/api';
 
-interface CreateDocumentProps {
+interface CreateDocumentBatchDto {
   organizationalUnitId: string;
   documentTypeId: number;
   documentSubtypeId?: number | null;
@@ -22,14 +22,17 @@ interface CreateDocumentProps {
   documents: DocumentRecord[];
 }
 
-interface UpdateDocumentProps {
-  date: Date;
-  title: string;
-  file: File;
-}
-
 interface DocumentRecord {
   title: string;
+}
+
+interface UpdateDocumentDto {
+  organizationalUnitId?: string | null;
+  documentTypeId?: number | null;
+  documentSubtypeId?: number | null;
+  year?: number | null;
+  file?: File | null;
+  title?: string | null;
 }
 
 interface GetDocumentsParams {
@@ -68,7 +71,7 @@ export class DocumentDataSource {
       .pipe(tap((resp) => console.log(resp)));
   }
 
-  create(data: CreateDocumentProps) {
+  create(data: CreateDocumentBatchDto) {
     const { documents, files, year, ...rest } = data;
     return forkJoin(
       files.map((file) => this.fileUploadService.upload(file, 'documents')),
@@ -88,18 +91,16 @@ export class DocumentDataSource {
     );
   }
 
-  update(id: string, data: UpdateDocumentProps) {
-    const { file, date, title } = data;
+  update(id: string, data: UpdateDocumentDto) {
+    const { file, ...props } = data;
     const uploadTask$: Observable<UploadResult | null> = file
       ? this.fileUploadService.upload(file, 'documents')
       : of(null);
     return uploadTask$.pipe(
       switchMap((uploadedFile) => {
         return this.http.patch<DocumentManageResponse>(`${this.URL}/${id}`, {
-          title: title ?? uploadedFile?.name,
-
-          ...uploadedFile,
-          fiscalYear: date.getFullYear(),
+          ...props,
+          ...(uploadedFile && { fileId: uploadedFile.id }),
         });
       }),
     );

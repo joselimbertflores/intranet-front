@@ -10,14 +10,17 @@ import { TableModule, TablePageEvent } from 'primeng/table';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { DialogService } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
+import { MenuItem, TreeNode } from 'primeng/api';
 import { PopoverModule } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
-import { FileIcon, SearchInput } from '../../../../../shared';
+import { finalize } from 'rxjs';
+
+import { FileIcon, SearchInput, YearSelector } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
 import {
@@ -25,16 +28,12 @@ import {
   DocumentSubtypeResponse,
   SectionTreeNodeResponse,
 } from '../../interfaces';
-import { MenuItem, TreeNode } from 'primeng/api';
-import { finalize } from 'rxjs';
-import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-document-admin',
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    DatePickerModule,
     FloatLabelModule,
     TreeSelectModule,
     InputTextModule,
@@ -46,6 +45,7 @@ import { MenuModule } from 'primeng/menu';
     TagModule,
     FileIcon,
     SearchInput,
+    YearSelector,
   ],
   templateUrl: './document-admin.html',
   providers: [DialogService],
@@ -79,9 +79,6 @@ export default class DocumentAdmin {
     { value: 'ACTIVE', label: 'Activos' },
     { value: 'INACTIVE', label: 'Inactivos' },
   ];
-  readonly MIN_YEAR = 2000;
-  readonly MAX_YEAR = new Date().getFullYear() + 1;
-  readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
 
   isLoading = signal(false);
   menuItems: MenuItem[] = [];
@@ -249,12 +246,5 @@ export default class DocumentAdmin {
       data: node.id,
       children: node.children.length ? this.toTreeNode(node.children) : [],
     }));
-  }
-
-  private buildYearOptions(minYear: number, maxYear: number) {
-    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
-      const year = maxYear - index;
-      return { label: String(year), value: year };
-    });
   }
 }

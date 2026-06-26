@@ -11,7 +11,7 @@
       [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
     />
     <p-popover #filterPopover>
-      <div class="flex flex-col w-[90vw] sm:w-[650px] gap-y-4">
+      <div class="flex flex-col w-[90vw] sm:w-[600px] gap-y-4">
         <div class="flex items-center justify-between px-2">
           <span class="text-lg font-semibold text-surface-700">
             Filtros avanzados
@@ -72,22 +72,9 @@
           </p-floatlabel>
 
           <div class="flex flex-col sm:flex-row gap-2">
-            <p-floatlabel class="w-full" variant="on">
-              <p-select
-                [options]="yearOptions"
-                [filter]="true"
-                [showClear]="true"
-                filterPlaceholder="Buscar gestión"
-                optionLabel="label"
-                optionValue="value"
-                appendTo="body"
-                class="w-full"
-                emptyMessage="Sin elementos"
-                inputId="yearInput"
-                formControlName="year"
-              />
-              <label for="yearInput">Gestión</label>
-            </p-floatlabel>
+            <year-selector
+              formControlName="year"
+            />
             <p-floatlabel class="w-full" variant="on">
               <p-select
                 [options]="statusOptions"

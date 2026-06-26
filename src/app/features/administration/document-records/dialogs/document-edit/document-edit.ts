@@ -6,6 +6,7 @@ import {
   FormsModule,
   Validators,
 } from '@angular/forms';
+
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -16,6 +17,8 @@ import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TreeNode } from 'primeng/api';
+
+import { finalize } from 'rxjs';
 
 import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
 import { FileIcon, YearSelector } from '../../../../../shared';
@@ -69,8 +72,8 @@ export class DocumentEdit implements OnInit {
     status: [null as string | null, Validators.required],
   });
   isSaving = signal(false);
+  submitted = signal(false);
 
-  // Catalogs
   organizationTree = computed(() =>
     this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
   );
@@ -81,7 +84,6 @@ export class DocumentEdit implements OnInit {
     { value: 'INACTIVE', label: 'Inactivo' },
   ];
 
-  // File config
   readonly fileRules = DOCUMENT_FILE_RULES;
   readonly acceptAttribute = this.fileRules.allowedExtensions
     .map((ext) => ext.trim().toLowerCase())
@@ -95,6 +97,9 @@ export class DocumentEdit implements OnInit {
 
   selectedFile = signal<File | null>(null);
   replaceFile = signal(false);
+  fileRequiredError = computed(
+    () => this.submitted() && this.replaceFile() && !this.selectedFile(),
+  );
 
   ngOnInit(): void {
     this.loadForm();
@@ -103,21 +108,33 @@ export class DocumentEdit implements OnInit {
   save() {
     if (this.isSaving()) return;
 
-    if (this.form.invalid || (this.replaceFile() && !this.selectedFile())) {
+    const fileRequired = this.replaceFile() && !this.selectedFile();
+
+    this.submitted.set(true);
+
+    if (this.form.invalid || fileRequired) {
       this.form.markAllAsTouched();
       return;
     }
-    // this.isSaving.set(true);
-    // this.documentDataSource
-    //   .update(this.data.id, {
-    //     ...this.form.value,
-    //     file: this.selectedFile,
-    //   })
-    //   .subscribe((resp) => this.diagloRef.close(resp));
+
+    this.isSaving.set(true);
+
+    const { organizationalUnitNode, ...props } = this.form.value;
+
+    this.documentDataSource
+      .update(this.data.id, {
+        ...props,
+        organizationalUnitId: organizationalUnitNode?.data,
+        file: this.selectedFile(),
+      })
+      .pipe(finalize(() => this.isSaving.set(false)))
+      .subscribe((resp) => this.diagloRef.close(resp));
   }
 
   close() {
-    this.diagloRef.close();
+    if (!this.isSaving()) {
+      this.diagloRef.close();
+    }
   }
 
   selectDocumentType(id: number) {

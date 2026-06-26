@@ -19,7 +19,7 @@ type YearOption = {
 };
 
 @Component({
-  selector: 'app-year-selector',
+  selector: 'year-selector',
   imports: [FloatLabelModule, SelectModule, FormsModule],
   template: `
     <p-floatlabel class="w-full" variant="on">
@@ -43,6 +43,9 @@ type YearOption = {
       <label [for]="inputId()">{{ label() }}</label>
     </p-floatlabel>
   `,
+  host: {
+    class: 'block w-full min-w-0',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -116,5 +119,4 @@ export class YearSelector implements ControlValueAccessor {
       };
     });
   }
-  
 }

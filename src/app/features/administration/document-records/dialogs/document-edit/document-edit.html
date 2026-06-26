@@ -69,7 +69,7 @@
         </p-floatlabel>
       </div>
 
-      <app-year-selector formControlName="year" />
+      <year-selector formControlName="year" />
 
       <p-floatlabel class="w-full" variant="on">
         <p-select
@@ -148,14 +148,14 @@
           Reemplazar archivo
         </label>
         <p class="text-xs text-surface-500">
-          Al guardar, el archivo actual será reemplazado por el nuevo archivo
+          Al guardar, el archivo actual será reemplazado por el nuevo
           seleccionado.
         </p>
       </div>
     </div>
 
     @if (replaceFile()) {
-      <div class="mt-4 space-y-3">
+      <div class="mt-4 space-y-3 flex flex-col gap-1">
         <p-fileUpload
           mode="basic"
           class="w-full"
@@ -170,6 +170,17 @@
           [invalidFileTypeMessageDetail]="allowedExtensionsLabel"
           (onSelect)="onSelectFile($event)"
         />
+
+        @if (fileRequiredError()) {
+          <p-message
+            severity="error"
+            size="small"
+            variant="simple"
+            class="ml-2"
+          >
+            Debe seleccionar un archivo para actualizar.
+          </p-message>
+        }
       </div>
     }
   </section>
@@ -181,7 +192,7 @@
 
     <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
       <div>
-        <p class="text-xs text-surface-500">Creado</p>
+        <p class="text-xs text-surface-500">Creacion</p>
         <p class="font-medium text-surface-800">
           {{ data.createdAt | date: "short" }}
         </p>

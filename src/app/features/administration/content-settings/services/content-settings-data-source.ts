@@ -18,8 +18,8 @@ export class ContentSettingsDataSource {
   private http = inject(HttpClient);
   private fileUploadService = inject(FileUploadService);
 
-  private readonly HERO_SLIDES_URL = `${environment.baseUrl}/banner`;
-  private readonly QUICK_ACCESS_URL = `${environment.baseUrl}/quick-access`;
+  private readonly HERO_SLIDES_URL = `${environment.baseUrl}/api/banner`;
+  private readonly QUICK_ACCESS_URL = `${environment.baseUrl}/api/quick-access`;
 
   getQuickAccess() {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);

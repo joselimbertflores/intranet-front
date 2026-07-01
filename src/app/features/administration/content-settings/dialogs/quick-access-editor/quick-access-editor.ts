@@ -1,35 +1,37 @@
 import {
   ChangeDetectionStrategy,
-  viewChild,
   Component,
   ElementRef,
   inject,
+  viewChild,
 } from '@angular/core';
 import {
-  ReactiveFormsModule,
+  FormArray,
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   Validators,
-  FormArray,
 } from '@angular/forms';
 import {
-  moveItemInArray,
-  DragDropModule,
   CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
+import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ColorPickerModule } from 'primeng/colorpicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
 
 import { CustomFormValidators } from '../../../../../../helpers';
-import { ContentSettingsDataSource } from '../../services';
-import { QuickAccessResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
+import { QuickAccessBatchItem, QuickAccessResponse } from '../../interfaces';
+import { ContentSettingsDataSource } from '../../services';
 
 @Component({
   selector: 'app-quick-access-editor',
@@ -41,51 +43,78 @@ import { FormUtils } from '../../../../../helpers';
     DragDropModule,
     MessageModule,
     ButtonModule,
-    ColorPickerModule,
+    CheckboxModule,
+    SelectModule,
+    TextareaModule,
   ],
   templateUrl: './quick-access-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuickAccessEditor {
-  private formBuilder = inject(FormBuilder);
-  private dialogRef = inject(DynamicDialogRef);
-  private conentDataSource = inject(ContentSettingsDataSource);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly dialogRef = inject(DynamicDialogRef);
+  private readonly contentDataSource = inject(ContentSettingsDataSource);
 
-  form: FormGroup = this.formBuilder.nonNullable.group({
+  readonly iconOptions = [
+    { label: 'Correo', value: 'mail', icon: 'pi pi-envelope' },
+    { label: 'Sistemas', value: 'systems', icon: 'pi pi-desktop' },
+    { label: 'Documentos', value: 'documents', icon: 'pi pi-file' },
+    { label: 'Gaceta', value: 'gaceta', icon: 'pi pi-book' },
+    { label: 'Formularios', value: 'forms', icon: 'pi pi-list-check' },
+    { label: 'Soporte', value: 'support', icon: 'pi pi-question-circle' },
+  ];
+  readonly form: FormGroup = this.formBuilder.nonNullable.group({
     items: this.formBuilder.array([], CustomFormValidators.minLengthArray(1)),
   });
   readonly scrollContainer = viewChild.required<ElementRef>('scrollContainer');
   readonly formUtils = FormUtils;
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadForm();
   }
 
-  save() {
+  save(): void {
     if (this.form.invalid) return this.form.markAllAsTouched();
-    const { items = [] } = this.form.value;
-    this.conentDataSource.replaceQuickAccessItems(items).subscribe(() => {
+
+    const items: QuickAccessBatchItem[] = this.itemsFormArray
+      .getRawValue()
+      .map((item) => ({
+        ...(item.id ? { id: item.id } : {}),
+        title: item.title,
+        description: item.description?.trim() || undefined,
+        iconKey: item.iconKey,
+        url: item.url,
+        isActive: item.isActive,
+      }));
+
+    this.contentDataSource.replaceQuickAccessItems(items).subscribe(() => {
       this.dialogRef.close();
     });
   }
 
-  close() {
+  close(): void {
     this.dialogRef.close();
   }
 
-  addItem() {
-    if (this.itemsFormArray.length > 12) return;
+  addItem(): void {
+    if (this.itemsFormArray.length >= 12) return;
     this.itemsFormArray.push(this.createItemGroup());
-    setTimeout(() => {
-      this.scrollToBottom();
+    setTimeout(() => this.scrollToBottom());
+  }
+
+  removeItem(index: number): void {
+    const id = this.itemsFormArray.at(index).get('id')?.value as number | null;
+    if (!id) {
+      this.itemsFormArray.removeAt(index);
+      return;
+    }
+
+    this.contentDataSource.removeQuickAccess(id).subscribe(() => {
+      this.itemsFormArray.removeAt(index);
     });
   }
 
-  removeItem(index: number) {
-    this.itemsFormArray.removeAt(index);
-  }
-
-  drop(event: CdkDragDrop<object[]>) {
+  drop(event: CdkDragDrop<object[]>): void {
     moveItemInArray(
       this.itemsFormArray.controls,
       event.previousIndex,
@@ -98,38 +127,40 @@ export class QuickAccessEditor {
     return this.form.get('items') as FormArray;
   }
 
+  iconClass(iconKey: string): string {
+    return (
+      this.iconOptions.find((option) => option.value === iconKey)?.icon ??
+      'pi pi-link'
+    );
+  }
+
   private createItemGroup(data?: Partial<QuickAccessResponse>): FormGroup {
     return this.formBuilder.group({
       id: [data?.id ?? null],
-      name: [data?.name ?? '', [Validators.required, Validators.maxLength(80)]],
-      icon: [
-        data?.icon ?? '',
-        [Validators.required, Validators.pattern(/^pi\s+pi-[a-z0-9-]+$/)],
+      title: [
+        data?.title ?? '',
+        [Validators.required, Validators.maxLength(120)],
       ],
+      description: [data?.description ?? ''],
+      iconKey: [data?.iconKey ?? 'systems', Validators.required],
       url: [
         data?.url ?? '',
         [Validators.required, Validators.pattern(/^https?:\/\/.+/i)],
       ],
-      color: [
-        data?.color ?? '#2563EB',
-        [Validators.pattern(/^#[0-9A-Fa-f]{6}$/)],
-      ],
+      isActive: [data?.isActive ?? true],
     });
   }
 
   private loadForm(): void {
-    this.conentDataSource.getQuickAccess().subscribe((data) => {
+    this.contentDataSource.getQuickAccess().subscribe((data) => {
       data.forEach((item) => {
         this.itemsFormArray.push(this.createItemGroup(item));
       });
     });
   }
 
-  private scrollToBottom() {
+  private scrollToBottom(): void {
     const el = this.scrollContainer().nativeElement;
-    el.scrollTo({
-      top: el.scrollHeight,
-      behavior: 'smooth',
-    });
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }
 }

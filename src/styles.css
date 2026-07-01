@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap");
 
 @import "swiper/css";
 @import "swiper/css/pagination";
@@ -18,74 +17,4 @@
   bottom: 0;
   right: 0;
   width: 100%;
-}
-
-.main-content {
-  view-transition-name: main-content;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes slide-from-right {
-  from {
-    transform: translateX(12px);
-  }
-}
-
-@keyframes slide-to-left {
-  to {
-    transform: translateX(-12px);
-  }
-}
-
-::view-transition-old(main-content) {
-  animation:
-    120ms ease-out both fade-out,
-    220ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
-}
-
-::view-transition-new(main-content) {
-  animation:
-    180ms ease-in 60ms both fade-in,
-    220ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
-}
-
-::view-transition-group(main-content) {
-  overflow: clip;
-}
-
-/* ===== CDK Drag & Drop – global ===== */
-.cdk-drag-preview {
-  border: 1px solid var(--p-primary-500);
-  box-sizing: border-box;
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  background-color: var(--p-surface-0);
-  /* padding: 16px; */
-  overflow-y: hidden;
-}
-
-/* Espacio que queda en la lista */
-.cdk-drag-placeholder {
-  opacity: 0.25;
-}
-
-/* Animación suave SOLO al soltar */
-.cdk-drag-animating {
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-/* Animación de los otros elementos apartándose */
-.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }

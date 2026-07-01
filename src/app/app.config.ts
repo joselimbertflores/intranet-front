@@ -28,7 +28,7 @@ import { handleTransitionCreated } from './core/router/view-transition.config';
 
 registerLocaleData(localeBo, 'es');
 
-const primaryColor = palette('{sky}');
+const primaryColor = palette('{green}');
 const AuraSky = definePreset(theme, {
   semantic: {
     primary: primaryColor,

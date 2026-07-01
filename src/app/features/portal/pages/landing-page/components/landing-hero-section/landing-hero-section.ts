@@ -1,162 +1,297 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  CUSTOM_ELEMENTS_SCHEMA,
+  input,
+  signal,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import type { Swiper } from 'swiper';
+import { register } from 'swiper/element/bundle';
+
+import { HeroSlide } from '../../../../models';
+
+register();
 
 @Component({
   selector: 'landing-hero-section',
-  imports: [],
+  imports: [RouterLink],
   template: `
-    <section
-      class="relative overflow-hidden bg-linear-to-br from-primary-100/80 via-surface-0 to-primary-200/40 pt-24 pb-20 md:pt-32 md:pb-28 border-b border-surface-200/50"
-    >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          class="flex flex-col-reverse md:flex-row items-center gap-12 md:gap-16"
+    @if (heroSlides().length) {
+      <section class="relative bg-surface-950" aria-label="Contenido destacado">
+        <swiper-container
+          #heroSwiper
+          class="hero-carousel block"
+          slides-per-view="1"
+          space-between="0"
+          keyboard="true"
+          a11y="true"
+          (swiperslidechange)="onSlideChange($event)"
         >
-          <!-- Left -->
-          <div
-            class="flex-1 flex flex-col items-center md:items-start text-center md:text-left"
-          >
-            <!-- Institutional context -->
-            <p
-              class="hero-reveal hero-delay-1 text-xs font-semibold uppercase tracking-widest text-primary-700"
-            >
-              Portal institucional
-            </p>
-
-            <p class="hero-reveal hero-delay-2 mt-1 text-sm text-surface-600">
-              Gobierno Autónomo Municipal de Sacaba
-            </p>
-
-            <!-- System identity -->
-            <div class="flex items-center gap-4 mt-6">
-              <img
-                src="images/icons/app.webp"
-                alt="Intranet"
-                class="hero-scale-in hero-delay-3 h-16 w-16 object-contain"
-              />
-
-              <h1
-                class="hero-reveal hero-delay-4 text-5xl sm:text-6xl md:text-7xl font-bold text-surface-950 tracking-tight"
+          @for (slide of heroSlides(); track slide.id) {
+            <swiper-slide>
+              <article
+                class="relative flex h-full items-center overflow-hidden bg-surface-950"
               >
-                Intranet
-              </h1>
-            </div>
+                <img
+                  class="absolute inset-0 h-full w-full object-cover"
+                  [src]="slide.imageUrl"
+                  alt=""
+                />
+                <div
+                  class="absolute inset-0 bg-linear-to-r from-surface-950/90 via-surface-950/60 to-surface-950/10"
+                ></div>
+                <div
+                  class="absolute inset-0 bg-linear-to-t from-surface-950/30 via-transparent to-surface-950/10"
+                ></div>
 
-            <!-- Description -->
-            <p
-              class="hero-reveal hero-delay-5 mt-6 max-w-2xl text-base leading-relaxed text-surface-700 sm:text-lg"
-            >
-              Acceda de forma centralizada a comunicados, documentos, calendario
-              institucional, tutoriales y servicios internos desde una
-              experiencia limpia, consistente y optimizada para escritorio y
-              móvil.
-            </p>
+                <div
+                  class="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 sm:px-8 lg:px-10"
+                >
+                  <div class="max-w-2xl">
+                    <h1
+                      class="text-balance font-sans text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl"
+                    >
+                      {{ slide.title }}
+                    </h1>
+
+                    @if (slide.description) {
+                      <p
+                        class="mt-5 max-w-xl text-pretty text-base leading-7 text-white/80 sm:text-lg sm:leading-8"
+                      >
+                        {{ slide.description }}
+                      </p>
+                    }
+
+                    @if (getValidLink(slide.linkUrl); as linkUrl) {
+                      <div class="mt-8">
+                        @if (isInternalLink(linkUrl)) {
+                          <a
+                            [routerLink]="linkUrl"
+                            class="hero-link inline-flex min-h-11 items-center gap-3 rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                          >
+                            {{ slide.linkLabel || 'Ver más' }}
+                            <i
+                              class="pi pi-arrow-right text-xs"
+                              aria-hidden="true"
+                            ></i>
+                          </a>
+                        } @else {
+                          <a
+                            [href]="linkUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="hero-link inline-flex min-h-11 items-center gap-3 rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                          >
+                            {{ slide.linkLabel || 'Ver más' }}
+                            <i
+                              class="pi pi-arrow-up-right text-xs"
+                              aria-hidden="true"
+                            ></i>
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </article>
+            </swiper-slide>
+          }
+        </swiper-container>
+
+        @if (hasMultipleSlides()) {
+          <button
+            type="button"
+            class="hero-nav-button left-4 lg:left-6"
+            aria-label="Mostrar slide anterior"
+            [disabled]="activeIndex() === 0"
+            (click)="previousSlide(heroSwiper)"
+          >
+            <i class="pi pi-chevron-left" aria-hidden="true"></i>
+          </button>
+
+          <button
+            type="button"
+            class="hero-nav-button right-4 lg:right-6"
+            aria-label="Mostrar slide siguiente"
+            [disabled]="activeIndex() === heroSlides().length - 1"
+            (click)="nextSlide(heroSwiper)"
+          >
+            <i class="pi pi-chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <div
+            class="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2"
+            aria-label="Seleccionar contenido destacado"
+          >
+            @for (slide of heroSlides(); track slide.id; let index = $index) {
+              <button
+                type="button"
+                class="hero-dot"
+                [class.hero-dot-active]="activeIndex() === index"
+                [attr.aria-label]="'Ir al slide ' + (index + 1)"
+                [attr.aria-current]="activeIndex() === index ? 'true' : null"
+                (click)="goToSlide(heroSwiper, index)"
+              ></button>
+            }
           </div>
-          <!-- Right -->
-          <div class="flex-1 flex justify-center md:justify-end">
-            <img
-              src="images/institution/alcaldia.webp"
-              alt="Gobierno Autónomo Municipal de Sacaba"
-              class="hero-logo hero-delay-6 h-20 w-auto object-contain sm:h-32"
-            />
+        }
+      </section>
+    } @else {
+      <section
+        class="relative h-[clamp(360px,52vh,520px)] overflow-hidden border-b border-surface-200 bg-linear-to-br from-primary-100/80 via-surface-0 to-primary-200/40"
+      >
+        <div
+          class="mx-auto flex h-full max-w-7xl items-center px-6 py-16 sm:px-8 lg:px-10"
+        >
+          <div class="max-w-2xl">
+            <h1
+              class="font-sans text-3xl font-semibold leading-tight tracking-tight text-surface-950 sm:text-4xl lg:text-5xl"
+            >
+              Intranet institucional
+            </h1>
+            <p
+              class="mt-5 max-w-xl text-base leading-7 text-surface-700 sm:text-lg sm:leading-8"
+            >
+              Consulta información, documentos y recursos internos del Gobierno
+              Autónomo Municipal de Sacaba.
+            </p>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    }
   `,
   styles: `
     :host {
       display: block;
     }
 
-    .hero-reveal,
-    .hero-scale-in,
-    .hero-logo {
-      opacity: 0;
-      will-change: transform, opacity;
+    .hero-carousel {
+      height: clamp(360px, 52vh, 520px);
     }
 
-    .hero-reveal {
-      animation: hero-fade-up 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    .hero-nav-button {
+      position: absolute;
+      top: 50%;
+      z-index: 20;
+      display: flex;
+      width: 2.75rem;
+      height: 2.75rem;
+      transform: translateY(-50%);
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgb(255 255 255 / 0.25);
+      border-radius: 9999px;
+      background: rgb(15 23 42 / 0.35);
+      color: #fff;
+      backdrop-filter: blur(4px);
+      transition:
+        background-color 180ms ease,
+        opacity 180ms ease;
     }
 
-    .hero-scale-in {
-      animation: hero-scale-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    .hero-nav-button:hover {
+      background: rgb(15 23 42 / 0.55);
     }
 
-    .hero-logo {
-      animation: hero-logo-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    .hero-nav-button:focus-visible,
+    .hero-dot:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
     }
 
-    .hero-delay-1 {
-      animation-delay: 80ms;
+    .hero-nav-button:disabled {
+      pointer-events: none;
+      opacity: 0.35;
     }
 
-    .hero-delay-2 {
-      animation-delay: 160ms;
+    .hero-nav-button i {
+      font-size: 1.125rem;
+      line-height: 1;
     }
 
-    .hero-delay-3 {
-      animation-delay: 240ms;
+    .hero-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 9999px;
+      background: rgb(255 255 255 / 0.55);
+      transition:
+        width 180ms ease,
+        background-color 180ms ease;
     }
 
-    .hero-delay-4 {
-      animation-delay: 320ms;
+    .hero-dot-active {
+      width: 1.5rem;
+      background: var(--p-primary-400);
     }
 
-    .hero-delay-5 {
-      animation-delay: 420ms;
+    .hero-link:hover i {
+      transform: translateX(0.2rem);
     }
 
-    .hero-delay-6 {
-      animation-delay: 520ms;
-    }
-
-    @keyframes hero-fade-up {
-      from {
-        opacity: 0;
-        transform: translate3d(0, 1.25rem, 0);
-      }
-
-      to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-      }
-    }
-
-    @keyframes hero-scale-in {
-      from {
-        opacity: 0;
-        transform: translate3d(0, 1rem, 0) scale(0.94);
-      }
-
-      to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-      }
-    }
-
-    @keyframes hero-logo-in {
-      from {
-        opacity: 0;
-        transform: translate3d(0, 1rem, 0) scale(0.96);
-      }
-
-      to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-      }
+    .hero-link i {
+      transition: transform 180ms ease;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .hero-reveal,
-      .hero-scale-in,
-      .hero-logo {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
+      .hero-link,
+      .hero-link i,
+      .hero-nav-button,
+      .hero-dot {
+        transition: none;
+      }
+    }
+
+    @media (max-width: 639px) {
+      .hero-nav-button {
+        display: none;
       }
     }
   `,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingHeroSection {}
+export class LandingHeroSection {
+  readonly heroSlides = input.required<HeroSlide[]>();
+  readonly hasMultipleSlides = computed(() => this.heroSlides().length > 1);
+  readonly activeIndex = signal(0);
+
+  onSlideChange(event: Event): void {
+    const [swiper] = (event as CustomEvent<[Swiper]>).detail;
+    this.activeIndex.set(swiper.activeIndex);
+  }
+
+  previousSlide(element: HTMLElement): void {
+    this.getSwiper(element)?.slidePrev();
+  }
+
+  nextSlide(element: HTMLElement): void {
+    this.getSwiper(element)?.slideNext();
+  }
+
+  goToSlide(element: HTMLElement, index: number): void {
+    this.getSwiper(element)?.slideTo(index);
+  }
+
+  isInternalLink(linkUrl: string): boolean {
+    return linkUrl.startsWith('/');
+  }
+
+  isExternalLink(linkUrl: string): boolean {
+    return /^https?:\/\//i.test(linkUrl);
+  }
+
+  getValidLink(linkUrl: string | null): string | null {
+    if (!linkUrl) return null;
+
+    return this.isInternalLink(linkUrl) || this.isExternalLink(linkUrl)
+      ? linkUrl
+      : null;
+  }
+
+  private getSwiper(element: HTMLElement): Swiper | undefined {
+    return (element as HTMLElement & { swiper?: Swiper }).swiper;
+  }
+}

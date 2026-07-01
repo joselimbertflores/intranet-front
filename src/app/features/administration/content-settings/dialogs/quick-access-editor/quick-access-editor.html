@@ -1,6 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="save()">
   <div class="flex items-center justify-end p-2">
     <p-button
+      type="button"
       icon="pi pi-plus"
       size="small"
       label="Agregar"
@@ -8,65 +9,71 @@
       (onClick)="addItem()"
     />
   </div>
+
   <div
     #scrollContainer
     cdkDropList
     (cdkDropListDropped)="drop($event)"
-    class="flex flex-col gap-y-3 max-h-[400px] p-2 overflow-y-auto rounded-xl"
+    class="flex max-h-[450px] flex-col gap-y-3 overflow-y-auto rounded-xl p-2"
     formArrayName="items"
   >
     @for (item of itemsFormArray.controls; track item; let i = $index) {
       <div
-        class="group flex flex-col xl:flex-row items-start xl:items-center gap-4 p-4 border border-surface-200 hover:border-primary-400 rounded-xl bg-surface-0 transition-colors shadow-sm"
+        class="flex flex-col gap-4 rounded-xl border border-surface-200 bg-surface-0 p-4 shadow-sm transition-colors hover:border-primary-400"
         [formGroupName]="i"
         cdkDrag
       >
-        <div class="flex items-center gap-3 w-full xl:w-auto">
-          <div
-            cdkDragHandle
-            class="cursor-grab active:cursor-grabbing text-surface-400 hover:text-surface-700 p-2"
-            pTooltip="Arrastrar para ordenar"
-            tooltipPosition="top"
-          >
-            <i class="pi pi-bars text-xl"></i>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              cdkDragHandle
+              class="cursor-grab rounded-md p-2 text-surface-400 hover:text-surface-700 active:cursor-grabbing"
+              pTooltip="Arrastrar para ordenar"
+            >
+              <i class="pi pi-bars text-xl"></i>
+            </button>
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-lg border border-surface-200 bg-surface-50"
+            >
+              <i
+                [class]="iconClass(item.get('iconKey')?.value)"
+                class="text-2xl text-primary-600"
+              ></i>
+            </div>
+            <span class="text-sm font-semibold text-surface-600">
+              Acceso {{ i + 1 }}
+            </span>
           </div>
 
-          <div
-            class="h-12 w-12 shrink-0 flex items-center justify-center rounded-lg border border-surface-200 bg-surface-50 shadow-sm"
-          >
-            <i
-              [class]="item.get('icon')?.value || 'pi pi-question'"
-              [style.color]="item.get('color')?.value || 'var(--text-color)'"
-              style="font-size: 1.75rem"
-            ></i>
-          </div>
-
-          <span class="text-sm font-semibold text-surface-500 xl:hidden"
-            >Item {{ i + 1 }}</span
-          >
+          <p-button
+            type="button"
+            [text]="true"
+            severity="danger"
+            [rounded]="true"
+            icon="pi pi-trash"
+            (onClick)="removeItem(i)"
+            pTooltip="Eliminar acceso"
+          />
         </div>
 
-        <div
-          class="grid grid-cols-1 md:grid-cols-12 gap-4 grow w-full items-start"
-        >
-          <div class="md:col-span-3 flex flex-col gap-1 mt-1">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
+          <div class="flex flex-col gap-1 md:col-span-4">
             <p-floatlabel variant="on">
-              <label>Nombre</label>
-              <input pInputText class="w-full" formControlName="name" />
+              <input pInputText class="w-full" formControlName="title" />
+              <label>Título</label>
             </p-floatlabel>
-            @if (formUtils.isInvalid(form.get("items." + i + ".name"))) {
+            @if (formUtils.isInvalid(form.get("items." + i + ".title"))) {
               <p-message severity="error" size="small" variant="simple">
-                {{
-                  formUtils.getErrorMessage(form.get("items." + i + ".name"))
-                }}
+                {{ formUtils.getErrorMessage(form.get("items." + i + ".title")) }}
               </p-message>
             }
           </div>
 
-          <div class="md:col-span-4 flex flex-col gap-1 mt-1">
+          <div class="flex flex-col gap-1 md:col-span-5">
             <p-floatlabel variant="on">
-              <label>URL</label>
               <input pInputText class="w-full" formControlName="url" />
+              <label>URL</label>
             </p-floatlabel>
             @if (formUtils.isInvalid(form.get("items." + i + ".url"))) {
               <p-message severity="error" size="small" variant="simple">
@@ -75,51 +82,66 @@
             }
           </div>
 
-          <div class="md:col-span-3 flex flex-col gap-1 mt-1">
-            <p-floatlabel variant="on">
-              <label>Código Ícono</label>
-              <input pInputText class="w-full" formControlName="icon" />
-            </p-floatlabel>
-            @if (formUtils.isInvalid(form.get("items." + i + ".icon"))) {
-              <p-message severity="error" size="small" variant="simple">
-                {{
-                  formUtils.getErrorMessage(form.get("items." + i + ".icon"))
-                }}
-              </p-message>
-            }
-          </div>
-
-          <div class="md:col-span-2 flex items-center h-12 gap-3 pl-2">
-            <p-colorpicker
-              formControlName="color"
-              [format]="'hex'"
+          <div class="flex flex-col gap-1 md:col-span-3">
+            <p-select
+              class="w-full"
+              formControlName="iconKey"
+              [options]="iconOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Icono"
               appendTo="body"
-            />
-            <span class="text-sm font-medium text-surface-600">Color</span>
+            >
+              <ng-template #selectedItem let-option>
+                <span class="flex items-center gap-2">
+                  <i [class]="option.icon"></i>
+                  {{ option.label }}
+                </span>
+              </ng-template>
+              <ng-template #item let-option>
+                <span class="flex items-center gap-2">
+                  <i [class]="option.icon"></i>
+                  {{ option.label }}
+                </span>
+              </ng-template>
+            </p-select>
           </div>
-        </div>
 
-        <div
-          class="flex items-center justify-end w-full xl:w-auto mt-2 xl:mt-0"
-        >
-          <p-button
-            [text]="true"
-            severity="danger"
-            [rounded]="true"
-            icon="pi pi-trash"
-            (onClick)="removeItem(i)"
-            pTooltip="Eliminar acceso"
-            tooltipPosition="left"
-          />
+          <div class="md:col-span-9">
+            <p-floatlabel variant="on">
+              <textarea
+                pTextarea
+                class="w-full resize-none"
+                rows="2"
+                formControlName="description"
+              ></textarea>
+              <label>Descripción (opcional)</label>
+            </p-floatlabel>
+          </div>
+
+          <div class="flex items-center gap-2 md:col-span-3">
+            <p-checkbox
+              formControlName="isActive"
+              [binary]="true"
+              [inputId]="'quick-access-active-' + i"
+            />
+            <label
+              [for]="'quick-access-active-' + i"
+              class="cursor-pointer text-sm font-medium text-surface-700"
+            >
+              Acceso activo
+            </label>
+          </div>
         </div>
       </div>
     } @empty {
-      <div class="flex flex-col items-center justify-center p-4">
+      <div class="flex flex-col items-center justify-center p-8">
         <span class="font-medium">No hay accesos rápidos agregados.</span>
-        <span class="text-sm">Haz clic en "Agregar" para comenzar.</span>
+        <span class="text-sm">Haz clic en “Agregar” para comenzar.</span>
       </div>
     }
   </div>
+
   <div class="p-dialog-footer">
     <p-button
       type="button"

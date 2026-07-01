@@ -1,18 +1,5 @@
-<landing-hero-section />
+<landing-hero-section [heroSlides]="heroSlides()" />
 
-@if (isLoading()) {
- <landing-skeleton/>
-} @else {
-  @if (data().quickAccess.length) {
-    <landing-quick-access-section [items]="data().quickAccess" />
-  }
-  @if (data().banners.length) {
-    <landing-banners-section [banners]="data().banners" />
-  }
-  @if (data().communications.length) {
-    <landing-communications-section [communications]="data().communications" />
-  }
-  @if (data().documents.length) {
-    <landing-documents-section [documents]="data().documents" />
-  }
+@if (quickAccesses().length) {
+  <landing-quick-access-section [items]="quickAccesses()" />
 }

@@ -53,21 +53,20 @@ export class PortalDataSource {
   private _isPortalLoading = signal<boolean>(true);
   isPortalLoading = computed(() => this._isPortalLoading());
 
-  portalData = toSignal(
-    this.http.get<HomePortalDataResponse>(`${this.URL}/home`).pipe(
-      finalize(() => {
-        this._isPortalLoading.set(false);
-      }),
-    ),
-    {
-      initialValue: {
-        quickAccess: [],
-        banners: [],
-        communications: [],
-        documents: [],
-      },
-    },
-  );
+  // portalData = toSignal(
+  //   this.http.get<HomePortalDataResponse>(`${this.URL}/home`).pipe(
+  //     finalize(() => {
+  //       this._isPortalLoading.set(false);
+  //     }),
+  //   ),
+  //   {
+  //     initialValue: {
+  //       quickAccess: [],
+  //       communications: [],
+  //       documents: [],
+  //     },
+  //   },
+  // );
 
   isDocumentSearching = signal<boolean>(false);
 

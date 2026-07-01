@@ -4,7 +4,7 @@ import { catchError, switchMap, forkJoin, EMPTY, map, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { FileUploadService } from '../../../shared';
-import { BannerResponse, QuickAccessResponse } from '../content-settings/interfaces';
+import { QuickAccessResponse } from '../content-settings/interfaces';
 
 interface QuickAccessItem {
   name: string;
@@ -34,7 +34,7 @@ export class QuickAccessService {
         (item) =>
           item.file === undefined &&
           item.icon !== null &&
-          !item.icon.startsWith('blob:')
+          !item.icon.startsWith('blob:'),
       )
       .map(({ icon, ...props }) => ({
         icon: icon?.split('/').pop(), // * extrack fileName from build url,
@@ -45,10 +45,10 @@ export class QuickAccessService {
     return this.buildUploadTask(items).pipe(
       map((newItems) => [...existingItems, ...newItems]),
       switchMap((allSItems) => {
-        return this.http.put<BannerResponse[]>(this.URL, {
+        return this.http.put<QuickAccessResponse[]>(this.URL, {
           items: allSItems,
         });
-      })
+      }),
     );
   }
 
@@ -72,9 +72,9 @@ export class QuickAccessService {
                   name: itemToUpload.name,
                   url: itemToUpload.url,
                 })),
-                catchError(() => EMPTY)
-              )
-          )
+                catchError(() => EMPTY),
+              ),
+          ),
         )
       : of([]);
   }

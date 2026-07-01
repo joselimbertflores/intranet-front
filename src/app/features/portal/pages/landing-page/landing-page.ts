@@ -1,24 +1,24 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import { PortalDataSource } from '../../services';
+import { catchError, of } from 'rxjs';
+
+import { PortalLandingService } from '../../services';
 import {
   LandingHeroSection,
-  LandingBannersSection,
-  LandingDocumentsSection,
   LandingQuickAccessSection,
-  LandingCommunicationsSection,
-  LandingSkeleton,
 } from './components';
 
 @Component({
   selector: 'landing-page',
   imports: [
     LandingHeroSection,
-    LandingBannersSection,
-    LandingDocumentsSection,
     LandingQuickAccessSection,
-    LandingCommunicationsSection,
-    LandingSkeleton,
   ],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
@@ -26,8 +26,17 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LandingPage {
-  private readonly portalDataSource = inject(PortalDataSource);
+  private readonly portalLandingService = inject(PortalLandingService);
 
-  readonly data = this.portalDataSource.portalData;
-  readonly isLoading = this.portalDataSource.isPortalLoading;
+  private readonly landingResponse = toSignal(
+    this.portalLandingService
+      .getLanding()
+      .pipe(catchError(() => of({ heroSlides: [], quickAccesses: [] }))),
+    { initialValue: { heroSlides: [], quickAccesses: [] } },
+  );
+
+  readonly heroSlides = computed(() => this.landingResponse().heroSlides);
+  readonly quickAccesses = computed(
+    () => this.landingResponse().quickAccesses,
+  );
 }

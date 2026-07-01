@@ -1,9 +1,18 @@
 export interface QuickAccessResponse {
   id: number;
-  name: string;
-  description?: string;
+  title: string;
+  description: string | null;
+  iconKey: string;
   url: string;
-  icon: string;
-  order: number;
-  color: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface QuickAccessBatchItem {
+  id?: number;
+  title: string;
+  description?: string;
+  iconKey: string;
+  url: string;
+  isActive: boolean;
 }

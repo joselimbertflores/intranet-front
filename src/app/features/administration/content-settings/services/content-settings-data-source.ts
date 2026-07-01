@@ -4,10 +4,21 @@ import { inject, Injectable } from '@angular/core';
 import { map, of, forkJoin, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { BannerResponse, QuickAccessResponse } from '../interfaces';
+import {
+  HeroSlideResponse,
+  QuickAccessBatchItem,
+  QuickAccessResponse,
+} from '../interfaces';
 import { FileUploadService } from '../../../../shared';
 
-interface BannersToUpload extends BannerResponse {
+interface HeroSlideToSave {
+  id?: number;
+  title: string;
+  description?: string | null;
+  linkLabel?: string | null;
+  linkUrl?: string | null;
+  imageFileId?: string;
+  isActive: boolean;
   file?: File;
 }
 
@@ -18,39 +29,49 @@ export class ContentSettingsDataSource {
   private http = inject(HttpClient);
   private fileUploadService = inject(FileUploadService);
 
-  private readonly HERO_SLIDES_URL = `${environment.baseUrl}/api/banner`;
-  private readonly QUICK_ACCESS_URL = `${environment.baseUrl}/api/quick-access`;
+  private readonly HERO_SLIDES_URL = `${environment.baseUrl}/api/content`;
+  private readonly QUICK_ACCESS_URL = `${this.HERO_SLIDES_URL}/quick-accesses`;
 
   getQuickAccess() {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
   }
-  replaceQuickAccessItems(dto: object[]) {
-    return this.http.put(this.QUICK_ACCESS_URL, { items: dto });
+  replaceQuickAccessItems(items: QuickAccessBatchItem[]) {
+    return this.http.put<QuickAccessResponse[]>(`${this.QUICK_ACCESS_URL}/batch`, {
+      items,
+    });
+  }
+
+  removeQuickAccess(id: number) {
+    return this.http.delete(`${this.QUICK_ACCESS_URL}/${id}`);
   }
 
   getBanners() {
-    return this.http.get<BannerResponse[]>(this.HERO_SLIDES_URL);
+    return this.http.get<HeroSlideResponse[]>(
+      `${this.HERO_SLIDES_URL}/hero-slides`,
+    );
   }
 
-  replaceBanners(items: BannersToUpload[]) {
+  saveHeroSections(items: HeroSlideToSave[]) {
     const uploads$ = items.map(({ file, ...props }) =>
       file
-        ? this.fileUploadService.upload(file, 'banners').pipe(
-            map(({ id: fileId }) => ({
+        ? this.fileUploadService.upload(file, 'hero-slides').pipe(
+            map(({ id: imageFileId }) => ({
               ...props,
-              imageId: fileId,
+              imageFileId,
             })),
           )
         : of(props),
     );
     return forkJoin(uploads$).pipe(
       switchMap((items) => {
-        return this.http.put(this.HERO_SLIDES_URL, { items });
+        return this.http.put(`${this.HERO_SLIDES_URL}/hero-slides/batch`, {
+          items,
+        });
       }),
     );
   }
 
   removeBanner(id: number) {
-    return this.http.delete(`${this.HERO_SLIDES_URL}/${id}`);
+    return this.http.delete(`${this.HERO_SLIDES_URL}/hero-slides/${id}`);
   }
 }

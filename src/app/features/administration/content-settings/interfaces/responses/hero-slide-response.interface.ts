@@ -1,12 +1,11 @@
-
-export interface BannerResponse {
-  id:           number;
-  title:        string;
-  subtitle:     string;
-  linkType:     string;
-  url:          string;
-  openInNewTab: boolean;
-  isActive:     boolean;
-  order:        number;
-  imageUrl:     string;
+export interface HeroSlideResponse {
+  id: number;
+  title: string;
+  description: string | null;
+  linkLabel: string | null;
+  linkUrl: string | null;
+  imageFileId: string;
+  imageUrl: string;
+  isActive: boolean;
+  sortOrder: number;
 }

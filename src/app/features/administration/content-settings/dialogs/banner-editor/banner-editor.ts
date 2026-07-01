@@ -12,6 +12,7 @@ import {
   FormBuilder,
   FormArray,
   FormGroup,
+  Validators,
 } from '@angular/forms';
 import {
   moveItemInArray,
@@ -27,11 +28,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 
 import { ContentSettingsDataSource } from '../../services';
-import { BannerResponse } from '../../interfaces';
+import { HeroSlideResponse } from '../../interfaces';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
@@ -44,7 +44,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     DragDropModule,
     ButtonModule,
     TagModule,
-    SelectModule,
     DragDropModule,
     CheckboxModule,
     ToggleSwitchModule,
@@ -71,11 +70,6 @@ export class BannerEditor {
   hasErrorMessage = signal(false);
 
   readonly scrollContainer = viewChild.required<ElementRef>('scrollContainer');
-  readonly linkTypeOptions = [
-    { label: 'Interno', value: 'INTERNAL' },
-    { label: 'Externo', value: 'EXTERNAL' },
-  ];
-
   ngOnInit() {
     this.getBanners();
   }
@@ -86,7 +80,7 @@ export class BannerEditor {
       return;
     }
     this.contentService
-      .replaceBanners(
+      .saveHeroSections(
         this.items.controls.map((item, i: number) => ({
           ...item.value,
           file: this.bannerImages()[i]?.file,
@@ -199,14 +193,20 @@ export class BannerEditor {
     });
   }
 
-  private createBannerGroup(banner?: BannerResponse): FormGroup {
+  private createBannerGroup(banner?: HeroSlideResponse): FormGroup {
     return this.formBuilder.group({
       id: [banner?.id],
-      title: [banner?.title],
-      subtitle: [banner?.subtitle],
-      linkType: [banner?.linkType ?? 'INTERNAL'],
-      url: [banner?.url],
-      openInNewTab: [banner?.openInNewTab ?? false],
+      title: [
+        banner?.title ?? '',
+        [Validators.required, Validators.maxLength(120)],
+      ],
+      description: [banner?.description],
+      linkLabel: [banner?.linkLabel, Validators.maxLength(80)],
+      linkUrl: [
+        banner?.linkUrl,
+        Validators.pattern(/^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i),
+      ],
+      imageFileId: [banner?.imageFileId],
       isActive: [banner?.isActive ?? true],
     });
   }

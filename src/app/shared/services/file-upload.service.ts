@@ -4,11 +4,12 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 type FileContext =
-  | 'banners'
+  | 'hero-slides'
   | 'documents'
   | 'quick-access'
   | 'communication'
   | 'tutorials';
+
 type MediaType = 'image' | 'audio' | 'video' | 'document';
 export interface UploadedFile {
   fileName: string;

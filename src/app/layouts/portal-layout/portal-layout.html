@@ -1,10 +1,20 @@
-<div class="min-h-screen flex flex-col bg-surface-0">
-  <div class="sticky top-0 z-50 bg-surface-0 border-b border-surface-200">
+<div class="flex min-h-dvh flex-col bg-surface-0 text-surface-900">
+  <a
+    href="#portal-main-content"
+    class="sr-only rounded-md bg-primary-600 px-3 py-2 text-sm font-medium text-primary-50 shadow-sm focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50"
+  >
+    Saltar al contenido principal
+  </a>
+
+  <header class="sticky top-0 z-50">
     <portal-navbar />
-  </div>
-  <main class="flex-1 main-content overflow-x-hidden">
+  </header>
+
+  <main id="portal-main-content" class="flex-1 overflow-x-hidden">
     <router-outlet />
   </main>
+
   <portal-footer />
 </div>
+
 <p-scrollTop target="window" [threshold]="400" icon="pi pi-arrow-up" />

@@ -3,3 +3,7 @@
 @if (quickAccesses().length) {
   <landing-quick-access-section [items]="quickAccesses()" />
 }
+
+@if (featuredBanners().length) {
+  <featured-banners-section [items]="featuredBanners()" />
+}

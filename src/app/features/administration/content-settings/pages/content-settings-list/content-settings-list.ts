@@ -10,8 +10,15 @@ import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
-import { BannerEditor, QuickAccessEditor } from '../../dialogs';
+import {
+  PermissionAction,
+  Resource,
+} from '../../../../../core/auth/auth.types';
+import {
+  BannerEditor,
+  FeaturedBannerEditor,
+  QuickAccessEditor,
+} from '../../dialogs';
 
 @Component({
   selector: 'app-content-settings-list',
@@ -53,6 +60,18 @@ export default class ContentSettingsList {
         '960px': '75vw',
         '640px': '90vw',
       },
+    });
+  }
+
+  showFeaturedBannersDialog(): void {
+    this.dialogService.open(FeaturedBannerEditor, {
+      header: 'Configuración de banners destacados',
+      modal: true,
+      closable: true,
+      draggable: false,
+      maximizable: true,
+      width: '72vw',
+      breakpoints: { '960px': '82vw', '640px': '94vw' },
     });
   }
 }

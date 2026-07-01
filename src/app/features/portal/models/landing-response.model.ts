@@ -18,7 +18,19 @@ export interface QuickAccess {
   sortOrder: number;
 }
 
+export interface FeaturedBanner {
+  id: number;
+  title: string;
+  description: string | null;
+  linkLabel: string | null;
+  url: string | null;
+  imageFileId: string;
+  imageUrl: string;
+  sortOrder: number;
+}
+
 export interface PortalLandingResponse {
   heroSlides: HeroSlide[];
   quickAccesses: QuickAccess[];
+  featuredBanners: FeaturedBanner[];
 }

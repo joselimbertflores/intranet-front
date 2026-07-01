@@ -38,6 +38,33 @@
     <div class="flex flex-col md:flex-row gap-4">
       <div class="flex items-center gap-4 flex-1">
         <div class="w-[200px] font-medium text-base leading-tight">
+          Banners destacados
+        </div>
+        <div class="flex-1 text-base leading-tight">
+          Administre avisos y campañas secundarias de la landing
+        </div>
+      </div>
+      @if (canUpdate()) {
+        <div class="flex justify-end">
+          <button
+            pButton
+            [rounded]="true"
+            [outlined]="true"
+            severity="secondary"
+            class="shrink-0"
+            (click)="showFeaturedBannersDialog()"
+          >
+            <i pButtonIcon class="pi pi-pen-to-square"></i>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex items-center gap-4 flex-1">
+        <div class="w-[200px] font-medium text-base leading-tight">
           Accesos directos
         </div>
         <div class="flex-1 text-base leading-tight">

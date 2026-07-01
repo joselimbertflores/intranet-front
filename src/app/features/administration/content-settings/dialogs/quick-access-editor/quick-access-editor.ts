@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -19,50 +13,112 @@ import {
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ConfirmationService } from 'primeng/api';
 import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
 
-import { CustomFormValidators } from '../../../../../../helpers';
-import { FormUtils } from '../../../../../helpers';
 import { QuickAccessBatchItem, QuickAccessResponse } from '../../interfaces';
+import { CustomFormValidators, FormUtils } from '../../../../../helpers';
 import { ContentSettingsDataSource } from '../../services';
+
+export const QUICK_ACCESS_DEFAULT_ICON_KEY = 'link';
+
+export const QUICK_ACCESS_ICONS = {
+  link: {
+    label: 'Enlace',
+    icon: 'pi pi-link',
+  },
+  external: {
+    label: 'Sistema externo',
+    icon: 'pi pi-external-link',
+  },
+  application: {
+    label: 'Aplicación',
+    icon: 'pi pi-desktop',
+  },
+  email: {
+    label: 'Correo',
+    icon: 'pi pi-envelope',
+  },
+  document: {
+    label: 'Documento',
+    icon: 'pi pi-file',
+  },
+  form: {
+    label: 'Formulario',
+    icon: 'pi pi-list-check',
+  },
+  book: {
+    label: 'Libro / Gaceta',
+    icon: 'pi pi-book',
+  },
+  support: {
+    label: 'Soporte',
+    icon: 'pi pi-question-circle',
+  },
+  dashboard: {
+    label: 'Dashboard',
+    icon: 'pi pi-chart-line',
+  },
+  report: {
+    label: 'Reporte',
+    icon: 'pi pi-chart-bar',
+  },
+  user: {
+    label: 'Usuario',
+    icon: 'pi pi-user',
+  },
+  calendar: {
+    label: 'Calendario',
+    icon: 'pi pi-calendar',
+  },
+  settings: {
+    label: 'Configuración',
+    icon: 'pi pi-cog',
+  },
+} as const;
+
+export type QuickAccessIconKey = keyof typeof QUICK_ACCESS_ICONS;
 
 @Component({
   selector: 'app-quick-access-editor',
   imports: [
     ReactiveFormsModule,
     CommonModule,
+    ConfirmDialogModule,
     FloatLabelModule,
     InputTextModule,
+    CheckboxModule,
+    TextareaModule,
     DragDropModule,
     MessageModule,
-    ButtonModule,
-    CheckboxModule,
     SelectModule,
-    TextareaModule,
+    ButtonModule,
   ],
   templateUrl: './quick-access-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ConfirmationService],
 })
 export class QuickAccessEditor {
   private readonly formBuilder = inject(FormBuilder);
   private readonly dialogRef = inject(DynamicDialogRef);
   private readonly contentDataSource = inject(ContentSettingsDataSource);
+  private readonly confirmationService = inject(ConfirmationService);
 
-  readonly iconOptions = [
-    { label: 'Correo', value: 'mail', icon: 'pi pi-envelope' },
-    { label: 'Sistemas', value: 'systems', icon: 'pi pi-desktop' },
-    { label: 'Documentos', value: 'documents', icon: 'pi pi-file' },
-    { label: 'Gaceta', value: 'gaceta', icon: 'pi pi-book' },
-    { label: 'Formularios', value: 'forms', icon: 'pi pi-list-check' },
-    { label: 'Soporte', value: 'support', icon: 'pi pi-question-circle' },
-  ];
+  readonly iconOptions = Object.entries(QUICK_ACCESS_ICONS).map(
+    ([value, config]) => ({
+      label: config.label,
+      value,
+      icon: config.icon,
+    }),
+  );
+
   readonly form: FormGroup = this.formBuilder.nonNullable.group({
     items: this.formBuilder.array([], CustomFormValidators.minLengthArray(1)),
   });
@@ -108,9 +164,22 @@ export class QuickAccessEditor {
       this.itemsFormArray.removeAt(index);
       return;
     }
-
-    this.contentDataSource.removeQuickAccess(id).subscribe(() => {
-      this.itemsFormArray.removeAt(index);
+    this.confirmationService.confirm({
+      message: '¿Esta seguro que desea eliminar el elemento?',
+      header: 'Eliminar banner',
+      rejectButtonProps: {
+        label: 'Cancelar',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Aceptar',
+      },
+      accept: () => {
+        this.contentDataSource.removeQuickAccess(id).subscribe(() => {
+          this.itemsFormArray.removeAt(index);
+        });
+      },
     });
   }
 
@@ -127,10 +196,10 @@ export class QuickAccessEditor {
     return this.form.get('items') as FormArray;
   }
 
-  iconClass(iconKey: string): string {
+  getQuickAccessIcon(iconKey?: string | null): string {
     return (
-      this.iconOptions.find((option) => option.value === iconKey)?.icon ??
-      'pi pi-link'
+      QUICK_ACCESS_ICONS[iconKey as QuickAccessIconKey]?.icon ??
+      QUICK_ACCESS_ICONS[QUICK_ACCESS_DEFAULT_ICON_KEY].icon
     );
   }
 
@@ -142,7 +211,10 @@ export class QuickAccessEditor {
         [Validators.required, Validators.maxLength(120)],
       ],
       description: [data?.description ?? ''],
-      iconKey: [data?.iconKey ?? 'systems', Validators.required],
+      iconKey: [
+        data?.iconKey ?? QUICK_ACCESS_DEFAULT_ICON_KEY,
+        Validators.required,
+      ],
       url: [
         data?.url ?? '',
         [Validators.required, Validators.pattern(/^https?:\/\/.+/i)],

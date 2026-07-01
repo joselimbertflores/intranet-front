@@ -6,6 +6,7 @@ export interface QuickAccessResponse {
   url: string;
   sortOrder: number;
   isActive: boolean;
+  color: string;
 }
 
 export interface QuickAccessBatchItem {

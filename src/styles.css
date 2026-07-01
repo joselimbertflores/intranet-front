@@ -18,3 +18,37 @@
   right: 0;
   width: 100%;
 }
+
+/* DRAG AND DROP BASE BEHAVIOR */
+.app-drag-card {
+  width: 100%;
+  background: var(--p-surface-0, #ffffff);
+}
+
+/* Preview flotante */
+.cdk-drag-preview.app-drag-card {
+  box-sizing: border-box;
+
+  background: var(--p-surface-0, #ffffff);
+  border: 1px solid var(--p-surface-200, #e5e7eb);
+  border-radius: 0.75rem;
+
+  opacity: 1;
+  z-index: 9999;
+
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.18),
+    0 8px 10px -6px rgb(0 0 0 / 0.18);
+}
+
+/* Espacio que queda mientras arrastras */
+.cdk-drag-placeholder.app-drag-card {
+  opacity: 0.35;
+}
+
+/* Animación al reordenar */
+.cdk-drag-animating.app-drag-card,
+.app-drag-list.cdk-drop-list-dragging
+  .app-drag-card:not(.cdk-drag-placeholder) {
+  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}

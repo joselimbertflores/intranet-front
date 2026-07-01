@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TreeNode } from 'primeng/api';
 
-import { CustomFormValidator, FormUtils } from '../../../../../helpers';
+import { CustomFormValidators, FormUtils } from '../../../../../helpers';
 import { DocumentDataSource } from '../../services';
 import { FileIcon } from '../../../../../shared';
 import { FileSizePipe } from '../../pipes';
@@ -214,7 +214,7 @@ export class DocumentCreate {
           Validators.minLength(3),
           Validators.maxLength(150),
           Validators.pattern(/^[\p{L}\p{N} _.,:'();\-–—]+$/u),
-          CustomFormValidator.notOnlyWhitespace,
+          CustomFormValidators.notOnlyWhitespace,
         ],
       ],
     });

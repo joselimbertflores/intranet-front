@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -21,10 +20,12 @@ import {
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmationService } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
@@ -32,8 +33,6 @@ import { TagModule } from 'primeng/tag';
 
 import { ContentSettingsDataSource } from '../../services';
 import { HeroSlideResponse } from '../../interfaces';
-import { ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'banner-editor',
@@ -52,7 +51,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     ConfirmDialogModule,
   ],
   templateUrl: './banner-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService],
 })
 export class BannerEditor {

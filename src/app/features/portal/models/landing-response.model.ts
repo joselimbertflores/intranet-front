@@ -29,8 +29,19 @@ export interface FeaturedBanner {
   sortOrder: number;
 }
 
+export interface LandingModalNotice {
+  id: string;
+  title: string;
+  contentHtml: string | null;
+  imageId: string | null;
+  imageUrl: string | null;
+  imageAlt: string | null;
+  imageLinkUrl: string | null;
+}
+
 export interface PortalLandingResponse {
   heroSlides: HeroSlide[];
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
+  modalNotices: LandingModalNotice[];
 }

@@ -1,0 +1,91 @@
+<div class="flex items-center justify-between mb-4">
+  <h2 class="text-2xl font-semibold">Avisos emergentes</h2>
+  <p-button
+    label="Agregar"
+    icon="pi pi-plus"
+    size="small"
+    (onClick)="openEditor()"
+  />
+</div>
+
+<p-table
+  #table
+  [lazy]="true"
+  [value]="dataSource()"
+  [totalRecords]="dataSize()"
+  [loading]="noticesResource.isLoading()"
+  [paginator]="true"
+  [rows]="limit()"
+  [first]="index()"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  currentPageReportTemplate="{first} - {last} de {totalRecords}"
+  [showCurrentPageReport]="true"
+  size="small"
+  class="text-sm"
+>
+  <ng-template #caption>
+    <div class="flex sm:justify-end">
+      <div class="w-full sm:w-80">
+        <search-input label="Buscar por título" (search)="onSearch($event)" />
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th>Título</th>
+      <th>Fijado</th>
+      <th>Mostrar desde</th>
+      <th>Mostrar hasta</th>
+      <th style="width: 6rem;">Activo</th>
+      <th style="width: 5rem"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-notice>
+    <tr>
+      <td class="max-w-64 truncate font-medium">{{ notice.title }}</td>
+      <td>{{ notice.isPinned ? "Sí" : "No" }}</td>
+      <td>
+        {{ notice.visibleFrom ? (notice.visibleFrom | date: "short") : "—" }}
+      </td>
+      <td>
+        {{ notice.visibleUntil ? (notice.visibleUntil | date: "short") : "—" }}
+      </td>
+      <td>
+        <p-tag
+          [severity]="notice.isActive ? 'success' : 'danger'"
+          [value]="notice.isActive ? 'Activo' : 'Inactivo'"
+        />
+      </td>
+      <td>
+        <div class="flex gap-1">
+          <p-button
+            icon="pi pi-pencil"
+            size="small"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Editar aviso"
+            (onClick)="openEditor(notice)"
+          />
+          <p-button
+            icon="pi pi-trash"
+            size="small"
+            severity="danger"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Eliminar aviso"
+            (onClick)="confirmRemove(notice)"
+          />
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="6" class="py-4 text-center text-surface-500">
+        Sin avisos emergentes.
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog />

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { map, of, forkJoin, switchMap } from 'rxjs';
@@ -8,6 +8,8 @@ import {
   FeaturedBannerResponse,
   FeaturedBannerToSave,
   HeroSlideResponse,
+  LandingModalNoticeResponse,
+  LandingModalNoticeToSave,
   QuickAccessBatchItem,
   QuickAccessResponse,
 } from '../interfaces';
@@ -34,6 +36,7 @@ export class ContentSettingsDataSource {
   private readonly HERO_SLIDES_URL = `${environment.baseUrl}/api/content`;
   private readonly QUICK_ACCESS_URL = `${this.HERO_SLIDES_URL}/quick-accesses`;
   private readonly FEATURED_BANNERS_URL = `${this.HERO_SLIDES_URL}/featured-banners`;
+  private readonly LANDING_MODAL_NOTICES_URL = `${this.HERO_SLIDES_URL}/landing-modal-notices`;
 
   getQuickAccess() {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
@@ -106,5 +109,55 @@ export class ContentSettingsDataSource {
 
   removeFeaturedBanner(id: number) {
     return this.http.delete(`${this.FEATURED_BANNERS_URL}/${id}`);
+  }
+
+  getLandingModalNotices(limit: number, offset: number, term?: string) {
+    const params = new HttpParams({
+      fromObject: { limit, offset, ...(term && { term }) },
+    });
+    return this.http.get<{
+      notices: LandingModalNoticeResponse[];
+      total: number;
+    }>(this.LANDING_MODAL_NOTICES_URL, { params });
+  }
+
+  createLandingModalNotice(notice: LandingModalNoticeToSave, file?: File) {
+    return this.withLandingModalNoticeImage(notice, file).pipe(
+      switchMap((payload) =>
+        this.http.post<LandingModalNoticeResponse>(
+          this.LANDING_MODAL_NOTICES_URL,
+          payload,
+        ),
+      ),
+    );
+  }
+
+  updateLandingModalNotice(
+    id: string,
+    notice: LandingModalNoticeToSave,
+    file?: File,
+  ) {
+    return this.withLandingModalNoticeImage(notice, file).pipe(
+      switchMap((payload) =>
+        this.http.patch<LandingModalNoticeResponse>(
+          `${this.LANDING_MODAL_NOTICES_URL}/${id}`,
+          payload,
+        ),
+      ),
+    );
+  }
+
+  removeLandingModalNotice(id: string) {
+    return this.http.delete(`${this.LANDING_MODAL_NOTICES_URL}/${id}`);
+  }
+
+  private withLandingModalNoticeImage(
+    notice: LandingModalNoticeToSave,
+    file?: File,
+  ) {
+    if (!file) return of(notice);
+    return this.fileUploadService
+      .upload(file, 'landing-modal-notices')
+      .pipe(map(({ id: imageId }) => ({ ...notice, imageId })));
   }
 }

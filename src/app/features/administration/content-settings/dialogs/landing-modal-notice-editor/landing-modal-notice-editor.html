@@ -19,26 +19,30 @@
 
   <div class="flex flex-col gap-1">
     <label class="text-sm font-medium text-surface-700">Contenido</label>
+
     <p-editor
       formControlName="contentHtml"
-      [style]="{ height: '200px' }"
+      [style]="{ height: '180px' }"
       placeholder="Escriba el contenido del aviso"
     >
       <ng-template #header>
         <span class="ql-formats">
-          <button class="ql-bold"></button>
-          <button class="ql-italic"></button>
+          <button type="button" class="ql-bold"></button>
+          <button type="button" class="ql-italic"></button>
         </span>
+
         <span class="ql-formats">
-          <button class="ql-list" value="ordered"></button>
-          <button class="ql-list" value="bullet"></button>
+          <button type="button" class="ql-list" value="ordered"></button>
+          <button type="button" class="ql-list" value="bullet"></button>
         </span>
+
         <span class="ql-formats">
-          <button class="ql-link"></button>
-          <button class="ql-clean"></button>
+          <button type="button" class="ql-link"></button>
+          <button type="button" class="ql-clean"></button>
         </span>
       </ng-template>
     </p-editor>
+
     @if (showContentError()) {
       <p-message severity="error" size="small" variant="simple">
         Ingrese contenido o seleccione una imagen.
@@ -46,83 +50,122 @@
     }
   </div>
 
-  <div class="grid grid-cols-1 gap-5 md:grid-cols-12">
-    <div class="md:col-span-5">
-      <button
-        type="button"
-        class="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border-2"
-        [ngClass]="
-          imagePreview()
-            ? 'border-transparent bg-surface-900'
-            : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400'
-        "
-        (click)="fileInput.click()"
-      >
-        @if (imagePreview()) {
-          <img
-            [src]="imagePreview()"
-            [alt]="form.controls.imageAlt.value || 'Vista previa del aviso'"
-            class="h-full w-full object-contain"
-          />
-          <span
-            class="absolute inset-0 flex items-center justify-center bg-black/50 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            Cambiar imagen
-          </span>
-        } @else {
-          <span class="flex flex-col items-center gap-2 text-surface-500">
-            <i class="pi pi-image text-3xl"></i>
-            <span class="text-sm font-medium">Subir imagen opcional</span>
-          </span>
-        }
-      </button>
-      <input
-        #fileInput
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        class="hidden"
-        (change)="onFileSelected($event)"
-      />
-      @if (imagePreview()) {
-        <p-button
-          type="button"
-          label="Quitar imagen"
-          icon="pi pi-times"
-          severity="secondary"
-          size="small"
-          [text]="true"
-          (onClick)="removeImage()"
-        />
-      }
-    </div>
+  @let preview = imagePreview();
 
-    <div class="flex flex-col gap-4 md:col-span-7">
-      <div class="flex flex-col gap-1">
-        <p-floatlabel variant="on">
-          <input pInputText class="w-full" formControlName="imageAlt" />
-          <label>Texto alternativo de imagen</label>
-        </p-floatlabel>
-        @if (showImageAltError()) {
-          <p-message severity="error" size="small" variant="simple">
-            El texto alternativo es obligatorio cuando hay una imagen.
-          </p-message>
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium text-surface-700">
+      Imagen opcional
+    </label>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div class="flex flex-col gap-2 md:col-span-1">
+        <button
+          type="button"
+          class="group relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg border-2 transition-colors"
+          [ngClass]="
+            preview
+              ? 'border-transparent bg-surface-900'
+              : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400'
+          "
+          [attr.aria-label]="preview ? 'Cambiar imagen' : 'Subir imagen'"
+          (click)="fileInput.click()"
+        >
+          @if (preview) {
+            <img
+              [src]="preview"
+              [alt]="form.controls.imageAlt.value || 'Vista previa del aviso'"
+              class="h-full w-full object-contain"
+            />
+
+            <span
+              class="absolute inset-0 flex items-center justify-center bg-black/50 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <span class="flex items-center gap-2">
+                <i class="pi pi-pencil text-sm"></i>
+                <span>Cambiar imagen</span>
+              </span>
+            </span>
+          } @else {
+            <span class="flex flex-col items-center gap-2 text-surface-500">
+              <i class="pi pi-image text-3xl"></i>
+              <span class="text-sm font-medium">Subir imagen</span>
+            </span>
+          }
+        </button>
+
+        <input
+          #fileInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          class="hidden"
+          (change)="onFileSelected($event)"
+        />
+
+        @if (preview) {
+          <p-button
+            type="button"
+            label="Quitar"
+            icon="pi pi-times"
+            severity="secondary"
+            size="small"
+            [text]="true"
+            styleClass="w-full justify-center"
+            (onClick)="removeImage()"
+          />
         }
       </div>
 
-      <div class="flex flex-col gap-1">
-        <p-floatlabel variant="on">
-          <input pInputText class="w-full" formControlName="imageLinkUrl" />
-          <label>URL de enlace de imagen</label>
-        </p-floatlabel>
-        @if (submitted() && form.controls.imageLinkUrl.invalid) {
-          <p-message severity="error" size="small" variant="simple">
-            Use una URL http(s) o una ruta interna que comience con /.
-          </p-message>
+      <div class="md:col-span-3">
+        @if (preview) {
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  class="w-full"
+                  formControlName="imageAlt"
+                  [invalid]="showImageAltError()"
+                />
+                <label>Texto alternativo</label>
+              </p-floatlabel>
+
+              @if (showImageAltError()) {
+                <p-message severity="error" size="small" variant="simple">
+                  El texto alternativo es obligatorio cuando hay una imagen.
+                </p-message>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  class="w-full"
+                  formControlName="imageLinkUrl"
+                  [invalid]="submitted() && form.controls.imageLinkUrl.invalid"
+                />
+                <label>Enlace de la imagen</label>
+              </p-floatlabel>
+
+              @if (submitted() && form.controls.imageLinkUrl.invalid) {
+                <p-message severity="error" size="small" variant="simple">
+                  Use una URL http(s) o una ruta interna que comience con /.
+                </p-message>
+              }
+
+              <small class="text-surface-500">
+                Ejemplo: https://ejemplo.com o /comunicados?year=2026.
+              </small>
+            </div>
+          </div>
+        } @else {
+          <div
+            class="flex h-full min-h-32 items-center rounded-lg border border-dashed border-surface-200 bg-surface-50 px-4 text-sm text-surface-500"
+          >
+            Puede agregar una imagen al aviso. Relacion de aspecto recomendada
+            4:3.
+          </div>
         }
-        <small class="text-surface-500">
-          Usa una URL completa como https://ejemplo.com o una ruta interna que
-          empiece con /, por ejemplo /comunicados?year=2026.
-        </small>
       </div>
     </div>
   </div>
@@ -140,6 +183,7 @@
       />
       <label for="notice-visible-from">Mostrar desde</label>
     </p-floatlabel>
+
     <p-floatlabel variant="on">
       <p-datepicker
         formControlName="visibleUntil"
@@ -153,7 +197,8 @@
       <label for="notice-visible-until">Mostrar hasta</label>
     </p-floatlabel>
   </div>
-  @if (submitted() && form.hasError("invalidDateRange")) {
+
+  @if (form.hasError("invalidDateRange")) {
     <p-message severity="error" size="small" variant="simple">
       “Mostrar desde” debe ser anterior o igual a “Mostrar hasta”.
     </p-message>
@@ -166,15 +211,26 @@
         [binary]="true"
         inputId="notice-active"
       />
-      <label for="notice-active">Activo</label>
+      <label
+        for="notice-active"
+        class="cursor-pointer text-sm font-medium text-surface-700"
+      >
+        Activo
+      </label>
     </div>
+
     <div class="flex items-center gap-2">
       <p-checkbox
         formControlName="isPinned"
         [binary]="true"
         inputId="notice-pinned"
       />
-      <label for="notice-pinned">Fijado</label>
+      <label
+        for="notice-pinned"
+        class="cursor-pointer text-sm font-medium text-surface-700"
+      >
+        Fijado
+      </label>
     </div>
   </div>
 
@@ -185,6 +241,7 @@
       severity="secondary"
       (onClick)="close()"
     />
+
     <p-button
       type="submit"
       label="Guardar"

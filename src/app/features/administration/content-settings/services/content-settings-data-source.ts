@@ -5,13 +5,13 @@ import { map, of, forkJoin, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import {
-  FeaturedBannerResponse,
-  FeaturedBannerToSave,
-  HeroSlideResponse,
   LandingModalNoticeResponse,
   LandingModalNoticeToSave,
+  FeaturedBannerResponse,
+  FeaturedBannerToSave,
   QuickAccessBatchItem,
   QuickAccessResponse,
+  HeroSlideResponse,
 } from '../interfaces';
 import { FileUploadService } from '../../../../shared';
 

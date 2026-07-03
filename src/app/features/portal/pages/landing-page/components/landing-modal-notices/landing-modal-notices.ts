@@ -12,15 +12,17 @@ import { CarouselModule } from 'primeng/carousel';
 import { DialogModule } from 'primeng/dialog';
 
 import { LandingModalNotice } from '../../../../models';
+import { JsonPipe } from '@angular/common';
 
 const SESSION_DISMISS_KEY = 'landing-modal-notices-dismissed';
 const IMAGE_LINK_URL_REGEX = /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i;
 
 @Component({
   selector: 'landing-modal-notices',
-  imports: [CarouselModule, DialogModule],
+  imports: [CarouselModule, DialogModule, JsonPipe],
   template: `
     <p-dialog
+      styleClass="landing-notice-dialog"
       header="Avisos emergentes"
       [visible]="visible()"
       (visibleChange)="onVisibleChange($event)"
@@ -29,19 +31,26 @@ const IMAGE_LINK_URL_REGEX = /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i;
       [closeOnEscape]="true"
       [draggable]="false"
       [maximizable]="false"
-      [style]="{ width: 'min(92vw, 760px)' }"
+      [dismissableMask]="true"
+      [style]="{ width: 'min(94vw, 820px)' }"
+      [contentStyle]="{ 'max-height': 'min(78vh, 760px)', overflow: 'auto' }"
     >
       <p-carousel
         [value]="items()"
         [numVisible]="1"
         [numScroll]="1"
         [circular]="false"
-        [autoplayInterval]="0"
         [showNavigators]="hasMultipleItems()"
         [showIndicators]="hasMultipleItems()"
       >
-        <ng-template pTemplate="item" let-notice>
-          <article class="px-1 pb-2">
+        <ng-template pTemplate="item" let-notice let-index="index">
+          <article class="min-w-0 px-1 pb-2">
+            @if (hasMultipleItems()) {
+              <p class="mb-3 text-right text-xs font-medium text-surface-500">
+                {{ index + 1 }} de {{ items().length }}
+              </p>
+            }
+
             <h2
               class="text-balance text-2xl font-semibold leading-tight text-surface-900"
             >
@@ -76,7 +85,7 @@ const IMAGE_LINK_URL_REGEX = /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i;
 
             @if (notice.contentHtml) {
               <div
-                class="prose prose-slate mt-5 max-w-none text-surface-700"
+                class="notice-rich-text prose prose-slate mt-5 max-w-none min-w-0 whitespace-normal break-words text-surface-700"
                 [innerHTML]="notice.contentHtml"
               ></div>
             }
@@ -96,8 +105,12 @@ export class LandingModalNotices {
   constructor() {
     effect(() => {
       // if (this.items().length && !this.wasDismissed()) this.visible.set(true);
-      this.visible.set(true)
+      this.visible.set(true);
     });
+  }
+
+  ngOnInit(): void {
+    console.log('LandingModalNotices items:', this.items());
   }
 
   onVisibleChange(visible: boolean): void {

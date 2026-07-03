@@ -58,6 +58,7 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
   readonly imageFile = signal<File | null>(null);
   readonly imagePreview = signal<string | null>(null);
 
+  readonly formUtils = FormUtils;
   readonly form = this.formBuilder.group(
     {
       title: ['', [Validators.required, Validators.maxLength(160)]],
@@ -75,8 +76,6 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
     },
     { validators: dateRangeValidator },
   );
-
-  formUtils = FormUtils;
 
   ngOnInit(): void {
     this.loadForm();

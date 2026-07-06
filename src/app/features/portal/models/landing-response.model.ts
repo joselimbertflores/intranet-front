@@ -44,4 +44,5 @@ export interface PortalLandingResponse {
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
   landingNotices: LandingNotice[];
+  communications: any[]
 }

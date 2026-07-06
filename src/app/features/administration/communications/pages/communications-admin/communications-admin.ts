@@ -18,7 +18,10 @@ import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
+import {
+  PermissionAction,
+  Resource,
+} from '../../../../../core/auth/auth.types';
 import { CalendarDataSource } from '../../../calendar/services';
 import { CommunicationAdminDataSource } from '../../services';
 import { SearchInput } from '../../../../../shared';
@@ -105,6 +108,7 @@ export default class CommunicationsAdmin {
       closable: true,
       width: '40vw',
       data: item,
+      styleClass: 'app-action-dialog',
       breakpoints: {
         '960px': '75vw',
         '640px': '90vw',
@@ -156,8 +160,7 @@ export default class CommunicationsAdmin {
         {
           label: row.isActive ? 'Desactivar' : 'Activar',
           icon: 'pi pi-trash',
-          command: () =>
-            this.toogleCommunication(row.id, row.isActive, event),
+          command: () => this.toogleCommunication(row.id, row.isActive, event),
         },
       );
     }

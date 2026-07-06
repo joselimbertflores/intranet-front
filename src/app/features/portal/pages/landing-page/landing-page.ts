@@ -5,6 +5,7 @@ import { catchError, of } from 'rxjs';
 
 import {
   FeaturedBannersSection,
+  LandingCommunicationsSection,
   LandingHeroSection,
   LandingNotices,
   LandingQuickAccessSection,
@@ -18,6 +19,7 @@ import { PortalLandingService } from '../../services';
     LandingQuickAccessSection,
     FeaturedBannersSection,
     LandingNotices,
+    LandingCommunicationsSection,
   ],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
@@ -33,6 +35,7 @@ export default class LandingPage {
           quickAccesses: [],
           featuredBanners: [],
           landingNotices: [],
+          communications: [],
         }),
       ),
     ),
@@ -42,6 +45,7 @@ export default class LandingPage {
         quickAccesses: [],
         featuredBanners: [],
         landingNotices: [],
+        communications: [],
       },
     },
   );
@@ -53,5 +57,8 @@ export default class LandingPage {
   );
   readonly landingNotices = computed(
     () => this.landingResponse().landingNotices,
+  );
+  readonly communications = computed(
+    () => this.landingResponse().communications,
   );
 }

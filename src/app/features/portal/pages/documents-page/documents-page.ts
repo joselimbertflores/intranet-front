@@ -20,12 +20,10 @@ import { CommonModule } from '@angular/common';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
 import { DataViewModule } from 'primeng/dataview';
 import { DatePicker } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
-import { PanelModule } from 'primeng/panel';
 import { TreeNode } from 'primeng/api';
 
 import {
@@ -46,6 +44,11 @@ interface FilterQueryParams {
   subtype?: string;
   year?: string;
 }
+
+interface ActiveFilter {
+  key: keyof FilterQueryParams;
+  label: string;
+}
 @Component({
   selector: 'app-documents-page',
   imports: [
@@ -55,17 +58,38 @@ interface FilterQueryParams {
     SelectButtonModule,
     TreeSelectModule,
     FloatLabelModule,
-    InputTextModule,
     DataViewModule,
     SelectModule,
     ButtonModule,
-    PanelModule,
     DatePicker,
     SearchInput,
     FileSizePipe,
     FileIcon,
   ],
   templateUrl: './documents-page.html',
+  styles: `
+    :host {
+      display: block;
+    }
+
+    :host ::ng-deep .documents-data-view .p-dataview-header {
+      border: 0;
+      background: transparent;
+      padding: 0 0 1.25rem;
+    }
+
+    :host ::ng-deep .documents-data-view .p-dataview-content {
+      background: transparent;
+    }
+
+    :host ::ng-deep .documents-data-view .p-paginator {
+      margin-top: 1.5rem;
+      border: 1px solid var(--p-surface-200);
+      border-radius: 1rem;
+      background: var(--p-surface-0);
+      padding: 0.75rem;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DocumentsPage {
@@ -83,7 +107,8 @@ export default class DocumentsPage {
   offset = computed(() => this.limit() * this.index());
 
   readonly sections = computed(() => {
-    const sections = this.documentDataSource.documentFilters().sections;
+    const sections =
+      this.documentDataSource.documentFilters().organizationalUnits;
     return this.toTreeNode(sections);
   });
   readonly types = computed(() => {
@@ -98,18 +123,49 @@ export default class DocumentsPage {
   });
 
   filterForm: FormGroup = this.formBuilder.group({
-    section: [null],
-    type: [null],
-    subtype: [null],
+    organizationalUnit: [null],
+    documentType: [null],
+    documentSubtype: [null],
     year: [null],
-    term: [null],
   });
 
   selectedYearDate = signal<Date | null>(null);
+  readonly activeQueryFilters = signal<FilterQueryParams>({});
+
+  readonly activeFilters = computed<ActiveFilter[]>(() => {
+    const filters = this.activeQueryFilters();
+    const active: ActiveFilter[] = [];
+
+    if (filters.term) {
+      active.push({ key: 'term', label: `Búsqueda: ${filters.term}` });
+    }
+    if (filters.type) {
+      const type = this.types().find((item) => item.slug === filters.type);
+      active.push({ key: 'type', label: type?.name ?? filters.type });
+    }
+    if (filters.subtype) {
+      const subtype = this.subtypes().find(
+        (item) => item.slug === filters.subtype,
+      );
+      active.push({ key: 'subtype', label: subtype?.name ?? filters.subtype });
+    }
+    if (filters.section) {
+      const section = this.findNodeByKey(this.sections(), filters.section);
+      active.push({
+        key: 'section',
+        label: section?.label ?? filters.section,
+      });
+    }
+    if (filters.year) {
+      active.push({ key: 'year', label: `Gestión ${filters.year}` });
+    }
+
+    return active;
+  });
 
   // Detect when sections is loaded
   selectedTreeNode = linkedSignal<TreeNode | null>(() => {
-    const slug = this.filterForm.get('section')?.value;
+    const slug = this.filterForm.get('organizationalUnit')?.value;
     if (!slug) return null;
     return this.findNodeByKey(this.sections(), slug);
   });
@@ -124,17 +180,29 @@ export default class DocumentsPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
         this.index.set(0);
+        this.activeQueryFilters.set(params);
         this.initFiltersFromQueryParams(params);
         this.searchDocuments();
       });
   }
 
   searchDocuments(): void {
+    const {
+      organizationalUnit,
+      documentType,
+      documentSubtype,
+      year,
+    } = this.filterForm.value;
+
     this.documentDataSource
       .searchDocuments({
         limit: this.limit(),
         offset: this.offset(),
-        ...this.filterForm.value,
+        term: this.activeQueryFilters().term,
+        section: organizationalUnit,
+        type: documentType,
+        subtype: documentSubtype,
+        year,
       })
       .subscribe(({ documents, total }) => {
         this.dataSource.set(documents);
@@ -142,9 +210,9 @@ export default class DocumentsPage {
       });
   }
 
-  changePage(event: { index: number; limit: number }) {
-    this.limit.set(event.limit);
-    this.index.set(event.index);
+  changePage(event: { first: number; rows: number }) {
+    this.limit.set(event.rows);
+    this.index.set(event.first / event.rows);
     this.searchDocuments();
   }
 
@@ -153,7 +221,7 @@ export default class DocumentsPage {
   }
 
   selectType(slug: string | null) {
-    this.setRouteQueryParams({ type: slug });
+    this.setRouteQueryParams({ type: slug, subtype: null });
   }
 
   selectSubtype(slug: string | null) {
@@ -185,6 +253,15 @@ export default class DocumentsPage {
       subtype: null,
       year: null,
     });
+  }
+
+  clearFilter(key: keyof FilterQueryParams): void {
+    if (key === 'type') {
+      this.setRouteQueryParams({ type: null, subtype: null });
+      return;
+    }
+
+    this.setRouteQueryParams({ [key]: null });
   }
 
   private toTreeNode(data: DocSectionFilterResponse[]): TreeNode[] {
@@ -222,10 +299,9 @@ export default class DocumentsPage {
     const yearNumber = year ? Number(year) : null;
 
     this.filterForm.patchValue({
-      term: term ?? null,
-      section: section ?? null,
-      type: type ?? null,
-      subtype: type ? (subtype ?? null) : null,
+      organizationalUnit: section ?? null,
+      documentType: type ?? null,
+      documentSubtype: type ? (subtype ?? null) : null,
       year: yearNumber,
     });
 

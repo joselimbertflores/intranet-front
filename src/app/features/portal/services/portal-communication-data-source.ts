@@ -27,7 +27,7 @@ export interface CommunicationsSnapshot {
 export class PortalCommunicationDataSource {
   private http = inject(HttpClient);
   private fileUploadService = inject(FileUploadService);
-  private readonly URL = `${environment.baseUrl}/portal/communications`;
+  private readonly URL = `${environment.baseUrl}/api/portal/communications`;
 
   detailCache: Record<string, PortalCommunicationResponse> = {};
   cache: Record<string, Cache> = {};

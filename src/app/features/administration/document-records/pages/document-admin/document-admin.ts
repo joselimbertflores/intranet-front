@@ -128,7 +128,7 @@ export default class DocumentAdmin {
     }
   }
 
-  chagePage(event: TablePageEvent) {
+  changePage(event: TablePageEvent) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
     this.getData();

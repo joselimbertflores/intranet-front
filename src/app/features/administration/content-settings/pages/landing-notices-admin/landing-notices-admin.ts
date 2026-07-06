@@ -1,32 +1,32 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  linkedSignal,
   Component,
   computed,
   inject,
-  linkedSignal,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 
-import { ConfirmationService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
+import { TableModule, TablePageEvent } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogService } from 'primeng/dynamicdialog';
-import { TableModule } from 'primeng/table';
+import { ConfirmationService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 
-import { LandingNoticeEditor } from '../../dialogs';
-import { LandingNoticeResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
+import { LandingNoticeResponse } from '../../interfaces';
+import { LandingNoticeEditor } from '../../dialogs';
 import { SearchInput } from '../../../../../shared';
 
 @Component({
   selector: 'app-landing-notices-admin',
   imports: [
     CommonModule,
-    ButtonModule,
     ConfirmDialogModule,
+    ButtonModule,
     SearchInput,
     TableModule,
     TagModule,
@@ -100,11 +100,16 @@ export default class LandingNoticesAdmin {
           );
           this.dataSize.update((value) => (value -= 1));
           if (this.dataSource().length === 0 && this.dataSize() > 0) {
-            this.noticesResource.reload();
+            this.offset.set(0);
           }
         });
       },
     });
+  }
+
+  changePage(event: TablePageEvent) {
+    this.limit.set(event.rows);
+    this.offset.set(event.first);
   }
 
   private upsertItem(item: LandingNoticeResponse): void {

@@ -18,7 +18,7 @@ export interface PortalFileResponse {
   downloadCount: number;
 }
 export interface DocumentFiltersResponse {
-  sections: DocSectionFilterResponse[];
+  organizationalUnits: DocSectionFilterResponse[];
   types: DocTypeFilterResponse[];
 }
 

@@ -17,10 +17,10 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
-import { SearchInput } from '../../../../../shared';
+import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { CalendarEventResponse } from '../../interfaces';
+import { SearchInput } from '../../../../../shared';
 import { CalendarDataSource } from '../../services';
 import { CalendarEditor } from '../../dialogs';
 

@@ -9,7 +9,7 @@ type FileContext =
   | 'landing-notices'
   | 'documents'
   | 'quick-access'
-  | 'communication'
+  | 'communications'
   | 'tutorials';
 
 type MediaType = 'image' | 'audio' | 'video' | 'document';

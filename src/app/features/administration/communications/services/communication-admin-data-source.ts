@@ -20,7 +20,7 @@ interface GetCommunicationsParams {
 export class CommunicationAdminDataSource {
   private fileUploadService = inject(FileUploadService);
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/communications`;
+  private readonly URL = `${environment.baseUrl}/api/communications`;
 
   types = toSignal(this.getTypes(), { initialValue: [] });
 
@@ -38,7 +38,7 @@ export class CommunicationAdminDataSource {
 
   create(data: object, pdf: File) {
     return this.fileUploadService
-      .uploadPdfForGeneratePreview(pdf, 'communication')
+      .uploadPdfForGeneratePreview(pdf, 'communications')
       .pipe(
         switchMap(({ id: fileId }) =>
           this.http.post(`${this.URL}`, {
@@ -53,7 +53,7 @@ export class CommunicationAdminDataSource {
     const fileUploadObserbable: Observable<null | UploadResult> = file
       ? this.fileUploadService.uploadPdfForGeneratePreview(
           file,
-          'communication',
+          'communications',
         )
       : of(null);
     return fileUploadObserbable.pipe(

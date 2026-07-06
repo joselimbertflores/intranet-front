@@ -9,8 +9,17 @@
 </div>
 
 <p-table
-  [value]="filteredNotices()"
+  [value]="dataSource()"
+  [totalRecords]="dataSize()"
+  (onPage)="changePage($event)"
+  [showCurrentPageReport]="true"
+  [lazy]="true"
+  [paginator]="true"
   [loading]="noticesResource.isLoading()"
+  [first]="offset()"
+  [rows]="limit()"
+  [rowsPerPageOptions]="[10, 25, 40, 50]"
+  currentPageReportTemplate="{first} - {last} de {totalRecords}"
   size="small"
   class="text-sm"
 >

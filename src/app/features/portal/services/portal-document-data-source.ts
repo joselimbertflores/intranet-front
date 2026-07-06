@@ -20,11 +20,11 @@ interface SearchDocumentsParams {
   providedIn: 'root',
 })
 export class PortalDocumentDataSource {
-  private readonly URL = `${environment.baseUrl}/portal-documents`;
+  private readonly URL = `${environment.baseUrl}/api/portal-documents`;
   private http = inject(HttpClient);
 
   documentFilters = toSignal(this.getDocumentFilters(), {
-    initialValue: { sections: [], types: [] },
+    initialValue: { organizationalUnits: [], types: [] },
   });
 
   constructor() {}

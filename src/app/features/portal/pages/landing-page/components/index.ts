@@ -4,4 +4,4 @@ export * from './landing-documents-section/landing-documents-section';
 export * from './landing-hero-section/landing-hero-section';
 export * from './landing-skeleton/landing-skeleton';
 export * from './featured-banners-section/featured-banners-section';
-export * from './landing-modal-notices/landing-modal-notices';
+export * from './landing-notices/landing-notices';

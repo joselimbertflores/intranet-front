@@ -1,4 +1,4 @@
-export interface LandingModalNoticeResponse {
+export interface LandingNoticeResponse {
   id: string;
   title: string;
   contentHtml: string | null;
@@ -16,7 +16,7 @@ export interface LandingModalNoticeResponse {
   updatedAt: string;
 }
 
-export interface LandingModalNoticeToSave {
+export interface LandingNoticeToSave {
   title: string;
   contentHtml: string | null;
   imageId?: string | null;

@@ -86,7 +86,7 @@ export class AdminSidebar {
         {
           label: 'Avisos emergentes',
           icon: 'pi pi-window-maximize',
-          routerLink: 'landing-modal-notices',
+          routerLink: 'landing-notices',
           resource: Resource.CONTENT,
         },
       ],

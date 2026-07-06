@@ -17,10 +17,7 @@ import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { EditorModule } from 'primeng/editor';
 
-import {
-  LandingModalNoticeResponse,
-  LandingModalNoticeToSave,
-} from '../../interfaces';
+import { LandingNoticeResponse, LandingNoticeToSave } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
 import { FormUtils } from '../../../../../helpers';
 
@@ -33,7 +30,7 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
 }
 
 @Component({
-  selector: 'app-landing-modal-notice-editor',
+  selector: 'app-landing-notice-editor',
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -45,14 +42,14 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     InputTextModule,
     MessageModule,
   ],
-  templateUrl: './landing-modal-notice-editor.html',
+  templateUrl: './landing-notice-editor.html',
 })
-export class LandingModalNoticeEditor implements OnInit, OnDestroy {
+export class LandingNoticeEditor implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogRef = inject(DynamicDialogRef);
   private readonly dataSource = inject(ContentSettingsDataSource);
 
-  readonly data?: LandingModalNoticeResponse = inject(DynamicDialogConfig).data;
+  readonly dialogRef = inject(DynamicDialogRef);
+  readonly data?: LandingNoticeResponse = inject(DynamicDialogConfig).data;
   readonly saving = signal(false);
   readonly submitted = signal(false);
   readonly imageFile = signal<File | null>(null);
@@ -110,7 +107,7 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
     }
 
     const value = this.form.getRawValue();
-    const payload: LandingModalNoticeToSave = {
+    const payload: LandingNoticeToSave = {
       title: value.title!.trim(),
       contentHtml: value.contentHtml?.trim() || null,
       imageId: value.imageId,
@@ -124,12 +121,12 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
 
     this.saving.set(true);
     const request$ = this.data
-      ? this.dataSource.updateLandingModalNotice(
+      ? this.dataSource.updateLandingNotice(
           this.data.id,
           payload,
           this.imageFile() ?? undefined,
         )
-      : this.dataSource.createLandingModalNotice(
+      : this.dataSource.createLandingNotice(
           payload,
           this.imageFile() ?? undefined,
         );
@@ -140,23 +137,11 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
     });
   }
 
-  close(): void {
-    this.dialogRef.close();
-  }
-
-  hasImage(): boolean {
-    return !!this.form.controls.imageId.value || !!this.imageFile();
-  }
-
   showContentError(): boolean {
-    return (
-      this.submitted() &&
-      !this.hasImage() &&
-      !this.hasMeaningfulContent(this.form.controls.contentHtml.value)
-    );
+    return this.submitted() && !this.hasImage() && !this.hasContent();
   }
 
-  showImageAltError(): boolean {
+  showImageAltRequiredError(): boolean {
     return (
       this.submitted() &&
       this.hasImage() &&
@@ -164,28 +149,12 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
     );
   }
 
-  private isValid(): boolean {
-    return (
-      this.form.valid &&
-      (this.hasImage() ||
-        this.hasMeaningfulContent(this.form.controls.contentHtml.value)) &&
-      (!this.hasImage() || !!this.form.controls.imageAlt.value?.trim())
-    );
-  }
-
-  private hasMeaningfulContent(value: string | null): boolean {
-    return !!value
-      ?.replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/gi, ' ')
-      .trim();
-  }
-
   private revokePreview(): void {
     const preview = this.imagePreview();
     if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview);
   }
 
-  private loadForm() {
+  private loadForm(): void {
     if (!this.data) return;
     const { visibleFrom, visibleUntil, ...props } = this.data;
     this.form.patchValue({
@@ -198,5 +167,29 @@ export class LandingModalNoticeEditor implements OnInit, OnDestroy {
         : null,
     });
     this.imagePreview.set(this.data.imageUrl);
+  }
+
+  private isValid(): boolean {
+    return (
+      this.form.valid &&
+      !this.showContentError() &&
+      !this.showImageAltRequiredError()
+    );
+  }
+
+  private hasImage(): boolean {
+    return !!this.form.controls.imageId.value || !!this.imageFile();
+  }
+
+  private hasContent(): boolean {
+    return this.hasMeaningfulContent(this.form.controls.contentHtml.value);
+  }
+
+  private hasMeaningfulContent(value: string | null): boolean {
+    return !!value
+      ?.replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\u00a0/g, ' ')
+      .trim();
   }
 }

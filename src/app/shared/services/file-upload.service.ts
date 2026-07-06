@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 type FileContext =
   | 'hero-slides'
   | 'featured-banners'
-  | 'landing-modal-notices'
+  | 'landing-notices'
   | 'documents'
   | 'quick-access'
   | 'communication'

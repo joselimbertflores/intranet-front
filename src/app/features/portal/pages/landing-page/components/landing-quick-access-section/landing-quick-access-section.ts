@@ -8,12 +8,7 @@ import { QuickAccess } from '../../../../models';
   selector: 'landing-quick-access-section',
   imports: [AnimateOnScroll],
   template: `
-    <section
-      class="py-16 md:py-24"
-      pAnimateOnScroll
-      enterClass="animate-enter fade-in slide-in-from-b-6 animate-duration-500"
-      [once]="true"
-    >
+    <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
         <div class="mb-10 max-w-2xl">
           <h2

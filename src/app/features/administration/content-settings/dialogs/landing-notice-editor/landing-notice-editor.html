@@ -1,0 +1,266 @@
+<form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
+  <div class="app-dialog-body flex flex-col gap-5">
+    <div class="flex flex-col gap-1">
+      <p-floatlabel variant="on">
+        <input
+          pInputText
+          class="w-full"
+          formControlName="title"
+          [invalid]="formUtils.isInvalid(form.controls.title)"
+        />
+        <label>Título</label>
+      </p-floatlabel>
+
+      @if (formUtils.isInvalid(form.controls.title)) {
+        <p-message severity="error" size="small" variant="simple">
+          El título es obligatorio y admite hasta 160 caracteres.
+        </p-message>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-surface-700">Contenido</label>
+
+      <p-editor
+        formControlName="contentHtml"
+        [style]="{ height: '180px' }"
+        placeholder="Escriba el contenido del aviso"
+      >
+        <ng-template #header>
+          <span class="ql-formats">
+            <button type="button" class="ql-bold"></button>
+            <button type="button" class="ql-italic"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button type="button" class="ql-list" value="ordered"></button>
+            <button type="button" class="ql-list" value="bullet"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button type="button" class="ql-link"></button>
+            <button type="button" class="ql-clean"></button>
+          </span>
+        </ng-template>
+      </p-editor>
+
+      @if (showContentError()) {
+        <p-message severity="error" size="small" variant="simple">
+          Ingrese contenido o seleccione una imagen.
+        </p-message>
+      }
+    </div>
+
+    @let preview = imagePreview();
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-medium text-surface-700">
+        Imagen opcional
+      </label>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div class="flex flex-col gap-2 md:col-span-1">
+          <button
+            type="button"
+            class="group relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg border-2 transition-colors"
+            [ngClass]="
+              preview
+                ? 'border-transparent bg-surface-900'
+                : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400'
+            "
+            [attr.aria-label]="preview ? 'Cambiar imagen' : 'Subir imagen'"
+            (click)="fileInput.click()"
+          >
+            @if (preview) {
+              <img
+                [src]="preview"
+                [alt]="form.controls.imageAlt.value || 'Vista previa del aviso'"
+                class="h-full w-full object-contain"
+              />
+
+              <span
+                class="absolute inset-0 flex items-center justify-center bg-black/50 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-pencil text-sm"></i>
+                  <span>Cambiar imagen</span>
+                </span>
+              </span>
+            } @else {
+              <span class="flex flex-col items-center gap-2 text-surface-500">
+                <i class="pi pi-image text-3xl"></i>
+                <span class="text-sm font-medium">Subir imagen</span>
+              </span>
+            }
+          </button>
+
+          <input
+            #fileInput
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            class="hidden"
+            (change)="onFileSelected($event)"
+          />
+
+          @if (preview) {
+            <p-button
+              type="button"
+              label="Quitar"
+              icon="pi pi-times"
+              severity="secondary"
+              size="small"
+              [text]="true"
+              styleClass="w-full justify-center"
+              (onClick)="removeImage()"
+            />
+          }
+        </div>
+
+        <div class="md:col-span-3">
+          @if (preview) {
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <p-floatlabel variant="on">
+                  <input
+                    pInputText
+                    class="w-full"
+                    formControlName="imageAlt"
+                    [invalid]="showImageAltRequiredError()"
+                  />
+                  <label>Texto alternativo</label>
+                </p-floatlabel>
+
+                @if (showImageAltRequiredError()) {
+                  <p-message severity="error" size="small" variant="simple">
+                    El texto alternativo es obligatorio cuando hay una imagen.
+                  </p-message>
+                }
+
+                @if (
+                  submitted() && form.controls.imageAlt.hasError("maxlength")
+                ) {
+                  <p-message severity="error" size="small" variant="simple">
+                    El texto alternativo admite hasta 255 caracteres.
+                  </p-message>
+                }
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <p-floatlabel variant="on">
+                  <input
+                    pInputText
+                    class="w-full"
+                    formControlName="imageLinkUrl"
+                    [invalid]="
+                      submitted() && form.controls.imageLinkUrl.invalid
+                    "
+                  />
+                  <label>Enlace de la imagen</label>
+                </p-floatlabel>
+
+                @if (submitted() && form.controls.imageLinkUrl.invalid) {
+                  <p-message severity="error" size="small" variant="simple">
+                    Use una URL http(s) o una ruta interna que comience con /.
+                  </p-message>
+                }
+
+                <small class="text-surface-500">
+                  Ejemplo: https://ejemplo.com o /comunicados?year=2026.
+                </small>
+              </div>
+            </div>
+          } @else {
+            <div
+              class="flex h-full min-h-32 items-center rounded-lg border border-dashed border-surface-200 bg-surface-50 px-4 text-sm text-surface-500"
+            >
+              Puede agregar una imagen al aviso. Relacion de aspecto recomendada
+              4:3.
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <p-floatlabel variant="on">
+        <p-datepicker
+          formControlName="visibleFrom"
+          [showTime]="true"
+          hourFormat="24"
+          [showClear]="true"
+          appendTo="body"
+          class="w-full"
+          inputId="notice-visible-from"
+          [maxDate]="form.controls.visibleUntil.value"
+        />
+        <label for="notice-visible-from">Mostrar desde</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on">
+        <p-datepicker
+          formControlName="visibleUntil"
+          [showTime]="true"
+          hourFormat="24"
+          [showClear]="true"
+          appendTo="body"
+          class="w-full"
+          inputId="notice-visible-until"
+          [minDate]="form.controls.visibleFrom.value"
+        />
+        <label for="notice-visible-until">Mostrar hasta</label>
+      </p-floatlabel>
+    </div>
+
+    @if (form.hasError("invalidDateRange")) {
+      <p-message severity="error" size="small" variant="simple">
+        “Mostrar desde” debe ser anterior o igual a “Mostrar hasta”.
+      </p-message>
+    }
+
+    <div class="flex flex-wrap gap-6 px-1">
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="isActive"
+          [binary]="true"
+          inputId="notice-active"
+        />
+        <label
+          for="notice-active"
+          class="cursor-pointer text-sm font-medium text-surface-700"
+        >
+          Activo
+        </label>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="isPinned"
+          [binary]="true"
+          inputId="notice-pinned"
+        />
+        <label
+          for="notice-pinned"
+          class="cursor-pointer text-sm font-medium text-surface-700"
+        >
+          Fijado
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-dialog-actions">
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      (onClick)="dialogRef.close()"
+    />
+
+    <p-button
+      type="submit"
+      label="Guardar"
+      [loading]="saving()"
+      [disabled]="saving()"
+    />
+  </div>
+</form>

@@ -29,19 +29,19 @@ export interface FeaturedBanner {
   sortOrder: number;
 }
 
-export interface LandingModalNotice {
+export interface LandingNotice {
   id: string;
   title: string;
   contentHtml: string | null;
-  imageId: string | null;
   imageUrl: string | null;
   imageAlt: string | null;
   imageLinkUrl: string | null;
+  updatedAt: string;
 }
 
 export interface PortalLandingResponse {
   heroSlides: HeroSlide[];
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
-  modalNotices: LandingModalNotice[];
+  landingNotices: LandingNotice[];
 }

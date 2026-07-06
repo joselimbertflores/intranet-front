@@ -146,12 +146,12 @@ export const routes: Routes = [
           import('./features/administration/content-settings/pages/content-settings-list/content-settings-list'),
       },
       {
-        path: 'landing-modal-notices',
+        path: 'landing-notices',
         title: 'Administracion - Avisos emergentes',
         data: { resource: Resource.CONTENT },
         canActivate: [resourceGuard],
         loadComponent: () =>
-          import('./features/administration/content-settings/pages/landing-modal-notices-admin/landing-modal-notices-admin'),
+          import('./features/administration/content-settings/pages/landing-notices-admin/landing-notices-admin'),
       },
       {
         path: 'directory',

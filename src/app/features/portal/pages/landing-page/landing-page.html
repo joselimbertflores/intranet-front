@@ -1,6 +1,8 @@
 <landing-hero-section [heroSlides]="heroSlides()" />
 
-<landing-modal-notices [items]="modalNotices()" />
+@if (landingNotices().length) {
+  <landing-notices [items]="landingNotices()" />
+}
 
 @if (quickAccesses().length) {
   <landing-quick-access-section [items]="quickAccesses()" />

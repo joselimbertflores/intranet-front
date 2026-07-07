@@ -3,10 +3,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { PortalDocumentResponse } from '../../../../interfaces';
+import { FileIcon } from '../../../../../../shared';
 
 @Component({
   selector: 'landing-documents-section',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FileIcon],
   template: `
     <section class="py-16 md:py-24">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -60,7 +61,10 @@ import { PortalDocumentResponse } from '../../../../interfaces';
                 <div
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-600 transition group-hover:bg-primary-50 group-hover:text-primary-700"
                 >
-                  <i class="pi pi-file-pdf"></i>
+                  <file-icon
+                    [fileName]="doc.file.name"
+                    [mimeType]="doc.file.mimeType"
+                  />
                 </div>
 
                 <div class="min-w-0">
@@ -73,14 +77,16 @@ import { PortalDocumentResponse } from '../../../../interfaces';
                   <div
                     class="mt-1 flex flex-wrap items-center gap-2 text-xs text-surface-500"
                   >
-                    <span *ngIf="doc.type">
-                      {{ doc.type }}
+                    <span *ngIf="doc.documentType">
+                      {{ doc.documentType }}
                     </span>
 
-                    <span *ngIf="doc.section"> • {{ doc.section }} </span>
+                    <span *ngIf="doc.organizationalUnit">
+                      • {{ doc.organizationalUnit }}
+                    </span>
 
-                    <span *ngIf="doc.fiscalYear">
-                      • Gestión {{ doc.fiscalYear }}
+                    <span *ngIf="doc.year">
+                      • Gestión {{ doc.year }}
                     </span>
                   </div>
                 </div>
@@ -91,7 +97,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
                 class="flex items-center gap-5 text-sm text-surface-500 justify-between sm:justify-end"
               >
                 <span class="text-xs font-medium">
-                  {{ doc.file.downloadCount }} descargas
+                  {{ doc.downloadCount }} descargas
                 </span>
 
                 <span

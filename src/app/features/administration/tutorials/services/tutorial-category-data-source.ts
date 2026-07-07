@@ -10,7 +10,7 @@ import { TutorialCategoryResponse } from '../interfaces';
 })
 export class TutorialCategoryDataSource {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/tutorial-categories`;
+  private readonly URL = `${environment.baseUrl}/api/tutorial-categories`;
 
   categories = toSignal(this.findAll(), { initialValue: [] });
 

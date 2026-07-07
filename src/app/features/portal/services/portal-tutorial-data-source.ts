@@ -22,7 +22,7 @@ export interface TutorialsSnapshot {
   providedIn: 'root',
 })
 export class PortalTutorialDataSource {
-  private readonly URL = `${environment.baseUrl}/portal-tutorials`;
+  private readonly URL = `${environment.baseUrl}/api/portal-tutorials`;
   private http = inject(HttpClient);
 
   private snapshot: TutorialsSnapshot | null = null;

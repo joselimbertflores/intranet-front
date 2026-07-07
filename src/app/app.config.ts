@@ -46,10 +46,15 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'disabled',
         anchorScrolling: 'enabled',
       }),
-      withViewTransitions({
-        onViewTransitionCreated: handleTransitionCreated,
-        skipInitialTransition: true,
-      }),
+
+      // withInMemoryScrolling({
+      //   scrollPositionRestoration: 'enabled',
+      //   anchorScrolling: 'disabled',
+      // }),
+      // withViewTransitions({
+      //   onViewTransitionCreated: handleTransitionCreated,
+      //   skipInitialTransition: true,
+      // }),
     ),
     provideHttpClient(
       withInterceptors([httpErrorInterceptor, authInterceptor]),

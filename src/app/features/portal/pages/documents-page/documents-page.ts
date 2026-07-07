@@ -6,6 +6,8 @@ import {
   computed,
   inject,
   signal,
+  ElementRef,
+  viewChild,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -18,6 +20,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { PaginatorModule } from 'primeng/paginator';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { DataViewModule } from 'primeng/dataview';
@@ -30,12 +33,9 @@ import {
   PortalDocumentResponse,
   DocSectionFilterResponse,
 } from '../../interfaces';
-import {
-  FileIcon,
-  FileSizePipe,
-  SearchInput,
-} from '../../../../shared';
+import { FileIcon, FileSizePipe, SearchInput } from '../../../../shared';
 import { PortalDocumentDataSource } from '../../services';
+import { PublicSectionHeader } from '../../components';
 
 interface FilterQueryParams {
   term?: string;
@@ -45,10 +45,6 @@ interface FilterQueryParams {
   year?: string;
 }
 
-interface ActiveFilter {
-  key: keyof FilterQueryParams;
-  label: string;
-}
 @Component({
   selector: 'app-documents-page',
   imports: [
@@ -56,6 +52,7 @@ interface ActiveFilter {
     FormsModule,
     ReactiveFormsModule,
     SelectButtonModule,
+    PaginatorModule,
     TreeSelectModule,
     FloatLabelModule,
     DataViewModule,
@@ -65,6 +62,7 @@ interface ActiveFilter {
     SearchInput,
     FileSizePipe,
     FileIcon,
+    PublicSectionHeader,
   ],
   templateUrl: './documents-page.html',
   styles: `
@@ -82,12 +80,48 @@ interface ActiveFilter {
       background: transparent;
     }
 
-    :host ::ng-deep .documents-data-view .p-paginator {
+    :host ::ng-deep .documents-data-view > .p-dataview-paginator-bottom {
       margin-top: 1.5rem;
       border: 1px solid var(--p-surface-200);
       border-radius: 1rem;
       background: var(--p-surface-0);
       padding: 0.75rem;
+    }
+
+    :host ::ng-deep .documents-top-paginator {
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    :host
+      ::ng-deep
+      .documents-top-paginator
+      :is(.p-paginator-prev, .p-paginator-next) {
+      min-width: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    :host ::ng-deep .documents-top-paginator .p-paginator-current {
+      min-width: auto;
+      padding: 0 0.35rem;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 40rem) {
+      :host
+        ::ng-deep
+        .documents-data-view
+        > .p-dataview-paginator-bottom
+        .p-paginator {
+        justify-content: center;
+        row-gap: 0.5rem;
+      }
+    }
+
+    .results-section {
+      scroll-margin-top: 100px;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -131,36 +165,16 @@ export default class DocumentsPage {
 
   selectedYearDate = signal<Date | null>(null);
   readonly activeQueryFilters = signal<FilterQueryParams>({});
-
-  readonly activeFilters = computed<ActiveFilter[]>(() => {
+  readonly advancedFiltersOpen = signal(false);
+  readonly activeFilterCount = computed(() => {
     const filters = this.activeQueryFilters();
-    const active: ActiveFilter[] = [];
-
-    if (filters.term) {
-      active.push({ key: 'term', label: `Búsqueda: ${filters.term}` });
-    }
-    if (filters.type) {
-      const type = this.types().find((item) => item.slug === filters.type);
-      active.push({ key: 'type', label: type?.name ?? filters.type });
-    }
-    if (filters.subtype) {
-      const subtype = this.subtypes().find(
-        (item) => item.slug === filters.subtype,
-      );
-      active.push({ key: 'subtype', label: subtype?.name ?? filters.subtype });
-    }
-    if (filters.section) {
-      const section = this.findNodeByKey(this.sections(), filters.section);
-      active.push({
-        key: 'section',
-        label: section?.label ?? filters.section,
-      });
-    }
-    if (filters.year) {
-      active.push({ key: 'year', label: `Gestión ${filters.year}` });
-    }
-
-    return active;
+    return [
+      filters.term,
+      filters.type,
+      filters.subtype,
+      filters.section,
+      filters.year,
+    ].filter(Boolean).length;
   });
 
   // Detect when sections is loaded
@@ -172,6 +186,8 @@ export default class DocumentsPage {
 
   readonly layoutOptions = ['list', 'grid'];
   layout = signal<'list' | 'grid'>('list');
+
+  resultsSection = viewChild<ElementRef<HTMLElement>>('resultsSection');
 
   constructor() {}
 
@@ -187,12 +203,8 @@ export default class DocumentsPage {
   }
 
   searchDocuments(): void {
-    const {
-      organizationalUnit,
-      documentType,
-      documentSubtype,
-      year,
-    } = this.filterForm.value;
+    const { organizationalUnit, documentType, documentSubtype, year } =
+      this.filterForm.value;
 
     this.documentDataSource
       .searchDocuments({
@@ -210,11 +222,27 @@ export default class DocumentsPage {
       });
   }
 
-  changePage(event: { first: number; rows: number }) {
-    this.limit.set(event.rows);
-    this.index.set(event.first / event.rows);
+  changePage(event: { first?: number; rows?: number }) {
+    const rows = event.rows ?? this.limit();
+    const first = event.first ?? 0;
+
+    this.limit.set(rows);
+    this.index.set(first / rows);
+    this.resultsSection()?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+    // console.log(this.resultsSection());
+    // this.router.navigate([], {
+    //   relativeTo: this.route,
+    //   queryParams: { limit: this.limit(), index: this.limit() },
+    //   queryParamsHandling: 'merge',
+    //   replaceUrl: true,
+    // });
     this.searchDocuments();
   }
+
+  private setQueryParams(params: object): void {}
 
   search(term: string) {
     this.setRouteQueryParams({ term: term !== '' ? term : null });
@@ -255,13 +283,8 @@ export default class DocumentsPage {
     });
   }
 
-  clearFilter(key: keyof FilterQueryParams): void {
-    if (key === 'type') {
-      this.setRouteQueryParams({ type: null, subtype: null });
-      return;
-    }
-
-    this.setRouteQueryParams({ [key]: null });
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((isOpen) => !isOpen);
   }
 
   private toTreeNode(data: DocSectionFilterResponse[]): TreeNode[] {

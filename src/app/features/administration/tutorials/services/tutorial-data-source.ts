@@ -22,7 +22,7 @@ interface PaginatioParams {
 })
 export class TutorialDataSource {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/tutorials`;
+  private readonly URL = `${environment.baseUrl}/api/tutorials`;
   private fileUploadService = inject(FileUploadService);
 
   findAll({ limit, offset, term }: PaginatioParams) {

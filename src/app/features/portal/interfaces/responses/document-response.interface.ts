@@ -1,11 +1,11 @@
 export interface PortalDocumentResponse {
   id: string;
   title: string;
-  fiscalYear: string;
-  createdAt: string;
-  section: string;
-  type: string;
-  subtype: string | null;
+  year: number | null;
+  organizationalUnit: string;
+  documentType: string;
+  documentSubtype: string | null;
+  downloadCount: number;
   file: PortalFileResponse;
 }
 
@@ -13,9 +13,9 @@ export interface PortalFileResponse {
   id: string;
   url: string;
   name: string;
+  mimeType: string;
   size: number;
   extension: string;
-  downloadCount: number;
 }
 export interface DocumentFiltersResponse {
   organizationalUnits: DocSectionFilterResponse[];

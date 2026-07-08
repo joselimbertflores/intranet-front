@@ -15,7 +15,11 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  rxResource,
+  takeUntilDestroyed,
+  toSignal,
+} from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -28,14 +32,29 @@ import { DatePicker } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TreeNode } from 'primeng/api';
+import { debounce, form, FormField, FormRoot } from '@angular/forms/signals';
+
 
 import {
   PortalDocumentResponse,
   DocSectionFilterResponse,
+  DocSubtypeFilterResponse,
 } from '../../interfaces';
-import { FileIcon, FileSizePipe, SearchInput } from '../../../../shared';
-import { PortalDocumentDataSource } from '../../services';
+import {
+  FileIcon,
+  FileSizePipe,
+  SearchInput,
+  YearSelector,
+} from '../../../../shared';
+import {
+  PortalDocumentDataSource,
+  SearchPublicDocumentsParams,
+} from '../../services';
 import { PublicSectionHeader } from '../../components';
+import { debounceTime, map } from 'rxjs';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputIconModule } from 'primeng/inputicon';
 
 interface FilterQueryParams {
   term?: string;
@@ -63,6 +82,12 @@ interface FilterQueryParams {
     FileSizePipe,
     FileIcon,
     PublicSectionHeader,
+    YearSelector,
+    FormField,
+    IconFieldModule,
+    InputTextModule,
+    InputIconModule,
+    FormRoot
   ],
   templateUrl: './documents-page.html',
   styles: `
@@ -134,11 +159,14 @@ export default class DocumentsPage {
   private destroyRef = inject(DestroyRef);
   private documentDataSource = inject(PortalDocumentDataSource);
 
+  readonly rowsPerPageOptions = [10, 20, 30, 50];
+
   dataSize = signal(0);
   dataSource = signal<PortalDocumentResponse[]>([]);
   limit = signal(10);
   index = signal(0);
   offset = computed(() => this.limit() * this.index());
+  searchTerm = signal('');
 
   readonly sections = computed(() => {
     const sections =
@@ -150,18 +178,15 @@ export default class DocumentsPage {
   });
 
   selectedType = signal<string | null>(null);
-  readonly subtypes = computed(() => {
-    const slug = this.selectedType();
-    if (!slug) return [];
-    return this.types().find((item) => item.slug === slug)?.subtypes ?? [];
-  });
 
-  filterForm: FormGroup = this.formBuilder.group({
-    organizationalUnit: [null],
-    documentType: [null],
-    documentSubtype: [null],
-    year: [null],
-  });
+  readonly subtypes = signal<DocSubtypeFilterResponse[]>([]);
+
+  // filterForm = this.formBuilder.group({
+  //   organizationalUnit: [null as string | null],
+  //   documentType: [null as string | null],
+  //   documentSubtype: [null as string | null],
+  //   year: [null as number | null],
+  // });
 
   selectedYearDate = signal<Date | null>(null);
   readonly activeQueryFilters = signal<FilterQueryParams>({});
@@ -189,32 +214,42 @@ export default class DocumentsPage {
 
   resultsSection = viewChild<ElementRef<HTMLElement>>('resultsSection');
 
+  queryParams = toSignal(
+    this.route.queryParams.pipe(map((params) => this.mapQueryParams(params))),
+    { initialValue: this.mapQueryParams(this.route.snapshot.queryParams) },
+  );
+
+  dataResource = rxResource({
+    params: () => this.queryParams(),
+    stream: ({ params }) => this.documentDataSource.searchDocuments(params),
+  });
+
+  filterFormModel = signal({
+    term: '',
+    organizationalUnit: null,
+    documentType: '',
+    documentSubtype: null,
+    year: null,
+  });
+
+  filterFormSignal = form(this.filterFormModel, (schemaPath) => {
+    debounce(schemaPath.term, 350);
+  });
+
   constructor() {}
 
   ngOnInit() {
-    this.route.queryParams
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        this.index.set(0);
-        this.activeQueryFilters.set(params);
-        this.initFiltersFromQueryParams(params);
-        this.searchDocuments();
-      });
+    this.loadFilterParams();
+    this.listenToFilterChanges();
   }
 
   searchDocuments(): void {
-    const { organizationalUnit, documentType, documentSubtype, year } =
-      this.filterForm.value;
-
     this.documentDataSource
       .searchDocuments({
         limit: this.limit(),
         offset: this.offset(),
         term: this.activeQueryFilters().term,
-        section: organizationalUnit,
-        type: documentType,
-        subtype: documentSubtype,
-        year,
+        ...this.filterForm.value,
       })
       .subscribe(({ documents, total }) => {
         this.dataSource.set(documents);
@@ -242,18 +277,15 @@ export default class DocumentsPage {
     this.searchDocuments();
   }
 
-  private setQueryParams(params: object): void {}
-
-  search(term: string) {
-    this.setRouteQueryParams({ term: term !== '' ? term : null });
+  onSearch(term: string) {
+    this.searchTerm.set(term);
+    this.setQueryParams({ term: term !== '' ? term : null });
   }
 
-  selectType(slug: string | null) {
-    this.setRouteQueryParams({ type: slug, subtype: null });
-  }
-
-  selectSubtype(slug: string | null) {
-    this.setRouteQueryParams({ subtype: slug });
+  onSelectType(slug: string | null) {
+    const type = this.types().find((item) => item.slug === slug);
+    this.filterForm.patchValue({ documentSubtype: null });
+    this.subtypes.set(type?.subtypes ?? []);
   }
 
   selectDate(value: Date) {
@@ -316,22 +348,98 @@ export default class DocumentsPage {
     });
   }
 
-  private initFiltersFromQueryParams(params: FilterQueryParams): void {
-    const { term, section, type, subtype, year } = params;
+  private loadFilterParams(): void {
+    const queryParams = this.route.snapshot.queryParams;
+    this.filterForm.patchValue(
+      {
+        documentType: queryParams['type'],
+        documentSubtype: queryParams['subtype'],
+        organizationalUnit: queryParams['unit'],
+        year: Number.isInteger(+queryParams['year'])
+          ? +queryParams['year']
+          : null,
+      },
+      {
+        emitEvent: false,
+      },
+    );
+  }
 
-    const yearNumber = year ? Number(year) : null;
+  private mapQueryParams(params: Record<string, string | undefined>) {
+    return {
+      term: params['term'] || null,
+      unit: params['unit'] || null,
+      type: params['type'] || null,
+      subtype: params['subtype'] || null,
+      year: this.parseYear(params['year']),
+      limit: this.parseLimit(params['limit']),
+      offset: this.parseOffset(params['offset']),
+    };
+  }
 
-    this.filterForm.patchValue({
-      organizationalUnit: section ?? null,
-      documentType: type ?? null,
-      documentSubtype: type ? (subtype ?? null) : null,
-      year: yearNumber,
+  private parseLimit(value: string | undefined): number {
+    const parsed = Number(value);
+    return this.rowsPerPageOptions.includes(parsed) ? parsed : 10;
+  }
+
+  private parseOffset(value: string | undefined): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
+  }
+
+  private parseYear(value: string | undefined): number | null {
+    if (!value) return null;
+    const year = Number(value);
+    return Number.isInteger(year) ? year : null;
+  }
+
+  private listenToFilterChanges(): void {
+    this.filterForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyFilters());
+  }
+
+  private applyFilters(): void {
+    const {
+      organizationalUnit: unit,
+      documentType: type,
+      documentSubtype: subtype,
+      year,
+    } = this.filterForm.value;
+
+    const filters = {
+      unit: this.normalizeFilterValue(unit),
+      type: this.normalizeFilterValue(type),
+      subtype: this.normalizeFilterValue(subtype),
+      year: this.normalizeFilterValue(year),
+    };
+
+    const current = this.queryParams();
+
+    const hasChanged =
+      filters.unit !== current.term ||
+      filters.type !== current.type ||
+      filters.subtype !== current.subtype ||
+      filters.year !== current.year;
+
+    if (!hasChanged) return;
+
+    this.setQueryParams({ ...filters, offset: 0 });
+  }
+
+  private normalizeFilterValue(value: unknown): string | null {
+    if (value == null) return null;
+    const normalized = String(value).trim();
+    return normalized.length ? normalized : null;
+  }
+
+  private setQueryParams(params: object): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: params,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+      scroll: 'manual',
     });
-
-    // * Start datepicker with date value
-    this.selectedYearDate.set(yearNumber ? new Date(yearNumber, 0, 1) : null);
-
-    // * Set value to get subtypes with signal: subtypes
-    this.selectedType.set(type ?? null);
   }
 }

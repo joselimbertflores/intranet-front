@@ -6,14 +6,14 @@ import { environment } from '../../../../environments/environment';
 
 import { DocumentFiltersResponse, PortalDocumentResponse } from '../interfaces';
 
-interface SearchDocumentsParams {
+export interface SearchPublicDocumentsParams {
+  term?: string | null;
+  unit?: string | null;
+  type?: string | null;
+  subtype?: string | null;
+  year?: number | null;
   limit: number;
   offset: number;
-  term?: string;
-  section?: string;
-  type?: string;
-  subtype?: string;
-  year?: number;
 }
 
 @Injectable({
@@ -29,10 +29,22 @@ export class PortalDocumentDataSource {
 
   constructor() {}
 
-  searchDocuments(filterParams: SearchDocumentsParams) {
+  searchDocuments(filterParams: SearchPublicDocumentsParams) {
+    
     const params = new HttpParams({
-      fromObject: this.removeEmptyProperties(filterParams),
+      fromObject: {
+        ...(filterParams.unit && { organizationalUnit: filterParams.unit }),
+        ...(filterParams.type && { organizationalUnit: filterParams.type }),
+        ...(filterParams.subtype && {
+          organizationalUnit: filterParams.subtype,
+        }),
+        ...(filterParams.year && { organizationalUnit: filterParams.year }),
+        ...(filterParams.term && { organizationalUnit: filterParams.term }),
+        ...(filterParams.offset && { organizationalUnit: filterParams.offset }),
+        ...(filterParams.limit && { organizationalUnit: filterParams.limit }),
+      },
     });
+    console.log(filterParams);
     return this.http.get<{
       documents: PortalDocumentResponse[];
       total: number;
@@ -45,11 +57,11 @@ export class PortalDocumentDataSource {
     return this.http.get<DocumentFiltersResponse>(`${this.URL}/filters`);
   }
 
-  private removeEmptyProperties<T extends object>(obj: T): Partial<T> {
+  private removeEmptyProperties(obj: object) {
     return Object.fromEntries(
       Object.entries(obj).filter(([_, value]) => {
         return value !== null && value !== undefined && value !== '';
       }),
-    ) as Partial<T>;
+    );
   }
 }

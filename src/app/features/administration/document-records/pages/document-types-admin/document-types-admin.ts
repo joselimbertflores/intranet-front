@@ -1,4 +1,4 @@
-import { linkedSignal, Component, inject, signal } from '@angular/core';
+import { linkedSignal, Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DialogService } from 'primeng/dynamicdialog';
@@ -19,6 +19,7 @@ import { DocumentTypeEditor } from '../../dialogs';
     ButtonModule,
     SearchInput,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './document-types-admin.html',
 })
 export default class DocumentTypesAdmin {

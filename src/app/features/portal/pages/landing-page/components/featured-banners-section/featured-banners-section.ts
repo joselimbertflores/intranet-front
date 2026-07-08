@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ButtonDirective, ButtonModule } from 'primeng/button';
@@ -97,6 +97,7 @@ import { FeaturedBanner } from '../../../../models';
       </section>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     :host {
       display: block;

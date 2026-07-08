@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { catchError, of } from 'rxjs';
@@ -22,6 +22,7 @@ import { PortalLandingService } from '../../services';
     LandingCommunicationsSection,
   ],
   templateUrl: './landing-page.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './landing-page.css',
 })
 export default class LandingPage {

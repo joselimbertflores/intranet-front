@@ -51,7 +51,7 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
               <p-avatar icon="pi pi-user" size="xlarge" shape="circle" />
             </div>
             <span class="font-semibold text-lg text-surface-800">
-              {{ user()?.fullName | titlecase }}
+              {{ $safeNavigationMigration(user()?.fullName) | titlecase }}
             </span>
             <p-menu [model]="menuOptions" class="w-full">
               <ng-template #item let-item>

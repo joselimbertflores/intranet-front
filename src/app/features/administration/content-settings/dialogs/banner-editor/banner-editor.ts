@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   ReactiveFormsModule,
@@ -51,6 +52,7 @@ import { HeroSlideResponse } from '../../interfaces';
     ConfirmDialogModule,
   ],
   templateUrl: './banner-editor.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ConfirmationService],
 })
 export class BannerEditor {

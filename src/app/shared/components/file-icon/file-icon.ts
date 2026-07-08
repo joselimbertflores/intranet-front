@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 
 const extensionIconMap: Record<string, string> = {
   pdf: 'pi pi-file-pdf text-red-500',
@@ -23,6 +23,7 @@ const extensionIconMap: Record<string, string> = {
 
 @Component({
   selector: 'file-icon',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ` <i
     [class]="iconClass()"
     class="shrink-0"

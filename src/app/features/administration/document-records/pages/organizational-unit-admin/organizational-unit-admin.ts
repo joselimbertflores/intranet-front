@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { computed } from '@angular/core';
 
@@ -28,6 +28,7 @@ import { OrganizationalUnitDatasource } from '../../services';
     TreeTableModule,
     FloatLabelModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './organizational-unit-admin.html',
 })
 export default class OrganizationalUnitAdmin {

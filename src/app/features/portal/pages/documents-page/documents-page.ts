@@ -8,6 +8,7 @@ import {
   signal,
   ElementRef,
   viewChild,
+  effect,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -33,7 +34,6 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TreeNode } from 'primeng/api';
 import { debounce, form, FormField, FormRoot } from '@angular/forms/signals';
-
 
 import {
   PortalDocumentResponse,
@@ -63,6 +63,13 @@ interface FilterQueryParams {
   subtype?: string;
   year?: string;
 }
+interface FilterFormMode {
+  term: string | null;
+  organizationalUnit: string | null;
+  documentType: string | null;
+  documentSubtype: string | null;
+  year: number | null;
+}
 
 @Component({
   selector: 'app-documents-page',
@@ -77,8 +84,6 @@ interface FilterQueryParams {
     DataViewModule,
     SelectModule,
     ButtonModule,
-    DatePicker,
-    SearchInput,
     FileSizePipe,
     FileIcon,
     PublicSectionHeader,
@@ -87,7 +92,7 @@ interface FilterQueryParams {
     IconFieldModule,
     InputTextModule,
     InputIconModule,
-    FormRoot
+    FormRoot,
   ],
   templateUrl: './documents-page.html',
   styles: `
@@ -154,7 +159,6 @@ interface FilterQueryParams {
 export default class DocumentsPage {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private formBuilder = inject(FormBuilder);
 
   private destroyRef = inject(DestroyRef);
   private documentDataSource = inject(PortalDocumentDataSource);
@@ -168,27 +172,26 @@ export default class DocumentsPage {
   offset = computed(() => this.limit() * this.index());
   searchTerm = signal('');
 
-  readonly sections = computed(() => {
-    const sections =
-      this.documentDataSource.documentFilters().organizationalUnits;
-    return this.toTreeNode(sections);
-  });
+  organizationTree = computed(() =>
+    this.toTreeNodes(
+      this.documentDataSource.documentFilters().organizationalUnits,
+    ),
+  );
+
   readonly types = computed(() => {
     return this.documentDataSource.documentFilters().types;
   });
 
-  selectedType = signal<string | null>(null);
+  readonly subtypes = computed(() => {
+    const selectedSlug = this.filterForm().value().documentType;
 
-  readonly subtypes = signal<DocSubtypeFilterResponse[]>([]);
+    if (!selectedSlug) return [];
 
-  // filterForm = this.formBuilder.group({
-  //   organizationalUnit: [null as string | null],
-  //   documentType: [null as string | null],
-  //   documentSubtype: [null as string | null],
-  //   year: [null as number | null],
-  // });
+    const selectedType = this.types().find(({ slug }) => slug === selectedSlug);
 
-  selectedYearDate = signal<Date | null>(null);
+    return selectedType?.subtypes ?? [];
+  });
+
   readonly activeQueryFilters = signal<FilterQueryParams>({});
   readonly advancedFiltersOpen = signal(false);
   readonly activeFilterCount = computed(() => {
@@ -200,13 +203,6 @@ export default class DocumentsPage {
       filters.section,
       filters.year,
     ].filter(Boolean).length;
-  });
-
-  // Detect when sections is loaded
-  selectedTreeNode = linkedSignal<TreeNode | null>(() => {
-    const slug = this.filterForm.get('organizationalUnit')?.value;
-    if (!slug) return null;
-    return this.findNodeByKey(this.sections(), slug);
   });
 
   readonly layoutOptions = ['list', 'grid'];
@@ -224,37 +220,42 @@ export default class DocumentsPage {
     stream: ({ params }) => this.documentDataSource.searchDocuments(params),
   });
 
-  filterFormModel = signal({
-    term: '',
+  filterFormModel = signal<FilterFormMode>({
     organizationalUnit: null,
-    documentType: '',
+    documentType: null,
     documentSubtype: null,
+    term: null,
     year: null,
   });
 
-  filterFormSignal = form(this.filterFormModel, (schemaPath) => {
+  filterForm = form(this.filterFormModel, (schemaPath) => {
     debounce(schemaPath.term, 350);
   });
 
-  constructor() {}
+  selectedOrganizationUnit = linkedSignal(() => {
+    const selectedSlug = this.filterForm().value().organizationalUnit;
+    if (!selectedSlug) return [];
+    return (
+      this.organizationTree().find((node) => node.data === selectedSlug) ?? null
+    );
+  });
 
-  ngOnInit() {
-    this.loadFilterParams();
-    this.listenToFilterChanges();
+  constructor() {
+    effect(() => {
+      const values = this.filterForm().value();
+      const filters = {
+        unit: this.normalizeFilterValue(values.organizationalUnit),
+        type: this.normalizeFilterValue(values.documentType),
+        subtype: this.normalizeFilterValue(values.documentSubtype),
+        year: this.normalizeFilterValue(values.year),
+        term: this.normalizeFilterValue(values.term),
+      };
+      this.setQueryParams(filters);
+    });
   }
 
-  searchDocuments(): void {
-    this.documentDataSource
-      .searchDocuments({
-        limit: this.limit(),
-        offset: this.offset(),
-        term: this.activeQueryFilters().term,
-        ...this.filterForm.value,
-      })
-      .subscribe(({ documents, total }) => {
-        this.dataSource.set(documents);
-        this.dataSize.set(total);
-      });
+  ngOnInit() {
+    this.loadForm();
   }
 
   changePage(event: { first?: number; rows?: number }) {
@@ -274,30 +275,10 @@ export default class DocumentsPage {
     //   queryParamsHandling: 'merge',
     //   replaceUrl: true,
     // });
-    this.searchDocuments();
   }
 
-  onSearch(term: string) {
-    this.searchTerm.set(term);
-    this.setQueryParams({ term: term !== '' ? term : null });
-  }
-
-  onSelectType(slug: string | null) {
-    const type = this.types().find((item) => item.slug === slug);
-    this.filterForm.patchValue({ documentSubtype: null });
-    this.subtypes.set(type?.subtypes ?? []);
-  }
-
-  selectDate(value: Date) {
-    this.setRouteQueryParams({ year: value.getFullYear() });
-  }
-
-  clearDate() {
-    this.setRouteQueryParams({ year: null });
-  }
-
-  selectSection(node: TreeNode) {
-    this.setRouteQueryParams({ section: node.key ?? null });
+  selectOrganizationUnit(node: TreeNode) {
+    this.filterForm.organizationalUnit().value.set(node.data ?? null);
   }
 
   clearSection() {
@@ -305,38 +286,27 @@ export default class DocumentsPage {
   }
 
   resetFilterForm() {
-    this.selectedTreeNode.set(null);
-    this.setRouteQueryParams({
-      term: null,
-      section: null,
-      type: null,
-      subtype: null,
-      year: null,
-    });
+    // this.selectedTreeNode.set(null);
+    // this.setRouteQueryParams({
+    //   term: null,
+    //   section: null,
+    //   type: null,
+    //   subtype: null,
+    //   year: null,
+    // });
   }
 
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((isOpen) => !isOpen);
   }
 
-  private toTreeNode(data: DocSectionFilterResponse[]): TreeNode[] {
-    return data.map((item) => ({
-      key: item.slug,
-      label: item.name.toUpperCase(),
-      children: item.children ? this.toTreeNode(item.children) : [],
+  private toTreeNodes(nodes: DocSectionFilterResponse[]): TreeNode<string>[] {
+    return nodes.map((node) => ({
+      key: node.id,
+      label: node.name.toUpperCase(),
+      data: node.slug,
+      children: node.children ? this.toTreeNodes(node.children) : [],
     }));
-  }
-
-  // Función recursiva para encontrar un nodo por su KEY
-  private findNodeByKey(nodes: TreeNode[], key: string): TreeNode | null {
-    for (const node of nodes) {
-      if (node.key === key) return node;
-      if (node.children) {
-        const found = this.findNodeByKey(node.children, key);
-        if (found) return found;
-      }
-    }
-    return null;
   }
 
   private setRouteQueryParams(params: Params): void {
@@ -348,32 +318,21 @@ export default class DocumentsPage {
     });
   }
 
-  private loadFilterParams(): void {
-    const queryParams = this.route.snapshot.queryParams;
-    this.filterForm.patchValue(
-      {
-        documentType: queryParams['type'],
-        documentSubtype: queryParams['subtype'],
-        organizationalUnit: queryParams['unit'],
-        year: Number.isInteger(+queryParams['year'])
-          ? +queryParams['year']
-          : null,
-      },
-      {
-        emitEvent: false,
-      },
+  private loadForm(): void {
+    this.filterFormModel.set(
+      this.mapQueryParams(this.route.snapshot.queryParams),
     );
   }
 
   private mapQueryParams(params: Record<string, string | undefined>) {
     return {
-      term: params['term'] || null,
-      unit: params['unit'] || null,
-      type: params['type'] || null,
-      subtype: params['subtype'] || null,
+      organizationalUnit: params['unit'] || null,
+      documentType: params['type'] || null,
+      documentSubtype: params['subtype'] || null,
       year: this.parseYear(params['year']),
       limit: this.parseLimit(params['limit']),
       offset: this.parseOffset(params['offset']),
+      term: params['term'] || null,
     };
   }
 
@@ -393,38 +352,27 @@ export default class DocumentsPage {
     return Number.isInteger(year) ? year : null;
   }
 
-  private listenToFilterChanges(): void {
-    this.filterForm.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.applyFilters());
-  }
-
   private applyFilters(): void {
-    const {
-      organizationalUnit: unit,
-      documentType: type,
-      documentSubtype: subtype,
-      year,
-    } = this.filterForm.value;
-
-    const filters = {
-      unit: this.normalizeFilterValue(unit),
-      type: this.normalizeFilterValue(type),
-      subtype: this.normalizeFilterValue(subtype),
-      year: this.normalizeFilterValue(year),
-    };
-
-    const current = this.queryParams();
-
-    const hasChanged =
-      filters.unit !== current.term ||
-      filters.type !== current.type ||
-      filters.subtype !== current.subtype ||
-      filters.year !== current.year;
-
-    if (!hasChanged) return;
-
-    this.setQueryParams({ ...filters, offset: 0 });
+    // const {
+    //   organizationalUnit: unit,
+    //   documentType: type,
+    //   documentSubtype: subtype,
+    //   year,
+    // } = this.filterForm.value;
+    // const filters = {
+    //   unit: this.normalizeFilterValue(unit),
+    //   type: this.normalizeFilterValue(type),
+    //   subtype: this.normalizeFilterValue(subtype),
+    //   year: this.normalizeFilterValue(year),
+    // };
+    // const current = this.queryParams();
+    // const hasChanged =
+    //   filters.unit !== current.term ||
+    //   filters.type !== current.type ||
+    //   filters.subtype !== current.subtype ||
+    //   filters.year !== current.year;
+    // if (!hasChanged) return;
+    // this.setQueryParams({ ...filters, offset: 0 });
   }
 
   private normalizeFilterValue(value: unknown): string | null {
@@ -436,10 +384,10 @@ export default class DocumentsPage {
   private setQueryParams(params: object): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: params,
       queryParamsHandling: 'merge',
       replaceUrl: true,
       scroll: 'manual',
+      queryParams: params,
     });
   }
 }

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'institutional-logo',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="grid h-12 w-12 place-items-center rounded-full border-2 border-primary-800 p-0.5"

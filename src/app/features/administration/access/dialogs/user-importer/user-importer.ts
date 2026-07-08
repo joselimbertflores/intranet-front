@@ -1,7 +1,7 @@
 import { TitleCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormGroup,
   Validators,
@@ -39,6 +39,7 @@ import { UserApi } from '../../services';
     SelectModule,
     TitleCasePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-importer.html',
 })
 export class UserImporter {

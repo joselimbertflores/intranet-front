@@ -175,7 +175,7 @@
                       placeholder="Nombre del archivo"
                       [ngClass]="{
                         'border-surface-300 focus:border-primary-500':
-                          item.get('title')?.valid,
+                          $safeNavigationMigration(item.get('title')?.valid),
                         'border-red-500 focus:border-red-500 focus:ring-red-500':
                           item.get('title')?.invalid &&
                           item.get('title')?.touched,

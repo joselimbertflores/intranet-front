@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -41,6 +41,7 @@ interface SubTypeOption {
     ButtonModule,
   ],
   templateUrl: './document-type-editor.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ConfirmationService],
 })
 export class DocumentTypeEditor {

@@ -5,13 +5,13 @@
   />
 
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-    <pre>{{ filterFormSignal().value() | json }}</pre>
+    <pre>{{ filterForm().value() | json }}</pre>
     <section
       #resultsSection
       class="rounded-2xl border border-surface-200 bg-surface-0 p-4 shadow-sm sm:p-5 lg:rounded-3xl results-section"
       aria-label="Filtros de documentos"
     >
-      <form [formRoot]="loginForm">
+      <form [formRoot]="filterForm">
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <div class="lg:col-span-4">
             <p-iconfield class="block w-full">
@@ -19,11 +19,11 @@
               <input
                 id="term"
                 pInputText
+                class="w-full"
                 type="search"
                 autocomplete="off"
-                placeholder="Buscar por código o resumen…"
-                [formField]="filterFormSignal.term"
-                class="w-full"
+                placeholder="Buscar por nombre"
+                [formField]="$any(filterForm.term)"
               />
             </p-iconfield>
           </div>
@@ -74,8 +74,8 @@
                   emptyFilterMessage="Sin resultados"
                   emptyMessage="Sin opciones"
                   [options]="types()"
-                  [formField]="$any(filterFormSignal.documentType)"
-                  (onChange)="onSelectType($event.value)"
+                  [formField]="$any(filterForm.documentType)"
+                  (onChange)="filterForm.documentSubtype().value.set(null)"
                 />
                 <label for="doctype">Tipo de documento</label>
               </p-floatlabel>
@@ -94,8 +94,8 @@
                   filterPlaceholder="Buscar subtipo"
                   emptyFilterMessage="Sin resultados"
                   emptyMessage="Sin opciones"
-                  formControlName="documentSubtype"
                   [options]="subtypes()"
+                  [formField]="$any(filterForm.documentSubtype)"
                 />
                 <label for="docsubtype">Subtipo</label>
               </p-floatlabel>
@@ -113,10 +113,10 @@
                   filterPlaceholder="Buscar unidad"
                   [filterInputAutoFocus]="true"
                   emptyMessage="Sin resultados"
-                  [(ngModel)]="selectedTreeNode"
+                  [(ngModel)]="selectedOrganizationUnit"
                   [ngModelOptions]="{ standalone: true }"
-                  [options]="sections()"
-                  (onNodeSelect)="selectSection($event.node)"
+                  [options]="organizationTree()"
+                  (onNodeSelect)="selectOrganizationUnit($event.node)"
                   (onClear)="clearSection()"
                 />
                 <label for="docsection">Unidad organizacional</label>
@@ -124,7 +124,7 @@
             </div>
 
             <div class="lg:col-span-2">
-              <year-selector formControlName="year" />
+              <year-selector [formField]="filterForm.year" />
             </div>
           </div>
         </div>
@@ -146,20 +146,21 @@
     </section>
 
     <section class="mt-8" aria-labelledby="document-results-count">
-      @if (!dataResource.isLoading()) {
+      @if (!dataResource.isLoading() && dataResource.hasValue()) {
         <p-dataview
-          styleClass="documents-data-view"
-          [value]="dataResource.value()?.documents"
-          [totalRecords]="dataSize()"
+          class="documents-data-view"
+          [value]="$safeNavigationMigration(dataResource.value().documents)"
+          [totalRecords]="dataResource.value().total"
           [lazy]="true"
           [layout]="layout()"
           [paginator]="true"
-          [rowsPerPageOptions]="[10, 25, 50]"
+          [rowsPerPageOptions]="rowsPerPageOptions"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="{first} - {last} de {totalRecords}"
           [rows]="limit()"
           [first]="offset()"
           (onPage)="changePage($event)"
+          paginatorDropdownAppendTo="body"
         >
           <ng-template #header>
             <div

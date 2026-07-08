@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -42,6 +42,7 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     InputTextModule,
     MessageModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './landing-notice-editor.html',
 })
 export class LandingNoticeEditor implements OnInit, OnDestroy {

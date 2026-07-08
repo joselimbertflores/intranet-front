@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -48,6 +48,7 @@ import {
     YearSelector,
   ],
   templateUrl: './document-admin.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [DialogService],
 })
 export default class DocumentAdmin {

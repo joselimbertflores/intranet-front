@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -49,6 +49,7 @@ import { FormUtils } from '../../../../../helpers';
     FileIcon,
     YearSelector,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './document-edit.html',
 })
 export class DocumentEdit implements OnInit {

@@ -3,17 +3,21 @@ import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { environment } from '../../../../environments/environment';
-
 import { DocumentFiltersResponse, PortalDocumentResponse } from '../interfaces';
 
 export interface SearchPublicDocumentsParams {
-  term?: string | null;
-  unit?: string | null;
-  type?: string | null;
-  subtype?: string | null;
+  organizationalUnit?: string | null;
+  documentType?: string | null;
+  documentSubtype?: string | null;
   year?: number | null;
-  limit: number;
-  offset: number;
+  term?: string | null;
+  limit?: number;
+  offset?: number;
+}
+
+interface PublicDocumentsResult {
+  documents: PortalDocumentResponse[];
+  total: number;
 }
 
 @Injectable({
@@ -30,27 +34,10 @@ export class PortalDocumentDataSource {
   constructor() {}
 
   searchDocuments(filterParams: SearchPublicDocumentsParams) {
-    
     const params = new HttpParams({
-      fromObject: {
-        ...(filterParams.unit && { organizationalUnit: filterParams.unit }),
-        ...(filterParams.type && { organizationalUnit: filterParams.type }),
-        ...(filterParams.subtype && {
-          organizationalUnit: filterParams.subtype,
-        }),
-        ...(filterParams.year && { organizationalUnit: filterParams.year }),
-        ...(filterParams.term && { organizationalUnit: filterParams.term }),
-        ...(filterParams.offset && { organizationalUnit: filterParams.offset }),
-        ...(filterParams.limit && { organizationalUnit: filterParams.limit }),
-      },
+      fromObject: this.removeEmptyProperties(filterParams),
     });
-    console.log(filterParams);
-    return this.http.get<{
-      documents: PortalDocumentResponse[];
-      total: number;
-    }>(`${this.URL}`, {
-      params,
-    });
+    return this.http.get<PublicDocumentsResult>(`${this.URL}`, { params });
   }
 
   private getDocumentFilters() {

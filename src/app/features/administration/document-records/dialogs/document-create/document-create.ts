@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -45,6 +45,7 @@ import { finalize } from 'rxjs';
     FileSizePipe,
     FileIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './document-create.html',
 })
 export class DocumentCreate {

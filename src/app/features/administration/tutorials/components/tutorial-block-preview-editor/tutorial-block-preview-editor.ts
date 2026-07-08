@@ -78,7 +78,7 @@ import { TutorialBlockResponse } from '../../interfaces';
                 class="rounded-lg border border-surface-100 overflow-hidden bg-surface-50 w-full flex justify-center"
               >
                 <img
-                  [src]="data().file?.url"
+                  [src]="$safeNavigationMigration(data().file?.url)"
                   [alt]="data().content || 'Imagen del tutorial'"
                   loading="lazy"
                   class="max-h-[350px] w-auto object-contain"
@@ -115,7 +115,7 @@ import { TutorialBlockResponse } from '../../interfaces';
                 preload="metadata"
                 class="w-full max-h-[400px] rounded-lg border border-surface-200 bg-black shadow-inner"
               >
-                <source [src]="data().file?.url" type="video/mp4" />
+                <source [src]="$safeNavigationMigration(data().file?.url)" type="video/mp4" />
                 Tu navegador no soporta el elemento de video.
               </video>
               @if (data().content) {
@@ -130,7 +130,7 @@ import { TutorialBlockResponse } from '../../interfaces';
             <div class="flex flex-col gap-2">
               @if (data().file) {
                 <a
-                  [href]="data().file?.url"
+                  [href]="$safeNavigationMigration(data().file?.url)"
                   target="_blank"
                   class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-full"
                 >

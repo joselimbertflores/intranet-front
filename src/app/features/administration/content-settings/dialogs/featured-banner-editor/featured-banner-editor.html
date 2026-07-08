@@ -68,7 +68,7 @@
             >
               @if (images()[i]?.preview) {
                 <img
-                  [src]="images()[i]?.preview"
+                  [src]="$safeNavigationMigration(images()[i]?.preview)"
                   class="h-full w-full object-cover"
                   alt="Vista previa del banner destacado"
                 />

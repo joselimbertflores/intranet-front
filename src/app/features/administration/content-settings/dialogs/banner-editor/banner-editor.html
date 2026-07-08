@@ -91,7 +91,7 @@
             >
               @if (bannerImages()[i]?.preview) {
                 <img
-                  [src]="bannerImages()[i]?.preview"
+                  [src]="$safeNavigationMigration(bannerImages()[i]?.preview)"
                   class="h-full w-full object-cover"
                   alt="Vista previa del banner"
                 />

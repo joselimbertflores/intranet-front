@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -103,6 +103,7 @@ export type QuickAccessIconKey = keyof typeof QUICK_ACCESS_ICONS;
     ButtonModule,
   ],
   templateUrl: './quick-access-editor.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ConfirmationService],
 })
 export class QuickAccessEditor {

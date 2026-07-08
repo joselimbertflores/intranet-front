@@ -38,7 +38,7 @@
                 class="flex h-12 w-12 items-center justify-center rounded-lg border border-surface-200 bg-surface-50"
               >
                 <i
-                  [class]="getQuickAccessIcon(item.get('iconKey')?.value)"
+                  [class]="getQuickAccessIcon($safeNavigationMigration(item.get('iconKey')?.value))"
                   class="text-primary-600"
                   style="font-size: 1.5rem"
                 ></i>

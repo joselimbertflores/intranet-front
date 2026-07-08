@@ -33,7 +33,7 @@
                     {{ data.block?.file!.originalName }}
                   </span>
                   <span class="text-xs text-surface-500">
-                    {{ data.block?.file!.size | fileSize }}
+                    {{ $safeNavigationMigration(data.block?.file!.size) | fileSize }}
                   </span>
                 </div>
               </div>

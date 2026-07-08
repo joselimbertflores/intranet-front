@@ -1,5 +1,5 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormGroup,
   Validators,
@@ -28,6 +28,7 @@ import { UserApi } from '../../services';
     MessageModule,
     TitleCasePipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-editor.html',
 })
 export class UserEditor {

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -58,6 +58,7 @@ interface PermissionView {
     ListboxModule,
     ButtonModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formGroup]="roleForm" (ngSubmit)="save()">
       <div class="space-y-4 pt-2">

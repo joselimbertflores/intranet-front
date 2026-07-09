@@ -51,7 +51,7 @@ import { FileIcon } from '../../../../../../shared';
         >
           @for (doc of documents(); track doc.id; let i = $index) {
             <a
-              [href]="doc.file.url"
+              [href]="doc.file.downloadUrl"
               target="_blank"
               rel="noopener noreferrer"
               class="group flex flex-col gap-4 p-5 transition-all duration-300 ease-out hover:bg-surface-50/70 sm:flex-row sm:items-center sm:justify-between"

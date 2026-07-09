@@ -1,68 +1,42 @@
 import {
-  ChangeDetectionStrategy,
+  afterRenderEffect,
   linkedSignal,
+  ElementRef,
+  viewChild,
   Component,
-  DestroyRef,
   computed,
   inject,
   signal,
-  ElementRef,
-  viewChild,
   effect,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import {
-  rxResource,
-  takeUntilDestroyed,
-  toSignal,
-} from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { debounce, form, FormField, FormRoot } from '@angular/forms/signals';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { PaginatorModule } from 'primeng/paginator';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
+import { PaginatorModule } from 'primeng/paginator';
+import { InputIconModule } from 'primeng/inputicon';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputTextModule } from 'primeng/inputtext';
 import { DataViewModule } from 'primeng/dataview';
-import { DatePicker } from 'primeng/datepicker';
+import { SkeletonModule } from 'primeng/skeleton';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TreeNode } from 'primeng/api';
-import { debounce, form, FormField, FormRoot } from '@angular/forms/signals';
 
-import {
-  PortalDocumentResponse,
-  DocSectionFilterResponse,
-  DocSubtypeFilterResponse,
-} from '../../interfaces';
-import {
-  FileIcon,
-  FileSizePipe,
-  SearchInput,
-  YearSelector,
-} from '../../../../shared';
-import {
-  PortalDocumentDataSource,
-  SearchPublicDocumentsParams,
-} from '../../services';
+import { map } from 'rxjs';
+
+import { YearSelector } from '../../../../shared';
+import { DocSectionFilterResponse } from '../../interfaces';
+import { PortalDocumentDataSource } from '../../services';
 import { PublicSectionHeader } from '../../components';
-import { debounceTime, map } from 'rxjs';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputIconModule } from 'primeng/inputicon';
+import { PortalDocumentGridCard } from './components/portal-document-grid-card/portal-document-grid-card';
+import { PortalDocumentListItem } from './components/portal-document-list-item/portal-document-list-item';
 
-interface FilterQueryParams {
-  term?: string;
-  section?: string;
-  type?: string;
-  subtype?: string;
-  year?: string;
-}
 interface FilterFormMode {
   term: string | null;
   organizationalUnit: string | null;
@@ -76,108 +50,97 @@ interface FilterFormMode {
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     SelectButtonModule,
-    PaginatorModule,
     TreeSelectModule,
     FloatLabelModule,
-    DataViewModule,
-    SelectModule,
-    ButtonModule,
-    FileSizePipe,
-    FileIcon,
-    PublicSectionHeader,
-    YearSelector,
-    FormField,
     IconFieldModule,
     InputTextModule,
     InputIconModule,
+    PaginatorModule,
+    DataViewModule,
+    SkeletonModule,
+    SelectModule,
+    ButtonModule,
+    YearSelector,
+    FormField,
+    PublicSectionHeader,
+    PortalDocumentGridCard,
+    PortalDocumentListItem,
     FormRoot,
   ],
-  templateUrl: './documents-page.html',
   styles: `
-    :host {
-      display: block;
-    }
-
-    :host ::ng-deep .documents-data-view .p-dataview-header {
-      border: 0;
+    ::ng-deep .p-dataview .p-dataview-header {
       background: transparent;
-      padding: 0 0 1.25rem;
+      padding: 8px;
+    }
+    ::ng-deep .p-dataview .p-dataview-content {
+      padding: 8px;
     }
 
-    :host ::ng-deep .documents-data-view .p-dataview-content {
-      background: transparent;
+    :host ::ng-deep .compact-paginator {
+      font-size: 14px;
+      --p-paginator-background: transparent;
+      --p-paginator-padding: 0px;
+      --p-select-padding-y: 0.1rem;
+      --p-select-padding-x: 0.2rem;
     }
 
-    :host ::ng-deep .documents-data-view > .p-dataview-paginator-bottom {
-      margin-top: 1.5rem;
-      border: 1px solid var(--p-surface-200);
-      border-radius: 1rem;
-      background: var(--p-surface-0);
-      padding: 0.75rem;
+    .fade-in {
+      animation: fade-in 160ms ease-out;
     }
 
-    :host ::ng-deep .documents-top-paginator {
-      border: 0;
-      background: transparent;
-      padding: 0;
-    }
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
 
-    :host
-      ::ng-deep
-      .documents-top-paginator
-      :is(.p-paginator-prev, .p-paginator-next) {
-      min-width: 2rem;
-      width: 2rem;
-      height: 2rem;
-    }
-
-    :host ::ng-deep .documents-top-paginator .p-paginator-current {
-      min-width: auto;
-      padding: 0 0.35rem;
-      font-size: 0.75rem;
-    }
-
-    @media (max-width: 40rem) {
-      :host
-        ::ng-deep
-        .documents-data-view
-        > .p-dataview-paginator-bottom
-        .p-paginator {
-        justify-content: center;
-        row-gap: 0.5rem;
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
-    .results-section {
-      scroll-margin-top: 100px;
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in {
+        animation: none;
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './documents-page.html',
 })
 export default class DocumentsPage {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  private destroyRef = inject(DestroyRef);
   private documentDataSource = inject(PortalDocumentDataSource);
 
-  readonly rowsPerPageOptions = [10, 20, 30, 50];
+  private readonly DEFAULT_LIMIT = 20;
+  private readonly DEFAULT_OFFSET = 0;
+  readonly rowsPerPageOptions = [20, 30, 40, 50];
+  readonly layoutOptions = ['list', 'grid'];
+  readonly listSkeletonRows = Array.from({ length: 6 });
+  readonly gridSkeletonCards = Array.from({ length: 6 });
+  layout = signal<'list' | 'grid'>('list');
 
-  dataSize = signal(0);
-  dataSource = signal<PortalDocumentResponse[]>([]);
-  limit = signal(10);
-  index = signal(0);
-  offset = computed(() => this.limit() * this.index());
-  searchTerm = signal('');
+  queryParams = toSignal(
+    this.route.queryParams.pipe(map((params) => this.mapQueryParams(params))),
+    { initialValue: this.mapQueryParams(this.route.snapshot.queryParams) },
+  );
 
-  organizationTree = computed(() =>
+  limit = linkedSignal(() => this.queryParams().limit);
+  offset = linkedSignal(() => this.queryParams().offset);
+
+  dataResource = rxResource({
+    params: () => this.queryParams(),
+    stream: ({ params }) => this.documentDataSource.searchDocuments(params),
+  });
+
+  readonly organizationTree = computed(() =>
     this.toTreeNodes(
       this.documentDataSource.documentFilters().organizationalUnits,
     ),
   );
-
   readonly types = computed(() => {
     return this.documentDataSource.documentFilters().types;
   });
@@ -192,32 +155,23 @@ export default class DocumentsPage {
     return selectedType?.subtypes ?? [];
   });
 
-  readonly activeQueryFilters = signal<FilterQueryParams>({});
   readonly advancedFiltersOpen = signal(false);
-  readonly activeFilterCount = computed(() => {
-    const filters = this.activeQueryFilters();
-    return [
-      filters.term,
-      filters.type,
-      filters.subtype,
-      filters.section,
-      filters.year,
-    ].filter(Boolean).length;
+  private filtersTop = viewChild<ElementRef<HTMLElement>>('filtersTop');
+
+  hasActiveFilters = computed(() => {
+    const { term, year, organizationalUnit, documentType, documentSubtype } =
+      this.queryParams();
+    return [term, year, organizationalUnit, documentSubtype, documentType].some(
+      Boolean,
+    );
   });
 
-  readonly layoutOptions = ['list', 'grid'];
-  layout = signal<'list' | 'grid'>('list');
-
-  resultsSection = viewChild<ElementRef<HTMLElement>>('resultsSection');
-
-  queryParams = toSignal(
-    this.route.queryParams.pipe(map((params) => this.mapQueryParams(params))),
-    { initialValue: this.mapQueryParams(this.route.snapshot.queryParams) },
-  );
-
-  dataResource = rxResource({
-    params: () => this.queryParams(),
-    stream: ({ params }) => this.documentDataSource.searchDocuments(params),
+  activeAdvancedFiltersCount = computed(() => {
+    const { year, organizationalUnit, documentType, documentSubtype } =
+      this.queryParams();
+    return [year, organizationalUnit, documentType, documentSubtype].filter(
+      Boolean,
+    ).length;
   });
 
   filterFormModel = signal<FilterFormMode>({
@@ -232,13 +186,21 @@ export default class DocumentsPage {
     debounce(schemaPath.term, 350);
   });
 
-  selectedOrganizationUnit = linkedSignal(() => {
+  selectedTreeNode = linkedSignal(() => {
     const selectedSlug = this.filterForm().value().organizationalUnit;
-    if (!selectedSlug) return [];
+    if (!selectedSlug) return null;
     return (
       this.organizationTree().find((node) => node.data === selectedSlug) ?? null
     );
   });
+
+  /**
+   * Solo paginación activa el scroll al bloque de filtros.
+   *
+   * Los filtros/buscador ya están en la parte superior, así que al cambiar
+   * esos query params no movemos el scroll.
+   */
+  private pendingScrollToFilters = false;
 
   constructor() {
     effect(() => {
@@ -252,48 +214,41 @@ export default class DocumentsPage {
       };
       this.setQueryParams(filters);
     });
+
+    afterRenderEffect(() => {
+      this.handlePendingScrollAfterRender();
+    });
   }
 
   ngOnInit() {
-    this.loadForm();
+    this.syncFormFromQueryParams();
   }
 
-  changePage(event: { first?: number; rows?: number }) {
-    const rows = event.rows ?? this.limit();
-    const first = event.first ?? 0;
-
-    this.limit.set(rows);
-    this.index.set(first / rows);
-    this.resultsSection()?.nativeElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-    // console.log(this.resultsSection());
-    // this.router.navigate([], {
-    //   relativeTo: this.route,
-    //   queryParams: { limit: this.limit(), index: this.limit() },
-    //   queryParamsHandling: 'merge',
-    //   replaceUrl: true,
-    // });
+  changePage(
+    event: { rows?: number; first?: number },
+    scrollToFilters?: boolean,
+  ) {
+    const limit = event.rows ?? this.DEFAULT_LIMIT;
+    const offset = event.first ?? this.DEFAULT_OFFSET;
+    this.setQueryParams({ limit, offset }, { scrollToFilters });
   }
 
   selectOrganizationUnit(node: TreeNode) {
     this.filterForm.organizationalUnit().value.set(node.data ?? null);
   }
 
-  clearSection() {
-    this.setRouteQueryParams({ section: null });
+  clearOrganizationUnit() {
+    this.filterForm.organizationalUnit().value.set(null);
   }
 
-  resetFilterForm() {
-    // this.selectedTreeNode.set(null);
-    // this.setRouteQueryParams({
-    //   term: null,
-    //   section: null,
-    //   type: null,
-    //   subtype: null,
-    //   year: null,
-    // });
+  resetFilters() {
+    this.filterFormModel.set({
+      organizationalUnit: null,
+      documentSubtype: null,
+      documentType: null,
+      term: null,
+      year: null,
+    });
   }
 
   toggleAdvancedFilters(): void {
@@ -309,16 +264,7 @@ export default class DocumentsPage {
     }));
   }
 
-  private setRouteQueryParams(params: Params): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: params,
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
-  }
-
-  private loadForm(): void {
+  private syncFormFromQueryParams(): void {
     this.filterFormModel.set(
       this.mapQueryParams(this.route.snapshot.queryParams),
     );
@@ -336,43 +282,27 @@ export default class DocumentsPage {
     };
   }
 
-  private parseLimit(value: string | undefined): number {
-    const parsed = Number(value);
-    return this.rowsPerPageOptions.includes(parsed) ? parsed : 10;
-  }
-
-  private parseOffset(value: string | undefined): number {
-    const parsed = Number(value);
-    return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
-  }
-
-  private parseYear(value: string | undefined): number | null {
-    if (!value) return null;
-    const year = Number(value);
-    return Number.isInteger(year) ? year : null;
-  }
-
-  private applyFilters(): void {
-    // const {
-    //   organizationalUnit: unit,
-    //   documentType: type,
-    //   documentSubtype: subtype,
-    //   year,
-    // } = this.filterForm.value;
-    // const filters = {
-    //   unit: this.normalizeFilterValue(unit),
-    //   type: this.normalizeFilterValue(type),
-    //   subtype: this.normalizeFilterValue(subtype),
-    //   year: this.normalizeFilterValue(year),
-    // };
-    // const current = this.queryParams();
-    // const hasChanged =
-    //   filters.unit !== current.term ||
-    //   filters.type !== current.type ||
-    //   filters.subtype !== current.subtype ||
-    //   filters.year !== current.year;
-    // if (!hasChanged) return;
-    // this.setQueryParams({ ...filters, offset: 0 });
+  /**
+   * Usamos scroll: 'manual' para evitar que Angular mande al top absoluto
+   * cuando cambia la URL por query params.
+   *
+   * Si la navegación viene de paginación, shouldScrollToFilters se encarga
+   * de mover al inicio del bloque de filtros después de cargar la data.
+   */
+  private setQueryParams(
+    params: object,
+    options: { scrollToFilters?: boolean } = {},
+  ): void {
+    if (options.scrollToFilters) {
+      this.pendingScrollToFilters = true;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+      scroll: 'manual',
+      queryParams: params,
+    });
   }
 
   private normalizeFilterValue(value: unknown): string | null {
@@ -381,13 +311,33 @@ export default class DocumentsPage {
     return normalized.length ? normalized : null;
   }
 
-  private setQueryParams(params: object): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-      scroll: 'manual',
-      queryParams: params,
+  private parseLimit(value: string | undefined): number {
+    const parsed = Number(value);
+    return this.rowsPerPageOptions.includes(parsed)
+      ? parsed
+      : this.DEFAULT_LIMIT;
+  }
+
+  private parseOffset(value: string | undefined): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0
+      ? parsed
+      : this.DEFAULT_OFFSET;
+  }
+
+  private parseYear(value: string | undefined): number | null {
+    if (!value) return null;
+    const year = Number(value);
+    return Number.isInteger(year) ? year : null;
+  }
+
+  private handlePendingScrollAfterRender(): void {
+    if (this.dataResource.isLoading()) return;
+    if (!this.pendingScrollToFilters) return;
+    this.filtersTop()?.nativeElement.scrollIntoView({
+      block: 'start',
+      behavior: 'smooth',
     });
+    this.pendingScrollToFilters = false;
   }
 }

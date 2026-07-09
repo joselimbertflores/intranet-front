@@ -10,12 +10,10 @@ export interface PortalDocumentResponse {
 }
 
 export interface PortalFileResponse {
-  id: string;
-  url: string;
   name: string;
   mimeType: string;
   size: number;
-  extension: string;
+  downloadUrl: string;
 }
 export interface DocumentFiltersResponse {
   organizationalUnits: DocSectionFilterResponse[];

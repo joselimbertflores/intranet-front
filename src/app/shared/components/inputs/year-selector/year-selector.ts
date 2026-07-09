@@ -1,15 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   forwardRef,
   input,
+  model,
   output,
+  signal,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormsModule,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 
@@ -27,15 +31,15 @@ type YearOption = {
         [inputId]="inputId()"
         class="w-full"
         appendTo="body"
-        [options]="yearOptions"
+        [options]="yearOptions()"
         optionLabel="label"
         optionValue="value"
         [filter]="filter()"
         [showClear]="showClear()"
         [filterPlaceholder]="filterPlaceholder()"
         [emptyMessage]="emptyMessage()"
-        [disabled]="disabled"
-        [ngModel]="selectedYear"
+        [disabled]="isDisabled()"
+        [ngModel]="value()"
         (ngModelChange)="onYearChange($event)"
         (onBlur)="onBlur()"
       />
@@ -55,7 +59,9 @@ type YearOption = {
     },
   ],
 })
-export class YearSelector implements ControlValueAccessor {
+export class YearSelector
+  implements FormValueControl<number | null>, ControlValueAccessor
+{
   readonly label = input('Gestión');
   readonly inputId = input('yearInput');
 
@@ -67,20 +73,38 @@ export class YearSelector implements ControlValueAccessor {
   readonly emptyMessage = input('Sin elementos');
   readonly filterPlaceholder = input('Buscar gestión');
 
+  /**
+   * Signal Forms necesita esta propiedad con este nombre: value.
+   */
+  readonly value = model<number | null>(null);
+
+  /**
+   * Signal Forms puede sincronizar disabled si existe este input.
+   */
+  readonly disabled = input(false);
+
+  /**
+   * Reactive Forms usa setDisabledState().
+   */
+  private readonly cvaDisabled = signal(false);
+
+  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+
   readonly yearSelected = output<number | null>();
 
-  selectedYear: number | null = null;
-  disabled = false;
-
-  get yearOptions(): YearOption[] {
-    return this.buildYearOptions(this.minYear(), this.maxYear());
-  }
+  readonly yearOptions = computed<YearOption[]>(() =>
+    this.buildYearOptions(this.minYear(), this.maxYear()),
+  );
 
   private onChange: (value: number | null) => void = () => {};
   private onTouched: () => void = () => {};
 
+  /**
+   * Reactive Forms: setValue, patchValue, reset, etc.
+   * Importante: aceptar null.
+   */
   writeValue(value: number | null): void {
-    this.selectedYear = value;
+    this.value.set(value);
   }
 
   registerOnChange(fn: (value: number | null) => void): void {
@@ -92,21 +116,36 @@ export class YearSelector implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.cvaDisabled.set(isDisabled);
   }
 
   onYearChange(value: number | null): void {
-    this.selectedYear = value;
+    /**
+     * Signal Forms lee/escribe este model().
+     */
+    this.value.set(value);
 
-    // Para Reactive Forms
+    /**
+     * Reactive Forms necesita esta llamada.
+     */
     this.onChange(value);
 
-    // Para uso suelto o lógica adicional
+    /**
+     * Uso externo opcional.
+     */
     this.yearSelected.emit(value);
   }
 
   onBlur(): void {
+    /**
+     * Reactive Forms.
+     */
     this.onTouched();
+
+    /**
+     * Opcional: si luego quieres exponer touched para Signal Forms,
+     * puedes agregar touch = output<void>().
+     */
   }
 
   private buildYearOptions(minYear: number, maxYear: number): YearOption[] {

@@ -1,0 +1,81 @@
+<article
+  class="group grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-surface-200 bg-surface-0 p-3 shadow-sm transition duration-200 hover:border-primary-200 hover:shadow-md sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4 motion-reduce:transition-none"
+>
+  <div class="flex w-16 flex-col items-center gap-1">
+    <div
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-surface-200 bg-surface-50 transition-colors group-hover:border-primary-200 group-hover:bg-primary-50"
+      aria-hidden="true"
+    >
+      <file-icon
+        [fileName]="document().file.name"
+        [mimeType]="document().file.mimeType"
+      />
+    </div>
+    <span
+      class="whitespace-nowrap text-[10px] font-medium leading-4 text-surface-500"
+    >
+      {{ document().file.size | fileSize }}
+    </span>
+  </div>
+
+  <div class="min-w-0">
+    <h3
+      class="line-clamp-2 text-[0.95rem] font-semibold leading-5 text-surface-900 transition-colors group-hover:text-primary-800 sm:line-clamp-1 sm:text-base"
+      [title]="document().title"
+    >
+      {{ document().title }}
+    </h3>
+
+    <p
+      class="mt-0.5 line-clamp-1 text-xs leading-5 text-surface-500 sm:text-[0.8125rem]"
+      [title]="document().organizationalUnit"
+    >
+      <span class="font-medium text-surface-600">Unidad:</span>
+      {{ document().organizationalUnit }}
+    </p>
+
+    <div
+      class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-surface-500 sm:text-xs"
+    >
+      <span>
+        <span class="font-medium text-surface-600">Tipo:</span>
+        {{ document().documentType }}
+      </span>
+      @if (document().documentSubtype) {
+        <span aria-hidden="true">·</span>
+        <span>
+          <span class="font-medium text-surface-600">Subtipo:</span>
+          {{ document().documentSubtype }}
+        </span>
+      }
+      @if (document().year) {
+        <span aria-hidden="true">·</span>
+        <span>
+          <span class="font-medium text-surface-600">Gestión:</span>
+          {{ document().year }}
+        </span>
+      }
+      <span aria-hidden="true">·</span>
+      @if (document().downloadCount > 10) {
+        <span>
+          <span class="font-medium text-surface-600">Descargas:</span>
+          {{ document().downloadCount }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <a
+    [href]="document().file.downloadUrl"
+    pButton
+    pRipple
+    size="small"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="col-span-2 w-full shrink-0 justify-center gap-2 md:col-span-1 md:w-auto"
+    [attr.aria-label]="'Descargar ' + document().title"
+  >
+    <i class="pi pi-download" aria-hidden="true"></i>
+    <span class="font-semibold">Descargar</span>
+  </a>
+</article>

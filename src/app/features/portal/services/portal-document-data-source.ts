@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { environment } from '../../../../environments/environment';
 import { DocumentFiltersResponse, PortalDocumentResponse } from '../interfaces';
+import { environment } from '../../../../environments/environment';
 
 export interface SearchPublicDocumentsParams {
   organizationalUnit?: string | null;
@@ -13,11 +13,6 @@ export interface SearchPublicDocumentsParams {
   term?: string | null;
   limit?: number;
   offset?: number;
-}
-
-interface PublicDocumentsResult {
-  documents: PortalDocumentResponse[];
-  total: number;
 }
 
 @Injectable({
@@ -37,7 +32,10 @@ export class PortalDocumentDataSource {
     const params = new HttpParams({
       fromObject: this.removeEmptyProperties(filterParams),
     });
-    return this.http.get<PublicDocumentsResult>(`${this.URL}`, { params });
+    return this.http.get<{
+      documents: PortalDocumentResponse[];
+      total: number;
+    }>(`${this.URL}`, { params });
   }
 
   private getDocumentFilters() {

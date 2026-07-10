@@ -34,28 +34,18 @@
   </ng-template>
   <ng-template #header>
     <tr>
-      <th>Adjunto</th>
       <th>Tipo</th>
       <th>Cite</th>
       <th>Referencia</th>
       <th>Fecha</th>
       <th>Evento</th>
       <th>Estado</th>
+      <th>Adjunto</th>
       <th style="width: 3rem"></th>
     </tr>
   </ng-template>
   <ng-template #body let-item>
     <tr>
-      <td>
-        <a
-          [href]="item.file.url"
-          target="_blank"
-          title="Abrir PDF"
-          class="underline text-primary"
-        >
-          Documento
-        </a>
-      </td>
       <td>{{ item.type.name }}</td>
       <td>{{ item.code }}</td>
       <td class="truncate max-w-[200px]">{{ item.reference }}</td>
@@ -67,6 +57,18 @@
         } @else {
           <p-tag severity="danger" value="Inactivo" />
         }
+      </td>
+      <td>
+        <!-- <a
+          [href]="item.file.url"
+          target="_blank"
+          title="Abrir PDF"
+          class="underline text-primary"
+        >
+          Ver
+        </a> -->
+
+        <p-button  size="small" icon="pi pi-eye" label="Ver" />
       </td>
       <td>
         @if (hasRowActions(item)) {

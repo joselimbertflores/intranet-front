@@ -10,7 +10,7 @@ import { PortalCalendarResponse } from '../interfaces';
 })
 export class PortalCalendarDataSource {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/portal-calendar`;
+  private readonly URL = `${environment.baseUrl}/api/portal-calendar`;
   constructor() {}
 
   getEvents(start: string, end: string) {

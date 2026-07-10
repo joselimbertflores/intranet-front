@@ -7,7 +7,7 @@ import { CalendarEventResponse, FormCalendarProps } from '../interfaces';
   providedIn: 'root',
 })
 export class CalendarDataSource {
-  private readonly URL = `${environment.baseUrl}/calendar`;
+  private readonly URL = `${environment.baseUrl}/api/calendar`;
   private http = inject(HttpClient);
 
   constructor() {}

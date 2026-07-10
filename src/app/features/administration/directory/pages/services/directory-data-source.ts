@@ -30,7 +30,7 @@ export interface DirectoryContact {
   providedIn: 'root',
 })
 export class DirectoryDataSource {
-  private readonly URL = `${environment.baseUrl}/directory`;
+  private readonly URL = `${environment.baseUrl}/api/directory`;
   private http = inject(HttpClient);
 
   constructor() {}

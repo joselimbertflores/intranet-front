@@ -10,7 +10,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class PortalDirectoryDataSource {
   private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/portal-directory`;
+  private readonly URL = `${environment.baseUrl}/api/portal-directory`;
 
   directory = toSignal(this.getDirectory(), { initialValue: [] });
 

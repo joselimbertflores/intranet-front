@@ -9,7 +9,13 @@ import {
   signal,
   effect,
 } from '@angular/core';
-import { debounce, form, FormField, FormRoot } from '@angular/forms/signals';
+import {
+  debounce,
+  disabled,
+  form,
+  FormField,
+  FormRoot,
+} from '@angular/forms/signals';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -184,6 +190,9 @@ export default class DocumentsPage {
 
   filterForm = form(this.filterFormModel, (schemaPath) => {
     debounce(schemaPath.term, 350);
+    disabled(schemaPath.documentSubtype, {
+      when: ({ valueOf }) => valueOf(schemaPath.documentType) === null,
+    });
   });
 
   selectedTreeNode = linkedSignal(() => {

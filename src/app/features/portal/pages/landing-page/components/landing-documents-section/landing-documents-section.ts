@@ -1,113 +1,141 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { PortalDocumentResponse } from '../../../../interfaces';
-import { FileIcon } from '../../../../../../shared';
+import { FileIcon, FileSizePipe } from '../../../../../../shared';
 
 @Component({
   selector: 'landing-documents-section',
-  imports: [CommonModule, RouterModule, FileIcon],
+  imports: [RouterLink, FileIcon, FileSizePipe],
   template: `
-    <section class="py-16 md:py-24">
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <!-- Header -->
+    <section class="border-y border-surface-200/70 bg-surface-50/70 py-12 md:py-14">
+      <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div class="mb-6 max-w-2xl">
+          <h2
+            class="text-2xl font-semibold tracking-tight text-surface-950 sm:text-3xl"
+          >
+            Documentos más consultados
+          </h2>
+
+          <p class="mt-3 text-sm text-surface-600 sm:text-base">
+            Accede rápidamente a los documentos institucionales más utilizados.
+          </p>
+        </div>
+
         <div
-          class="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+          class="overflow-hidden rounded-xl border border-surface-200 bg-surface-0 shadow-[0_1px_2px_rgb(15_23_42/0.05)]"
         >
-          <div class="max-w-3xl">
-            <span
-              class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-700 ring-1 ring-inset ring-primary-700/10"
-            >
-              Documentos
-            </span>
+          <div class="divide-y divide-surface-100">
+            @for (doc of visibleDocuments(); track doc.id) {
+              <article
+                class="grid gap-3 px-4 py-4 transition-colors hover:bg-surface-50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
+              >
+                <div class="flex min-w-0 gap-3">
+                  <span
+                    class="grid size-11 shrink-0 place-items-center rounded-lg bg-surface-100 ring-1 ring-inset ring-surface-200"
+                    aria-hidden="true"
+                  >
+                    <file-icon
+                      [fileName]="doc.file.name"
+                      [mimeType]="doc.file.mimeType"
+                    />
+                  </span>
 
-            <h2
-              class="mt-4 text-3xl font-semibold tracking-tight text-surface-900 sm:text-4xl"
-            >
-              Documentos más descargados
-            </h2>
+                  <div class="min-w-0">
+                    <h3
+                      class="line-clamp-2 text-sm font-semibold leading-5 text-surface-950 sm:text-base"
+                      [title]="doc.title"
+                    >
+                      {{ doc.title }}
+                    </h3>
 
-            <p class="mt-3 text-sm text-surface-600 sm:text-base">
-              Normativas, recursos y archivos de consulta frecuente disponibles
-              para descarga inmediata.
-            </p>
+                    <div
+                      class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-surface-500"
+                    >
+                      @if (documentCategory(doc)) {
+                        <span
+                          class="max-w-full truncate font-semibold text-primary-700"
+                        >
+                          {{ documentCategory(doc) }}
+                        </span>
+                      }
+
+                      @if (doc.organizationalUnit) {
+                        <span class="inline-flex items-center gap-1">
+                          <i class="pi pi-building text-[10px]" aria-hidden="true"></i>
+                          <span>{{ doc.organizationalUnit }}</span>
+                        </span>
+                      }
+
+                      @if (doc.year) {
+                        <span class="inline-flex items-center gap-1">
+                          <i class="pi pi-calendar text-[10px]" aria-hidden="true"></i>
+                          <span>Gestión {{ doc.year }}</span>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="flex flex-wrap items-center justify-between gap-3 pl-14 sm:justify-end sm:pl-0"
+                >
+                  <div
+                    class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-surface-500"
+                  >
+                    <span class="inline-flex items-center gap-1">
+                      <i class="pi pi-download text-[10px]" aria-hidden="true"></i>
+                      <span>{{ doc.downloadCount }} descargas</span>
+                    </span>
+                    <span>{{ doc.file.size | fileSize }}</span>
+                  </div>
+
+                  <a
+                    [href]="doc.file.downloadUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex min-h-9 items-center gap-2 rounded-lg bg-primary-600 px-3.5 text-sm font-semibold text-white no-underline shadow-sm transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                    [attr.aria-label]="'Descargar ' + doc.title"
+                  >
+                    <i class="pi pi-download text-xs" aria-hidden="true"></i>
+                    Descargar
+                  </a>
+                </div>
+              </article>
+            }
           </div>
+        </div>
+
+        <div
+          class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          @if (documents().length > visibleDocuments().length) {
+            <p
+              class="text-xs font-medium text-surface-500"
+              aria-label="Cantidad de documentos mostrados"
+            >
+              Mostrando {{ visibleDocuments().length }} de
+              {{ documents().length }} documentos consultados.
+            </p>
+          } @else {
+            <span aria-hidden="true"></span>
+          }
 
           <a
             routerLink="/documents"
-            class="group inline-flex items-center gap-2 rounded-full ring-1 ring-inset ring-surface-200 bg-surface-0 px-5 py-2.5 text-sm font-semibold text-surface-700 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:ring-surface-300 hover:bg-surface-50 hover:text-surface-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            class="group inline-flex w-fit items-center gap-2 rounded-lg border border-surface-300 bg-surface-0 px-4 py-2.5 text-sm font-semibold text-surface-800 shadow-sm transition-colors hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
           >
-            Ver todos
+            Ver todos los documentos
             <i
-              class="pi pi-arrow-right text-xs transition-transform duration-300 ease-out group-hover:translate-x-1"
+              class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
             ></i>
           </a>
-        </div>
-
-        <!-- Document list -->
-        <div
-          class="divide-y divide-surface-100 rounded-xl border border-surface-200 bg-surface-0 overflow-hidden"
-        >
-          @for (doc of documents(); track doc.id; let i = $index) {
-            <a
-              [href]="doc.file.downloadUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group flex flex-col gap-4 p-5 transition-all duration-300 ease-out hover:bg-surface-50/70 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <!-- Left -->
-              <div class="flex min-w-0 items-center gap-4">
-                <div
-                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-600 transition group-hover:bg-primary-50 group-hover:text-primary-700"
-                >
-                  <file-icon
-                    [fileName]="doc.file.name"
-                    [mimeType]="doc.file.mimeType"
-                  />
-                </div>
-
-                <div class="min-w-0">
-                  <h3
-                    class="truncate text-sm font-semibold text-surface-900 group-hover:text-primary-700 sm:text-base"
-                  >
-                    {{ doc.title }}
-                  </h3>
-
-                  <div
-                    class="mt-1 flex flex-wrap items-center gap-2 text-xs text-surface-500"
-                  >
-                    <span *ngIf="doc.documentType">
-                      {{ doc.documentType }}
-                    </span>
-
-                    <span *ngIf="doc.organizationalUnit">
-                      • {{ doc.organizationalUnit }}
-                    </span>
-
-                    <span *ngIf="doc.year">
-                      • Gestión {{ doc.year }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right -->
-              <div
-                class="flex items-center gap-5 text-sm text-surface-500 justify-between sm:justify-end"
-              >
-                <span class="text-xs font-medium">
-                  {{ doc.downloadCount }} descargas
-                </span>
-
-                <span
-                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-900 text-white transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-primary-700"
-                >
-                  <i class="pi pi-download text-xs"></i>
-                </span>
-              </div>
-            </a>
-          }
         </div>
       </div>
     </section>
@@ -115,5 +143,13 @@ import { FileIcon } from '../../../../../../shared';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingDocumentsSection {
-  documents = input.required<PortalDocumentResponse[]>();
+  readonly documents = input.required<PortalDocumentResponse[]>();
+
+  readonly visibleDocuments = computed(() => this.documents().slice(0, 8));
+
+  documentCategory(document: PortalDocumentResponse): string {
+    return [document.documentType, document.documentSubtype]
+      .filter(Boolean)
+      .join(' / ');
+  }
 }

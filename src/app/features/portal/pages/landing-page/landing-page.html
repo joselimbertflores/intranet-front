@@ -12,6 +12,11 @@
   <featured-banners-section [items]="featuredBanners()" />
 }
 
+
 @if (communications().length) {
   <landing-communications-section [items]="communications()" />
+}
+
+@if (mostConsultedDocuments().length) {
+  <landing-documents-section [documents]="mostConsultedDocuments()" />
 }

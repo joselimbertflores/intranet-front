@@ -10,7 +10,11 @@ import {
   withComponentInputBinding,
   withInMemoryScrolling,
 } from '@angular/router';
-import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withXhr,
+} from '@angular/common/http';
 import localeBo from '@angular/common/locales/es-BO';
 import { registerLocaleData } from '@angular/common';
 
@@ -43,20 +47,16 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(),
       withInMemoryScrolling({
-        scrollPositionRestoration: 'disabled',
+        scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
-
-      // withInMemoryScrolling({
-      //   scrollPositionRestoration: 'enabled',
-      //   anchorScrolling: 'disabled',
-      // }),
-      // withViewTransitions({
-      //   onViewTransitionCreated: handleTransitionCreated,
-      //   skipInitialTransition: true,
-      // }),
+      withViewTransitions({
+        onViewTransitionCreated: handleTransitionCreated,
+        skipInitialTransition: true,
+      }),
     ),
-    provideHttpClient(withXhr(), 
+    provideHttpClient(
+      withXhr(),
       withInterceptors([httpErrorInterceptor, authInterceptor]),
     ),
     providePrimeNG({

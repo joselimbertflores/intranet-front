@@ -1,3 +1,5 @@
+import { PortalDocumentResponse } from '../interfaces';
+
 export interface HeroSlide {
   id: number;
   title: string;
@@ -44,5 +46,6 @@ export interface PortalLandingResponse {
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
   landingNotices: LandingNotice[];
-  communications: any[]
+  communications: any[];
+  mostConsultedDocuments: PortalDocumentResponse[];
 }

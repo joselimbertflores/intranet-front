@@ -25,7 +25,7 @@ interface OfficialChannel {
       class="border-t border-white/10 bg-linear-to-br from-primary-950 via-primary-900 to-primary-800 text-primary-50"
     >
       <div
-        class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.15fr_1fr_0.75fr] lg:gap-10 lg:px-8 lg:py-10"
+        class="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.15fr_1fr_0.75fr] lg:gap-8 lg:px-8 lg:py-7"
       >
         <section class="min-w-0" aria-labelledby="portal-footer-brand">
           <div class="flex items-start gap-3.5">
@@ -44,7 +44,7 @@ interface OfficialChannel {
             </div>
           </div>
 
-          <p class="mt-4 max-w-md text-sm leading-6 text-primary-100/80">
+          <p class="mt-3 max-w-md text-sm leading-6 text-primary-100/80">
             Espacio interno de consulta, comunicación y acceso a recursos
             institucionales.
           </p>
@@ -58,12 +58,12 @@ interface OfficialChannel {
             Contacto institucional
           </h2>
 
-          <div class="mt-4 grid gap-3">
+          <div class="mt-3 grid gap-2.5">
             @for (item of contactItems; track item.label) {
               @if (item.href) {
                 <a
                   [href]="item.href"
-                  class="group flex min-h-11 items-start gap-3 rounded-lg text-primary-50 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-950"
+                  class="group flex min-h-10 items-start gap-3 rounded-lg text-primary-50 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-950"
                 >
                   <ng-container
                     [ngTemplateOutlet]="contactItemContent"
@@ -71,7 +71,7 @@ interface OfficialChannel {
                   />
                 </a>
               } @else {
-                <div class="flex min-h-11 items-start gap-3 text-primary-50">
+                <div class="flex min-h-10 items-start gap-3 text-primary-50">
                   <ng-container
                     [ngTemplateOutlet]="contactItemContent"
                     [ngTemplateOutletContext]="{ $implicit: item }"
@@ -90,13 +90,13 @@ interface OfficialChannel {
             Canales oficiales
           </h2>
 
-          <div class="mt-4 flex flex-wrap gap-2 lg:flex-col">
+          <div class="mt-3 flex flex-wrap gap-2 lg:flex-col">
             @for (channel of officialChannels; track channel.label) {
               <a
                 [href]="channel.href"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-sm font-semibold text-primary-50 no-underline outline-none transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-950 lg:w-fit"
+                class="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-sm font-semibold text-primary-50 no-underline outline-none transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-950 lg:w-fit"
               >
                 <i [class]="channel.icon + ' text-sm'" aria-hidden="true"></i>
                 <span>{{ channel.label }}</span>
@@ -108,7 +108,7 @@ interface OfficialChannel {
 
       <div class="border-t border-white/10">
         <div
-          class="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-primary-100/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+          class="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-3.5 text-xs text-primary-100/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
         >
           <p>
             © {{ currentYear }} Gobierno Autónomo Municipal de Sacaba. Todos los
@@ -120,7 +120,7 @@ interface OfficialChannel {
 
       <ng-template #contactItemContent let-item>
         <span
-          class="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 text-primary-100 transition-colors group-hover:bg-white/12"
+          class="grid size-8 shrink-0 place-items-center rounded-full bg-white/8 text-primary-100 transition-colors group-hover:bg-white/12"
         >
           <i [class]="item.icon + ' text-sm'" aria-hidden="true"></i>
         </span>

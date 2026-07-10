@@ -37,10 +37,9 @@
       <th>Tipo</th>
       <th>Cite</th>
       <th>Referencia</th>
-      <th>Fecha</th>
       <th>Evento</th>
       <th>Estado</th>
-      <th>Adjunto</th>
+      <th class="w-24">Adjunto</th>
       <th style="width: 3rem"></th>
     </tr>
   </ng-template>
@@ -48,8 +47,7 @@
     <tr>
       <td>{{ item.type.name }}</td>
       <td>{{ item.code }}</td>
-      <td class="truncate max-w-[200px]">{{ item.reference }}</td>
-      <td>{{ item.createdAt | date: "short" }}</td>
+      <td class="truncate max-w-[350px]">{{ item.reference }}</td>
       <td>{{ item.eventId ? "SI" : "NO" }}</td>
       <td>
         @if (item.isActive) {
@@ -59,16 +57,17 @@
         }
       </td>
       <td>
-        <!-- <a
+        <a
           [href]="item.file.url"
+          pButton
           target="_blank"
-          title="Abrir PDF"
-          class="underline text-primary"
+          rel="noopener noreferrer"
+          size="small"
+          icon="pi pi-external-link"
+          label="Abrir"
+          severity="secondary"
         >
-          Ver
-        </a> -->
-
-        <p-button  size="small" icon="pi pi-eye" label="Ver" />
+        </a>
       </td>
       <td>
         @if (hasRowActions(item)) {

@@ -22,10 +22,15 @@ interface OfficialChannel {
   imports: [InstitutionalLogo, NgTemplateOutlet],
   template: `
     <footer
-      class="border-t border-white/10 bg-linear-to-br from-primary-950 via-primary-900 to-primary-800 text-primary-50"
+      class="relative overflow-hidden border-t-4 border-primary-500 bg-linear-to-br from-primary-950 via-primary-900 to-primary-800 text-primary-50"
     >
       <div
-        class="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.15fr_1fr_0.75fr] lg:gap-8 lg:px-8 lg:py-7"
+        class="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 28px 28px"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="relative mx-auto grid w-full max-w-7xl gap-8 px-4 py-9 sm:px-6 lg:grid-cols-[1.2fr_1fr_0.75fr] lg:gap-10 lg:px-8 lg:py-11"
       >
         <section class="min-w-0" aria-labelledby="portal-footer-brand">
           <div class="flex items-start gap-3.5">
@@ -106,7 +111,7 @@ interface OfficialChannel {
         </section>
       </div>
 
-      <div class="border-t border-white/10">
+      <div class="relative border-t border-white/10">
         <div
           class="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-3.5 text-xs text-primary-100/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
         >

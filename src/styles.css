@@ -7,6 +7,27 @@
 @plugin "tailwindcss-primeui";
 @plugin '@tailwindcss/typography';
 
+:root {
+  --portal-cream: #fbf6e9;
+  --portal-mint: #eef8f1;
+  --portal-sky: #edf6fb;
+  --portal-amber: #fff3d8;
+  --portal-violet: #f4effa;
+  --portal-rose: #fbeef1;
+}
+
+.portal-shell {
+  font-family:
+    Aptos, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system,
+    sans-serif;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* CUSTOM CLASS FOR DYNAMIC DIALOG */
 .app-action-dialog .p-dialog-content {
   padding: 0;

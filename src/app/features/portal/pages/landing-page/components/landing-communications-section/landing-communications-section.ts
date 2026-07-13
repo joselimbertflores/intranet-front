@@ -1,191 +1,133 @@
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   input,
+  signal,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
-
-import { CarouselModule } from 'primeng/carousel';
+import { RouterLink } from '@angular/router';
 
 import { PortalCommunicationResponse } from '../../../../interfaces';
+import { communicationTone } from '../landing-presentation';
 
 @Component({
   selector: 'landing-communications-section',
-  imports: [CommonModule, RouterModule, CarouselModule],
+  imports: [DatePipe, RouterLink],
   template: `
-    <section class="border-y border-surface-200/70 bg-surface-50/60 py-16 md:py-20">
-      <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <header
-          class="mb-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:mb-10"
-        >
+    <section
+      class="w-full bg-surface-0 py-14 sm:py-16 lg:py-20"
+      aria-labelledby="communications-title"
+    >
+      <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <h2
-            class="text-3xl font-semibold tracking-tight text-surface-950 sm:text-4xl"
+            id="communications-title"
+            class="text-3xl font-extrabold tracking-[-0.025em] text-primary-900 sm:text-4xl"
           >
             Comunicados recientes
           </h2>
 
           <a
             routerLink="/communications"
-            class="group inline-flex w-fit items-center gap-2 rounded-lg border border-surface-300 bg-surface-0 px-4 py-2.5 text-sm font-semibold text-surface-800 shadow-sm transition duration-200 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+            class="group inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-1 py-2 text-sm font-bold text-primary-800 no-underline outline-none transition-colors hover:text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-3"
           >
-            Ver todos
-            <i
-              class="pi pi-arrow-right text-xs transition-transform duration-200 group-hover:translate-x-0.5"
-              aria-hidden="true"
-            ></i>
+            Ver todos los comunicados
+            <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
           </a>
         </header>
 
-        <p-carousel
-          [value]="items()"
-          [numVisible]="numVisible"
-          [numScroll]="1"
-          [circular]="items().length > 3"
-          [showIndicators]="items().length > 1"
-          [showNavigators]="items().length > 3"
-          [responsiveOptions]="responsiveOptions()"
-          [ngClass]="{
-            'single-item-carousel': items().length === 1,
-            'two-item-carousel': items().length === 2,
-          }"
-          aria-label="Comunicados recientes"
-        >
-          <ng-template pTemplate="item" let-item>
-            <div class="flex justify-center px-2 py-3 sm:px-3">
+        <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          @for (entry of visualItems(); track entry.item.id) {
+            <article class="min-w-0">
               <a
-                [routerLink]="['/communications', item.id]"
-                [attr.aria-label]="'Abrir comunicado: ' + item.reference"
-                class="group flex h-[34rem] w-full max-w-[22rem] flex-col overflow-hidden rounded-xl border border-surface-200 bg-surface-0 shadow-[0_1px_2px_rgb(15_23_42/0.05)] transition duration-300 ease-out hover:-translate-y-1 hover:border-surface-300 hover:shadow-[0_14px_32px_-18px_rgb(15_23_42/0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+                [routerLink]="['/communications', entry.item.id]"
+                [attr.aria-label]="'Leer comunicado: ' + entry.item.reference"
+                class="group flex h-full min-h-[32rem] flex-col overflow-hidden rounded-2xl border no-underline outline-none transition duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-surface-950/10 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-3 motion-reduce:transform-none motion-reduce:transition-none"
+                [class]="entry.tone.surface + ' ' + entry.tone.border"
               >
-                <div
-                  class="relative flex h-[22.75rem] shrink-0 items-center justify-center overflow-hidden border-b border-surface-200 bg-surface-100 p-4 sm:p-5"
-                >
-                  @if (item.previewImageUrl) {
+                <div class="relative flex h-72 shrink-0 items-center justify-center overflow-hidden border-b border-surface-200/80 bg-surface-100 p-4 sm:h-80 xl:h-72">
+                  @if (entry.item.previewImageUrl && !failedImages().has(entry.item.id)) {
                     <img
-                      [src]="item.previewImageUrl"
-                      [alt]="'Vista previa de ' + item.reference"
-                      class="h-full w-auto max-w-full rounded-sm object-contain shadow-[0_8px_20px_-10px_rgb(15_23_42/0.4)] transition-transform duration-300 group-hover:scale-[1.015] motion-reduce:transform-none motion-reduce:transition-none"
+                      [src]="entry.item.previewImageUrl"
+                      [alt]="'Vista previa de ' + entry.item.reference"
+                      class="h-full w-full rounded-sm object-contain drop-shadow-[0_10px_10px_rgb(15_23_42/0.16)] transition-transform duration-200 group-hover:scale-[1.012] motion-reduce:transform-none motion-reduce:transition-none"
+                      loading="lazy"
+                      decoding="async"
+                      (error)="markImageAsFailed(entry.item.id)"
                     />
                   } @else {
                     <div
-                      class="relative flex aspect-[8.5/11] h-full max-w-full flex-col overflow-hidden rounded-sm border border-surface-200 bg-surface-0 px-5 py-6 shadow-[0_8px_20px_-10px_rgb(15_23_42/0.3)]"
+                      class="flex aspect-[8.5/11] h-full max-w-full flex-col rounded-sm border border-surface-200 bg-white px-5 py-6 shadow-lg shadow-surface-950/10"
                       aria-label="Vista previa no disponible"
                     >
-                      <div class="mb-8 h-1 w-10 rounded-full bg-primary-600"></div>
-                      <div class="space-y-2" aria-hidden="true">
+                      <div class="h-1 w-10 rounded-full bg-primary-600" aria-hidden="true"></div>
+                      <div class="mt-7 space-y-2" aria-hidden="true">
                         <div class="h-1.5 w-4/5 rounded-full bg-surface-200"></div>
                         <div class="h-1.5 w-full rounded-full bg-surface-100"></div>
                         <div class="h-1.5 w-3/5 rounded-full bg-surface-100"></div>
                       </div>
-                      <div class="mt-auto flex items-end justify-between">
-                        <div>
-                          <i
-                            class="pi pi-file-pdf text-3xl text-primary-700"
-                            aria-hidden="true"
-                          ></i>
-                          <p
-                            class="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-surface-500"
-                          >
-                            Documento PDF
-                          </p>
-                        </div>
-                        <span
-                          class="rounded border border-surface-200 px-2 py-1 text-[9px] font-semibold uppercase text-surface-400"
-                        >
-                          Sin preview
-                        </span>
+                      <div class="mt-auto text-center text-surface-400" aria-hidden="true">
+                        <i class="pi pi-file-pdf text-4xl"></i>
                       </div>
                     </div>
                   }
                 </div>
 
-                <div class="flex min-h-0 flex-1 flex-col p-5">
-                  <div class="mb-3 flex min-w-0 items-center gap-2">
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex min-w-0 flex-wrap items-center gap-2">
                     <span
-                      class="max-w-full truncate rounded-md bg-primary-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-800"
+                      class="max-w-full truncate rounded-md px-2.5 py-1 text-[0.68rem] font-extrabold tracking-[0.08em] uppercase"
+                      [class]="entry.tone.badge"
                     >
-                      {{ item.type }}
+                      {{ entry.item.type }}
                     </span>
-                    @if (item.code) {
-                      <span
-                        class="min-w-0 truncate border-l border-surface-200 pl-2 text-[11px] font-semibold text-surface-500"
-                        [title]="item.code"
-                      >
-                        {{ item.code }}
+                    @if (entry.item.code) {
+                      <span class="min-w-0 truncate text-xs font-semibold text-surface-600" [title]="entry.item.code">
+                        {{ entry.item.code }}
                       </span>
                     }
                   </div>
 
-                  <h3
-                    class="line-clamp-3 text-[15px] font-semibold leading-5 text-surface-900 transition-colors duration-200 group-hover:text-primary-800"
-                    [title]="item.reference"
-                  >
-                    {{ item.reference }}
+                  <h3 class="mt-4 line-clamp-3 text-lg font-bold leading-6 text-surface-950" [title]="entry.item.reference">
+                    {{ entry.item.reference }}
                   </h3>
 
-                  <div
-                    class="mt-auto flex items-center justify-between border-t border-surface-100 pt-3 text-xs text-surface-500"
+                  <time
+                    class="mt-3 text-xs font-medium text-surface-600"
+                    [attr.datetime]="entry.item.createdAt"
                   >
-                    <time [attr.datetime]="item.createdAt">
-                      {{ item.createdAt | date: 'dd/MM/yyyy' }}
-                    </time>
-                    <span
-                      class="flex h-7 w-7 items-center justify-center rounded-full bg-surface-100 text-primary-700 transition-colors duration-200 group-hover:bg-primary-700 group-hover:text-white"
-                      aria-hidden="true"
-                    >
-                      <i class="pi pi-arrow-right text-[10px]"></i>
-                    </span>
-                  </div>
+                    {{ entry.item.createdAt | date: 'dd MMMM yyyy' }}
+                  </time>
+
+                  <span
+                    class="mt-auto inline-flex items-center gap-2 border-t border-surface-900/8 pt-4 text-sm font-bold"
+                    [class]="entry.tone.action"
+                  >
+                    Leer comunicado
+                    <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
+                  </span>
                 </div>
               </a>
-            </div>
-          </ng-template>
-        </p-carousel>
+            </article>
+          }
+        </div>
       </div>
     </section>
-  `,
-  styles: `
-    :host {
-      display: block;
-    }
-
-    .single-item-carousel {
-      display: block;
-      max-width: 24rem;
-      margin-inline: auto;
-    }
-
-    .two-item-carousel {
-      display: block;
-      max-width: 48rem;
-      margin-inline: auto;
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingCommunicationsSection {
   readonly items = input.required<PortalCommunicationResponse[]>();
+  readonly failedImages = signal<ReadonlySet<string>>(new Set<string>());
 
-  readonly responsiveOptions = computed(() => {
-    const itemCount = this.items().length;
+  readonly visualItems = computed(() =>
+    this.items()
+      .slice(0, 4)
+      .map((item) => ({ item, tone: communicationTone(item.type) })),
+  );
 
-    return [
-      {
-        breakpoint: '1024px',
-        numVisible: Math.min(itemCount, 2),
-        numScroll: 1,
-      },
-      {
-        breakpoint: '640px',
-        numVisible: Math.min(itemCount, 1),
-        numScroll: 1,
-      },
-    ];
-  });
-
-  get numVisible(): number {
-    return Math.min(this.items().length, 3);
+  markImageAsFailed(id: string): void {
+    this.failedImages.update((failedImages) => new Set(failedImages).add(id));
   }
 }

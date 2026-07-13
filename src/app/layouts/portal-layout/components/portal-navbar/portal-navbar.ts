@@ -20,42 +20,40 @@ interface NavItem {
   imports: [RouterLink, RouterLinkActive, InstitutionalLogo],
   template: `
     <nav
-      class="relative border-b border-surface-200/80 bg-surface-0/90 shadow-sm shadow-surface-950/5 backdrop-blur-md"
+      class="relative border-b border-white/10 bg-primary-900 text-white shadow-lg shadow-primary-950/15"
       aria-label="Navegación principal"
     >
       <div
-        class="mx-auto flex min-h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+        class="mx-auto flex min-h-19 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
       >
         <a
           routerLink="/"
           (click)="closeMobileMenu()"
-          class="flex min-w-0 shrink-0 items-center gap-3 rounded-xl no-underline outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
+          class="flex min-w-0 shrink-0 items-center gap-3 rounded-xl text-white no-underline outline-none focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
           aria-label="Ir al inicio de la Intranet"
         >
           <institutional-logo />
 
           <span class="min-w-0 leading-tight">
-            <span
-              class="block truncate text-base font-bold tracking-tight text-surface-950"
-            >
+            <span class="block truncate text-xl font-extrabold tracking-tight">
               Intranet
             </span>
             <span
-              class="hidden text-xs font-medium tracking-wide text-surface-500 sm:block"
+              class="mt-0.5 hidden text-[0.7rem] font-medium tracking-wide text-primary-100 sm:block"
             >
-              GAM Sacaba
+              Gobierno Autónomo Municipal de Sacaba
             </span>
           </span>
         </a>
 
-        <div class="hidden items-center gap-1 lg:flex">
+        <div class="hidden items-center gap-0.5 xl:flex">
           @for (item of navItems; track item.route) {
             <a
               [routerLink]="item.route"
-              routerLinkActive="bg-primary-50 !text-primary-700"
+              routerLinkActive="bg-white/12 !text-white"
               [routerLinkActiveOptions]="{ exact: item.exact }"
               ariaCurrentWhenActive="page"
-              class="rounded-full px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-surface-600 no-underline outline-none transition-colors hover:bg-surface-100 hover:text-surface-900 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
+              class="relative rounded-lg px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap text-primary-100 no-underline outline-none transition-colors hover:bg-white/8 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
             >
               {{ item.label }}
             </a>
@@ -64,37 +62,17 @@ interface NavItem {
 
         <button
           type="button"
-          class="grid size-11 shrink-0 place-items-center rounded-xl text-surface-700 outline-none transition-colors hover:bg-surface-100 hover:text-surface-950 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0 lg:hidden"
+          class="grid size-11 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/8 text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900 xl:hidden"
           aria-label="Abrir o cerrar el menú de navegación"
           aria-controls="mobile-navigation"
           [attr.aria-expanded]="isMobileMenuOpen()"
           (click)="toggleMobileMenu()"
         >
-          @if (isMobileMenuOpen()) {
-            <svg
-              class="size-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              aria-hidden="true"
-            >
-              <path d="M6 6l12 12M18 6 6 18" />
-            </svg>
-          } @else {
-            <svg
-              class="size-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              aria-hidden="true"
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          }
+          <i
+            [class]="isMobileMenuOpen() ? 'pi pi-times' : 'pi pi-bars'"
+            class="text-xl"
+            aria-hidden="true"
+          ></i>
         </button>
       </div>
 
@@ -103,30 +81,22 @@ interface NavItem {
           id="mobile-navigation"
           animate.enter="portal-mobile-menu-enter"
           animate.leave="portal-mobile-menu-leave"
-          class="absolute inset-x-0 top-full z-40 px-3 pt-2 lg:hidden"
+          class="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-primary-950 px-4 py-3 shadow-2xl shadow-primary-950/30 xl:hidden"
         >
-          <div
-            class="mx-auto w-full max-w-7xl rounded-xl border border-surface-200/80 bg-surface-0/95 p-1.5 shadow-xl shadow-surface-950/15 ring-1 ring-surface-950/5 backdrop-blur-md"
-          >
-            <div class="flex flex-col gap-1">
-              @for (item of navItems; track item.route) {
-                <a
-                  [routerLink]="item.route"
-                  routerLinkActive="bg-primary-50 !text-primary-700"
-                  [routerLinkActiveOptions]="{ exact: item.exact }"
-                  ariaCurrentWhenActive="page"
-                  (click)="closeMobileMenu()"
-                  class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-surface-600 no-underline outline-none transition-colors hover:bg-surface-100 hover:text-surface-900 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
-                >
-                  <i
-                    [class]="item.icon + ' text-base text-surface-500'"
-                    aria-hidden="true"
-                  ></i>
-
-                  <span>{{ item.label }}</span>
-                </a>
-              }
-            </div>
+          <div class="mx-auto grid w-full max-w-7xl gap-1 sm:grid-cols-2">
+            @for (item of navItems; track item.route) {
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="bg-white/12 !text-white"
+                [routerLinkActiveOptions]="{ exact: item.exact }"
+                ariaCurrentWhenActive="page"
+                (click)="closeMobileMenu()"
+                class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-primary-100 no-underline outline-none transition-colors hover:bg-white/8 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-200"
+              >
+                <i [class]="item.icon + ' text-base'" aria-hidden="true"></i>
+                <span>{{ item.label }}</span>
+              </a>
+            }
           </div>
         </div>
       }
@@ -148,24 +118,18 @@ interface NavItem {
     @keyframes portal-mobile-menu-in {
       from {
         opacity: 0;
-        transform: translateY(-0.5rem) scale(0.98);
+        transform: translateY(-0.4rem);
       }
-
       to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
       }
     }
 
     @keyframes portal-mobile-menu-out {
-      from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-
       to {
         opacity: 0;
-        transform: translateY(-0.35rem) scale(0.98);
+        transform: translateY(-0.3rem);
       }
     }
 

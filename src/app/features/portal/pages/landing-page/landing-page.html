@@ -1,22 +1,61 @@
-<landing-hero-section [heroSlides]="heroSlides()" />
+@switch (state()) {
+  @case ('loading') {
+    <landing-skeleton />
+  }
 
-@if (landingNotices().length) {
-  <landing-notices [items]="landingNotices()" />
-}
+  @case ('error') {
+    <section
+      class="grid min-h-[32rem] place-items-center bg-linear-to-br from-primary-950 via-primary-900 to-primary-800 px-4 py-20 text-white"
+      aria-labelledby="landing-error-title"
+    >
+      <div class="max-w-lg text-center">
+        <h1 id="landing-error-title" class="text-3xl font-bold tracking-tight sm:text-4xl">
+          No pudimos cargar la Intranet
+        </h1>
+        <p class="mx-auto mt-4 max-w-md text-base leading-7 text-primary-100">
+          Verifica tu conexión e intenta cargar nuevamente el contenido institucional.
+        </p>
+        <button
+          type="button"
+          class="mt-7 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-primary-800 shadow-lg shadow-primary-950/20 outline-none transition-colors hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-900"
+          (click)="loadLanding()"
+        >
+          <i class="pi pi-refresh text-sm" aria-hidden="true"></i>
+          Intentar de nuevo
+        </button>
+      </div>
+    </section>
+  }
 
-@if (quickAccesses().length) {
-  <landing-quick-access-section [items]="quickAccesses()" />
-}
+  @case ('ready') {
+    <landing-hero-section [heroSlides]="heroSlides()" />
 
-@if (featuredBanners().length) {
-  <featured-banners-section [items]="featuredBanners()" />
-}
+    @if (landingNotices().length) {
+      <landing-notices [items]="landingNotices()" />
+    }
 
+    @if (quickAccesses().length) {
+      <landing-quick-access-section [items]="quickAccesses()" />
+    }
 
-@if (communications().length) {
-  <landing-communications-section [items]="communications()" />
-}
+    @if (featuredBanners().length) {
+      <featured-banners-section [items]="featuredBanners()" />
+    }
 
-@if (mostConsultedDocuments().length) {
-  <landing-documents-section [documents]="mostConsultedDocuments()" />
+    @if (communications().length) {
+      <landing-communications-section [items]="communications()" />
+    }
+
+    @if (mostConsultedDocuments().length) {
+      <landing-documents-section [documents]="mostConsultedDocuments()" />
+    }
+
+    @if (!hasContent()) {
+      <section class="bg-surface-0 px-4 py-10 text-center">
+        <p class="text-sm font-medium text-surface-600">
+          No hay contenido adicional disponible en este momento.
+        </p>
+      </section>
+    }
+  }
 }

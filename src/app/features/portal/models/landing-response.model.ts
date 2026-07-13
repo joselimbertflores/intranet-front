@@ -1,4 +1,7 @@
-import { PortalDocumentResponse } from '../interfaces';
+import {
+  PortalCommunicationResponse,
+  PortalDocumentResponse,
+} from '../interfaces';
 
 export interface HeroSlide {
   id: number;
@@ -46,6 +49,6 @@ export interface PortalLandingResponse {
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
   landingNotices: LandingNotice[];
-  communications: any[];
+  communications: PortalCommunicationResponse[];
   mostConsultedDocuments: PortalDocumentResponse[];
 }

@@ -6,7 +6,10 @@ import { Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
-import { CommunicationAdminResponse } from '../interfaces';
+import {
+  CommunicationResponse,
+  CommunicationTypeResponse,
+} from '../interfaces';
 
 interface GetCommunicationsParams {
   term?: string;
@@ -29,7 +32,7 @@ export class CommunicationAdminDataSource {
       fromObject: { ...props, ...(term && { term }) },
     });
     return this.http.get<{
-      communications: CommunicationAdminResponse[];
+      communications: CommunicationResponse[];
       total: number;
     }>(this.URL, {
       params,
@@ -37,36 +40,31 @@ export class CommunicationAdminDataSource {
   }
 
   create(data: object, pdf: File) {
-    return this.fileUploadService
-      .uploadPdfForGeneratePreview(pdf, 'communications')
-      .pipe(
-        switchMap(({ id: fileId }) =>
-          this.http.post(`${this.URL}`, {
-            ...data,
-            fileId,
-          }),
-        ),
-      );
+    return this.fileUploadService.upload(pdf, 'communications').pipe(
+      switchMap(({ id: fileId }) =>
+        this.http.post(`${this.URL}`, {
+          ...data,
+          fileId,
+        }),
+      ),
+    );
   }
 
   update(id: string, data: object, file: File | null) {
     const fileUploadObserbable: Observable<null | UploadResult> = file
-      ? this.fileUploadService.uploadPdfForGeneratePreview(
-          file,
-          'communications',
-        )
+      ? this.fileUploadService.upload(file, 'communications')
       : of(null);
     return fileUploadObserbable.pipe(
-      switchMap((result) =>
+      switchMap((uploadResult) =>
         this.http.patch(`${this.URL}/${id}`, {
           ...data,
-          ...(result && { fileId: result.id }),
+          ...(uploadResult && { fileId: uploadResult.id }),
         }),
       ),
     );
   }
 
   private getTypes() {
-    return this.http.get<any[]>(`${this.URL}/types`);
+    return this.http.get<CommunicationTypeResponse[]>(`${this.URL}/types`);
   }
 }

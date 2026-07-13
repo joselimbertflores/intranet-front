@@ -17,7 +17,10 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 
-import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
+import {
+  PermissionAction,
+  Resource,
+} from '../../../../../core/auth/auth.types';
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { CalendarEventResponse } from '../../interfaces';
 import { SearchInput } from '../../../../../shared';
@@ -93,6 +96,7 @@ export default class CalendarAdmin {
         '960px': '75vw',
         '640px': '90vw',
       },
+      styleClass: 'app-action-dialog',
     });
     dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
       if (!result) return;

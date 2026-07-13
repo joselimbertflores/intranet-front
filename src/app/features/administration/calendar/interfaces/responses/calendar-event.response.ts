@@ -10,6 +10,7 @@ export interface CalendarEventResponse {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  communicationId: string | null;
 }
 
 export interface RecurrenceConfigResponse {

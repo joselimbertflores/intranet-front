@@ -31,10 +31,6 @@ import { CalendarDataSource } from '../../services';
 import { recurrenceValidator } from '../../helpers';
 import { FormUtils } from '../../../../../helpers';
 
-interface DialogData extends Partial<CalendarEventResponse> {
-  communicationId?: string;
-  loadEntity?: boolean;
-}
 @Component({
   selector: 'app-calendar-editor',
   imports: [
@@ -60,9 +56,10 @@ export class CalendarEditor implements OnInit {
   private calendarDataSource = inject(CalendarDataSource);
 
   readonly currentDate = new Date();
-  readonly data?: DialogData = inject(DynamicDialogConfig).data;
+  readonly data?: CalendarEventResponse = inject(DynamicDialogConfig).data;
 
   formSubmitted = signal(false);
+
   form: FormGroup = this.formBuilder.group({
     title: ['', [Validators.required, Validators.maxLength(150)]],
     description: [''],
@@ -159,20 +156,7 @@ export class CalendarEditor implements OnInit {
 
   private loadForm(): void {
     if (!this.data) return;
-    if (this.data.id && this.data.loadEntity) {
-      return this.loadEventPropsFromId(this.data.id);
-    }
-    this.setFormValues(this.data);
-  }
-
-  private loadEventPropsFromId(id: string) {
-    this.calendarDataSource.getOne(id).subscribe((resp) => {
-      this.setFormValues(resp);
-    });
-  }
-
-  private setFormValues(event: Partial<CalendarEventResponse>) {
-    const { recurrenceConfig, startDate, endDate, ...props } = event;
+    const { recurrenceConfig, startDate, endDate, ...props } = this.data;
     if (recurrenceConfig) this.isRecurring.set(true);
     setTimeout(() => {
       this.form.patchValue({

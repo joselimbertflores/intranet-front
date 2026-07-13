@@ -55,12 +55,6 @@ export class FileUploadService {
     return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
   }
 
-  uploadPdfForGeneratePreview(pdf: File, group: FileContext) {
-    const formData = new FormData();
-    formData.append('file', pdf);
-    return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
-  }
-
   uploadFile(file: File, group: FileContext) {
     const formData = new FormData();
     formData.append('file', file);

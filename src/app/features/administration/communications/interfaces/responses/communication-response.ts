@@ -1,4 +1,4 @@
-export interface CommunicationAdminResponse {
+export interface CommunicationResponse {
   id: string;
   reference: string;
   code: string;

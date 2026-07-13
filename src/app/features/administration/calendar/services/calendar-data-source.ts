@@ -1,7 +1,25 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+
 import { environment } from '../../../../../environments/environment';
-import { CalendarEventResponse, FormCalendarProps } from '../interfaces';
+import { CalendarEventResponse } from '../interfaces';
+
+export interface FormCalendarProps {
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate?: Date | null;
+  allDay?: boolean;
+  recurrence?: RecurrenceConfig | null;
+  communicationId?: string | null;
+}
+
+export interface RecurrenceConfig {
+  frequency: string | null;
+  interval: number;
+  byWeekDays: string[];
+  until?: Date | null;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +34,9 @@ export class CalendarDataSource {
     const { recurrence, ...props } = form;
     return this.http.post(this.URL, {
       ...props,
-      recurrence: recurrence?.frequency ? recurrence : null,
+      recurrence: recurrence?.frequency
+        ? this.toRecurrenceDto(recurrence)
+        : null,
     });
   }
 
@@ -24,7 +44,9 @@ export class CalendarDataSource {
     const { recurrence, ...props } = form;
     return this.http.patch(`${this.URL}/${id}`, {
       ...props,
-      recurrence: recurrence?.frequency ? recurrence : null,
+      recurrence: recurrence?.frequency
+        ? this.toRecurrenceDto(recurrence)
+        : null,
     });
   }
 
@@ -42,13 +64,18 @@ export class CalendarDataSource {
     return this.http.get<CalendarEventResponse>(`${this.URL}/${id}`);
   }
 
-  toggleCommunication(id: string, isActive: boolean) {
-    return this.http.patch(`${this.URL}/communications/${id}/deactivate`, {
-      isActive,
-    });
-  }
-
   remove(id: string) {
     return this.http.delete(`${this.URL}/${id}`);
+  }
+
+  private toRecurrenceDto(recurrence: RecurrenceConfig) {
+    return {
+      frequency: recurrence.frequency,
+      interval: recurrence.interval,
+      until: recurrence.until,
+      ...(recurrence.frequency === 'WEEKLY' && {
+        byWeekDays: recurrence.byWeekDays,
+      }),
+    };
   }
 }

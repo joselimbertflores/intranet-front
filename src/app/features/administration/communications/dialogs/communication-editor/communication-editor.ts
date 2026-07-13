@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormGroup,
   Validators,
@@ -24,8 +19,11 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 
 import { CommunicationAdminDataSource } from '../../services';
-import { CommunicationAdminResponse } from '../../interfaces';
+import { CommunicationResponse } from '../../interfaces';
 import { FormUtils } from '../../../../../helpers';
+import { finalize } from 'rxjs';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-communication-editor',
@@ -41,23 +39,27 @@ import { FormUtils } from '../../../../../helpers';
     MessageModule,
     SelectModule,
     ButtonModule,
+    ConfirmDialogModule,
   ],
   templateUrl: './communication-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ConfirmationService],
 })
 export class CommunicationEditor {
   private formBuilder = inject(FormBuilder);
-  private diagloRef = inject(DynamicDialogRef);
+  private dialogRef = inject(DynamicDialogRef);
 
-  readonly data?: CommunicationAdminResponse = inject(DynamicDialogConfig).data;
+  readonly data?: CommunicationResponse = inject(DynamicDialogConfig).data;
 
   private communicationService = inject(CommunicationAdminDataSource);
+  private confirmationService = inject(ConfirmationService);
 
   readonly types = this.communicationService.types;
   readonly formUtils = FormUtils;
 
   formSubmitted = signal(false);
-  form: FormGroup = this.formBuilder.group({
+  isSaving = signal(false);
+
+  form = this.formBuilder.group({
     reference: ['', [Validators.required, Validators.minLength(3)]],
     code: [
       '',
@@ -68,7 +70,8 @@ export class CommunicationEditor {
         Validators.pattern(/^[a-zA-Z0-9\/-]+$/),
       ],
     ],
-    typeId: ['', Validators.required],
+    isActive: [true],
+    typeId: [null as number | null, Validators.required],
   });
   file = signal<File | null>(null);
 
@@ -77,27 +80,35 @@ export class CommunicationEditor {
   }
 
   save() {
+    if (this.isSaving()) return;
+
     this.formSubmitted.set(true);
+
     if (!this.isFormValid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const subscription = this.data
-      ? this.communicationService.update(
-          this.data.id,
-          this.form.value,
-          this.file(),
-        )
-      : this.communicationService.create(this.form.value, this.file()!);
+    const isDisablingWithEvent =
+      this.data?.isActive === true &&
+      this.form.controls.isActive.value === false &&
+      !!this.data.eventId;
 
-    subscription.subscribe((resp) => {
-      this.diagloRef.close(resp);
-    });
+    if (isDisablingWithEvent) {
+      this.confirmationService.confirm({
+        header: 'Desactivar comunicado',
+        message: 'El comunicado tiene un evento asociado. El evento conservará su estado.',
+        acceptButtonProps: { label: 'Desactivar' },
+        rejectButtonProps: { label: 'Cancelar', severity: 'secondary' },
+        accept: () => this.persistCommunication(),
+      });
+      return;
+    }
+    this.persistCommunication();
   }
 
   close() {
-    this.diagloRef.close();
+    this.dialogRef.close();
   }
 
   selectFile(event: FileSelectEvent) {
@@ -107,12 +118,32 @@ export class CommunicationEditor {
   }
 
   get isFormValid() {
-    return this.form.valid && (this.data || this.file() !== null);
+    return this.form.valid && (this.data?.file || this.file());
   }
 
   private loadFormData(): void {
     if (!this.data) return;
     const { type, file, ...props } = this.data;
     this.form.patchValue({ ...props, typeId: type.id });
+  }
+
+  private persistCommunication() {
+    if (this.isSaving()) return;
+
+    this.isSaving.set(true);
+
+    const request$ = this.data
+      ? this.communicationService.update(
+          this.data.id,
+          this.form.getRawValue(),
+          this.file(),
+        )
+      : this.communicationService.create(this.form.getRawValue(), this.file()!);
+
+    request$
+      .pipe(finalize(() => this.isSaving.set(false)))
+      .subscribe((response) => {
+        this.dialogRef.close(response);
+      });
   }
 }

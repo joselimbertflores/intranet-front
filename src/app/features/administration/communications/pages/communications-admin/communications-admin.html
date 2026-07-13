@@ -1,13 +1,11 @@
 <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Comunicados</h2>
-  @if (canCreate()) {
-    <p-button
-      label="Agregar"
-      icon="pi pi-plus"
-      size="small"
-      (onClick)="openCommunicationDialog()"
-    />
-  }
+  <p-button
+    label="Agregar"
+    icon="pi pi-plus"
+    size="small"
+    (onClick)="openCommunicationDialog()"
+  />
 </div>
 <p-table
   #table
@@ -23,7 +21,7 @@
   class="text-sm"
   size="small"
   (onPage)="chagePage($event)"
-  [loading]="isLoading()"
+  [loading]="communicationResource.isLoading()"
 >
   <ng-template #caption>
     <div class="flex sm:justify-end">
@@ -70,19 +68,15 @@
         </a>
       </td>
       <td>
-        @if (hasRowActions(item)) {
-          <div class="flex gap-x-2">
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              size="small"
-              [text]="true"
-              [rounded]="true"
-              [outlined]="true"
-              (click)="openMenu(item, $event); menu.toggle($event)"
-            ></button>
-          </div>
-        }
+        <button
+          pButton
+          icon="pi pi-ellipsis-v"
+          size="small"
+          [text]="true"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="openMenu(item); menu.toggle($event)"
+        ></button>
       </td>
     </tr>
   </ng-template>
@@ -96,4 +90,4 @@
 </p-table>
 
 <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
-<p-confirmdialog />
+

@@ -1,5 +1,5 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  <div [formGroup]="form">
+<form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
+  <div class="app-dialog-body">
     <div class="space-y-6 pt-2">
       <div class="flex flex-col gap-1">
         <p-floatlabel variant="on">
@@ -42,6 +42,7 @@
               inputId="startDatePicker"
               formControlName="startDate"
               [invalid]="formUtils.isInvalid(form.get('startDate'))"
+              [maxDate]="form.get('endDate')?.value"
             >
             </p-datepicker>
             <label for="startDatePicker">Inicio</label>
@@ -106,7 +107,9 @@
       @if (isRecurring()) {
         <div formGroupName="recurrence">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @let frecuencyInvalid = form.get("recurrence")?.hasError("requiredFrequency") && formSubmitted();
+            @let frecuencyInvalid =
+              form.get("recurrence")?.hasError("requiredFrequency") &&
+              formSubmitted();
             <div class="flex flex-col gap-1">
               <p-floatlabel variant="on">
                 <p-select
@@ -144,12 +147,15 @@
                 class="w-full"
                 appendTo="body"
                 [showClear]="true"
+                [minDate]="form.get('startDate')?.value"
               />
               <label for="untilDatePicker">Hasta</label>
             </p-floatlabel>
 
             @if (form.get("recurrence.frequency")!.value === "WEEKLY") {
-              @let byWeekDaysInvalid =  form.get("recurrence")?.hasError("weeklyRequiresDays") && formSubmitted();
+              @let byWeekDaysInvalid =
+                form.get("recurrence")?.hasError("weeklyRequiresDays") &&
+                formSubmitted();
               <div class="flex flex-col gap-1">
                 <p-floatlabel variant="on">
                   <p-multiselect
@@ -174,7 +180,7 @@
       }
     </div>
   </div>
-  <div class="p-dialog-footer">
+  <div class="app-dialog-actions">
     <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
     <p-button type="submit" label="Guardar" />
   </div>

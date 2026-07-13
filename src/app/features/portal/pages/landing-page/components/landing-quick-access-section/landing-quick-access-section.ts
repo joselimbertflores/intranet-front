@@ -12,7 +12,7 @@ import { quickAccessTone } from '../landing-presentation';
   selector: 'landing-quick-access-section',
   template: `
     <section
-      class="relative z-10 -mt-6 w-full rounded-t-[1.75rem] bg-surface-0 py-12 shadow-[0_-12px_30px_-24px_rgb(2_44_23/0.45)] sm:rounded-t-[2.25rem] sm:py-14 lg:py-16"
+      class="w-full bg-surface-0 py-12 sm:py-14 lg:py-16"
       aria-labelledby="quick-access-title"
     >
       <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -45,7 +45,7 @@ import { quickAccessTone } from '../landing-presentation';
                 [class]="entry.tone.icon"
                 aria-hidden="true"
               >
-                <i [class]="iconClass(entry.item.iconKey)" class="text-2xl sm:text-[1.75rem]"></i>
+                <i [class]="iconClass(entry.item.iconKey)" style="font-size: 36px;"></i>
               </span>
 
               <h3 class="mt-4 text-sm font-bold leading-5 text-surface-900 sm:text-[0.95rem]">

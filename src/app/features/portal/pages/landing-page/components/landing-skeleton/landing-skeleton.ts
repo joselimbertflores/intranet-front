@@ -19,7 +19,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         </div>
       </section>
 
-      <section class="relative -mt-6 rounded-t-[1.75rem] bg-surface-0 px-4 py-12 sm:px-6 lg:px-8">
+      <section class="bg-surface-0 px-4 py-12 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-7xl">
           <div class="mx-auto h-9 w-64 rounded-lg bg-surface-200"></div>
           <div class="mx-auto mt-3 h-4 w-80 max-w-full rounded bg-surface-100"></div>

@@ -25,12 +25,12 @@ export const routes: Routes = [
       {
         path: 'communications',
         loadComponent: () =>
-          import('./features/portal/pages/communications/communications-page/communications-page'),
+          import('./features/portal/pages/communications-page/communications-page'),
       },
       {
         path: 'communications/:id',
         loadComponent: () =>
-          import('./features/portal/pages/communications/communication-detail-page/communication-detail-page'),
+          import('./features/portal/pages/communications-page/communications-page'),
       },
       {
         path: 'calendar',

@@ -47,9 +47,9 @@ import { communicationTone } from '../landing-presentation';
                 [class]="entry.tone.surface + ' ' + entry.tone.border"
               >
                 <div class="relative flex h-72 shrink-0 items-center justify-center overflow-hidden border-b border-surface-200/80 bg-surface-100 p-4 sm:h-80 xl:h-72">
-                  @if (entry.item.previewImageUrl && !failedImages().has(entry.item.id)) {
+                  @if (entry.item.file.previewImageUrl && !failedImages().has(entry.item.id)) {
                     <img
-                      [src]="entry.item.previewImageUrl"
+                      [src]="entry.item.file.previewImageUrl"
                       [alt]="'Vista previa de ' + entry.item.reference"
                       class="h-full w-full rounded-sm object-contain drop-shadow-[0_10px_10px_rgb(15_23_42/0.16)] transition-transform duration-200 group-hover:scale-[1.012] motion-reduce:transform-none motion-reduce:transition-none"
                       loading="lazy"

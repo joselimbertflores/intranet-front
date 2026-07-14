@@ -3,14 +3,7 @@ export interface PortalCommunicationResponse {
   reference: string;
   type: string;
   createdAt: string;
-  previewImageUrl?: string | null;
-  code: string;
-  attachment?: AttachmentCommunicationResponse;
-}
-
-export interface AttachmentCommunicationResponse {
-  fileName: string;
-  mimeType: string;
+  code: string | null;
   url: string;
-  size: number;
+  previewUrl: string | null;
 }

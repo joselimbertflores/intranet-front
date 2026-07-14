@@ -1,0 +1,169 @@
+<public-section-header
+  title="Comunicados"
+  description="Avisos y comunicados oficiales de la institución."
+/>
+
+<div class="bg-surface-50/60 pb-16">
+  <section
+    #resultsTop
+    class="mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    aria-labelledby="communications-list-title"
+  >
+    <h2 id="communications-list-title" class="sr-only">
+      Listado de comunicados
+    </h2>
+
+    <div
+      class="flex w-full flex-col gap-3 pb-4 sm:flex-row sm:justify-end"
+      aria-label="Filtros de comunicados"
+    >
+      <div class="w-full sm:w-72">
+        <search-input
+          label="Buscar"
+          [value]="term()"
+          (search)="search($event)"
+        />
+      </div>
+
+      <div class="w-full sm:w-64">
+        <p-select
+          class="w-full"
+          placeholder="Tipo"
+          optionLabel="name"
+          optionValue="id"
+          [fluid]="true"
+          [showClear]="true"
+          [options]="types()"
+          [(ngModel)]="selectedTypeId"
+        />
+      </div>
+    </div>
+
+    <div
+      class="overflow-hidden rounded-xl border border-surface-200 bg-surface-0 shadow-sm"
+    >
+      @if (communicationResource.error()) {
+        <div
+          class="flex min-h-64 flex-col items-center justify-center bg-red-50/70 px-6 py-12 text-center"
+          role="alert"
+        >
+          <span class="font-semibold text-red-950">
+            No pudimos cargar los comunicados
+          </span>
+          <p class="mt-1 max-w-md text-sm text-red-700">
+            Ocurrió un problema al obtener la información. Intenta nuevamente.
+          </p>
+          <p-button
+            styleClass="mt-5"
+            label="Reintentar"
+            icon="pi pi-refresh"
+            (onClick)="communicationResource.reload()"
+          />
+        </div>
+      } @else if (communicationResource.isLoading()) {
+        <div
+          animate.enter="animate-fadein motion-reduce:animate-none"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="sr-only">Cargando comunicados</span>
+
+          @for (placeholder of skeletonItems; track placeholder) {
+            <div
+              class="flex flex-col gap-4 border-t border-surface-200 p-4 first:border-t-0 sm:flex-row sm:items-center sm:gap-6 sm:px-5 sm:py-4"
+            >
+              <div class="min-w-0 flex-1">
+                <p-skeleton width="min(100%, 34rem)" height="1.125rem" />
+                <p-skeleton
+                  width="min(78%, 23rem)"
+                  class="mt-3"
+                  height="0.75rem"
+                />
+              </div>
+              <div class="w-full shrink-0 sm:w-32">
+                <p-skeleton class="w-full" height="2.5rem" />
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (!communications().length) {
+        <div
+          class="flex min-h-52 items-center justify-center px-6 py-12 text-center"
+        >
+          <p class="font-medium text-surface-600">
+            No hay comunicados disponibles.
+          </p>
+        </div>
+      } @else {
+        @for (communication of communications(); track communication.id) {
+          <article
+            animate.enter="animate-fadein motion-reduce:animate-none"
+            class="group flex min-w-0 flex-col gap-4 border-b border-surface-200 p-5 transition-colors last:border-b-0 hover:bg-surface-50/80 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div class="min-w-0 flex-1">
+              <h3
+                class="wrap-break-word text-base font-bold leading-tight text-surface-900 sm:text-lg"
+              >
+                {{ communication.reference }}
+              </h3>
+
+              <div
+                class="mt-3 flex min-w-0 flex-wrap items-center gap-2 text-sm"
+              >
+                @if (communication.type) {
+                  <span
+                    class="rounded-md bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/20"
+                  >
+                    {{ communication.type }}
+                  </span>
+                }
+                @if (communication.code?.trim()) {
+                  <span
+                    class="rounded-md bg-surface-100 px-2.5 py-1 text-xs font-medium text-surface-600 ring-1 ring-inset ring-surface-500/20"
+                  >
+                    {{ communication.code }}
+                  </span>
+                }
+                <span class="ml-2 flex items-center text-surface-500">
+                  <i class="pi pi-clock mr-1.5 text-xs"></i>
+                  <time [attr.datetime]="communication.createdAt">{{
+                    communication.createdAt | date: "longDate"
+                  }}</time>
+                </span>
+              </div>
+            </div>
+            <a
+              size="small"
+              [href]="communication.url"
+              pButton
+              target="_blank"
+              rel="noopener noreferrer"
+              label="Ver comunicado"
+              icon="pi pi-external-link"
+              severity="secondary"
+            >
+            </a>
+          </article>
+        }
+      }
+    </div>
+
+    @if (
+      !communicationResource.error() &&
+      !communicationResource.isLoading() &&
+      communications().length
+    ) {
+      <p-paginator
+        class="mt-4 block"
+        [first]="offset()"
+        [rows]="limit()"
+        [totalRecords]="dataSize()"
+        [pageLinkSize]="3"
+        [showFirstLastIcon]="false"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} de {totalRecords}"
+        (onPageChange)="changePage($event)"
+      />
+    }
+  </section>
+</div>

@@ -20,6 +20,7 @@ import { TagModule } from 'primeng/tag';
 import { SearchInput, WindowScrollStore } from '../../../../../shared';
 import { PortalTutorialDataSource } from '../../../services';
 import { PortalTutorialResponse } from '../../../interfaces';
+import { PublicSectionHeader } from '../../../components';
 
 @Component({
   selector: 'app-tutorials-page',
@@ -33,6 +34,7 @@ import { PortalTutorialResponse } from '../../../interfaces';
     ButtonModule,
     TagModule,
     SearchInput,
+    PublicSectionHeader,
   ],
   templateUrl: './tutorials-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

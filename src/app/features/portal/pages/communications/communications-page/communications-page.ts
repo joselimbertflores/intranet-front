@@ -1,133 +1,208 @@
+import { DatePipe } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   afterRenderEffect,
+  ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
-  signal,
-  OnInit,
+  viewChild,
 } from '@angular/core';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 
-import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TableModule, TablePageEvent } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 
-import { WindowScrollStore, SearchInput } from '../../../../../shared';
-import { PortalCommunicationDataSource } from '../../../services';
+import { map } from 'rxjs';
+
+import { SearchInput, WindowScrollStore } from '../../../../../shared';
+import { PublicSectionHeader } from '../../../components';
 import { PortalCommunicationResponse } from '../../../interfaces';
-import { CommunicationCard } from '../../../components';
+import { PortalCommunicationDataSource } from '../../../services';
+
+type CommunicationTableRow = PortalCommunicationResponse & {
+  isSkeleton?: boolean;
+};
 
 @Component({
   selector: 'app-communications-page',
   imports: [
-    SelectModule,
-    ButtonModule,
+    DatePipe,
     FormsModule,
+    ButtonModule,
+    SelectModule,
+    SkeletonModule,
+    TableModule,
+    TagModule,
     SearchInput,
-    CommunicationCard,
+    PublicSectionHeader,
   ],
   templateUrl: './communications-page.html',
+  styleUrl: './communications-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class CommunicationsPage implements OnInit {
+export default class CommunicationsPage {
+  private readonly DEFAULT_LIMIT = 12;
+  private readonly DEFAULT_OFFSET = 0;
+
   private router = inject(Router);
-  private comunicationDataSource = inject(PortalCommunicationDataSource);
+  private route = inject(ActivatedRoute);
+  private communicationDataSource = inject(PortalCommunicationDataSource);
   private scrollStore = inject(WindowScrollStore);
 
-  readonly types = this.comunicationDataSource.types;
+  private tableTop = viewChild<ElementRef<HTMLElement>>('tableTop');
+  private pendingScrollToTable = false;
+  private scrollRestored = false;
+  private readonly scrollKey = this.router.url.split('?')[0];
 
-  readonly pageSize = 12;
-  dataSource = signal<PortalCommunicationResponse[]>([]);
-  dataSize = signal(0);
-  isLoading = signal<boolean>(false);
-  hasMore = computed(() => this.dataSource().length < this.dataSize());
+  readonly types = this.communicationDataSource.types;
+  readonly skeletonRows: CommunicationTableRow[] = Array.from(
+    { length: 6 },
+    (_, index) => ({
+      id: `communication-skeleton-${index}`,
+      reference: '',
+      type: '',
+      createdAt: '',
+      code: '',
+      isSkeleton: true,
+    }),
+  );
 
-  term = signal('');
-  type = signal<number | null>(null);
-  restoreScroll = signal(false);
+  readonly queryParams = toSignal(
+    this.route.queryParamMap.pipe(map((params) => this.mapQueryParams(params))),
+    { initialValue: this.mapQueryParams(this.route.snapshot.queryParamMap) },
+  );
 
-  private readonly scrollKey = this.router.url;
+  readonly term = computed(() => this.queryParams().term ?? '');
+  readonly type = computed(() => this.queryParams().type);
+  readonly limit = computed(() => this.queryParams().limit);
+  readonly offset = computed(() => this.queryParams().offset);
+
+  readonly communicationResource = rxResource({
+    params: () => this.queryParams(),
+    stream: ({ params }) => this.communicationDataSource.getData(params),
+  });
+
+  readonly communications = computed<PortalCommunicationResponse[]>(() => {
+    if (!this.communicationResource.hasValue()) return [];
+    return this.communicationResource.value().communications;
+  });
+
+  readonly dataSize = computed(() => {
+    if (!this.communicationResource.hasValue()) return 0;
+    return this.communicationResource.value().total;
+  });
+
+  readonly tableRows = computed<CommunicationTableRow[]>(() =>
+    this.communicationResource.isLoading()
+      ? this.skeletonRows
+      : this.communications(),
+  );
+
+  readonly isFiltering = computed(
+    () => Boolean(this.term()) || this.type() !== null,
+  );
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.restoreScroll()) {
+      if (this.communicationResource.isLoading()) return;
+
+      if (!this.scrollRestored) {
         this.scrollStore.restoreScroll(this.scrollKey);
+        this.scrollRestored = true;
       }
+
+      if (!this.pendingScrollToTable) return;
+
+      this.tableTop()?.nativeElement.scrollIntoView({
+        block: 'start',
+        behavior: 'smooth',
+      });
+      this.pendingScrollToTable = false;
     });
   }
 
-  ngOnInit(): void {
-    this.loadInitialData();
+  search(term: string): void {
+    this.setQueryParams({
+      term: this.normalizeTerm(term),
+      offset: this.DEFAULT_OFFSET,
+    });
   }
 
-  search(term: string) {
-    this.term.set(term);
-    this.resetAndFetch();
+  filterByType(type: number | null): void {
+    this.setQueryParams({
+      type: type ?? null,
+      offset: this.DEFAULT_OFFSET,
+    });
   }
 
-  filterByType(id: number | null) {
-    this.type.set(id);
-    this.resetAndFetch();
-  }
-
-  openDetail(item: PortalCommunicationResponse) {
-    this.comunicationDataSource.saveSnapshot({
-      items: this.dataSource(),
-      total: this.dataSize(),
-      filters: {
-        term: this.term(),
-        typeId: this.type(),
+  changePage(event: TablePageEvent): void {
+    this.setQueryParams(
+      {
+        limit: event.rows,
+        offset: event.first,
       },
-    });
+      { scrollToTable: true },
+    );
+  }
+
+  openDetail(item: PortalCommunicationResponse): void {
     this.router.navigate(['/communications', item.id]);
   }
 
-  loadInitialData(): void {
-    const snapshot = this.comunicationDataSource.consumeSnapshot();
-
-    if (!snapshot) {
-      this.dataSource.set([]);
-      this.dataSize.set(0);
-      this.fetchMore();
-      return;
+  private setQueryParams(
+    params: Params,
+    options: { scrollToTable?: boolean } = {},
+  ): void {
+    if (options.scrollToTable) {
+      this.pendingScrollToTable = true;
     }
 
-    const { items, total, filters } = snapshot;
-
-    this.dataSource.set(items);
-    this.dataSize.set(total);
-
-    this.term.set(filters.term ?? '');
-    this.type.set(filters.typeId ?? null);
-
-    this.restoreScroll.set(true);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+      scroll: 'manual',
+      queryParams: params,
+    });
   }
 
-  fetchMore(): void {
-    if (this.isLoading()) return;
-    this.isLoading.set(true);
-    this.comunicationDataSource
-      .getData({
-        limit: this.pageSize,
-        offset: this.dataSource().length,
-        type: this.type(),
-        term: this.term(),
-      })
-      .subscribe(({ communications, total }) => {
-        this.dataSource.update((v) => [...v, ...communications]);
-        this.dataSize.set(total);
-        this.isLoading.set(false);
-      });
+  private mapQueryParams(params: ParamMap) {
+    return {
+      term: this.normalizeTerm(params.get('term')),
+      type: this.parseType(params.get('type')),
+      limit: this.parseLimit(params.get('limit')),
+      offset: this.parseOffset(params.get('offset')),
+    };
   }
 
-  isFiltering(): boolean {
-    return !!this.term() || this.type() !== null;
+  private normalizeTerm(value: string | null): string | null {
+    const normalized = value?.trim();
+    return normalized ? normalized : null;
   }
 
-  resetAndFetch() {
-    this.dataSource.set([]);
-    this.dataSize.set(0);
-    this.fetchMore();
+  private parseType(value: string | null): number | null {
+    if (!value) return null;
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  private parseLimit(value: string | null): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 && parsed <= 100
+      ? parsed
+      : this.DEFAULT_LIMIT;
+  }
+
+  private parseOffset(value: string | null): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0
+      ? parsed
+      : this.DEFAULT_OFFSET;
   }
 }

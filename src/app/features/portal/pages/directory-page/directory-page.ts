@@ -12,12 +12,12 @@ import { TreeNode } from 'primeng/api';
 import { TreeDirectoryResponse } from '../../../administration/directory/interfaces';
 import { PortalDirectoryDataSource } from '../../services';
 import { TreeDirectoryNode } from '../../interfaces';
-import { DirectoryNode } from '../../components';
+import { DirectoryNode, PublicSectionHeader } from '../../components';
 import { SearchInput } from '../../../../shared';
 
 @Component({
   selector: 'app-directory-page',
-  imports: [CommonModule, DirectoryNode, SearchInput],
+  imports: [CommonModule, DirectoryNode, SearchInput, PublicSectionHeader],
   templateUrl: './directory-page.html',
 
   changeDetection: ChangeDetectionStrategy.OnPush,

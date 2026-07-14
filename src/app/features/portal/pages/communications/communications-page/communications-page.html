@@ -1,71 +1,199 @@
-<section class="bg-surface-50 border-b">
-  <div class="max-w-7xl mx-auto px-4 py-6">
-    <h1 class="text-2xl md:text-3xl font-semibold">Comunicados</h1>
-    <p class="mt-2 text-sm md:text-base text-muted max-w-2xl">
-      Avisos y comunicados oficiales de la institución.
-    </p>
-  </div>
-</section>
+<public-section-header
+  title="Comunicados"
+  description="Avisos y comunicados oficiales de la institución."
+/>
 
-<section class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-  <div class="w-full flex flex-col gap-2 sm:flex-row justify-end mb-4">
-    <div class="w-full md:w-64">
-      <search-input [value]="term()" (search)="search($event)" />
-    </div>
-    <div class="w-full md:w-64">
-      <p-select
-        [showClear]="true"
-        [options]="types()"
-        optionLabel="name"
-        optionValue="id"
-        placeholder="Tipo"
-        class="w-full"
-        [(ngModel)]="type"
-        (onChange)="filterByType($event.value)"
-      />
-    </div>
-  </div>
+<div class="bg-surface-50/60 pb-16">
+  <section
+    #tableTop
+    class="mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    aria-labelledby="communications-table-title"
+  >
+    <h2 id="communications-table-title" class="sr-only">
+      Listado de comunicados
+    </h2>
 
-  @if (isLoading() && !dataSource().length) {
-    <div class="flex flex-col items-center justify-center py-16">
-      <i
-        class="pi pi-spin pi-spinner text-4xl mb-4"
-        style="font-size: 2rem"
-      ></i>
-      <p class="font-medium text-surface-500 animate-pulse">
-        Cargando comunicados...
-      </p>
-    </div>
-  }
+    <div
+      class="mb-5 flex w-full flex-col gap-3 border-b border-surface-200 pb-5 sm:flex-row sm:items-center sm:justify-end"
+      aria-label="Filtros de comunicados"
+    >
+      <div class="w-full sm:w-72">
+        <search-input
+          label="Buscar comunicado"
+          [value]="term()"
+          (search)="search($event)"
+        />
+      </div>
 
-  @if (dataSource().length) {
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      @for (item of dataSource(); track item.id) {
-        <communication-card [data]="item" (onOpen)="openDetail(item)" />
-      }
+      <div class="w-full sm:w-64">
+        <p-select
+          class="w-full"
+          placeholder="Tipo"
+          optionLabel="name"
+          optionValue="id"
+          [fluid]="true"
+          [showClear]="true"
+          [options]="types()"
+          [ngModel]="type()"
+          (onChange)="filterByType($event.value)"
+        />
+      </div>
     </div>
-  }
 
-  @if (!isLoading() && !dataSource().length) {
-    <div class="flex flex-col items-center justify-center py-16 text-center">
-      <h3 class="text-lg font-semibold text-surface-900 mb-1">
-        Sin resultados
-      </h3>
-      <p class="text-sm text-surface-500 max-w-sm">
-        Aún no se han publicado comunicados o ninguno coincide con su búsqueda
-        actual.
-      </p>
-    </div>
-  }
+    @if (communicationResource.error()) {
+      <div
+        class="flex min-h-64 flex-col items-center justify-center border-y border-red-200 bg-red-50/70 px-6 py-12 text-center"
+        role="alert"
+      >
+        <span class="font-semibold text-red-950">
+          No pudimos cargar los comunicados
+        </span>
+        <p class="mt-1 max-w-md text-sm text-red-700">
+          Ocurrió un problema al obtener la información. Intenta nuevamente.
+        </p>
+        <p-button
+          styleClass="mt-5"
+          label="Reintentar"
+          icon="pi pi-refresh"
+          (onClick)="communicationResource.reload()"
+        />
+      </div>
+    } @else {
+      <p-table
+         responsiveLayout="stack" 
+        scrollHeight="flex"
+        size="small"
+        [value]="tableRows()"
+        [lazy]="true"
+        [paginator]="!communicationResource.isLoading() && dataSize() > 0"
+        [first]="offset()"
+        [rows]="limit()"
+        [totalRecords]="dataSize()"
+        [pageLinks]="3"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} de {totalRecords}"
+        (onPage)="changePage($event)"
+      >
+        <ng-template #header>
+          <tr>
+            <th class="w-44">Tipo</th>
+            <th>Comunicado</th>
+            <th class="w-40">Fecha</th>
+            <th class="w-40">Código</th>
+            <th class="w-28"><span class="sr-only">Acción</span></th>
+          </tr>
+        </ng-template>
 
-  @if (hasMore()) {
-    <div class="flex justify-center pt-4">
-      <p-button
-        [rounded]="true"
-        [loading]="isLoading()"
-        [label]="isLoading() ? ' Cargando....' : '  Cargar más'"
-        (onClick)="fetchMore()"
-      />
-    </div>
-  }
-</section>
+        <ng-template #body let-item>
+          <tr class="communication-row">
+            @if (!item.isSkeleton) {
+              <td class="communication-type-cell">
+                <span class="mobile-column-label">Tipo</span>
+                <p-tag
+                  severity="secondary"
+                  [rounded]="true"
+                  [value]="item.type"
+                />
+              </td>
+
+              <td class="communication-main-cell">
+                <span class="mobile-column-label">Comunicado</span>
+                <p
+                  class="line-clamp-2 min-w-0 break-words font-semibold leading-5 text-surface-900"
+                  [title]="item.reference"
+                >
+                  {{ item.reference }}
+                </p>
+              </td>
+
+              <td class="communication-date-cell">
+                <span class="mobile-column-label">Fecha</span>
+                <time
+                  class="whitespace-nowrap text-sm text-surface-600"
+                  [attr.datetime]="item.createdAt"
+                >
+                  {{ item.createdAt | date: "mediumDate" }}
+                </time>
+              </td>
+
+              <td class="communication-code-cell">
+                <span class="mobile-column-label">Código</span>
+                @if (item.code) {
+                  <span class="break-all text-sm font-medium text-surface-700">
+                    {{ item.code }}
+                  </span>
+                } @else {
+                  <span class="text-surface-400" aria-label="Sin código"
+                    >—</span
+                  >
+                }
+              </td>
+
+              <td class="communication-action-cell">
+                <p-button
+                  styleClass="w-full md:w-auto"
+                  label="Abrir"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  severity="secondary"
+                  variant="outlined"
+                  (onClick)="openDetail(item)"
+                />
+              </td>
+            } @else {
+              <td class="communication-type-cell">
+                <span class="mobile-column-label">Tipo</span>
+                <p-skeleton width="6rem" height="1.5rem" borderRadius="1rem" />
+              </td>
+              <td class="communication-main-cell">
+                <span class="mobile-column-label">Comunicado</span>
+                <p-skeleton width="min(100%, 30rem)" height="1rem" />
+                <p-skeleton
+                  styleClass="mt-2"
+                  width="min(72%, 20rem)"
+                  height="0.75rem"
+                />
+              </td>
+              <td class="communication-date-cell">
+                <span class="mobile-column-label">Fecha</span>
+                <p-skeleton width="6.5rem" height="0.875rem" />
+              </td>
+              <td class="communication-code-cell">
+                <span class="mobile-column-label">Código</span>
+                <p-skeleton width="5.5rem" height="0.875rem" />
+              </td>
+              <td class="communication-action-cell">
+                <p-skeleton
+                  width="5.5rem"
+                  height="2rem"
+                  borderRadius="0.5rem"
+                />
+              </td>
+            }
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="5">
+              <div
+                class="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center"
+              >
+                <h3 class="font-semibold text-surface-900">
+                  {{ isFiltering() ? "Sin resultados" : "Sin comunicados" }}
+                </h3>
+                <p class="mt-1 max-w-md text-sm text-surface-500">
+                  @if (isFiltering()) {
+                    Ningún comunicado coincide con la búsqueda actual.
+                  } @else {
+                    Aún no se han publicado comunicados.
+                  }
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </section>
+</div>

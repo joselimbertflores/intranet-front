@@ -20,6 +20,7 @@ import { DialogModule } from 'primeng/dialog';
 
 import { PortalCalendarResponse } from '../../interfaces';
 import { PortalCalendarDataSource } from '../../services';
+import { PublicSectionHeader } from '../../components';
 
 @Component({
   selector: 'app--calendar-page',
@@ -29,6 +30,7 @@ import { PortalCalendarDataSource } from '../../services';
     PopoverModule,
     ButtonModule,
     DialogModule,
+    PublicSectionHeader,
     // FullCalendarModule,
   ],
   templateUrl: './calendar-page.html',
@@ -37,14 +39,11 @@ import { PortalCalendarDataSource } from '../../services';
 export default class CalendarPage {
   // private calendarDataSource = inject(PortalCalendarDataSource);
   // calendarOptions: CalendarOptions;
-
   // selectedEvent = signal<EventApi | null>(null);
   // displayDialog = signal(false);
-
   // constructor() {
   //   this.calendarOptions = this.buildCalendarOptions();
   // }
-
   // private buildCalendarOptions(): CalendarOptions {
   //   return {
   //     plugins: [dayGridPlugin, interactionPlugin, listPlugin],
@@ -74,13 +73,11 @@ export default class CalendarPage {
   //     eventClick: (info) => this.onEventClick(info),
   //   };
   // }
-
   // private onEventClick(info: EventClickArg): void {
   //   info.jsEvent.preventDefault();
   //   this.selectedEvent.set(info.event);
   //   this.displayDialog.set(true);
   // }
-
   // private mapToCalendarEvent(dto: PortalCalendarResponse) {
   //   return {
   //     id: dto.id,

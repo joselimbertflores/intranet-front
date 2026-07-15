@@ -1,21 +1,176 @@
 <public-section-header
   title="Directorio telefónico"
-  description="Números internos y externos del GAMS."
+  description="Encuentra un área o función y copia el número que necesitas."
 />
-<section class="max-w-7xl mx-auto px-4 py-4 space-y-4">
-  <div class="flex sm:justify-end">
-    <div class="w-full sm:w-1/4">
-      <search-input (search)="onSearch($event)" />
-    </div>
-  </div>
-  <div class="flex flex-col">
-    @for (node of filteredTree(); track node.id) {
-      <directory-node [node]="node" />
-    } @empty {
-      <div class="flex flex-col items-center justify-center py-12 text-muted">
-        <p class="text-lg font-medium">No se encontraron resultados</p>
-        <p class="text-xs mt-1 opacity-80">Intenta con otro nombre o número</p>
+
+<div class="min-h-[55vh] bg-surface-50/60 pb-16">
+  <section
+    class="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8"
+    aria-labelledby="directory-results-title"
+  >
+    <div class="mx-auto max-w-3xl">
+      <div
+        class="rounded-2xl border border-surface-200 bg-surface-0 p-3 shadow-sm sm:p-4"
+        role="search"
+        aria-label="Buscar en el directorio"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <div class="min-w-0 flex-1">
+            <search-input
+              label="Área, función, interno o teléfono"
+              [value]="term()"
+              (search)="search($event)"
+            />
+          </div>
+          <div class="w-full sm:w-64">
+            <p-select
+              class="w-full"
+              placeholder="Todas las sedes"
+              optionLabel="name"
+              optionValue="id"
+              [fluid]="true"
+              [showClear]="true"
+              [options]="sites()"
+              [ngModel]="selectedSiteId()"
+              (ngModelChange)="selectSite($event)"
+            />
+          </div>
+        </div>
       </div>
-    }
-  </div>
-</section>
+    </div>
+
+    <div class="mt-7 flex items-center justify-between gap-4">
+      <h2 id="directory-results-title" class="text-sm font-semibold uppercase tracking-[0.12em] text-surface-500">
+        Destinos telefónicos
+      </h2>
+      @if (!directoryResource.isLoading() && !directoryResource.error()) {
+        <span class="text-sm tabular-nums text-surface-500">
+          {{ entries().length }} {{ entries().length === 1 ? "resultado" : "resultados" }}
+        </span>
+      }
+    </div>
+
+    <div class="directory-list mt-3 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0">
+      @if (directoryResource.error()) {
+        <div class="flex min-h-56 flex-col items-center justify-center px-6 py-12 text-center" role="alert">
+          <div class="flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <i class="pi pi-exclamation-circle"></i>
+          </div>
+          <p class="mt-3 font-semibold text-surface-900">No pudimos cargar el directorio</p>
+          <p class="mt-1 text-sm text-surface-600">Intenta nuevamente en unos momentos.</p>
+          <p-button
+            styleClass="mt-4"
+            label="Reintentar"
+            icon="pi pi-refresh"
+            size="small"
+            (onClick)="directoryResource.reload()"
+          />
+        </div>
+      } @else if (directoryResource.isLoading()) {
+        <div role="status" aria-live="polite">
+          <span class="sr-only">Cargando directorio</span>
+          @for (placeholder of skeletonItems; track placeholder) {
+            <div class="border-b border-surface-200 p-5 last:border-b-0 sm:px-6">
+              <p-skeleton width="min(72%, 24rem)" height="1.1rem" />
+              <p-skeleton class="mt-3" width="min(45%, 15rem)" height="0.8rem" />
+            </div>
+          }
+        </div>
+      } @else if (!entries().length) {
+        <div class="flex min-h-56 flex-col items-center justify-center px-6 py-12 text-center">
+          <div class="flex size-11 items-center justify-center rounded-full bg-surface-100 text-surface-500">
+            <i class="pi pi-search"></i>
+          </div>
+          <p class="mt-3 font-semibold text-surface-800">No encontramos coincidencias</p>
+          <p class="mt-1 max-w-md text-sm text-surface-500">
+            Prueba con otra área, función, número o sede.
+          </p>
+        </div>
+      } @else {
+        @for (entry of entries(); track entry.id) {
+          <article
+            animate.enter="animate-fadein motion-reduce:animate-none"
+            class="group relative border-b border-surface-200 p-5 last:border-b-0 hover:bg-surface-50/70 sm:px-6 sm:py-5"
+          >
+            <div class="absolute inset-y-4 left-0 w-0.5 rounded-r bg-primary-500 opacity-0 transition-opacity group-hover:opacity-100"></div>
+
+            <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(16rem,auto)] md:items-center md:gap-8">
+              <div class="min-w-0">
+                <h3 class="text-base font-bold leading-tight text-surface-900 sm:text-lg">
+                  {{ entry.areaName }}
+                </h3>
+                @if (entry.contactLabel) {
+                  <p class="mt-1 text-sm font-medium text-primary-700">{{ entry.contactLabel }}</p>
+                }
+
+                @if (entry.site || entry.siteDetails || entry.email) {
+                  <div class="mt-3 flex flex-col gap-1.5 text-sm text-surface-600 sm:flex-row sm:flex-wrap sm:gap-x-4">
+                    @if (entry.site || entry.siteDetails) {
+                      <span class="flex min-w-0 items-center gap-2">
+                        <i class="pi pi-map-marker shrink-0 text-xs text-surface-400"></i>
+                        <span class="min-w-0">
+                          @if (entry.site) { {{ entry.site.name }} }
+                          @if (entry.site && entry.siteDetails) { <span aria-hidden="true"> · </span> }
+                          @if (entry.siteDetails) { {{ entry.siteDetails }} }
+                        </span>
+                      </span>
+                    }
+                    @if (entry.email) {
+                      <a
+                        class="flex min-w-0 items-center gap-2 text-surface-600 hover:text-primary-700 hover:underline"
+                        [href]="'mailto:' + entry.email"
+                      >
+                        <i class="pi pi-envelope shrink-0 text-xs text-surface-400"></i>
+                        <span class="truncate">{{ entry.email }}</span>
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (entry.extensions.length || entry.phones.length) {
+                <div class="flex flex-col items-start gap-3 md:items-end">
+                  @if (entry.extensions.length) {
+                    <div class="flex flex-wrap items-center gap-2 md:justify-end">
+                      <span class="mr-1 text-[0.65rem] font-semibold uppercase tracking-wider text-surface-400">Interno</span>
+                      @for (extension of entry.extensions; track extension) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 px-2.5 py-1.5 font-mono text-sm font-semibold text-primary-800 ring-1 ring-inset ring-primary-600/15 transition hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                          [pTooltip]="copiedNumber() === extension ? 'Copiado' : 'Copiar interno'"
+                          [attr.aria-label]="'Copiar interno ' + extension"
+                          (click)="copyNumber(extension)"
+                        >
+                          {{ extension }}
+                          <i [class]="copiedNumber() === extension ? 'pi pi-check' : 'pi pi-copy'" class="text-[0.65rem]"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @if (entry.phones.length) {
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 md:justify-end">
+                      @for (phone of entry.phones; track phone) {
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-2 font-mono text-sm text-surface-700 hover:text-primary-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                          [pTooltip]="copiedNumber() === phone ? 'Copiado' : 'Copiar teléfono'"
+                          [attr.aria-label]="'Copiar teléfono ' + phone"
+                          (click)="copyNumber(phone)"
+                        >
+                          <i class="pi pi-phone text-xs text-surface-400"></i>
+                          {{ phone }}
+                          <i [class]="copiedNumber() === phone ? 'pi pi-check' : 'pi pi-copy'" class="text-[0.65rem] text-surface-400"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </article>
+        }
+      }
+    </div>
+  </section>
+</div>

@@ -1,83 +1,72 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 
-import { CommonModule } from '@angular/common';
-import { TreeNode } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TooltipModule } from 'primeng/tooltip';
 
-import { TreeDirectoryResponse } from '../../../administration/directory/interfaces';
-import { PortalDirectoryDataSource } from '../../services';
-import { TreeDirectoryNode } from '../../interfaces';
-import { DirectoryNode, PublicSectionHeader } from '../../components';
+import { DirectoryEntryResponse } from '../../../administration/directory/interfaces';
 import { SearchInput } from '../../../../shared';
+import { PublicSectionHeader } from '../../components';
+import { PortalDirectoryDataSource } from '../../services';
 
 @Component({
   selector: 'app-directory-page',
-  imports: [CommonModule, DirectoryNode, SearchInput, PublicSectionHeader],
+  imports: [
+    FormsModule,
+    ButtonModule,
+    SelectModule,
+    SkeletonModule,
+    TooltipModule,
+    SearchInput,
+    PublicSectionHeader,
+  ],
   templateUrl: './directory-page.html',
-
+  styles: `
+    .directory-list {
+      box-shadow: 0 18px 50px -42px color-mix(in srgb, var(--p-primary-900) 55%, transparent);
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DirectoryPage {
-  private data = inject(PortalDirectoryDataSource).directory;
-  private nodes = computed(() => this.mapToViewModel(this.data()));
+  private readonly dataSource = inject(PortalDirectoryDataSource);
 
-  filteredTree = computed(() => this.filterTree(this.nodes(), this.term()));
-  term = signal<string>('');
+  readonly sites = this.dataSource.sites;
+  readonly term = signal('');
+  readonly selectedSiteId = signal<number | null>(null);
+  readonly copiedNumber = signal<string | null>(null);
+  readonly skeletonItems = Array.from({ length: 6 }, (_, index) => index);
 
-  constructor() {}
+  readonly directoryResource = rxResource({
+    params: () => ({ term: this.term(), siteId: this.selectedSiteId() }),
+    stream: ({ params }) => this.dataSource.findAll(params),
+  });
 
-  onSearch(term: string): void {
+  readonly entries = computed<DirectoryEntryResponse[]>(() => {
+    if (!this.directoryResource.hasValue()) return [];
+    return this.directoryResource.value();
+  });
+
+  search(term: string): void {
     this.term.set(term);
   }
 
-  filterTree(nodes: TreeDirectoryNode[], term: string): TreeDirectoryNode[] {
-    if (!term.trim()) return nodes;
-
-    const lowerTerm = term.toLowerCase();
-
-    return nodes
-      .map((node) => {
-        const matches =
-          node.name.toLowerCase().includes(lowerTerm) ||
-          node.internalPhone?.includes(term) ||
-          node.landlinePhone?.includes(term);
-
-        const filteredChildren = node.children
-          ? this.filterTree(node.children, term)
-          : [];
-
-        if (matches || filteredChildren.length) {
-          return {
-            ...node,
-            expanded: true,
-            children: filteredChildren,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as TreeDirectoryNode[];
+  selectSite(siteId: number | null): void {
+    this.selectedSiteId.set(siteId);
   }
 
-  mapToViewModel(nodes: TreeDirectoryResponse[]): TreeDirectoryNode[] {
-    return nodes.map((node) => ({
-      ...node,
-      expanded: false,
-      children: this.mapToViewModel(node.children),
-    }));
-  }
-
-  private toTreeNode(
-    node: TreeDirectoryResponse,
-  ): TreeNode<TreeDirectoryResponse> {
-    return {
-      key: node.id.toString(),
-      data: node,
-      children: node.children?.map((child) => this.toTreeNode(child)) ?? [],
-    };
+  async copyNumber(value: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(value);
+      this.copiedNumber.set(value);
+      window.setTimeout(() => {
+        if (this.copiedNumber() === value) this.copiedNumber.set(null);
+      }, 1600);
+    } catch {
+      this.copiedNumber.set(null);
+    }
   }
 }

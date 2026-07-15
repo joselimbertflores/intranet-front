@@ -3,10 +3,11 @@ import {
   Component,
   computed,
   inject,
+  input,
+  output,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
+import { ButtonModule } from 'primeng/button';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 
@@ -14,56 +15,44 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
 import { Resource } from '../../../../core/auth/auth.types';
 import { AppIcon } from '../../../../shared';
 
-interface SidebarItem {
-  label: string;
-  icon: string;
-  expanded?: boolean;
-  routerLink?: string;
+interface SidebarItem extends MenuItem {
   resource?: Resource;
-  items?: SidebarItem[];
 }
 @Component({
   selector: 'app-admin-sidebar',
-  imports: [RouterModule, PanelMenuModule, CommonModule, AppIcon],
+  host: {
+    class: 'block h-full min-h-0',
+  },
+  imports: [PanelMenuModule, ButtonModule, AppIcon],
   template: `
-    <div class="h-full flex flex-col bg-surface-0">
-      <div class="flex items-center gap-3 h-14 sm:px-4">
+    <div class="flex h-full min-h-0 flex-col">
+      <div class="flex h-14 shrink-0 items-center gap-3 px-4">
         <app-icon />
-        <div class="flex flex-col leading-tight">
-          <span class="font-semibold text-surface-900"> Intranet </span>
-          <span class="text-xs text-surface-500"> Administracion </span>
+
+        <div class="flex min-w-0 flex-1 flex-col leading-tight">
+          <span class="font-semibold text-surface-900">Intranet</span>
+          <span class="text-xs text-surface-500">Administración</span>
         </div>
+
+        @if (showCloseButton()) {
+          <p-button
+            type="button"
+            size="small"
+            icon="pi pi-times"
+            [rounded]="true"
+            [text]="true"
+            ariaLabel="Cerrar menú de administración"
+            (onClick)="closeRequested.emit()"
+          />
+        }
       </div>
 
-      <div class="flex-1 overflow-y-auto py-2 sm:px-2">
-        <p-panelMenu [model]="filteredMenu()" class="w-full" [multiple]="true">
-          <ng-template #item let-item>
-            <a
-              pRipple
-              [routerLink]="item.routerLink"
-              [routerLinkActiveOptions]="{ exact: false }"
-              routerLinkActive="bg-primary-100 !text-primary-700 rounded-lg"
-              class="flex items-center gap-x-3 px-2 py-2 text-surface-700 hover:bg-surface-100 hover:rounded-lg transition-colors mb-1"
-            >
-              @if (item.icon) {
-                <i [class]="item.icon"></i>
-              }
-
-              <span [ngClass]="{ 'font-medium': item.items }">
-                {{ item.label }}
-              </span>
-
-              @if (item.items) {
-                <i
-                  class="pi pi-chevron-down ml-auto transition-transform duration-200"
-                  [ngClass]="{ 'rotate-180': item.expanded }"
-                  style="font-size: 12px;"
-                ></i>
-              }
-            </a>
-          </ng-template>
-        </p-panelMenu>
-      </div>
+      <nav
+        class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"
+        aria-label="Navegación de administración"
+      >
+        <p-panelMenu [model]="filteredMenu()" class="w-full" [multiple]="true" />
+      </nav>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,109 +60,101 @@ interface SidebarItem {
 export class AdminSidebar {
   private authDataSource = inject(AuthDataSource);
 
+  readonly showCloseButton = input(false);
+  readonly closeRequested = output<void>();
+
   readonly menu: SidebarItem[] = [
     {
-      label: 'Configuraciones',
-      icon: 'pi pi-cog',
-      expanded: true,
+      label: 'Portal',
+      icon: 'pi pi-home',
       items: [
         {
-          label: 'Contenido',
-          icon: 'pi pi-objects-column',
+          label: 'Página de inicio',
           routerLink: 'content-settings',
           resource: Resource.CONTENT,
         },
         {
           label: 'Avisos emergentes',
-          icon: 'pi pi-window-maximize',
           routerLink: 'landing-notices',
           resource: Resource.CONTENT,
         },
       ],
     },
     {
-      label: 'Documentacion',
+      label: 'Documentación',
       icon: 'pi pi-folder',
-      expanded: true,
       items: [
         {
-          label: 'Organizacion',
-          icon: 'pi pi-table',
-          routerLink: 'document-sections',
+          label: 'Documentos',
+          routerLink: 'documents',
           resource: Resource.DOCUMENTS,
         },
         {
-          label: 'Tipos de documentos',
-          icon: 'pi pi-list',
+          label: 'Tipos de documento',
           routerLink: 'document-types',
           resource: Resource.DOCUMENTS,
         },
-
         {
-          label: 'Documentos',
-          icon: 'pi pi-file',
-          routerLink: 'documents',
+          label: 'Unidades organizacionales',
+          routerLink: 'document-sections',
           resource: Resource.DOCUMENTS,
         },
       ],
     },
     {
-      label: 'Institucional',
-      icon: 'pi pi-building',
-      expanded: true,
+      label: 'Comunicación',
+      icon: 'pi pi-megaphone',
       items: [
         {
           label: 'Comunicados',
-          icon: 'pi pi-clipboard',
           routerLink: 'communications-manage',
           resource: Resource.COMMUNICATIONS,
         },
         {
           label: 'Calendario',
-          icon: 'pi pi-calendar',
           routerLink: 'calendar-manage',
           resource: Resource.CALENDAR,
-        },
-        {
-          label: 'Directorio telefonico',
-          icon: 'pi pi-phone',
-          routerLink: 'directory',
-          resource: Resource.DIRECTORY,
-        },
-        {
-          label: 'Tutoriales',
-          icon: 'pi pi-book',
-          items: [
-            {
-              label: 'Categorias',
-              icon: 'pi pi-align-center',
-              routerLink: 'tutorial-categories',
-              resource: Resource.TUTORIALS,
-            },
-            {
-              label: 'Contenido',
-              icon: 'pi pi-desktop',
-              routerLink: 'tutorials',
-              resource: Resource.TUTORIALS,
-            },
-          ],
         },
       ],
     },
     {
-      label: 'Accesso',
+      label: 'Directorio',
+      icon: 'pi pi-phone',
+      items: [
+        {
+          label: 'Contactos',
+          routerLink: 'directory',
+          resource: Resource.DIRECTORY,
+        },
+      ],
+    },
+    {
+      label: 'Capacitación',
+      icon: 'pi pi-book',
+      items: [
+        {
+          label: 'Tutoriales',
+          routerLink: 'tutorials',
+          resource: Resource.TUTORIALS,
+        },
+        {
+          label: 'Categorías',
+          routerLink: 'tutorial-categories',
+          resource: Resource.TUTORIALS,
+        },
+      ],
+    },
+    {
+      label: 'Acceso',
       icon: 'pi pi-lock',
-      expanded: true,
       items: [
         {
           label: 'Usuarios',
-          icon: 'pi pi-users',
           routerLink: 'users',
           resource: Resource.USERS,
         },
         {
           label: 'Roles',
-          icon: 'pi pi-shield',
           routerLink: 'roles',
           resource: Resource.ROLES,
         },
@@ -184,18 +165,20 @@ export class AdminSidebar {
   filteredMenu = computed<MenuItem[]>(() => this.filterMenu(this.menu));
 
   private filterMenu(items: SidebarItem[]): MenuItem[] {
-    return items
-      .map(({ resource, items, ...props }) => {
-        if (items) {
-          const children = this.filterMenu(items);
-          return children.length ? { ...props, items: children } : null;
-        }
-        if (!resource) return props;
+    return items.flatMap(({ resource, items, ...item }) => {
+      if (items) {
+        const visibleChildren = this.filterMenu(items);
 
-        return this.authDataSource.hasAnyResourcePermission(resource)
-          ? props
-          : null;
-      })
-      .filter((item) => item !== null);
+        return visibleChildren.length
+          ? [{ ...item, items: visibleChildren }]
+          : [];
+      }
+
+      if (resource && !this.authDataSource.hasAnyResourcePermission(resource)) {
+        return [];
+      }
+
+      return [item];
+    });
   }
 }

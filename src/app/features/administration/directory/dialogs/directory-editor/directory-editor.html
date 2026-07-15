@@ -1,78 +1,161 @@
-<form [formGroup]="directoryForm" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-6 pt-1">
-    <div class="flex flex-col gap-1">
+<form [formGroup]="directoryForm" (ngSubmit)="save()" class="space-y-5 pt-1">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="flex flex-col gap-1 md:col-span-2">
       <p-floatlabel variant="on">
-        <label>Nombre</label>
-        <input
-          pInputText
-          class="w-full"
-          formControlName="name"
-          [invalid]="formUtils.isInvalid(directoryForm.get('name'))"
+        <p-autocomplete
+          inputId="areaName"
+          formControlName="areaName"
+          [suggestions]="areaSuggestions()"
+          [forceSelection]="false"
+          [dropdown]="true"
+          [fluid]="true"
+          appendTo="body"
+          emptyMessage="No hay otra área con ese nombre"
+          (completeMethod)="searchAreas($event)"
+          [invalid]="formUtils.isInvalid(directoryForm.controls.areaName)"
         />
+        <label for="areaName">Área *</label>
       </p-floatlabel>
-      @if (formUtils.isInvalid(directoryForm.get("name"))) {
+      @if (formUtils.isInvalid(directoryForm.controls.areaName)) {
         <p-message severity="error" size="small" variant="simple">
-          {{ formUtils.getErrorMessage(directoryForm.get("name")) }}
+          {{ formUtils.getErrorMessage(directoryForm.controls.areaName) }}
         </p-message>
       }
-    </div>
-    <div class="flex flex-col sm:flex-row gap-2">
-      <div class="flex flex-col gap-1 w-full">
-        <p-floatlabel variant="on">
-          <input
-            inputId="internalTxt"
-            type="text"
-            pInputText
-            [fluid]="true"
-            formControlName="internalPhone"
-          />
-          <label for="internalTxt">Numero interno</label>
-        </p-floatlabel>
-        @if (formUtils.isInvalid(directoryForm.get("internalPhone"))) {
-          <p-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(directoryForm.get("internalPhone")) }}
-          </p-message>
-        }
-      </div>
-      <div class="flex flex-col gap-1 w-full">
-        <p-floatlabel variant="on">
-          <input
-            inputId="externalTxt"
-            type="text"
-            pInputText
-            [fluid]="true"
-            formControlName="landlinePhone"
-          />
-          <label for="externalTxt">Numero fijo</label>
-        </p-floatlabel>
-        @if (formUtils.isInvalid(directoryForm.get("landlinePhone"))) {
-          <p-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(directoryForm.get("landlinePhone")) }}
-          </p-message>
-        }
-      </div>
+      <small class="text-surface-500">
+        Puedes elegir un nombre existente o escribir uno nuevo.
+      </small>
     </div>
 
-    @if (data.parent) {
-      <p-floatlabel variant="on">
-        <input
-          id="parentLabel"
-          pInputText
-          [value]="data.parent.name"
-          [disabled]="true"
-          class="w-full"
+    <p-floatlabel variant="on" class="md:col-span-2">
+      <input
+        id="contactLabel"
+        pInputText
+        class="w-full"
+        formControlName="contactLabel"
+      />
+      <label for="contactLabel">Función o contacto (opcional)</label>
+    </p-floatlabel>
+
+    <section class="rounded-xl border border-surface-200 p-3">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h3 class="text-sm font-semibold text-surface-800">Internos</h3>
+        <p-button
+          type="button"
+          label="Agregar"
+          icon="pi pi-plus"
+          size="small"
+          [text]="true"
+          (onClick)="addExtension()"
         />
-        <label for="parentLabel">Directorio superior</label>
-      </p-floatlabel>
-    }
+      </div>
+      <div formArrayName="extensions" class="space-y-2">
+        @for (control of extensions.controls; track control; let i = $index) {
+          <div class="flex items-center gap-2">
+            <input
+              pInputText
+              class="min-w-0 flex-1"
+              [formControlName]="i"
+              [attr.aria-label]="'Interno ' + (i + 1)"
+              placeholder="Ej. 124"
+            />
+            <p-button
+              type="button"
+              icon="pi pi-times"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              [attr.aria-label]="'Quitar interno ' + (i + 1)"
+              (onClick)="removeExtension(i)"
+            />
+          </div>
+        } @empty {
+          <p class="text-xs text-surface-500">Sin internos registrados.</p>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-surface-200 p-3">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h3 class="text-sm font-semibold text-surface-800">Teléfonos</h3>
+        <p-button
+          type="button"
+          label="Agregar"
+          icon="pi pi-plus"
+          size="small"
+          [text]="true"
+          (onClick)="addPhone()"
+        />
+      </div>
+      <div formArrayName="phones" class="space-y-2">
+        @for (control of phones.controls; track control; let i = $index) {
+          <div class="flex items-center gap-2">
+            <input
+              pInputText
+              class="min-w-0 flex-1"
+              [formControlName]="i"
+              [attr.aria-label]="'Teléfono ' + (i + 1)"
+              placeholder="Ej. 4 6421234"
+            />
+            <p-button
+              type="button"
+              icon="pi pi-times"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              [attr.aria-label]="'Quitar teléfono ' + (i + 1)"
+              (onClick)="removePhone(i)"
+            />
+          </div>
+        } @empty {
+          <p class="text-xs text-surface-500">Sin teléfonos registrados.</p>
+        }
+      </div>
+    </section>
+
+    <p-floatlabel variant="on">
+      <input id="email" type="email" pInputText class="w-full" formControlName="email" />
+      <label for="email">Correo (opcional)</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="on">
+      <p-select
+        inputId="siteId"
+        formControlName="siteId"
+        [options]="sites()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sin sede"
+        [showClear]="true"
+        [fluid]="true"
+        appendTo="body"
+      />
+      <label for="siteId">Sede (opcional)</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="on" class="md:col-span-2">
+      <input
+        id="siteDetails"
+        pInputText
+        class="w-full"
+        formControlName="siteDetails"
+      />
+      <label for="siteDetails">Detalle de ubicación (opcional)</label>
+    </p-floatlabel>
   </div>
-  <div class="p-dialog-footer">
-    <p-button
-      type="button"
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="close()"
+
+  <div class="flex items-center gap-2 rounded-lg bg-surface-50 px-3 py-2">
+    <p-checkbox
+      inputId="directoryActive"
+      formControlName="isActive"
+      [binary]="true"
     />
+    <label for="directoryActive" class="cursor-pointer text-sm font-medium">
+      Mostrar este destino en el directorio público
+    </label>
+  </div>
+
+  <div class="p-dialog-footer">
+    <p-button type="button" label="Cancelar" severity="secondary" (onClick)="close()" />
     <p-button type="submit" label="Guardar" />
   </div>
 </form>

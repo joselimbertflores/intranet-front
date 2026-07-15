@@ -143,10 +143,6 @@ export class PortalDataSource {
     );
   }
 
-  getDirectoryTree() {
-    return this.http.get<any[]>(`${environment.baseUrl}/directory`);
-  }
-
   getCalendarRange(start: string, end: string) {
     return this.http.get<any[]>(`${environment.baseUrl}/calendar/list`, {
       params: { start, end },

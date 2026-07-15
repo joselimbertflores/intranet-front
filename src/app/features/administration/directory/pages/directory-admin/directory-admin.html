@@ -1,85 +1,206 @@
-<div class="flex items-center justify-between mb-2">
-  <h2 class="text-2xl font-semibold">Directorio</h2>
-  @if (canCreate()) {
-    <p-button
-      label="Agregar"
-      icon="pi pi-plus"
+<div class="space-y-8">
+  <section aria-labelledby="directory-entries-title">
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 id="directory-entries-title" class="text-2xl font-semibold">Directorio telefónico</h2>
+        <p class="mt-1 text-sm text-surface-500">Cada fila representa un destino de contacto independiente.</p>
+      </div>
+      @if (canCreate()) {
+        <p-button
+          label="Agregar destino"
+          icon="pi pi-plus"
+          size="small"
+          (onClick)="openDirectoryDialog()"
+        />
+      }
+    </div>
+
+    <p-table
+      [value]="entries()"
+      [loading]="isLoading()"
+      [rowHover]="true"
+      [scrollable]="true"
       size="small"
-      (onClick)="openDirectoryDialog()"
-    />
-  }
+    >
+      <ng-template #caption>
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div class="w-full sm:w-72">
+            <search-input
+              label="Área, función o número"
+              [value]="term()"
+              (search)="search($event)"
+            />
+          </div>
+          <div class="w-full sm:w-64">
+            <p-select
+              class="w-full"
+              placeholder="Todas las sedes"
+              optionLabel="name"
+              optionValue="id"
+              [fluid]="true"
+              [showClear]="true"
+              [options]="sites()"
+              [ngModel]="selectedSiteId()"
+              (ngModelChange)="filterSite($event)"
+            />
+          </div>
+        </div>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th class="min-w-64">Área / función</th>
+          <th class="min-w-40">Internos</th>
+          <th class="min-w-48">Teléfonos</th>
+          <th class="min-w-44">Sede</th>
+          <th class="w-28">Estado</th>
+          @if (hasRowActions()) { <th class="w-24"></th> }
+        </tr>
+      </ng-template>
+      <ng-template #body let-entry>
+        <tr>
+          <td>
+            <div class="font-medium text-surface-900">{{ entry.areaName }}</div>
+            @if (entry.contactLabel) {
+              <div class="mt-0.5 text-xs text-surface-500">{{ entry.contactLabel }}</div>
+            }
+            @if (entry.email) {
+              <div class="mt-0.5 text-xs text-surface-500">{{ entry.email }}</div>
+            }
+          </td>
+          <td>
+            <div class="flex flex-wrap gap-1">
+              @for (extension of entry.extensions; track extension) {
+                <span class="rounded-md bg-primary-50 px-2 py-1 font-mono text-xs text-primary-700">{{ extension }}</span>
+              } @empty { <span class="text-surface-400">—</span> }
+            </div>
+          </td>
+          <td>
+            <div class="flex flex-col gap-1 font-mono text-xs">
+              @for (phone of entry.phones; track phone) { <span>{{ phone }}</span> }
+              @empty { <span class="text-surface-400">—</span> }
+            </div>
+          </td>
+          <td>
+            @if (entry.site) {
+              <div>{{ entry.site.name }}</div>
+              @if (entry.siteDetails) {
+                <div class="text-xs text-surface-500">{{ entry.siteDetails }}</div>
+              }
+            } @else {
+              <span class="text-surface-400">—</span>
+            }
+          </td>
+          <td>
+            <p-tag
+              [severity]="entry.isActive ? 'success' : 'secondary'"
+              [value]="entry.isActive ? 'Activo' : 'Inactivo'"
+            />
+          </td>
+          @if (hasRowActions()) {
+            <td>
+              <div class="flex justify-end gap-1">
+                @if (canUpdate()) {
+                  <p-button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Editar"
+                    (onClick)="openDirectoryDialog(entry)"
+                  />
+                }
+                @if (canDelete()) {
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Eliminar"
+                    (onClick)="removeEntry(entry)"
+                  />
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td [attr.colspan]="hasRowActions() ? 6 : 5" class="py-6 text-center">Sin resultados.</td></tr>
+      </ng-template>
+    </p-table>
+  </section>
+
+  <section aria-labelledby="directory-sites-title">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <div>
+        <h2 id="directory-sites-title" class="text-xl font-semibold">Sedes</h2>
+        <p class="mt-1 text-sm text-surface-500">Ubicaciones físicas compartidas por los destinos.</p>
+      </div>
+      @if (canCreate()) {
+        <p-button
+          label="Agregar sede"
+          icon="pi pi-plus"
+          severity="secondary"
+          size="small"
+          (onClick)="openSiteDialog()"
+        />
+      }
+    </div>
+
+    <p-table [value]="sites()" [rowHover]="true" size="small">
+      <ng-template #header>
+        <tr>
+          <th>Nombre</th>
+          <th class="w-28">Estado</th>
+          @if (hasRowActions()) { <th class="w-24"></th> }
+        </tr>
+      </ng-template>
+      <ng-template #body let-site>
+        <tr>
+          <td class="font-medium">{{ site.name }}</td>
+          <td>
+            <p-tag
+              [severity]="site.isActive ? 'success' : 'secondary'"
+              [value]="site.isActive ? 'Activa' : 'Inactiva'"
+            />
+          </td>
+          @if (hasRowActions()) {
+            <td>
+              <div class="flex justify-end gap-1">
+                @if (canUpdate()) {
+                  <p-button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Editar sede"
+                    (onClick)="openSiteDialog(site)"
+                  />
+                }
+                @if (canDelete()) {
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Eliminar sede"
+                    (onClick)="removeSite(site)"
+                  />
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td [attr.colspan]="hasRowActions() ? 3 : 2" class="py-6 text-center">No hay sedes registradas.</td></tr>
+      </ng-template>
+    </p-table>
+  </section>
 </div>
 
-<p-treeTable
-  #treeTable
-  [value]="nodes()"
-  class="p-treetable-sm text-sm"
-  [globalFilterFields]="['name']"
-  (onNodeExpand)="onExpand($event)"
-  (onNodeCollapse)="onCollapse($event)"
-  [rowHover]="true"
-  filterMode="lenient"
-  [scrollable]="true"
-  scrollHeight="60vh"
->
-  <ng-template #caption>
-    <div class="flex justify-end items-center">
-      <p-floatlabel iconPosition="left" class="w-full sm:w-1/4" variant="on">
-        <p-iconfield>
-          <p-inputicon class="pi pi-search" />
-          <input
-            pInputText
-            type="text"
-            class="w-full"
-            (input)="treeTable.filterGlobal($event.target.value, 'contains')"
-          />
-        </p-iconfield>
-        <label>Buscar</label>
-      </p-floatlabel>
-    </div>
-  </ng-template>
-  <ng-template pTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th>Interno</th>
-      <th>Fijo</th>
-      <th style="width: 3rem"></th>
-    </tr>
-  </ng-template>
-
-  <ng-template #body let-rowNode let-rowData="rowData">
-    <tr [ttRow]="rowNode">
-      <td>
-        <div class="flex items-center gap-2">
-          <p-treetable-toggler [rowNode]="rowNode" />
-          <span>{{ rowData.name }}</span>
-        </div>
-      </td>
-      <td>{{ rowData.internalPhone ?? "----" }}</td>
-      <td>{{ rowData.landlinePhone ?? "----" }}</td>
-      <td style="width: 3rem">
-        @if (hasRowActions()) {
-          <div class="flex gap-x-2">
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              class="p-button-text"
-              size="small"
-              [rounded]="true"
-              (click)="openMenu(rowNode, $event); menu.toggle($event)"
-            ></button>
-          </div>
-        }
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="4">
-        <div class="py-1">Sin resultados.</div>
-      </td>
-    </tr>
-  </ng-template>
-</p-treeTable>
-<p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
 <p-confirmdialog />

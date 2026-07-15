@@ -1,53 +1,55 @@
-import { HttpClient } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../../../../environments/environment';
-import { TreeDirectoryResponse } from '../../interfaces';
+import {
+  DirectoryEntryPayload,
+  DirectoryEntryResponse,
+  DirectorySite,
+  DirectorySitePayload,
+} from '../../interfaces';
 
-// models.ts
-export interface DirectorySection {
-  id: string;
-  name: string;
-  order: number;
-  isActive: boolean;
-  parent?: DirectorySection | null; // opcional si lo traes del backend
-  children?: DirectorySection[];
-  parentId?: string | null; // útil para front
-}
-
-export interface DirectoryContact {
-  id: string;
-  title: string;
-  internalPhone?: string | null;
-  externalPhone?: string | null;
-  order: number;
-  isActive: boolean;
-  sectionId: string;
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class DirectoryDataSource {
-  private readonly URL = `${environment.baseUrl}/api/directory`;
-  private http = inject(HttpClient);
+  private readonly url = `${environment.baseUrl}/api/directory`;
+  private readonly http = inject(HttpClient);
 
-  constructor() {}
-
-  create(dto: object) {
-    return this.http.post<DirectorySection>(this.URL, dto);
+  findAll(term = '', siteId: number | null = null) {
+    let params = new HttpParams();
+    if (term.trim()) params = params.set('term', term.trim());
+    if (siteId) params = params.set('siteId', siteId);
+    return this.http.get<DirectoryEntryResponse[]>(this.url, { params });
   }
 
-  update(id: number, dto: object) {
-    return this.http.patch<DirectorySection>(`${this.URL}/${id}`, dto);
+  findAreaNames() {
+    return this.http.get<string[]>(`${this.url}/area-names`);
+  }
+
+  create(dto: DirectoryEntryPayload) {
+    return this.http.post<DirectoryEntryResponse>(this.url, dto);
+  }
+
+  update(id: number, dto: DirectoryEntryPayload) {
+    return this.http.patch<DirectoryEntryResponse>(`${this.url}/${id}`, dto);
   }
 
   remove(id: number) {
-    return this.http.delete(`${this.URL}/${id}`);
+    return this.http.delete(`${this.url}/${id}`);
   }
 
-  getTreeDirectory() {
-    return this.http.get<TreeDirectoryResponse[]>(this.URL, {});
+  findSites() {
+    return this.http.get<DirectorySite[]>(`${this.url}/sites`);
+  }
+
+  createSite(dto: DirectorySitePayload) {
+    return this.http.post<DirectorySite>(`${this.url}/sites`, dto);
+  }
+
+  updateSite(id: number, dto: DirectorySitePayload) {
+    return this.http.patch<DirectorySite>(`${this.url}/sites/${id}`, dto);
+  }
+
+  removeSite(id: number) {
+    return this.http.delete(`${this.url}/sites/${id}`);
   }
 }

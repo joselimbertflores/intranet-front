@@ -1,22 +1,32 @@
-import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import { TreeDirectoryResponse } from '../../administration/directory/interfaces';
+import {
+  DirectoryEntryResponse,
+  DirectorySite,
+} from '../../administration/directory/interfaces';
 import { environment } from '../../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface PortalDirectoryFilters {
+  term: string;
+  siteId: number | null;
+}
+
+@Injectable({ providedIn: 'root' })
 export class PortalDirectoryDataSource {
-  private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/api/portal-directory`;
+  private readonly http = inject(HttpClient);
+  private readonly url = `${environment.baseUrl}/api/portal-directory`;
 
-  directory = toSignal(this.getDirectory(), { initialValue: [] });
+  readonly sites = toSignal(
+    this.http.get<DirectorySite[]>(`${this.url}/sites`),
+    { initialValue: [] },
+  );
 
-  constructor() {}
-
-  getDirectory() {
-    return this.http.get<TreeDirectoryResponse[]>(this.URL);
+  findAll({ term, siteId }: PortalDirectoryFilters) {
+    let params = new HttpParams();
+    if (term.trim()) params = params.set('term', term.trim());
+    if (siteId) params = params.set('siteId', siteId);
+    return this.http.get<DirectoryEntryResponse[]>(this.url, { params });
   }
 }

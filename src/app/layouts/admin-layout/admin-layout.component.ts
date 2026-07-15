@@ -1,16 +1,23 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { NavigationStart, Router, RouterModule } from '@angular/router';
+import { Component, effect, inject, signal } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { RouterModule } from '@angular/router';
+
+import { filter, map } from 'rxjs';
 
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 
 import { ProfileOverlay, AdminSidebar } from './components';
-import { ThemeSwitcher } from '../../shared';
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 64rem)';
 
 @Component({
   selector: 'app-admin-layout',
+  host: {
+    class: 'fixed inset-0 block h-dvh min-h-0 overflow-hidden',
+  },
   imports: [
     RouterModule,
     ButtonModule,
@@ -18,29 +25,46 @@ import { ThemeSwitcher } from '../../shared';
     AdminSidebar,
     ProfileOverlay,
     CdkScrollable,
-    ThemeSwitcher
   ],
   templateUrl: './admin-layout.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AdminLayoutComponent {
-  isMobile = signal(false);
-  mobileMenuOpen = signal(false);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly router = inject(Router);
 
-  constructor(private breakpoint: BreakpointObserver) {
-    this.breakpoint.observe('(max-width: 1023px)').subscribe(({ matches }) => {
-      if (!matches) {
+  readonly mobileMenuOpen = signal(false);
+
+  readonly isDesktop = toSignal(
+    this.breakpointObserver
+      .observe(DESKTOP_MEDIA_QUERY)
+      .pipe(map(({ matches }) => matches)),
+    {
+      initialValue: this.breakpointObserver.isMatched(DESKTOP_MEDIA_QUERY),
+    },
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.isDesktop()) {
         this.mobileMenuOpen.set(false);
       }
-      this.isMobile.set(matches);
     });
+
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationStart),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.mobileMenuOpen.set(false));
   }
 
-  openMobileMenu() {
-    this.mobileMenuOpen.set(true);
+  openMobileMenu(): void {
+    if (!this.isDesktop()) {
+      this.mobileMenuOpen.set(true);
+    }
   }
 
-  closeMobileMenu() {
+  closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
   }
 }

@@ -27,13 +27,24 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
     RippleModule,
   ],
   template: `
-    <p-avatar
+    <button
+      type="button"
       pRipple
-      icon="pi pi-user"
-      shape="circle"
+      class="inline-flex rounded-full outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+      aria-label="Abrir menú de perfil"
+      aria-haspopup="menu"
+      aria-controls="admin-profile-menu"
+      [attr.aria-expanded]="op.overlayVisible"
       (click)="op.toggle($event)"
-    />
-    <p-popover #op [focusOnShow]="false">
+    >
+      <p-avatar
+        icon="pi pi-user"
+        shape="circle"
+        aria-hidden="true"
+      />
+    </button>
+
+    <p-popover #op id="admin-profile-menu" [focusOnShow]="false">
       <ng-template pTemplate="content">
         <div class="w-[300px]">
           <div class="flex flex-col space-y-3 items-center">
@@ -43,7 +54,8 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
                 severity="secondary"
                 [rounded]="true"
                 [text]="true"
-                (click)="op.hide()"
+                ariaLabel="Cerrar menú de perfil"
+                (onClick)="op.hide()"
                 size="small"
               />
             </div>
@@ -55,14 +67,15 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
             </span>
             <p-menu [model]="menuOptions" class="w-full">
               <ng-template #item let-item>
-                <a
+                <button
+                  type="button"
                   pRipple
-                  class="flex items-center px-3 py-2 cursor-pointer"
+                  class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left outline-none hover:bg-surface-100 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset"
                   [class]="item.linkClass"
                 >
-                  <span [class]="item.icon"></span>
+                  <span [class]="item.icon" aria-hidden="true"></span>
                   <span class="ml-3">{{ item.label }}</span>
-                </a>
+                </button>
               </ng-template>
             </p-menu>
           </div>

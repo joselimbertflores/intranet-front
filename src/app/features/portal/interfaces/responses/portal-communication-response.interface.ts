@@ -1,7 +1,7 @@
 export interface PortalCommunicationResponse {
   id: string;
   reference: string;
-  type: string;
+  typeName: string;
   createdAt: string;
   code: string | null;
   url: string;

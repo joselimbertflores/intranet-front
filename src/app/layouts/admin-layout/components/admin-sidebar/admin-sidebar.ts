@@ -1,184 +1,196 @@
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+  lucideBookOpen,
+  lucideChevronDown,
+  lucideFolder,
+  lucideHouse,
+  lucideLockKeyhole,
+  lucideMegaphone,
+  lucidePhone,
+} from '@ng-icons/lucide';
+import { HlmCollapsibleImports } from '@spartan-ng/helm/collapsible';
 
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
 import { Resource } from '../../../../core/auth/auth.types';
-import { AppIcon } from '../../../../shared';
 
-interface SidebarItem {
-  resource?: Resource;
+type AdminMenuIcon =
+  | 'lucideHouse'
+  | 'lucideFolder'
+  | 'lucideMegaphone'
+  | 'lucidePhone'
+  | 'lucideBookOpen'
+  | 'lucideLockKeyhole';
+
+interface AdminMenuLink {
+  readonly label: string;
+  readonly route: string;
+  readonly resource: Resource;
 }
+
+interface AdminMenuGroup {
+  readonly label: string;
+  readonly icon: AdminMenuIcon;
+  readonly links: readonly AdminMenuLink[];
+}
+
+const ADMIN_MENU = [
+  {
+    label: 'Portal',
+    icon: 'lucideHouse',
+    links: [
+      {
+        label: 'Página de inicio',
+        route: 'portal/home',
+        resource: Resource.CONTENT,
+      },
+      {
+        label: 'Avisos emergentes',
+        route: 'portal/notices',
+        resource: Resource.CONTENT,
+      },
+    ],
+  },
+  {
+    label: 'Documentación',
+    icon: 'lucideFolder',
+    links: [
+      {
+        label: 'Documentos',
+        route: 'documents',
+        resource: Resource.DOCUMENTS,
+      },
+      {
+        label: 'Tipos de documento',
+        route: 'document-types',
+        resource: Resource.DOCUMENTS,
+      },
+      {
+        label: 'Unidades organizacionales',
+        route: 'document-sections',
+        resource: Resource.DOCUMENTS,
+      },
+    ],
+  },
+  {
+    label: 'Comunicación',
+    icon: 'lucideMegaphone',
+    links: [
+      {
+        label: 'Comunicados',
+        route: 'communications-manage',
+        resource: Resource.COMMUNICATIONS,
+      },
+      {
+        label: 'Calendario',
+        route: 'calendar-manage',
+        resource: Resource.CALENDAR,
+      },
+    ],
+  },
+  {
+    label: 'Directorio',
+    icon: 'lucidePhone',
+    links: [
+      {
+        label: 'Contactos',
+        route: 'directory',
+        resource: Resource.DIRECTORY,
+      },
+    ],
+  },
+  {
+    label: 'Capacitación',
+    icon: 'lucideBookOpen',
+    links: [
+      {
+        label: 'Tutoriales',
+        route: 'tutorials',
+        resource: Resource.TUTORIALS,
+      },
+      {
+        label: 'Categorías',
+        route: 'tutorial-categories',
+        resource: Resource.TUTORIALS,
+      },
+    ],
+  },
+  {
+    label: 'Acceso',
+    icon: 'lucideLockKeyhole',
+    links: [
+      { label: 'Usuarios', route: 'users', resource: Resource.USERS },
+      { label: 'Roles', route: 'roles', resource: Resource.ROLES },
+    ],
+  },
+] as const satisfies readonly AdminMenuGroup[];
+
 @Component({
   selector: 'app-admin-sidebar',
   host: {
-    class: 'block h-full min-h-0',
+    class: 'block h-full min-h-0 bg-sidebar text-sidebar-foreground',
   },
-  imports: [AppIcon],
+  imports: [RouterLink, RouterLinkActive, NgIcon, HlmCollapsibleImports],
+  providers: [
+    provideIcons({
+      lucideHouse,
+      lucideFolder,
+      lucideMegaphone,
+      lucidePhone,
+      lucideBookOpen,
+      lucideLockKeyhole,
+      lucideChevronDown,
+    }),
+  ],
   template: `
     <div class="flex h-full min-h-0 flex-col">
-      <div class="flex h-14 shrink-0 items-center gap-3 px-4">
-        <app-icon />
-
-        <div class="flex min-w-0 flex-1 flex-col leading-tight">
-          <span class="font-semibold text-surface-900">Intranet</span>
-          <span class="text-xs text-surface-500">Administración</span>
-        </div>
-
-        @if (showCloseButton()) {
-          <!-- <app-ui-button
-            type="button"
-            size="small"
-            icon="ui-icon ui-icon-times"
-            [rounded]="true"
-            [text]="true"
-            ariaLabel="Cerrar menú de administración"
-            (onClick)="closeRequested.emit()"
-          /> -->
-        }
-      </div>
-
-      <!-- <nav
-        class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"
+      <nav
+        class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2"
         aria-label="Navegación de administración"
       >
-        <p-panelMenu
-          [model]="filteredMenu()"
-          class="w-full"
-          [multiple]="true"
-        />
-      </nav> -->
+        @for (group of visibleMenu(); track group.label) {
+          <section hlmCollapsible [expanded]="true" class="group/collapsible mb-1">
+            <button
+              hlmCollapsibleTrigger
+              class="flex h-9 w-full items-center gap-3 rounded-md px-2 text-left text-sm font-medium outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+            >
+              <ng-icon [name]="group.icon" aria-hidden="true" />
+              <span class="min-w-0 flex-1 truncate">{{ group.label }}</span>
+              <ng-icon
+                name="lucideChevronDown"
+                class="transition-transform group-data-[state=open]/collapsible:rotate-180"
+                aria-hidden="true"
+              />
+            </button>
+
+            <div hlmCollapsibleContent class="mt-1 space-y-1 ps-9">
+              @for (link of group.links; track link.route) {
+                <a
+                  class="block rounded-md px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                  [routerLink]="'/admin/' + link.route"
+                  routerLinkActive="bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                >
+                  {{ link.label }}
+                </a>
+              }
+            </div>
+          </section>
+        }
+      </nav>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminSidebar {
-  private authDataSource = inject(AuthDataSource);
+  private readonly authDataSource = inject(AuthDataSource);
 
-  readonly showCloseButton = input(false);
-  readonly closeRequested = output<void>();
-
-  readonly menu: any[] = [
-    {
-      label: 'Portal',
-      icon: 'ui-icon ui-icon-home',
-      items: [
-        {
-          label: 'Página de inicio',
-          routerLink: 'content-settings',
-          resource: Resource.CONTENT,
-        },
-        {
-          label: 'Avisos emergentes',
-          routerLink: 'landing-notices',
-          resource: Resource.CONTENT,
-        },
-      ],
-    },
-    {
-      label: 'Documentación',
-      icon: 'ui-icon ui-icon-folder',
-      items: [
-        {
-          label: 'Documentos',
-          routerLink: 'documents',
-          resource: Resource.DOCUMENTS,
-        },
-        {
-          label: 'Tipos de documento',
-          routerLink: 'document-types',
-          resource: Resource.DOCUMENTS,
-        },
-        {
-          label: 'Unidades organizacionales',
-          routerLink: 'document-sections',
-          resource: Resource.DOCUMENTS,
-        },
-      ],
-    },
-    {
-      label: 'Comunicación',
-      icon: 'ui-icon ui-icon-megaphone',
-      items: [
-        {
-          label: 'Comunicados',
-          routerLink: 'communications-manage',
-          resource: Resource.COMMUNICATIONS,
-        },
-        {
-          label: 'Calendario',
-          routerLink: 'calendar-manage',
-          resource: Resource.CALENDAR,
-        },
-      ],
-    },
-    {
-      label: 'Directorio',
-      icon: 'ui-icon ui-icon-phone',
-      items: [
-        {
-          label: 'Contactos',
-          routerLink: 'directory',
-          resource: Resource.DIRECTORY,
-        },
-      ],
-    },
-    {
-      label: 'Capacitación',
-      icon: 'ui-icon ui-icon-book',
-      items: [
-        {
-          label: 'Tutoriales',
-          routerLink: 'tutorials',
-          resource: Resource.TUTORIALS,
-        },
-        {
-          label: 'Categorías',
-          routerLink: 'tutorial-categories',
-          resource: Resource.TUTORIALS,
-        },
-      ],
-    },
-    {
-      label: 'Acceso',
-      icon: 'ui-icon ui-icon-lock',
-      items: [
-        {
-          label: 'Usuarios',
-          routerLink: 'users',
-          resource: Resource.USERS,
-        },
-        {
-          label: 'Roles',
-          routerLink: 'roles',
-          resource: Resource.ROLES,
-        },
-      ],
-    },
-  ];
-
-  filteredMenu = computed<any[]>(() => this.filterMenu(this.menu));
-
-  private filterMenu(items: any[]): any[] {
-    return items.flatMap(({ resource, items, ...item }) => {
-      if (items) {
-        const visibleChildren = this.filterMenu(items);
-
-        return visibleChildren.length
-          ? [{ ...item, items: visibleChildren }]
-          : [];
-      }
-
-      if (resource && !this.authDataSource.hasAnyResourcePermission(resource)) {
-        return [];
-      }
-
-      return [item];
-    });
-  }
+  readonly visibleMenu = computed<readonly AdminMenuGroup[]>(() =>
+    ADMIN_MENU.map((group) => ({
+      ...group,
+      links: group.links.filter(({ resource }) =>
+        this.authDataSource.hasAnyResourcePermission(resource),
+      ),
+    })).filter(({ links }) => links.length > 0),
+  );
 }

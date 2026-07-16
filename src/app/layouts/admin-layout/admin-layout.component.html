@@ -1,69 +1,89 @@
-<div class="flex h-dvh min-h-0 overflow-hidden bg-surface-50">
+<div
+  class="flex h-dvh min-h-0 flex-col overflow-hidden bg-background text-foreground"
+>
   <a
     href="#admin-main-content"
-    class="sr-only rounded-md bg-primary-600 px-3 py-2 text-sm font-medium text-primary-50 shadow-sm focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+    class="sr-only rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
   >
     Saltar al contenido principal
   </a>
 
-  <aside
-    class="hidden h-full min-h-0 w-72 shrink-0 overflow-hidden border-r border-surface-200 bg-surface-0 lg:block"
-    aria-label="Panel de administración"
+  <header
+    class="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur"
   >
-    @if (isDesktop()) {
-      <app-admin-sidebar />
-    }
-  </aside>
-
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-    <header
-      class="flex h-14 shrink-0 items-center gap-3 border-b border-surface-200 bg-surface-0 px-4"
-    >
-      <!-- <app-ui-button
+    @if (!isDesktop()) {
+      <button
+        hlmBtn
         type="button"
-        icon="ui-icon ui-icon-bars"
-        [text]="true"
-        [rounded]="true"
-        ariaLabel="Abrir menú de administración"
-        styleClass="lg:hidden"
-        [pt]="{
-          root: {
-            'aria-controls': 'admin-mobile-navigation',
-            'aria-expanded': mobileMenuOpen(),
-          },
-        }"
-        (onClick)="openMobileMenu()"
-      /> -->
+        size="icon"
+        variant="outline"
+        aria-label="Abrir menú de navegación"
+        aria-controls="admin-mobile-navigation"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        (click)="mobileMenuOpen.set(true)"
+      >
+        <ng-icon name="lucideMenu" aria-hidden="true" />
+      </button>
+    }
 
-      <div class="min-w-0 flex-1"></div>
-      <profile-overlay />
-    </header>
+    <div class="flex min-w-0 flex-1 items-center gap-2.5">
+      <span
+        class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+        aria-hidden="true"
+      >
+        <ng-icon name="lucideLandmark" />
+      </span>
+
+      <div class="flex min-w-0 items-baseline gap-1.5 leading-tight">
+        <span class="truncate text-sm font-semibold sm:text-base">
+          Intranet
+        </span>
+
+        <span class="truncate text-xs text-muted-foreground sm:text-sm">
+          / Administración
+        </span>
+      </div>
+    </div>
+
+    <app-user-menu />
+  </header>
+
+  <div class="flex min-h-0 flex-1 overflow-hidden pt-14">
+    @if (isDesktop()) {
+      <aside
+        class="h-full min-h-0 w-72 shrink-0 overflow-hidden border-r border-border bg-sidebar text-sidebar-foreground"
+        aria-label="Navegación de administración"
+      >
+        <app-admin-sidebar />
+      </aside>
+    } @else {
+      <hlm-sheet
+        id="admin-mobile-navigation"
+        side="left"
+        [state]="mobileMenuOpen() ? 'open' : 'closed'"
+        (stateChanged)="mobileMenuOpen.set($event === 'open')"
+      >
+        <hlm-sheet-content
+          *hlmSheetPortal
+          class="w-72 max-w-[calc(100vw-2rem)] gap-0 p-0"
+        >
+          <hlm-sheet-header>
+            <h3 hlmSheetTitle>Menu</h3>
+          </hlm-sheet-header>
+          <p hlmSheetDescription class="sr-only">
+            Accesos a las secciones permitidas del panel de administración.
+          </p>
+          <app-admin-sidebar />
+        </hlm-sheet-content>
+      </hlm-sheet>
+    }
 
     <main
       id="admin-main-content"
-      tabindex="-1"
-      class="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain p-4 sm:p-6"
+      class="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/30 p-4 sm:p-6"
       cdkScrollable
     >
       <router-outlet />
     </main>
   </div>
 </div>
-
-@if (!isDesktop()) {
-  <!-- <app-ui-drawer
-    id="admin-mobile-navigation"
-    position="left"
-    [modal]="true"
-    [blockScroll]="true"
-    [(visible)]="mobileMenuOpen"
-    styleClass="max-w-full overflow-hidden"
-  >
-    <ng-template #headless>
-      <app-admin-sidebar
-        [showCloseButton]="true"
-        (closeRequested)="closeMobileMenu()"
-      />
-    </ng-template>
-  </app-ui-drawer> -->
-}

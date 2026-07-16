@@ -1,0 +1,100 @@
+<div class="mx-auto w-full max-w-4xl">
+  <header class="mb-7 max-w-2xl">
+    <h1 class="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      Página de inicio
+    </h1>
+    <p class="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+      Administra las secciones principales que las personas encuentran al ingresar al
+      portal institucional.
+    </p>
+  </header>
+
+  <ul class="overflow-hidden rounded-xl border border-border bg-card text-card-foreground">
+    <li
+      class="grid gap-4 px-4 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6"
+      aria-labelledby="hero-carousel-title"
+    >
+      <span
+        class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <ng-icon name="lucideGalleryHorizontal" />
+      </span>
+      <div class="min-w-0">
+        <h2 id="hero-carousel-title" class="font-medium">Carrusel principal</h2>
+        <p class="mt-1 text-sm leading-5 text-muted-foreground">
+          Configura las imágenes y mensajes que encabezan la página de inicio.
+        </p>
+      </div>
+      @if (canUpdate()) {
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          class="w-full sm:w-auto"
+          (click)="showHeroSectionDialog()"
+        >
+          Administrar
+        </button>
+      }
+    </li>
+
+    <li
+      class="grid gap-4 border-t border-border px-4 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6"
+      aria-labelledby="featured-banners-title"
+    >
+      <span
+        class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <ng-icon name="lucideImages" />
+      </span>
+      <div class="min-w-0">
+        <h2 id="featured-banners-title" class="font-medium">Banners destacados</h2>
+        <p class="mt-1 text-sm leading-5 text-muted-foreground">
+          Organiza campañas y contenidos secundarios visibles en la portada.
+        </p>
+      </div>
+      @if (canUpdate()) {
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          class="w-full sm:w-auto"
+          (click)="showFeaturedBannersDialog()"
+        >
+          Administrar
+        </button>
+      }
+    </li>
+
+    <li
+      class="grid gap-4 border-t border-border px-4 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-6"
+      aria-labelledby="quick-access-title"
+    >
+      <span
+        class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <ng-icon name="lucideMousePointerClick" />
+      </span>
+      <div class="min-w-0">
+        <h2 id="quick-access-title" class="font-medium">Accesos rápidos</h2>
+        <p class="mt-1 text-sm leading-5 text-muted-foreground">
+          Mantén los enlaces directos a sistemas y servicios de uso frecuente.
+        </p>
+      </div>
+      @if (canUpdate()) {
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          class="w-full sm:w-auto"
+          (click)="showQuickAccessDialog()"
+        >
+          Administrar
+        </button>
+      }
+    </li>
+  </ul>
+</div>

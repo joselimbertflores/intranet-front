@@ -138,20 +138,35 @@ export const routes: Routes = [
           import('./features/administration/tutorials/pages/tutorial-categories-admin/tutorial-categories-admin'),
       },
       {
+        path: 'portal',
+        children: [
+          {
+            path: 'home',
+            title: 'Administración - Página de inicio',
+            data: { resource: Resource.CONTENT },
+            canActivate: [resourceGuard],
+            loadComponent: () =>
+              import('./features/administration/content-settings/pages/portal-home-page/portal-home-page'),
+          },
+          {
+            path: 'notices',
+            title: 'Administración - Avisos emergentes',
+            data: { resource: Resource.CONTENT },
+            canActivate: [resourceGuard],
+            loadComponent: () =>
+              import('./features/administration/content-settings/pages/landing-notices-admin/landing-notices-admin'),
+          },
+        ],
+      },
+      {
         path: 'content-settings',
-        title: 'Administracion - Contenido',
-        data: { resource: Resource.CONTENT },
-        canActivate: [resourceGuard],
-        loadComponent: () =>
-          import('./features/administration/content-settings/pages/content-settings-list/content-settings-list'),
+        redirectTo: 'portal/home',
+        pathMatch: 'full',
       },
       {
         path: 'landing-notices',
-        title: 'Administracion - Avisos emergentes',
-        data: { resource: Resource.CONTENT },
-        canActivate: [resourceGuard],
-        loadComponent: () =>
-          import('./features/administration/content-settings/pages/landing-notices-admin/landing-notices-admin'),
+        redirectTo: 'portal/notices',
+        pathMatch: 'full',
       },
       {
         path: 'directory',

@@ -4,6 +4,7 @@ export interface AuthUser {
   fullName: string;
   isActive: boolean;
   permissions: string[];
+  roles?: readonly { readonly name: string }[];
 }
 
 export enum Resource {

@@ -6,7 +6,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/app/shared/ui/**/src/**/*.ts"
+    "libs/ui/**/src/**/*.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts"

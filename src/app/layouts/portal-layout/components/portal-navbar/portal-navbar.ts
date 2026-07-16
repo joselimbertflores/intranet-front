@@ -69,7 +69,11 @@ interface NavItem {
           (click)="toggleMobileMenu()"
         >
           <i
-            [class]="isMobileMenuOpen() ? 'ui-icon ui-icon-times' : 'ui-icon ui-icon-bars'"
+            [class]="
+              isMobileMenuOpen()
+                ? 'ui-icon ui-icon-times'
+                : 'ui-icon ui-icon-bars'
+            "
             class="text-xl"
             aria-hidden="true"
           ></i>

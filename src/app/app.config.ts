@@ -22,6 +22,7 @@ import { definePreset, palette } from '@primeuix/themes';
 
 import { es } from 'primelocale/es.json';
 import theme from '@primeuix/themes/aura';
+import { provideSpartanHlm } from '@spartan-ng/helm/utils';
 
 import { httpErrorInterceptor } from './core/http/http-error-interceptor';
 import { authInterceptor } from './core/auth/auth-interceptor';
@@ -59,6 +60,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideSpartanHlm(),
     provideRouter(
       routes,
       withComponentInputBinding(),

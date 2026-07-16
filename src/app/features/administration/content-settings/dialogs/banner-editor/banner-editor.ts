@@ -23,10 +23,31 @@ import { CommonModule } from '@angular/common';
 
 import { ContentSettingsDataSource } from '../../services';
 import { HeroSlideResponse } from '../../interfaces';
+import { HlmDialogHeader, HlmDialogFooter } from '@spartan-ng/helm/dialog';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { form, required } from '@angular/forms/signals';
+
+interface FormData {
+  id: string | null;
+  title: string | null;
+  description: string | null;
+  linkLabel: string | null;
+  linkUrl: string | null;
+  imageFileId: string | null;
+  isActive: string | null;
+}
 
 @Component({
   selector: 'banner-editor',
-  imports: [CommonModule, ReactiveFormsModule, DragDropModule, DragDropModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DragDropModule,
+    DragDropModule,
+    HlmDialogHeader,
+    HlmDialogFooter,
+    HlmButton,
+  ],
   templateUrl: './banner-editor.html',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
@@ -39,9 +60,22 @@ export class BannerEditor {
 
   bannerImages = signal<{ file?: File; preview?: string }[]>([]);
 
+  formModel = signal<FormData>({
+    id: null,
+    title: null,
+    description: null,
+    linkLabel: null,
+    linkUrl: null,
+    imageFileId: null,
+    isActive: null,
+  });
+
   form: FormGroup = this.formBuilder.group({
     items: this.formBuilder.array([]),
   });
+
+  formSignal = form(this.formModel);
+
   hasErrorMessage = signal(false);
 
   readonly scrollContainer = viewChild.required<ElementRef>('scrollContainer');

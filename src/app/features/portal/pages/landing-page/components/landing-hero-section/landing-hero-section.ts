@@ -76,7 +76,7 @@ register();
                             class="hero-link inline-flex min-h-12 items-center gap-3 rounded-xl bg-primary-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-surface-950/25 outline-none transition-colors hover:bg-primary-400 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-surface-950"
                           >
                             {{ slide.linkLabel }}
-                            <i class="pi pi-arrow-right text-xs" aria-hidden="true"></i>
+                            <i class="ui-icon ui-icon-arrow-right text-xs" aria-hidden="true"></i>
                           </a>
                         } @else {
                           <a
@@ -86,7 +86,7 @@ register();
                             class="hero-link inline-flex min-h-12 items-center gap-3 rounded-xl bg-primary-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-surface-950/25 outline-none transition-colors hover:bg-primary-400 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-surface-950"
                           >
                             {{ slide.linkLabel }}
-                            <i class="pi pi-arrow-up-right text-xs" aria-hidden="true"></i>
+                            <i class="ui-icon ui-icon-arrow-up-right text-xs" aria-hidden="true"></i>
                           </a>
                         }
                       </div>
@@ -106,7 +106,7 @@ register();
             [disabled]="activeIndex() === 0"
             (click)="previousSlide(heroSwiper)"
           >
-            <i class="pi pi-chevron-left" aria-hidden="true"></i>
+            <i class="ui-icon ui-icon-chevron-left" aria-hidden="true"></i>
           </button>
 
           <button
@@ -116,7 +116,7 @@ register();
             [disabled]="activeIndex() === heroSlides().length - 1"
             (click)="nextSlide(heroSwiper)"
           >
-            <i class="pi pi-chevron-right" aria-hidden="true"></i>
+            <i class="ui-icon ui-icon-chevron-right" aria-hidden="true"></i>
           </button>
 
           <div

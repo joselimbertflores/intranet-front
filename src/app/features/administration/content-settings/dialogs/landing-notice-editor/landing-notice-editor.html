@@ -1,32 +1,32 @@
 <form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
   <div class="app-dialog-body flex flex-col gap-5">
     <div class="flex flex-col gap-1">
-      <p-floatlabel variant="on">
+      <!-- <app-ui-floatlabel variant="on">
         <input
-          pInputText
+          appUiInput
           class="w-full"
           formControlName="title"
           [invalid]="formUtils.isInvalid(form.controls.title)"
         />
         <label>Título</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
 
       @if (formUtils.isInvalid(form.controls.title)) {
-        <p-message severity="error" size="small" variant="simple">
+        <app-ui-message severity="error" size="small" variant="simple">
           El título es obligatorio y admite hasta 160 caracteres.
-        </p-message>
-      }
+        </app-ui-message>
+      } -->
     </div>
 
     <div class="flex flex-col gap-1">
       <label class="text-sm font-medium text-surface-700">Contenido</label>
 
-      <p-editor
+      <app-ui-editor
         formControlName="contentHtml"
         [style]="{ height: '180px' }"
         placeholder="Escriba el contenido del aviso"
       >
-        <ng-template #header>
+        <ng-template appUiTemplate="header">
           <span class="ql-formats">
             <button type="button" class="ql-bold"></button>
             <button type="button" class="ql-italic"></button>
@@ -42,12 +42,12 @@
             <button type="button" class="ql-clean"></button>
           </span>
         </ng-template>
-      </p-editor>
+      </app-ui-editor>
 
       @if (showContentError()) {
-        <p-message severity="error" size="small" variant="simple">
+        <!-- <app-ui-message severity="error" size="small" variant="simple">
           Ingrese contenido o seleccione una imagen.
-        </p-message>
+        </app-ui-message> -->
       }
     </div>
 
@@ -82,13 +82,13 @@
                 class="absolute inset-0 flex items-center justify-center bg-black/50 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <span class="flex items-center gap-2">
-                  <i class="pi pi-pencil text-sm"></i>
+                  <i class="ui-icon ui-icon-pencil text-sm"></i>
                   <span>Cambiar imagen</span>
                 </span>
               </span>
             } @else {
               <span class="flex flex-col items-center gap-2 text-surface-500">
-                <i class="pi pi-image text-3xl"></i>
+                <i class="ui-icon ui-icon-image text-3xl"></i>
                 <span class="text-sm font-medium">Subir imagen</span>
               </span>
             }
@@ -102,53 +102,61 @@
             (change)="onFileSelected($event)"
           />
 
-          @if (preview) {
-            <p-button
+          <!-- @if (preview) {
+            <app-ui-button
               type="button"
               label="Quitar"
-              icon="pi pi-times"
+              icon="ui-icon ui-icon-times"
               severity="secondary"
               size="small"
               [text]="true"
               styleClass="w-full justify-center"
               (onClick)="removeImage()"
             />
-          }
+          } -->
         </div>
 
         <div class="md:col-span-3">
-          @if (preview) {
+          <!-- @if (preview) {
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1">
-                <p-floatlabel variant="on">
+                <app-ui-floatlabel variant="on">
                   <input
-                    pInputText
+                    appUiInput
                     class="w-full"
                     formControlName="imageAlt"
                     [invalid]="showImageAltRequiredError()"
                   />
                   <label>Texto alternativo</label>
-                </p-floatlabel>
+                </app-ui-floatlabel>
 
                 @if (showImageAltRequiredError()) {
-                  <p-message severity="error" size="small" variant="simple">
+                  <app-ui-message
+                    severity="error"
+                    size="small"
+                    variant="simple"
+                  >
                     El texto alternativo es obligatorio cuando hay una imagen.
-                  </p-message>
+                  </app-ui-message>
                 }
 
                 @if (
                   submitted() && form.controls.imageAlt.hasError("maxlength")
                 ) {
-                  <p-message severity="error" size="small" variant="simple">
+                  <app-ui-message
+                    severity="error"
+                    size="small"
+                    variant="simple"
+                  >
                     El texto alternativo admite hasta 255 caracteres.
-                  </p-message>
+                  </app-ui-message>
                 }
               </div>
 
               <div class="flex flex-col gap-1">
-                <p-floatlabel variant="on">
+                <app-ui-floatlabel variant="on">
                   <input
-                    pInputText
+                    appUiInput
                     class="w-full"
                     formControlName="imageLinkUrl"
                     [invalid]="
@@ -156,12 +164,16 @@
                     "
                   />
                   <label>Enlace de la imagen</label>
-                </p-floatlabel>
+                </app-ui-floatlabel>
 
                 @if (submitted() && form.controls.imageLinkUrl.invalid) {
-                  <p-message severity="error" size="small" variant="simple">
+                  <app-ui-message
+                    severity="error"
+                    size="small"
+                    variant="simple"
+                  >
                     Use una URL http(s) o una ruta interna que comience con /.
-                  </p-message>
+                  </app-ui-message>
                 }
 
                 <small class="text-surface-500">
@@ -176,14 +188,14 @@
               Puede agregar una imagen al aviso. Relacion de aspecto recomendada
               4:3.
             </div>
-          }
+          } -->
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <p-floatlabel variant="on">
-        <p-datepicker
+    <!-- <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <app-ui-floatlabel variant="on">
+        <app-ui-datepicker
           formControlName="visibleFrom"
           [showTime]="true"
           hourFormat="24"
@@ -194,10 +206,10 @@
           [maxDate]="form.controls.visibleUntil.value"
         />
         <label for="notice-visible-from">Mostrar desde</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
 
-      <p-floatlabel variant="on">
-        <p-datepicker
+      <app-ui-floatlabel variant="on">
+        <app-ui-datepicker
           formControlName="visibleUntil"
           [showTime]="true"
           hourFormat="24"
@@ -208,18 +220,18 @@
           [minDate]="form.controls.visibleFrom.value"
         />
         <label for="notice-visible-until">Mostrar hasta</label>
-      </p-floatlabel>
-    </div>
+      </app-ui-floatlabel>
+    </div> -->
 
     @if (form.hasError("invalidDateRange")) {
-      <p-message severity="error" size="small" variant="simple">
+      <!-- <app-ui-message severity="error" size="small" variant="simple">
         “Mostrar desde” debe ser anterior o igual a “Mostrar hasta”.
-      </p-message>
+      </app-ui-message> -->
     }
 
-    <div class="flex flex-wrap gap-6 px-1">
+    <!-- <div class="flex flex-wrap gap-6 px-1">
       <div class="flex items-center gap-2">
-        <p-checkbox
+        <app-ui-checkbox
           formControlName="isActive"
           [binary]="true"
           inputId="notice-active"
@@ -233,7 +245,7 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <p-checkbox
+        <app-ui-checkbox
           formControlName="isPinned"
           [binary]="true"
           inputId="notice-pinned"
@@ -245,22 +257,22 @@
           Fijado
         </label>
       </div>
-    </div>
+    </div> -->
   </div>
 
-  <div class="app-dialog-actions">
-    <p-button
+  <!-- <div class="app-dialog-actions">
+    <app-ui-button
       type="button"
       label="Cancelar"
       severity="secondary"
       (onClick)="dialogRef.close()"
     />
 
-    <p-button
+    <app-ui-button
       type="submit"
       label="Guardar"
       [loading]="saving()"
       [disabled]="saving()"
     />
-  </div>
+  </div> -->
 </form>

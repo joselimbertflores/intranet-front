@@ -1,4 +1,10 @@
-import { Component, ElementRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -13,17 +19,6 @@ import {
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ConfirmationService } from 'primeng/api';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
-import { ButtonModule } from 'primeng/button';
-
 import { QuickAccessBatchItem, QuickAccessResponse } from '../../interfaces';
 import { CustomFormValidators, FormUtils } from '../../../../../helpers';
 import { ContentSettingsDataSource } from '../../services';
@@ -33,55 +28,55 @@ export const QUICK_ACCESS_DEFAULT_ICON_KEY = 'link';
 export const QUICK_ACCESS_ICONS = {
   link: {
     label: 'Enlace',
-    icon: 'pi pi-link',
+    icon: 'ui-icon ui-icon-link',
   },
   external: {
     label: 'Sistema externo',
-    icon: 'pi pi-external-link',
+    icon: 'ui-icon ui-icon-external-link',
   },
   application: {
     label: 'Aplicación',
-    icon: 'pi pi-desktop',
+    icon: 'ui-icon ui-icon-desktop',
   },
   email: {
     label: 'Correo',
-    icon: 'pi pi-envelope',
+    icon: 'ui-icon ui-icon-envelope',
   },
   document: {
     label: 'Documento',
-    icon: 'pi pi-file',
+    icon: 'ui-icon ui-icon-file',
   },
   form: {
     label: 'Formulario',
-    icon: 'pi pi-list-check',
+    icon: 'ui-icon ui-icon-list-check',
   },
   book: {
     label: 'Libro / Gaceta',
-    icon: 'pi pi-book',
+    icon: 'ui-icon ui-icon-book',
   },
   support: {
     label: 'Soporte',
-    icon: 'pi pi-question-circle',
+    icon: 'ui-icon ui-icon-question-circle',
   },
   dashboard: {
     label: 'Dashboard',
-    icon: 'pi pi-chart-line',
+    icon: 'ui-icon ui-icon-chart-line',
   },
   report: {
     label: 'Reporte',
-    icon: 'pi pi-chart-bar',
+    icon: 'ui-icon ui-icon-chart-bar',
   },
   user: {
     label: 'Usuario',
-    icon: 'pi pi-user',
+    icon: 'ui-icon ui-icon-user',
   },
   calendar: {
     label: 'Calendario',
-    icon: 'pi pi-calendar',
+    icon: 'ui-icon ui-icon-calendar',
   },
   settings: {
     label: 'Configuración',
-    icon: 'pi pi-cog',
+    icon: 'ui-icon ui-icon-cog',
   },
 } as const;
 
@@ -89,28 +84,16 @@ export type QuickAccessIconKey = keyof typeof QUICK_ACCESS_ICONS;
 
 @Component({
   selector: 'app-quick-access-editor',
-  imports: [
-    ReactiveFormsModule,
-    CommonModule,
-    ConfirmDialogModule,
-    FloatLabelModule,
-    InputTextModule,
-    CheckboxModule,
-    TextareaModule,
-    DragDropModule,
-    MessageModule,
-    SelectModule,
-    ButtonModule,
-  ],
+  imports: [ReactiveFormsModule, CommonModule, DragDropModule],
   templateUrl: './quick-access-editor.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [ConfirmationService],
+  // providers: [ConfirmationService],
 })
 export class QuickAccessEditor {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogRef = inject(DynamicDialogRef);
+  // private readonly dialogRef = inject(DynamicDialogRef);
   private readonly contentDataSource = inject(ContentSettingsDataSource);
-  private readonly confirmationService = inject(ConfirmationService);
+  // private readonly confirmationService = inject(ConfirmationService);
 
   readonly iconOptions = Object.entries(QUICK_ACCESS_ICONS).map(
     ([value, config]) => ({
@@ -145,12 +128,12 @@ export class QuickAccessEditor {
       }));
 
     this.contentDataSource.replaceQuickAccessItems(items).subscribe(() => {
-      this.dialogRef.close();
+      // this.dialogRef.close();
     });
   }
 
   close(): void {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   addItem(): void {
@@ -165,23 +148,23 @@ export class QuickAccessEditor {
       this.itemsFormArray.removeAt(index);
       return;
     }
-    this.confirmationService.confirm({
-      message: '¿Esta seguro que desea eliminar el elemento?',
-      header: 'Eliminar banner',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Aceptar',
-      },
-      accept: () => {
-        this.contentDataSource.removeQuickAccess(id).subscribe(() => {
-          this.itemsFormArray.removeAt(index);
-        });
-      },
-    });
+    // this.confirmationService.confirm({
+    //   message: '¿Esta seguro que desea eliminar el elemento?',
+    //   header: 'Eliminar banner',
+    //   rejectButtonProps: {
+    //     label: 'Cancelar',
+    //     severity: 'secondary',
+    //     outlined: true,
+    //   },
+    //   acceptButtonProps: {
+    //     label: 'Aceptar',
+    //   },
+    //   accept: () => {
+    //     this.contentDataSource.removeQuickAccess(id).subscribe(() => {
+    //       this.itemsFormArray.removeAt(index);
+    //     });
+    //   },
+    // });
   }
 
   drop(event: CdkDragDrop<object[]>): void {

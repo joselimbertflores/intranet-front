@@ -5,7 +5,7 @@ import {
   inject,
   signal,
   viewChild,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   ReactiveFormsModule,
@@ -21,46 +21,21 @@ import {
 } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { ConfirmationService } from 'primeng/api';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-
 import { ContentSettingsDataSource } from '../../services';
 import { HeroSlideResponse } from '../../interfaces';
 
 @Component({
   selector: 'banner-editor',
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    InputTextModule,
-    DragDropModule,
-    ButtonModule,
-    TagModule,
-    DragDropModule,
-    CheckboxModule,
-    ToggleSwitchModule,
-    FloatLabelModule,
-    MessageModule,
-    ConfirmDialogModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, DragDropModule, DragDropModule],
   templateUrl: './banner-editor.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [ConfirmationService],
 })
 export class BannerEditor {
   private formBuilder = inject(FormBuilder);
-  private dialogRef = inject(DynamicDialogRef);
+  // private dialogRef = inject(DynamicDialogRef);
   private changeDetectorRef = inject(ChangeDetectorRef);
   private contentService = inject(ContentSettingsDataSource);
-  private confirmationService = inject(ConfirmationService);
+  // private confirmationService = inject(ConfirmationService);
 
   bannerImages = signal<{ file?: File; preview?: string }[]>([]);
 
@@ -87,12 +62,12 @@ export class BannerEditor {
         })),
       )
       .subscribe(() => {
-        this.dialogRef.close();
+        // this.dialogRef.close();
       });
   }
 
   close() {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   onFileSelected(event: Event, i: number): void {
@@ -123,37 +98,37 @@ export class BannerEditor {
 
   removeBanner(i: number) {
     const control = this.items.controls[i];
-    if (control.value['id']) {
-      this.confirmationService.confirm({
-        message: '¿Esta seguro que desea eliminar el elemento?',
-        header: 'Eliminar banner',
-        rejectButtonProps: {
-          label: 'Cancelar',
-          severity: 'secondary',
-          outlined: true,
-        },
-        acceptButtonProps: {
-          label: 'Aceptar',
-        },
-        accept: () => {
-          this.contentService
-            .removeBanner(control.value['id'])
-            .subscribe(() => {
-              this.items.removeAt(i);
-              this.bannerImages.update((values) => {
-                values.splice(i, 1);
-                return [...values];
-              });
-            });
-        },
-      });
-    } else {
-      this.items.removeAt(i);
-      this.bannerImages.update((values) => {
-        values.splice(i, 1);
-        return [...values];
-      });
-    }
+    // if (control.value['id']) {
+    //   this.confirmationService.confirm({
+    //     message: '¿Esta seguro que desea eliminar el elemento?',
+    //     header: 'Eliminar banner',
+    //     rejectButtonProps: {
+    //       label: 'Cancelar',
+    //       severity: 'secondary',
+    //       outlined: true,
+    //     },
+    //     acceptButtonProps: {
+    //       label: 'Aceptar',
+    //     },
+    //     accept: () => {
+    //       this.contentService
+    //         .removeBanner(control.value['id'])
+    //         .subscribe(() => {
+    //           this.items.removeAt(i);
+    //           this.bannerImages.update((values) => {
+    //             values.splice(i, 1);
+    //             return [...values];
+    //           });
+    //         });
+    //     },
+    //   });
+    // } else {
+    //   this.items.removeAt(i);
+    //   this.bannerImages.update((values) => {
+    //     values.splice(i, 1);
+    //     return [...values];
+    //   });
+    // }
   }
 
   drop(event: CdkDragDrop<unknown>) {

@@ -3,11 +3,10 @@ import {
   type HttpInterceptorFn,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { MessageService, ToastMessageOptions } from 'primeng/api';
 import { catchError, throwError } from 'rxjs';
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
-  const messageService = inject(MessageService);
+  // const messageService = inject(MessageService);
 
   return next(req).pipe(
     catchError((error) => {
@@ -17,77 +16,77 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
       const detail = getErrorMessage(error);
 
-      const messageConfig: ToastMessageOptions = (() => {
-        switch (error.status) {
-          case 0:
-            return {
-              severity: 'error',
-              summary: 'Sin conexión',
-              detail: 'No se pudo conectar con el servidor.',
-            };
+      // const messageConfig: ToastMessageOptions = (() => {
+      //   switch (error.status) {
+      //     case 0:
+      //       return {
+      //         severity: 'error',
+      //         summary: 'Sin conexión',
+      //         detail: 'No se pudo conectar con el servidor.',
+      //       };
 
-          case 400:
-            return {
-              severity: 'warn',
-              summary: 'Solicitud incorrecta',
-              detail,
-            };
+      //     case 400:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'Solicitud incorrecta',
+      //         detail,
+      //       };
 
-          case 401:
-            return {
-              severity: 'warn',
-              summary: 'Sesión no válida',
-              detail: 'Debe iniciar sesión nuevamente.',
-            };
+      //     case 401:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'Sesión no válida',
+      //         detail: 'Debe iniciar sesión nuevamente.',
+      //       };
 
-          case 403:
-            return {
-              severity: 'warn',
-              summary: 'Acceso denegado',
-              detail: 'No tiene los permisos requeridos.',
-            };
+      //     case 403:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'Acceso denegado',
+      //         detail: 'No tiene los permisos requeridos.',
+      //       };
 
-          case 404:
-            return {
-              severity: 'warn',
-              summary: 'No encontrado',
-              detail: 'El recurso solicitado no existe.',
-            };
+      //     case 404:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'No encontrado',
+      //         detail: 'El recurso solicitado no existe.',
+      //       };
 
-          case 409:
-            return {
-              severity: 'warn',
-              summary: 'Conflicto',
-              detail,
-            };
+      //     case 409:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'Conflicto',
+      //         detail,
+      //       };
 
-          case 422:
-            return {
-              severity: 'warn',
-              summary: 'Datos inválidos',
-              detail,
-            };
+      //     case 422:
+      //       return {
+      //         severity: 'warn',
+      //         summary: 'Datos inválidos',
+      //         detail,
+      //       };
 
-          case 500:
-            return {
-              severity: 'error',
-              summary: 'Error interno',
-              detail: 'No se pudo procesar la solicitud.',
-            };
+      //     case 500:
+      //       return {
+      //         severity: 'error',
+      //         summary: 'Error interno',
+      //         detail: 'No se pudo procesar la solicitud.',
+      //       };
 
-          default:
-            return {
-              severity: 'error',
-              summary: 'Error inesperado',
-              detail: detail || 'Ocurrió un error al procesar la solicitud.',
-            };
-        }
-      })();
+      //     default:
+      //       return {
+      //         severity: 'error',
+      //         summary: 'Error inesperado',
+      //         detail: detail || 'Ocurrió un error al procesar la solicitud.',
+      //       };
+      //   }
+      // })();
 
-      messageService.add({
-        ...messageConfig,
-        life: 3000,
-      });
+      // messageService.add({
+      //   ...messageConfig,
+      //   life: 3000,
+      // });
 
       return throwError(() => error);
     }),

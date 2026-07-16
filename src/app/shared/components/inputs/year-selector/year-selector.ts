@@ -14,8 +14,8 @@ import {
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { SelectModule } from 'primeng/select';
+// import { FloatLabelModule } from '@app/shared/ui-compat';
+// import { SelectModule } from '@app/shared/ui-compat';
 
 type YearOption = {
   label: string;
@@ -24,10 +24,10 @@ type YearOption = {
 
 @Component({
   selector: 'year-selector',
-  imports: [FloatLabelModule, SelectModule, FormsModule],
+  imports: [ FormsModule],
   template: `
-    <p-floatlabel class="w-full" variant="on">
-      <p-select
+    <!-- <app-ui-floatlabel class="w-full" variant="on">
+      <app-ui-select
         [inputId]="inputId()"
         class="w-full"
         appendTo="body"
@@ -45,7 +45,7 @@ type YearOption = {
       />
 
       <label [for]="inputId()">{{ label() }}</label>
-    </p-floatlabel>
+    </app-ui-floatlabel> -->
   `,
   host: {
     class: 'block w-full min-w-0',

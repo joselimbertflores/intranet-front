@@ -2,13 +2,6 @@ import { linkedSignal, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
-import { TableModule, TablePageEvent } from 'primeng/table';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MenuItem } from 'primeng/api';
-import { DialogService } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
-import { TagModule } from 'primeng/tag';
 
 import { firstValueFrom } from 'rxjs';
 
@@ -24,17 +17,14 @@ import { CommunicationEditor } from '../../dialogs';
   selector: 'app-communications-admin',
   imports: [
     CommonModule,
-    ButtonModule,
-    TableModule,
-    MenuModule,
-    TagModule,
+    
     SearchInput,
   ],
   templateUrl: './communications-admin.html',
 
 })
 export default class CommunicationsAdmin {
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
   private communicationServce = inject(CommunicationAdminDataSource);
   private calendarDataSource = inject(CalendarDataSource);
 
@@ -61,92 +51,92 @@ export default class CommunicationsAdmin {
     return this.communicationResource.value().total;
   });
 
-  menuItems: MenuItem[] = [];
+  // menuItems: MenuItem[] = [];
 
   onSearch(term: string) {
     this.offset.set(0);
     this.term.set(term);
   }
 
-  chagePage(event: TablePageEvent) {
+  chagePage(event:any) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
   }
 
   openMenu(row: CommunicationResponse) {
-    this.menuItems = [
-      {
-        label: 'Opciones',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'pi pi-pencil',
-            command: () => this.openCommunicationDialog(row),
-          },
-          {
-            label: row.eventId ? 'Editar evento' : 'Crear evento',
-            icon: 'pi pi-calendar',
-            command: async () => {
-              if (row.eventId) {
-                const event = await firstValueFrom(
-                  this.calendarDataSource.getOne(row.eventId),
-                );
-                this.openEventDialog(row, event);
-                return;
-              } else {
-                this.openEventDialog(row);
-              }
-            },
-          },
-        ],
-      },
-    ];
+    // this.menuItems = [
+    //   {
+    //     label: 'Opciones',
+    //     items: [
+    //       {
+    //         label: 'Editar',
+    //         icon: 'ui-icon ui-icon-pencil',
+    //         command: () => this.openCommunicationDialog(row),
+    //       },
+    //       {
+    //         label: row.eventId ? 'Editar evento' : 'Crear evento',
+    //         icon: 'ui-icon ui-icon-calendar',
+    //         command: async () => {
+    //           if (row.eventId) {
+    //             const event = await firstValueFrom(
+    //               this.calendarDataSource.getOne(row.eventId),
+    //             );
+    //             this.openEventDialog(row, event);
+    //             return;
+    //           } else {
+    //             this.openEventDialog(row);
+    //           }
+    //         },
+    //       },
+    //     ],
+    //   },
+    // ];
   }
 
   openCommunicationDialog(item?: CommunicationResponse) {
-    const dialogRef = this.dialogService.open(CommunicationEditor, {
-      header: item ? 'Editar comunicado' : 'Crear comunicado',
-      modal: true,
-      draggable: false,
-      closeOnEscape: true,
-      closable: true,
-      width: '40vw',
-      data: item,
-      styleClass: 'app-action-dialog',
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
-    dialogRef?.onClose.subscribe((result?: CommunicationResponse) => {
-      if (!result) return;
-      this.upsertItem(result);
-    });
+    // const dialogRef = this.dialogService.open(CommunicationEditor, {
+    //   header: item ? 'Editar comunicado' : 'Crear comunicado',
+    //   modal: true,
+    //   draggable: false,
+    //   closeOnEscape: true,
+    //   closable: true,
+    //   width: '40vw',
+    //   data: item,
+    //   styleClass: 'app-action-dialog',
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
+    // dialogRef?.onClose.subscribe((result?: CommunicationResponse) => {
+    //   if (!result) return;
+    //   this.upsertItem(result);
+    // });
   }
 
   openEventDialog(
     fromCommunication: CommunicationResponse,
     currentEvent?: CalendarEventResponse,
   ) {
-    const dialogRef = this.dialogService.open(CalendarEditor, {
-      header: currentEvent ? 'Editar evento' : 'Crear evento',
-      modal: true,
-      draggable: false,
-      closeOnEscape: true,
-      closable: true,
-      width: '40vw',
-      data: currentEvent,
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-       styleClass: 'app-action-dialog',
-    });
-    dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
-      if (result && !currentEvent) {
-        this.upsertItem({ ...fromCommunication, eventId: result.id });
-      }
-    });
+    // const dialogRef = this.dialogService.open(CalendarEditor, {
+    //   header: currentEvent ? 'Editar evento' : 'Crear evento',
+    //   modal: true,
+    //   draggable: false,
+    //   closeOnEscape: true,
+    //   closable: true,
+    //   width: '40vw',
+    //   data: currentEvent,
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    //    styleClass: 'app-action-dialog',
+    // });
+    // dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
+    //   if (result && !currentEvent) {
+    //     this.upsertItem({ ...fromCommunication, eventId: result.id });
+    //   }
+    // });
   }
 
   private upsertItem(item: CommunicationResponse): void {

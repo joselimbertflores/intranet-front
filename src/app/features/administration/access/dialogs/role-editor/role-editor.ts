@@ -1,4 +1,9 @@
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -6,13 +11,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ListboxModule } from 'primeng/listbox';
-import { ButtonModule } from 'primeng/button';
 
 import { RoleApi } from '../../services';
 import { RoleResponse } from '../../interfaces';
@@ -48,42 +46,33 @@ interface PermissionView {
 }
 @Component({
   selector: 'app-role-editor',
-  imports: [
-    ReactiveFormsModule,
-    CommonModule,
-    FormsModule,
-    FloatLabelModule,
-    InputTextModule,
-    CheckboxModule,
-    ListboxModule,
-    ButtonModule,
-  ],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formGroup]="roleForm" (ngSubmit)="save()">
       <div class="space-y-4 pt-2">
-        <p-floatlabel variant="on">
+        <!-- <app-ui-floatlabel variant="on">
           <input
             id="name"
             [fluid]="true"
-            pInputText
+            appUiInput
             autocomplete="off"
             formControlName="name"
           />
           <label for="name">Nombre</label>
-        </p-floatlabel>
-        <p-floatlabel variant="on">
+        </app-ui-floatlabel>
+        <app-ui-floatlabel variant="on">
           <input
             id="description"
             [fluid]="true"
-            pInputText
+            appUiInput
             autocomplete="off"
             formControlName="description"
           />
           <label for="description">Descripcion</label>
-        </p-floatlabel>
+        </app-ui-floatlabel> -->
         <label class="flex items-center gap-2 px-2 py-2">
-          <p-checkbox formControlName="isAutoAssigned" [binary]="true" />
+          <!-- <app-ui-checkbox formControlName="isAutoAssigned" [binary]="true" /> -->
           <span>Autoasignar</span>
         </label>
 
@@ -113,12 +102,12 @@ interface PermissionView {
                   <label
                     class="flex items-center gap-2 rounded-lg border border-surface-200 px-3 py-2 text-sm"
                   >
-                    <p-checkbox
+                    <!-- <app-ui-checkbox
                       [binary]="true"
                       [ngModel]="isPermissionSelected(permission.id)"
                       (ngModelChange)="togglePermission(permission.id, $event)"
                       [ngModelOptions]="{ standalone: true }"
-                    />
+                    /> -->
 
                     <span>{{ permission.label }}</span>
                   </label>
@@ -128,24 +117,24 @@ interface PermissionView {
           }
         </div>
       </div>
-      <div class="p-dialog-footer">
-        <p-button
+      <div class="app-dialog-actions">
+        <!-- <app-ui-button
           label="Cancelar"
           type="button"
           severity="secondary"
           (onClick)="close()"
         />
-        <p-button label="Guardar" type="submit" />
+        <app-ui-button label="Guardar" type="submit" /> -->
       </div>
     </form>
   `,
 })
 export class RoleEditor {
   private roleDataSource = inject(RoleApi);
-  private dialogRef = inject(DynamicDialogRef);
+  // private dialogRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
 
-  readonly data?: RoleResponse = inject(DynamicDialogConfig).data;
+  // readonly data?: RoleResponse = inject(DynamicDialogConfig).data;
 
   permissions = computed<PermissionGroupView[]>(() =>
     this.roleDataSource.permissions().map(({ resource, permissions }) => ({
@@ -174,18 +163,17 @@ export class RoleEditor {
   }
 
   save() {
-    if (this.roleForm.invalid) return this.roleForm.markAllAsTouched();
-    const saveObservable = this.data
-      ? this.roleDataSource.update(this.data.id, this.roleForm.value)
-      : this.roleDataSource.create(this.roleForm.value);
-
-    saveObservable.subscribe((resp) => {
-      this.dialogRef.close(resp);
-    });
+    // if (this.roleForm.invalid) return this.roleForm.markAllAsTouched();
+    // const saveObservable = this.data
+    //   ? this.roleDataSource.update(this.data.id, this.roleForm.value)
+    //   : this.roleDataSource.create(this.roleForm.value);
+    // saveObservable.subscribe((resp) => {
+    //   this.dialogRef.close(resp);
+    // });
   }
 
   close() {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   isResourceFullySelected(group: PermissionGroupView): boolean {
@@ -229,15 +217,13 @@ export class RoleEditor {
   }
 
   private loadForm() {
-    if (!this.data) return;
-
-    const { permissions, ...props } = this.data;
-
-    this.roleForm.patchValue({
-      name: props.name,
-      description: props.description ?? '',
-      permissionIds: permissions.map(({ id }) => id),
-      isAutoAssigned: props.isAutoAssigned,
-    });
+    // if (!this.data) return;
+    // const { permissions, ...props } = this.data;
+    // this.roleForm.patchValue({
+    //   name: props.name,
+    //   description: props.description ?? '',
+    //   permissionIds: permissions.map(({ id }) => id),
+    //   isAutoAssigned: props.isAutoAssigned,
+    // });
   }
 }

@@ -7,7 +7,7 @@
   <!-- <full-calendar [options]="calendarOptions"></full-calendar> -->
 </section>
 
-<!-- <p-dialog
+<!-- <app-ui-dialog
   [(visible)]="displayDialog"
   [modal]="true"
   [closable]="true"
@@ -34,16 +34,16 @@
       <div>
         @if (event.allDay) {
           <div class="flex items-center gap-x-2">
-            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
             <span> {{ event.start | date: "longDate" }} </span>
           </div>
         } @else {
           <div class="flex items-center gap-x-2">
-            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
             <span>Inicio: {{ event.start | date: "medium" }} </span>
           </div>
           <div class="flex items-center gap-x-2">
-            <i class="pi pi-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
             <span>Fin: {{ event.end | date: "medium" }} </span>
           </div>
         }
@@ -59,12 +59,12 @@
           </span>
           <span>CITE: {{ communication.code }}</span>
         </div>
-        <div class="p-dialog-footer">
+        <div class="app-dialog-actions">
           <div class="pt-4 border-t border-surface-100">
             <a
               [routerLink]="['/communications', communication.id]"
               target="_blank"
-              pButton
+              appUiButton
               label="Ver comunicado"
               (click)="displayDialog.set(false)"
             ></a>
@@ -73,4 +73,4 @@
       }
     </div>
   }
-</p-dialog> -->
+</app-ui-dialog> -->

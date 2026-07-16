@@ -9,14 +9,6 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
-import { TableModule, TablePageEvent } from 'primeng/table';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MenuItem } from 'primeng/api';
-import { DialogService } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
-import { TagModule } from 'primeng/tag';
-
 import {
   PermissionAction,
   Resource,
@@ -29,23 +21,14 @@ import { CalendarEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-calendar-admin',
-  imports: [
-    CommonModule,
-    ConfirmDialogModule,
-    ButtonModule,
-    TableModule,
-    TagModule,
-    MenuModule,
-    SearchInput,
-  ],
+  imports: [CommonModule, SearchInput],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ConfirmationService],
 })
 export default class CalendarAdmin {
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
   private calendarDataSource = inject(CalendarDataSource);
-  private confirmationService = inject(ConfirmationService);
+  // private confirmationService = inject(ConfirmationService);
   private authDataSource = inject(AuthDataSource);
 
   limit = signal(10);
@@ -81,36 +64,36 @@ export default class CalendarAdmin {
     return this.resource.value().total;
   });
 
-  menuItems: MenuItem[] = [];
+  menuItems: any[] = [];
 
   openEventDialog(item?: CalendarEventResponse) {
-    const dialogRef = this.dialogService.open(CalendarEditor, {
-      header: item ? 'Editar evento' : 'Crear evento',
-      modal: true,
-      draggable: false,
-      closeOnEscape: true,
-      closable: true,
-      width: '40vw',
-      data: item,
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-      styleClass: 'app-action-dialog',
-    });
-    dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
-      if (!result) return;
-      this.updateItemDataSource(result);
-    });
+    // const dialogRef = this.dialogService.open(CalendarEditor, {
+    //   header: item ? 'Editar evento' : 'Crear evento',
+    //   modal: true,
+    //   draggable: false,
+    //   closeOnEscape: true,
+    //   closable: true,
+    //   width: '40vw',
+    //   data: item,
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    //   styleClass: 'app-action-dialog',
+    // });
+    // dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
+    //   if (!result) return;
+    //   this.updateItemDataSource(result);
+    // });
   }
 
   openMenu(row: CalendarEventResponse, event: Event) {
-    const items: MenuItem[] = [];
+    const items: any[] = [];
 
     if (this.canUpdate()) {
       items.push({
         label: 'Editar',
-        icon: 'pi pi-pencil',
+        icon: 'ui-icon ui-icon-pencil',
         command: () => this.openEventDialog(row),
       });
     }
@@ -118,7 +101,7 @@ export default class CalendarAdmin {
     if (this.canDelete()) {
       items.push({
         label: 'Eliminar',
-        icon: 'pi pi-calendar',
+        icon: 'ui-icon ui-icon-calendar',
         command: () => this.remove(row.id, event),
       });
     }
@@ -136,35 +119,35 @@ export default class CalendarAdmin {
     this.term.set(term);
   }
 
-  chagePage(event: TablePageEvent) {
+  chagePage(event: any) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
   }
 
   private remove(id: string, event: Event) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: '¿Esta seguro que desea eliminar este evento?',
-      header: 'Eliminar evento',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Aceptar',
-      },
-      accept: () => {
-        this.calendarDataSource.remove(id).subscribe(() => {
-          this.dataSize.update((value) => (value -= 1));
-          this.dataSource.update((values) => {
-            const index = values.findIndex((item) => item.id === id);
-            values.splice(index, 1);
-            return [...values];
-          });
-        });
-      },
-    });
+    // this.confirmationService.confirm({
+    //   target: event.target as EventTarget,
+    //   message: '¿Esta seguro que desea eliminar este evento?',
+    //   header: 'Eliminar evento',
+    //   rejectButtonProps: {
+    //     label: 'Cancelar',
+    //     severity: 'secondary',
+    //     outlined: true,
+    //   },
+    //   acceptButtonProps: {
+    //     label: 'Aceptar',
+    //   },
+    //   accept: () => {
+    //     this.calendarDataSource.remove(id).subscribe(() => {
+    //       this.dataSize.update((value) => (value -= 1));
+    //       this.dataSource.update((values) => {
+    //         const index = values.findIndex((item) => item.id === id);
+    //         values.splice(index, 1);
+    //         return [...values];
+    //       });
+    //     });
+    //   },
+    // });
   }
 
   private updateItemDataSource(item: CalendarEventResponse): void {

@@ -156,24 +156,24 @@ export class PortalFooter {
       label: 'Dirección',
       value: 'Plaza Principal 6 de Agosto',
       detail: 'Sacaba, Cochabamba',
-      icon: 'pi pi-map-marker',
+      icon: 'ui-icon ui-icon-map-marker',
     },
     {
       label: 'Línea directa',
       value: 'Atención institucional',
-      icon: 'pi pi-phone',
+      icon: 'ui-icon ui-icon-phone',
     },
     {
       label: 'Correo institucional',
       value: 'contacto@sacaba.gob.bo',
       href: 'mailto:contacto@sacaba.gob.bo',
-      icon: 'pi pi-envelope',
+      icon: 'ui-icon ui-icon-envelope',
     },
     {
       label: 'Sugerencias',
       value: 'Enviar sugerencia',
       href: 'mailto:sugerencias@sacaba.gob.bo',
-      icon: 'pi pi-lightbulb',
+      icon: 'ui-icon ui-icon-lightbulb',
     },
   ];
 
@@ -181,22 +181,22 @@ export class PortalFooter {
     {
       label: 'Sitio web institucional',
       href: 'https://www.sacaba.gob.bo/',
-      icon: 'pi pi-globe',
+      icon: 'ui-icon ui-icon-globe',
     },
     {
       label: 'Facebook',
       href: 'https://www.facebook.com/gamsacaba',
-      icon: 'pi pi-facebook',
+      icon: 'ui-icon ui-icon-facebook',
     },
     {
       label: 'Instagram',
       href: 'https://www.instagram.com/gamsacaba',
-      icon: 'pi pi-instagram',
+      icon: 'ui-icon ui-icon-instagram',
     },
     {
       label: 'TikTok',
       href: 'https://www.tiktok.com/@gamsacaba',
-      icon: 'pi pi-tiktok',
+      icon: 'ui-icon ui-icon-tiktok',
     },
   ];
 }

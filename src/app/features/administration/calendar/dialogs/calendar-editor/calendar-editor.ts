@@ -14,18 +14,6 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { DatePickerModule } from 'primeng/datepicker';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumber } from 'primeng/inputnumber';
-import { CheckboxModule } from 'primeng/checkbox';
-import { TextareaModule } from 'primeng/textarea';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
-import { ButtonModule } from 'primeng/button';
-
 import { CalendarEventResponse } from '../../interfaces';
 import { CalendarDataSource } from '../../services';
 import { recurrenceValidator } from '../../helpers';
@@ -33,30 +21,17 @@ import { FormUtils } from '../../../../../helpers';
 
 @Component({
   selector: 'app-calendar-editor',
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    ButtonModule,
-    MultiSelectModule,
-    FloatLabelModule,
-    DatePickerModule,
-    InputTextModule,
-    CheckboxModule,
-    MessageModule,
-    TextareaModule,
-    SelectModule,
-    InputNumber,
-  ],
+  imports: [ReactiveFormsModule, FormsModule],
   templateUrl: './calendar-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarEditor implements OnInit {
   private formBuilder = inject(FormBuilder);
-  private diagloRef = inject(DynamicDialogRef);
+  // private diagloRef = inject(DynamicDialogRef);
   private calendarDataSource = inject(CalendarDataSource);
 
   readonly currentDate = new Date();
-  readonly data?: CalendarEventResponse = inject(DynamicDialogConfig).data;
+  // readonly data?: CalendarEventResponse = inject(DynamicDialogConfig).data;
 
   formSubmitted = signal(false);
 
@@ -113,16 +88,16 @@ export class CalendarEditor implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const saveObservable = this.data?.id
-      ? this.calendarDataSource.update(this.data.id, this.form.value)
-      : this.calendarDataSource.create({
-          ...this.form.value,
-          communicationId: this.data?.communicationId,
-        });
+    // const saveObservable = this.data?.id
+    //   ? this.calendarDataSource.update(this.data.id, this.form.value)
+    //   : this.calendarDataSource.create({
+    //       ...this.form.value,
+    //       communicationId: this.data?.communicationId,
+    //     });
 
-    saveObservable.subscribe((resp) => {
-      this.diagloRef.close(resp);
-    });
+    // saveObservable.subscribe((resp) => {
+    //   this.diagloRef.close(resp);
+    // });
   }
 
   onAllDayToggle() {
@@ -132,7 +107,7 @@ export class CalendarEditor implements OnInit {
   }
 
   close() {
-    this.diagloRef.close();
+    // this.diagloRef.close();
   }
 
   get isAllDay() {
@@ -155,16 +130,16 @@ export class CalendarEditor implements OnInit {
   }
 
   private loadForm(): void {
-    if (!this.data) return;
-    const { recurrenceConfig, startDate, endDate, ...props } = this.data;
-    if (recurrenceConfig) this.isRecurring.set(true);
-    setTimeout(() => {
-      this.form.patchValue({
-        ...props,
-        ...(startDate && { startDate: new Date(startDate) }),
-        ...(endDate && { endDate: new Date(endDate) }),
-        recurrence: recurrenceConfig,
-      });
-    }, 0);
+  //   if (!this.data) return;
+  //   const { recurrenceConfig, startDate, endDate, ...props } = this.data;
+  //   if (recurrenceConfig) this.isRecurring.set(true);
+  //   setTimeout(() => {
+  //     this.form.patchValue({
+  //       ...props,
+  //       ...(startDate && { startDate: new Date(startDate) }),
+  //       ...(endDate && { endDate: new Date(endDate) }),
+  //       recurrence: recurrenceConfig,
+  //     });
+  //   }, 0);
   }
 }

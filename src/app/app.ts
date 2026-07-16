@@ -1,10 +1,9 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { Toast } from 'primeng/toast';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Toast],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.css',

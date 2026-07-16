@@ -7,14 +7,6 @@ import {
   FormGroup,
 } from '@angular/forms';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { ConfirmationService } from 'primeng/api';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
 
 import {
   DocumentTypeWithSubTypesResponse,
@@ -33,25 +25,19 @@ interface SubTypeOption {
   selector: 'app-document-type-editor',
   imports: [
     ReactiveFormsModule,
-    ConfirmDialogModule,
-    FloatLabelModule,
-    CheckboxModule,
-    InputTextModule,
-    MessageModule,
-    ButtonModule,
+   
   ],
   templateUrl: './document-type-editor.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [ConfirmationService],
 })
 export class DocumentTypeEditor {
   private formBuilder = inject(FormBuilder);
-  private confirmationService = inject(ConfirmationService);
+  // private confirmationService = inject(ConfirmationService);
   private docTypeDatasource = inject(DocumentTypeDatasource);
 
-  diagloRef = inject(DynamicDialogRef);
-  readonly data: DocumentTypeWithSubTypesResponse | undefined =
-    inject(DynamicDialogConfig).data;
+  // diagloRef = inject(DynamicDialogRef);
+  // readonly data: DocumentTypeWithSubTypesResponse | undefined =
+  //   inject(DynamicDialogConfig).data;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
     name: [
@@ -69,14 +55,14 @@ export class DocumentTypeEditor {
   }
 
   save() {
-    if (this.form.invalid) return this.form.markAllAsTouched();
-    const subscription = this.data
-      ? this.docTypeDatasource.update(this.data!.id, this.form.value)
-      : this.docTypeDatasource.create(this.form.value);
+    // if (this.form.invalid) return this.form.markAllAsTouched();
+    // const subscription = this.data
+    //   ? this.docTypeDatasource.update(this.data!.id, this.form.value)
+    //   : this.docTypeDatasource.create(this.form.value);
 
-    subscription.subscribe((data) => {
-      this.diagloRef.close(data);
-    });
+    // subscription.subscribe((data) => {
+    //   this.diagloRef.close(data);
+    // });
   }
 
   addSubtype(subtype?: DocumentSubtypeResponse) {
@@ -93,38 +79,38 @@ export class DocumentTypeEditor {
   }
 
   deleteSubtype(index: number) {
-    const subtype: SubTypeOption = this.subtypes.at(index).getRawValue();
+    // const subtype: SubTypeOption = this.subtypes.at(index).getRawValue();
 
-    const subtypeId = subtype.id;
+    // const subtypeId = subtype.id;
 
-    if (!subtypeId) {
-      this.subtypes.removeAt(index);
-      return;
-    }
+    // if (!subtypeId) {
+    //   this.subtypes.removeAt(index);
+    //   return;
+    // }
 
-    const typeId = this.data?.id;
-    if (!typeId) return;
+    // const typeId = this.data?.id;
+    // if (!typeId) return;
 
-    this.confirmationService.confirm({
-      header: 'Confirmar eliminación',
-      message: `¿Eliminar el subtipo "${subtype.name}"?`,
-      icon: 'pi pi-info-circle',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Eliminar',
-        severity: 'danger',
-      },
-      accept: () => {
-        this.docTypeDatasource.removeSubtype(subtypeId).subscribe(() => {
-          this.subtypes.removeAt(index);
-          this.docTypeDatasource.emitSubtypeRemoved(typeId, subtypeId);
-        });
-      },
-    });
+    // this.confirmationService.confirm({
+    //   header: 'Confirmar eliminación',
+    //   message: `¿Eliminar el subtipo "${subtype.name}"?`,
+    //   icon: 'ui-icon ui-icon-info-circle',
+    //   rejectButtonProps: {
+    //     label: 'Cancelar',
+    //     severity: 'secondary',
+    //     outlined: true,
+    //   },
+    //   acceptButtonProps: {
+    //     label: 'Eliminar',
+    //     severity: 'danger',
+    //   },
+    //   accept: () => {
+    //     this.docTypeDatasource.removeSubtype(subtypeId).subscribe(() => {
+    //       this.subtypes.removeAt(index);
+    //       this.docTypeDatasource.emitSubtypeRemoved(typeId, subtypeId);
+    //     });
+    //   },
+    // });
   }
 
   get subtypes() {
@@ -132,13 +118,13 @@ export class DocumentTypeEditor {
   }
 
   private loadForm() {
-    if (!this.data) return;
-    const { subtypes, ...props } = this.data;
+    // if (!this.data) return;
+    // const { subtypes, ...props } = this.data;
 
-    subtypes.forEach((item) => {
-      this.addSubtype(item);
-    });
+    // subtypes.forEach((item) => {
+    //   this.addSubtype(item);
+    // });
 
-    this.form.patchValue(props);
+    // this.form.patchValue(props);
   }
 }

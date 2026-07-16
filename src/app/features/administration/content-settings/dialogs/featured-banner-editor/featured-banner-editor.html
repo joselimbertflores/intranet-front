@@ -1,6 +1,6 @@
-<div class="mb-4 flex justify-end">
-  <p-button
-    icon="pi pi-plus"
+<!-- <div class="mb-4 flex justify-end">
+  <app-ui-button
+    icon="ui-icon ui-icon-plus"
     label="Agregar"
     size="small"
     [outlined]="true"
@@ -9,8 +9,8 @@
 </div>
 
 @if (hasErrorMessage()) {
-  <p-message severity="error"
-    >Revisa los campos requeridos, la imagen y el formato de la URL.</p-message
+  <app-ui-message severity="error"
+    >Revisa los campos requeridos, la imagen y el formato de la URL.</app-ui-message
   >
 }
 
@@ -38,15 +38,15 @@
               class="cursor-grab rounded-md p-1.5 text-surface-400 hover:bg-surface-100"
               aria-label="Reordenar banner"
             >
-              <i class="pi pi-bars"></i>
+              <i class="ui-icon ui-icon-bars"></i>
             </button>
             <span class="text-sm font-semibold text-surface-800"
               >Destacado {{ i + 1 }}</span
             >
           </div>
-          <p-button
+          <app-ui-button
             type="button"
-            icon="pi pi-trash"
+            icon="ui-icon ui-icon-trash"
             [text]="true"
             severity="danger"
             size="small"
@@ -78,7 +78,7 @@
                 >
               } @else {
                 <span class="flex flex-col items-center gap-2 text-surface-500"
-                  ><i class="pi pi-image text-3xl"></i
+                  ><i class="ui-icon ui-icon-image text-3xl"></i
                   ><span class="text-sm font-medium">Subir imagen</span></span
                 >
               }
@@ -96,31 +96,31 @@
           </div>
 
           <div class="flex flex-col gap-4 md:col-span-8">
-            <p-floatlabel variant="on">
-              <input pInputText class="w-full" formControlName="title" />
+            <app-ui-floatlabel variant="on">
+              <input appUiInput class="w-full" formControlName="title" />
               <label>Título</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on">
+            </app-ui-floatlabel>
+            <app-ui-floatlabel variant="on">
               <textarea
-                pTextarea
+                appUiTextarea
                 rows="2"
                 class="w-full resize-none"
                 formControlName="description"
               ></textarea>
               <label>Descripción (opcional)</label>
-            </p-floatlabel>
+            </app-ui-floatlabel>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <p-floatlabel variant="on">
-                <input pInputText class="w-full" formControlName="linkLabel" />
+              <app-ui-floatlabel variant="on">
+                <input appUiInput class="w-full" formControlName="linkLabel" />
                 <label>Texto del botón</label>
-              </p-floatlabel>
-              <p-floatlabel variant="on">
-                <input pInputText class="w-full" formControlName="url" />
+              </app-ui-floatlabel>
+              <app-ui-floatlabel variant="on">
+                <input appUiInput class="w-full" formControlName="url" />
                 <label>Ruta o URL</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
             </div>
             <div class="flex items-center gap-2">
-              <p-checkbox
+              <app-ui-checkbox
                 formControlName="isActive"
                 [binary]="true"
                 [inputId]="'featured-banner-active-' + i"
@@ -144,14 +144,14 @@
     }
   </div>
 
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <app-ui-button
       type="button"
       label="Cancelar"
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button
+    <app-ui-button
       type="submit"
       label="Guardar cambios"
       [loading]="saving()"
@@ -160,4 +160,4 @@
   </div>
 </form>
 
-<p-confirmdialog />
+<app-ui-confirmdialog /> -->

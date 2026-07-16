@@ -5,18 +5,17 @@ import {
   signal,
 } from '@angular/core';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'pdf-display',
-  imports: [PdfViewerModule, ProgressSpinnerModule],
+  imports: [PdfViewerModule],
   template: `
     @if (isLoading()) {
     <div class="h-full w-full flex flex-col justify-center items-center">
-      <p-progress-spinner
+      <!-- <app-ui-progress-spinner
         strokeWidth="4"
         [style]="{ width: '100px', height: '100px' }"
-      />
+      /> -->
       <div class="mt-2 font-medium">Cargando PDF ({{ progress() }} %)</div>
     </div>
     }

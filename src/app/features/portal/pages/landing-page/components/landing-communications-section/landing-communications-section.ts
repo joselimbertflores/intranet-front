@@ -33,7 +33,7 @@ import { communicationTone } from '../landing-presentation';
             class="group inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-1 py-2 text-sm font-bold text-primary-800 no-underline outline-none transition-colors hover:text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-3"
           >
             Ver todos los comunicados
-            <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
+            <i class="ui-icon ui-icon-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
           </a>
         </header>
 
@@ -68,7 +68,7 @@ import { communicationTone } from '../landing-presentation';
                         <div class="h-1.5 w-3/5 rounded-full bg-surface-100"></div>
                       </div>
                       <div class="mt-auto text-center text-surface-400" aria-hidden="true">
-                        <i class="pi pi-file-pdf text-4xl"></i>
+                        <i class="ui-icon ui-icon-file-pdf text-4xl"></i>
                       </div>
                     </div>
                   }
@@ -105,7 +105,7 @@ import { communicationTone } from '../landing-presentation';
                     [class]="entry.tone.action"
                   >
                     Leer comunicado
-                    <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
+                    <i class="ui-icon ui-icon-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
                   </span>
                 </div>
               </a>

@@ -12,11 +12,6 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 
-import { ButtonModule } from 'primeng/button';
-import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { SelectModule } from 'primeng/select';
-import { SkeletonModule } from 'primeng/skeleton';
-
 import { SearchInput } from '../../../../shared';
 import { PublicSectionHeader } from '../../components';
 import { PortalCommunicationResponse } from '../../interfaces';
@@ -27,10 +22,7 @@ import { PortalCommunicationDataSource } from '../../services';
   imports: [
     DatePipe,
     FormsModule,
-    ButtonModule,
-    PaginatorModule,
-    SelectModule,
-    SkeletonModule,
+  
     SearchInput,
     PublicSectionHeader,
   ],
@@ -105,7 +97,7 @@ export default class CommunicationsPage {
     this.term.set(term);
   }
 
-  changePage(event: PaginatorState): void {
+  changePage(event: any): void {
     this.limit.set(event.rows ?? 10);
     this.offset.set(event.first ?? 0);
   }

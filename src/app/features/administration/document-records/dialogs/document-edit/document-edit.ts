@@ -1,22 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
   FormsModule,
   Validators,
 } from '@angular/forms';
-
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { InputTextModule } from 'primeng/inputtext';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
-import { TreeNode } from 'primeng/api';
 
 import { finalize } from 'rxjs';
 
@@ -37,15 +33,8 @@ import { FormUtils } from '../../../../../helpers';
     FormsModule,
     CommonModule,
     ReactiveFormsModule,
-    FileUploadModule,
-    FloatLabelModule,
-    TreeSelectModule,
-    InputTextModule,
-    CheckboxModule,
-    MessageModule,
-    SelectModule,
+
     FileSizePipe,
-    ButtonModule,
     FileIcon,
     YearSelector,
   ],
@@ -54,19 +43,16 @@ import { FormUtils } from '../../../../../helpers';
 })
 export class DocumentEdit implements OnInit {
   private formBuilder = inject(FormBuilder);
-  private diagloRef = inject(DynamicDialogRef);
+  // private diagloRef = inject(DynamicDialogRef);
   private documentDataSource = inject(DocumentDataSource);
 
-  readonly data: DocumentManageResponse = inject(DynamicDialogConfig).data;
+  // readonly data: DocumentManageResponse = inject(DynamicDialogConfig).data;
 
   readonly formUtils = FormUtils;
 
   form = this.formBuilder.group({
     title: ['', Validators.required],
-    organizationalUnitNode: [
-      null as TreeNode<string> | null,
-      Validators.required,
-    ],
+    organizationalUnitNode: [null, Validators.required],
     documentTypeId: [null as number | null, Validators.required],
     documentSubtypeId: [{ value: null as number | null, disabled: true }],
     year: [null as number | null],
@@ -122,19 +108,19 @@ export class DocumentEdit implements OnInit {
 
     const { organizationalUnitNode, ...props } = this.form.value;
 
-    this.documentDataSource
-      .update(this.data.id, {
-        ...props,
-        organizationalUnitId: organizationalUnitNode?.data,
-        file: this.selectedFile(),
-      })
-      .pipe(finalize(() => this.isSaving.set(false)))
-      .subscribe((resp) => this.diagloRef.close(resp));
+    // this.documentDataSource
+    //   .update(this.data.id, {
+    //     ...props,
+    //     organizationalUnitId: organizationalUnitNode?.data,
+    //     file: this.selectedFile(),
+    //   })
+    //   .pipe(finalize(() => this.isSaving.set(false)))
+    //   .subscribe((resp) => this.diagloRef.close(resp));
   }
 
   close() {
     if (!this.isSaving()) {
-      this.diagloRef.close();
+      // this.diagloRef.close();
     }
   }
 
@@ -152,10 +138,10 @@ export class DocumentEdit implements OnInit {
     }
   }
 
-  onSelectFile(event: FileSelectEvent): void {
-    const [file] = Array.from(event.files) ?? [];
-    if (!file) return;
-    this.selectedFile.set(file);
+  onSelectFile(event: any): void {
+    // const [file] = Array.from(event.files) ?? [];
+    // if (!file) return;
+    // this.selectedFile.set(file);
   }
 
   onReplaceChange(checked: boolean) {
@@ -176,31 +162,28 @@ export class DocumentEdit implements OnInit {
   }
 
   private loadForm() {
-    const node = this.findTreeNodeByKey(
-      this.organizationTree(),
-      this.data.organizationalUnit.id,
-    );
-
-    const selectedTypeDocument = this.documentTypes().find(
-      ({ id }) => id === this.data.documentType.id,
-    );
-
-    if (selectedTypeDocument?.subtypes.length) {
-      this.documentSubtypes.set(selectedTypeDocument.subtypes);
-      this.form.get('documentSubtypeId')?.enable();
-    }
-
-    this.form.patchValue({
-      documentSubtypeId: this.data.documentSubtype?.id,
-      documentTypeId: this.data.documentType.id,
-      organizationalUnitNode: node,
-      status: this.data.status,
-      year: this.data.year,
-      title: this.data.title,
-    });
+    // const node = this.findTreeNodeByKey(
+    //   this.organizationTree(),
+    //   this.data.organizationalUnit.id,
+    // );
+    // const selectedTypeDocument = this.documentTypes().find(
+    //   ({ id }) => id === this.data.documentType.id,
+    // );
+    // if (selectedTypeDocument?.subtypes.length) {
+    //   this.documentSubtypes.set(selectedTypeDocument.subtypes);
+    //   this.form.get('documentSubtypeId')?.enable();
+    // }
+    // this.form.patchValue({
+    //   documentSubtypeId: this.data.documentSubtype?.id,
+    //   documentTypeId: this.data.documentType.id,
+    //   organizationalUnitNode: node,
+    //   status: this.data.status,
+    //   year: this.data.year,
+    //   title: this.data.title,
+    // });
   }
 
-  private toTreeNodes(nodes: SectionTreeNodeResponse[]): TreeNode<string>[] {
+  private toTreeNodes(nodes: SectionTreeNodeResponse[]): any[] {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),
@@ -209,22 +192,19 @@ export class DocumentEdit implements OnInit {
     }));
   }
 
-  private findTreeNodeByKey(
-    nodes: TreeNode<string>[],
-    key: string,
-  ): TreeNode<string> | null {
-    for (const node of nodes) {
-      if (node.key === key) {
-        return node;
-      }
+  // private findTreeNodeByKey(nodes: any[], key: string) {
+  //   for (const node of nodes) {
+  //     if (node.key === key) {
+  //       return node;
+  //     }
 
-      const found = this.findTreeNodeByKey(node.children ?? [], key);
+  //     const found = this.findTreeNodeByKey(node.children ?? [], key);
 
-      if (found) {
-        return found;
-      }
-    }
+  //     if (found) {
+  //       return found;
+  //     }
+  //   }
 
-    return null;
-  }
+  //   return null;
+  // }
 }

@@ -67,15 +67,15 @@
 
   <a
     [href]="document().file.downloadUrl"
-    pButton
-    pRipple
+    appUiButton
+    appUiRipple
     size="small"
     target="_blank"
     rel="noopener noreferrer"
     class="col-span-2 w-full shrink-0 justify-center gap-2 md:col-span-1 md:w-auto"
     [attr.aria-label]="'Descargar ' + document().title"
   >
-    <i class="pi pi-download" aria-hidden="true"></i>
+    <i class="ui-icon ui-icon-download" aria-hidden="true"></i>
     <span class="font-semibold">Descargar</span>
   </a>
 </article>

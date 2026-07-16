@@ -1,24 +1,24 @@
 import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 
 const extensionIconMap: Record<string, string> = {
-  pdf: 'pi pi-file-pdf text-red-500',
-  doc: 'pi pi-file-word text-blue-600',
-  docx: 'pi pi-file-word text-blue-600',
-  odt: 'pi pi-file-word text-blue-600',
-  xls: 'pi pi-file-excel text-green-600',
-  xlsx: 'pi pi-file-excel text-green-600',
-  ods: 'pi pi-file-excel text-green-600',
-  ppt: 'pi pi-file text-orange-500',
-  pptx: 'pi pi-file text-orange-500',
-  odp: 'pi pi-file text-orange-500',
-  jpg: 'pi pi-image text-orange-400',
-  jpeg: 'pi pi-image text-orange-400',
-  png: 'pi pi-image text-orange-400',
-  webp: 'pi pi-image text-orange-400',
-  mp4: 'pi pi-video text-purple-600',
-  webm: 'pi pi-video text-purple-600',
-  mp3: 'pi pi-volume-up text-purple-500',
-  ogg: 'pi pi-volume-up text-purple-500',
+  pdf: 'ui-icon ui-icon-file-pdf text-red-500',
+  doc: 'ui-icon ui-icon-file-word text-blue-600',
+  docx: 'ui-icon ui-icon-file-word text-blue-600',
+  odt: 'ui-icon ui-icon-file-word text-blue-600',
+  xls: 'ui-icon ui-icon-file-excel text-green-600',
+  xlsx: 'ui-icon ui-icon-file-excel text-green-600',
+  ods: 'ui-icon ui-icon-file-excel text-green-600',
+  ppt: 'ui-icon ui-icon-file text-orange-500',
+  pptx: 'ui-icon ui-icon-file text-orange-500',
+  odp: 'ui-icon ui-icon-file text-orange-500',
+  jpg: 'ui-icon ui-icon-image text-orange-400',
+  jpeg: 'ui-icon ui-icon-image text-orange-400',
+  png: 'ui-icon ui-icon-image text-orange-400',
+  webp: 'ui-icon ui-icon-image text-orange-400',
+  mp4: 'ui-icon ui-icon-video text-purple-600',
+  webm: 'ui-icon ui-icon-video text-purple-600',
+  mp3: 'ui-icon ui-icon-volume-up text-purple-500',
+  ogg: 'ui-icon ui-icon-volume-up text-purple-500',
 };
 
 @Component({
@@ -37,20 +37,20 @@ export class FileIcon {
   iconClass = computed(() => {
     const mimeType = this.mimeType();
 
-    if (mimeType.includes('pdf')) return 'pi pi-file-pdf text-red-500';
-    if (mimeType.startsWith('image/')) return 'pi pi-image text-orange-400';
-    if (mimeType.startsWith('video/')) return 'pi pi-video text-purple-600';
-    if (mimeType.startsWith('audio/')) return 'pi pi-volume-up text-purple-500';
+    if (mimeType.includes('pdf')) return 'ui-icon ui-icon-file-pdf text-red-500';
+    if (mimeType.startsWith('image/')) return 'ui-icon ui-icon-image text-orange-400';
+    if (mimeType.startsWith('video/')) return 'ui-icon ui-icon-video text-purple-600';
+    if (mimeType.startsWith('audio/')) return 'ui-icon ui-icon-volume-up text-purple-500';
     if (mimeType.includes('word') || mimeType.includes('opendocument.text')) {
-      return 'pi pi-file-word text-blue-600';
+      return 'ui-icon ui-icon-file-word text-blue-600';
     }
     if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) {
-      return 'pi pi-file-excel text-green-600';
+      return 'ui-icon ui-icon-file-excel text-green-600';
     }
     if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) {
-      return 'pi pi-file text-orange-500';
+      return 'ui-icon ui-icon-file text-orange-500';
     }
     const extension = this.fileName().trim().split('.').pop()?.toLowerCase() ?? '';
-    return extensionIconMap[extension] ?? 'pi pi-file text-gray-500';
+    return extensionIconMap[extension] ?? 'ui-icon ui-icon-file text-gray-500';
   });
 }

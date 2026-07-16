@@ -5,14 +5,13 @@ import {
   input,
 } from '@angular/core';
 import { CdkDragHandle, CdkDrag } from '@angular/cdk/drag-drop';
-import { ButtonModule } from 'primeng/button';
 
 import { FileIcon, SafeUrlPipe } from '../../../../../shared';
 import { TutorialBlockResponse } from '../../interfaces';
 
 @Component({
   selector: 'tutorial-block-preview-editor',
-  imports: [ButtonModule, CdkDrag, CdkDragHandle, FileIcon, SafeUrlPipe],
+  imports: [CdkDrag, CdkDragHandle, FileIcon, SafeUrlPipe],
   template: `
     <div
       cdkDrag
@@ -25,7 +24,7 @@ import { TutorialBlockResponse } from '../../interfaces';
             class="cursor-grab active:cursor-grabbing p-1 text-surface-400 hover:text-surface-700 transition-colors"
             title="Arrastrar para reordenar"
           >
-            <i class="pi pi-bars text-lg"></i>
+            <i class="ui-icon ui-icon-bars text-lg"></i>
           </div>
           <span
             class="text-[10px] font-bold uppercase tracking-wider text-surface-600 bg-surface-100 px-2 py-1 rounded border border-surface-200"
@@ -37,10 +36,10 @@ import { TutorialBlockResponse } from '../../interfaces';
         <div
           class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         >
-          @if (canEdit()) {
+          <!-- @if (canEdit()) {
             <button
-              pButton
-              icon="pi pi-pencil"
+              appUiButton
+              icon="ui-icon ui-icon-pencil"
               [rounded]="true"
               [text]="true"
               size="small"
@@ -50,8 +49,8 @@ import { TutorialBlockResponse } from '../../interfaces';
           }
           @if (canRemove()) {
             <button
-              pButton
-              icon="pi pi-trash"
+              appUiButton
+              icon="ui-icon ui-icon-trash"
               [rounded]="true"
               [text]="true"
               size="small"
@@ -59,7 +58,7 @@ import { TutorialBlockResponse } from '../../interfaces';
               title="Eliminar bloque"
               (click)="remove.emit()"
             ></button>
-          }
+          } -->
         </div>
       </div>
 
@@ -115,7 +114,10 @@ import { TutorialBlockResponse } from '../../interfaces';
                 preload="metadata"
                 class="w-full max-h-[400px] rounded-lg border border-surface-200 bg-black shadow-inner"
               >
-                <source [src]="$safeNavigationMigration(data().file?.url)" type="video/mp4" />
+                <source
+                  [src]="$safeNavigationMigration(data().file?.url)"
+                  type="video/mp4"
+                />
                 Tu navegador no soporta el elemento de video.
               </video>
               @if (data().content) {

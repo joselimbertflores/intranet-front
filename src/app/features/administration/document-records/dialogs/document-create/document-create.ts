@@ -8,16 +8,6 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { TreeNodeSelectEvent } from 'primeng/tree';
-import { MessageModule } from 'primeng/message';
-import { StepperModule } from 'primeng/stepper';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
-import { TreeNode } from 'primeng/api';
 
 import { CustomFormValidators, FormUtils } from '../../../../../helpers';
 import { DocumentDataSource } from '../../services';
@@ -35,13 +25,7 @@ import { finalize } from 'rxjs';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    TreeSelectModule,
-    FloatLabelModule,
-    InputTextModule,
-    StepperModule,
-    MessageModule,
-    SelectModule,
-    ButtonModule,
+  
     FileSizePipe,
     FileIcon,
   ],
@@ -50,7 +34,7 @@ import { finalize } from 'rxjs';
 })
 export class DocumentCreate {
   private formBuilder = inject(FormBuilder);
-  private diagloRef = inject(DynamicDialogRef);
+  // private diagloRef = inject(DynamicDialogRef);
   private documentDataSource = inject(DocumentDataSource);
 
   readonly MIN_YEAR = 2000;
@@ -119,16 +103,16 @@ export class DocumentCreate {
 
     this.isSaving.set(true);
 
-    this.documentDataSource
-      .create({ ...this.form.value, files: this.files() })
-      .pipe(finalize(() => this.isSaving.set(false)))
-      .subscribe((resp) => {
-        this.diagloRef.close(resp);
-      });
+    // this.documentDataSource
+    //   .create({ ...this.form.value, files: this.files() })
+    //   .pipe(finalize(() => this.isSaving.set(false)))
+    //   .subscribe((resp) => {
+    //     this.diagloRef.close(resp);
+    //   });
   }
 
   close() {
-    this.diagloRef.close();
+    // this.diagloRef.close();
   }
 
   removeFile(index: number) {
@@ -154,7 +138,7 @@ export class DocumentCreate {
     }
   }
 
-  selectOrganizationUnit(event: TreeNodeSelectEvent) {
+  selectOrganizationUnit(event: any) {
     this.form.get('organizationalUnitId')?.setValue(event.node.data);
   }
 
@@ -233,7 +217,7 @@ export class DocumentCreate {
     }, 3000);
   }
 
-  private toTreeNodes(nodes: SectionTreeNodeResponse[]): TreeNode<string>[] {
+  private toTreeNodes(nodes: SectionTreeNodeResponse[]):any {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

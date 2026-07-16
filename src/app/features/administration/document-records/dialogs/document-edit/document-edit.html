@@ -1,22 +1,22 @@
-<form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+<!-- <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
   <section class="space-y-4 mt-2">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="md:col-span-4">
-        <p-floatlabel variant="on">
+        <app-ui-floatlabel variant="on">
           <input
-            pInputText
+            appUiInput
             id="docName"
             formControlName="title"
             class="w-full"
             [invalid]="formUtils.isInvalid(form.get('title'))"
           />
           <label for="docName">Nombre del documento *</label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
       </div>
 
       <div class="md:col-span-4">
-        <p-floatlabel variant="on">
-          <p-treeSelect
+        <app-ui-floatlabel variant="on">
+          <app-ui-tree-select
             inputId="orgUnit"
             class="w-full"
             appendTo="body"
@@ -28,12 +28,12 @@
             [options]="organizationTree()"
           />
           <label for="orgUnit">Unidad organizacional *</label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
       </div>
 
       <div class="md:col-span-2">
-        <p-floatlabel class="w-full" variant="on">
-          <p-select
+        <app-ui-floatlabel class="w-full" variant="on">
+          <app-ui-select
             inputId="docType"
             class="w-full"
             appendTo="body"
@@ -48,11 +48,11 @@
             (onChange)="selectDocumentType($event.value)"
           />
           <label for="docType">Tipo de documento *</label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
       </div>
       <div class="md:col-span-2">
-        <p-floatlabel class="w-full" variant="on">
-          <p-select
+        <app-ui-floatlabel class="w-full" variant="on">
+          <app-ui-select
             inputId="docSubType"
             class="w-full"
             appendTo="body"
@@ -66,13 +66,13 @@
             formControlName="documentSubtypeId"
           />
           <label for="docSubType">Subtipo</label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
       </div>
 
       <year-selector formControlName="year" />
 
-      <p-floatlabel class="w-full" variant="on">
-        <p-select
+      <app-ui-floatlabel class="w-full" variant="on">
+        <app-ui-select
           inputId="statusInput"
           class="w-full"
           appendTo="body"
@@ -84,7 +84,7 @@
           [invalid]="formUtils.isInvalid(form.get('status'))"
         />
         <label for="statusInput">Estado *</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
     </div>
   </section>
 
@@ -100,20 +100,20 @@
       </div>
 
       <div class="flex gap-2">
-        <p-button
+        <app-ui-button
           type="button"
           label="Ver"
-          icon="pi pi-external-link"
+          icon="ui-icon ui-icon-external-link"
           size="small"
           severity="secondary"
           [outlined]="true"
           (onClick)="openFile(data.file.url)"
         />
 
-        <p-button
+        <app-ui-button
           type="button"
           label="Descargar"
-          icon="pi pi-download"
+          icon="ui-icon ui-icon-download"
           size="small"
           severity="secondary"
           [outlined]="true"
@@ -137,7 +137,7 @@
 
   <section class="rounded-xl border border-surface-200 p-4">
     <div class="flex items-center gap-3">
-      <p-checkbox
+      <app-ui-checkbox
         [binary]="true"
         [ngModel]="replaceFile()"
         [ngModelOptions]="{ standalone: true }"
@@ -172,14 +172,14 @@
         />
 
         @if (fileRequiredError()) {
-          <p-message
+          <app-ui-message
             severity="error"
             size="small"
             variant="simple"
             class="ml-2"
           >
             Debe seleccionar un archivo para actualizar.
-          </p-message>
+          </app-ui-message>
         }
       </div>
     }
@@ -214,14 +214,14 @@
     </div>
   </section>
 
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <app-ui-button
       type="button"
       label="Cancelar"
       severity="secondary"
       [disabled]="isSaving()"
       (onClick)="close()"
     />
-    <p-button type="submit" label="Guardar" [loading]="isSaving()" />
+    <app-ui-button type="submit" label="Guardar" [loading]="isSaving()" />
   </div>
-</form>
+</form> -->

@@ -1,14 +1,14 @@
-<div class="mb-4 flex items-center justify-between">
+<!-- <div class="mb-4 flex items-center justify-between">
   <h2 class="text-2xl font-semibold">Avisos emergentes</h2>
-  <p-button
+  <app-ui-button
     label="Agregar"
-    icon="pi pi-plus"
+    icon="ui-icon ui-icon-plus"
     size="small"
     (onClick)="openEditor()"
   />
 </div>
 
-<p-table
+<app-ui-table
   [value]="dataSource()"
   [totalRecords]="dataSize()"
   (onPage)="changePage($event)"
@@ -23,14 +23,14 @@
   size="small"
   class="text-sm"
 >
-  <ng-template #caption>
+  <ng-template appUiTemplate="caption">
     <div class="flex sm:justify-end">
       <div class="w-full sm:w-80">
         <search-input label="Buscar por título" (search)="onSearch($event)" />
       </div>
     </div>
   </ng-template>
-  <ng-template #header>
+  <ng-template appUiTemplate="header">
     <tr>
       <th>Título</th>
       <th>Fijado</th>
@@ -40,7 +40,7 @@
       <th style="width: 5rem"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-notice>
+  <ng-template appUiTemplate="body" let-notice>
     <tr>
       <td class="max-w-64 truncate font-medium">{{ notice.title }}</td>
 
@@ -52,23 +52,23 @@
         {{ notice.visibleUntil ? (notice.visibleUntil | date: "short") : "—" }}
       </td>
       <td>
-        <p-tag
+        <app-ui-tag
           [severity]="notice.isActive ? 'success' : 'danger'"
           [value]="notice.isActive ? 'Activo' : 'Inactivo'"
         />
       </td>
       <td>
         <div class="flex gap-1">
-          <p-button
-            icon="pi pi-pencil"
+          <app-ui-button
+            icon="ui-icon ui-icon-pencil"
             size="small"
             [text]="true"
             [rounded]="true"
             ariaLabel="Editar aviso"
             (onClick)="openEditor(notice)"
           />
-          <p-button
-            icon="pi pi-trash"
+          <app-ui-button
+            icon="ui-icon ui-icon-trash"
             size="small"
             severity="danger"
             [text]="true"
@@ -80,13 +80,13 @@
       </td>
     </tr>
   </ng-template>
-  <ng-template #emptymessage>
+  <ng-template appUiTemplate="emptymessage">
     <tr>
       <td colspan="6" class="py-4 text-center text-surface-500">
         Sin avisos emergentes.
       </td>
     </tr>
   </ng-template>
-</p-table>
+</app-ui-table>
 
-<p-confirmdialog />
+<app-ui-confirmdialog /> -->

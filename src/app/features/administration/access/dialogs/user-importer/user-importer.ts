@@ -1,25 +1,20 @@
 import { TitleCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormGroup,
   Validators,
   FormControl,
   ReactiveFormsModule,
 } from '@angular/forms';
-
-import {
-  AutoCompleteCompleteEvent,
-  AutoCompleteModule,
-} from 'primeng/autocomplete';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
-import { ButtonModule } from 'primeng/button';
-import { MessageService } from 'primeng/api';
 
 import { finalize } from 'rxjs';
 
@@ -29,22 +24,13 @@ import { UserApi } from '../../services';
 
 @Component({
   selector: 'app-user-importer',
-  imports: [
-    ReactiveFormsModule,
-    AutoCompleteModule,
-    MultiSelectModule,
-    FloatLabelModule,
-    MessageModule,
-    ButtonModule,
-    SelectModule,
-    TitleCasePipe,
-  ],
+  imports: [ReactiveFormsModule, TitleCasePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-importer.html',
 })
 export class UserImporter {
-  private readonly dialogRef = inject(DynamicDialogRef);
-  private readonly messageService = inject(MessageService);
+  // private readonly dialogRef = inject(DynamicDialogRef);
+  // private readonly messageService = inject(MessageService);
   private readonly userApi = inject(UserApi);
 
   readonly minimumSearchLength = 3;
@@ -79,7 +65,7 @@ export class UserImporter {
     });
   }
 
-  searchCandidates(event: AutoCompleteCompleteEvent): void {
+  searchCandidates(event: any): void {
     const term = event.query.trim();
 
     this.candidates.set([]);
@@ -104,27 +90,27 @@ export class UserImporter {
     this.isSaving.set(true);
     this.importError.set(null);
 
-    this.userApi
-      .importFromIdentity(candidate.externalKey, roleIds)
-      .pipe(finalize(() => this.isSaving.set(false)))
-      .subscribe({
-        next: (user) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Usuario importado',
-            detail: `${user.fullName} fue agregado correctamente.`,
-            life: 3000,
-          });
-          this.dialogRef.close(user);
-        },
-        error: (error: unknown) => {
-          this.importError.set(this.getImportErrorMessage(error));
-        },
-      });
+    // this.userApi
+    //   .importFromIdentity(candidate.externalKey, roleIds)
+    //   .pipe(finalize(() => this.isSaving.set(false)))
+    //   .subscribe({
+    //     next: (user) => {
+    //       this.messageService.add({
+    //         severity: 'success',
+    //         summary: 'Usuario importado',
+    //         detail: `${user.fullName} fue agregado correctamente.`,
+    //         life: 3000,
+    //       });
+    //       this.dialogRef.close(user);
+    //     },
+    //     error: (error: unknown) => {
+    //       this.importError.set(this.getImportErrorMessage(error));
+    //     },
+    //   });
   }
 
   close(): void {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   private getImportErrorMessage(error: unknown): string {

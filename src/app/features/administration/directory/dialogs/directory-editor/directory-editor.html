@@ -1,8 +1,8 @@
-<form [formGroup]="directoryForm" (ngSubmit)="save()" class="space-y-5 pt-1">
+<!-- <form [formGroup]="directoryForm" (ngSubmit)="save()" class="space-y-5 pt-1">
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div class="flex flex-col gap-1 md:col-span-2">
-      <p-floatlabel variant="on">
-        <p-autocomplete
+      <app-ui-floatlabel variant="on">
+        <app-ui-autocomplete
           inputId="areaName"
           formControlName="areaName"
           [suggestions]="areaSuggestions()"
@@ -15,34 +15,34 @@
           [invalid]="formUtils.isInvalid(directoryForm.controls.areaName)"
         />
         <label for="areaName">Área *</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
       @if (formUtils.isInvalid(directoryForm.controls.areaName)) {
-        <p-message severity="error" size="small" variant="simple">
+        <app-ui-message severity="error" size="small" variant="simple">
           {{ formUtils.getErrorMessage(directoryForm.controls.areaName) }}
-        </p-message>
+        </app-ui-message>
       }
       <small class="text-surface-500">
         Puedes elegir un nombre existente o escribir uno nuevo.
       </small>
     </div>
 
-    <p-floatlabel variant="on" class="md:col-span-2">
+    <app-ui-floatlabel variant="on" class="md:col-span-2">
       <input
         id="contactLabel"
-        pInputText
+        appUiInput
         class="w-full"
         formControlName="contactLabel"
       />
       <label for="contactLabel">Función o contacto (opcional)</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
     <section class="rounded-xl border border-surface-200 p-3">
       <div class="mb-3 flex items-center justify-between gap-3">
         <h3 class="text-sm font-semibold text-surface-800">Internos</h3>
-        <p-button
+        <app-ui-button
           type="button"
           label="Agregar"
-          icon="pi pi-plus"
+          icon="ui-icon ui-icon-plus"
           size="small"
           [text]="true"
           (onClick)="addExtension()"
@@ -52,15 +52,15 @@
         @for (control of extensions.controls; track control; let i = $index) {
           <div class="flex items-center gap-2">
             <input
-              pInputText
+              appUiInput
               class="min-w-0 flex-1"
               [formControlName]="i"
               [attr.aria-label]="'Interno ' + (i + 1)"
               placeholder="Ej. 124"
             />
-            <p-button
+            <app-ui-button
               type="button"
-              icon="pi pi-times"
+              icon="ui-icon ui-icon-times"
               severity="secondary"
               [text]="true"
               [rounded]="true"
@@ -77,10 +77,10 @@
     <section class="rounded-xl border border-surface-200 p-3">
       <div class="mb-3 flex items-center justify-between gap-3">
         <h3 class="text-sm font-semibold text-surface-800">Teléfonos</h3>
-        <p-button
+        <app-ui-button
           type="button"
           label="Agregar"
-          icon="pi pi-plus"
+          icon="ui-icon ui-icon-plus"
           size="small"
           [text]="true"
           (onClick)="addPhone()"
@@ -90,15 +90,15 @@
         @for (control of phones.controls; track control; let i = $index) {
           <div class="flex items-center gap-2">
             <input
-              pInputText
+              appUiInput
               class="min-w-0 flex-1"
               [formControlName]="i"
               [attr.aria-label]="'Teléfono ' + (i + 1)"
               placeholder="Ej. 4 6421234"
             />
-            <p-button
+            <app-ui-button
               type="button"
-              icon="pi pi-times"
+              icon="ui-icon ui-icon-times"
               severity="secondary"
               [text]="true"
               [rounded]="true"
@@ -112,13 +112,13 @@
       </div>
     </section>
 
-    <p-floatlabel variant="on">
-      <input id="email" type="email" pInputText class="w-full" formControlName="email" />
+    <app-ui-floatlabel variant="on">
+      <input id="email" type="email" appUiInput class="w-full" formControlName="email" />
       <label for="email">Correo (opcional)</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
-    <p-floatlabel variant="on">
-      <p-select
+    <app-ui-floatlabel variant="on">
+      <app-ui-select
         inputId="siteId"
         formControlName="siteId"
         [options]="sites()"
@@ -130,21 +130,21 @@
         appendTo="body"
       />
       <label for="siteId">Sede (opcional)</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
-    <p-floatlabel variant="on" class="md:col-span-2">
+    <app-ui-floatlabel variant="on" class="md:col-span-2">
       <input
         id="siteDetails"
-        pInputText
+        appUiInput
         class="w-full"
         formControlName="siteDetails"
       />
       <label for="siteDetails">Detalle de ubicación (opcional)</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
   </div>
 
   <div class="flex items-center gap-2 rounded-lg bg-surface-50 px-3 py-2">
-    <p-checkbox
+    <app-ui-checkbox
       inputId="directoryActive"
       formControlName="isActive"
       [binary]="true"
@@ -154,8 +154,8 @@
     </label>
   </div>
 
-  <div class="p-dialog-footer">
-    <p-button type="button" label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" />
+  <div class="app-dialog-actions">
+    <app-ui-button type="button" label="Cancelar" severity="secondary" (onClick)="close()" />
+    <app-ui-button type="submit" label="Guardar" />
   </div>
-</form>
+</form> -->

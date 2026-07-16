@@ -7,13 +7,6 @@ import {
   FormsModule,
 } from '@angular/forms';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
-import { ButtonModule } from 'primeng/button';
 
 import { SectionTreeNodeResponse } from '../../interfaces';
 import { OrganizationalUnitDatasource } from '../../services';
@@ -27,23 +20,18 @@ interface DialogData {
   selector: 'app-organizational-unit-editor',
   imports: [
     ReactiveFormsModule,
-    FloatLabelModule,
-    InputTextModule,
-    CheckboxModule,
-    MessageModule,
-    SelectModule,
-    ButtonModule,
+    
     FormsModule,
   ],
   templateUrl: './organizational-unit-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrganizationalUnitEditor {
-  private diagloRef = inject(DynamicDialogRef);
+  // private diagloRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
   private sectionService = inject(OrganizationalUnitDatasource);
 
-  readonly data: DialogData = inject(DynamicDialogConfig).data;
+  // readonly data: DialogData = inject(DynamicDialogConfig).data;
 
   readonly formUtils = FormUtils;
 
@@ -58,21 +46,21 @@ export class OrganizationalUnitEditor {
   }
 
   close() {
-    this.diagloRef.close();
+    // this.diagloRef.close();
   }
 
   save() {
-    if (this.form.invalid) return this.form.markAllAsTouched();
-    const subscription = this.data.section
-      ? this.sectionService.update(this.data.section.id, this.form.value)
-      : this.sectionService.create(this.form.value);
-    subscription.subscribe((resp) => {
-      this.diagloRef.close(resp);
-    });
+    // if (this.form.invalid) return this.form.markAllAsTouched();
+    // const subscription = this.data.section
+    //   ? this.sectionService.update(this.data.section.id, this.form.value)
+    //   : this.sectionService.create(this.form.value);
+    // subscription.subscribe((resp) => {
+    //   this.diagloRef.close(resp);
+    // });
   }
 
   private loadForm(): void {
-    const { parent, section } = this.data;
-    this.form.patchValue({ ...section, parentId: parent?.id });
+    // const { parent, section } = this.data;
+    // this.form.patchValue({ ...section, parentId: parent?.id });
   }
 }

@@ -1,40 +1,40 @@
-<form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
+<!-- <form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
   <div class="app-dialog-body">
     <div class="space-y-6 pt-2">
       <div class="flex flex-col gap-1">
-        <p-floatlabel variant="on">
+        <app-ui-floatlabel variant="on">
           <input
-            pInputText
+            appUiInput
             id="titleTxt"
             class="w-full"
             formControlName="title"
             [invalid]="formUtils.isInvalid(form.get('title'))"
           />
           <label for="titleTxt">Titulo</label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
         @if (formUtils.isInvalid(form.get("title"))) {
-          <p-message severity="error" size="small" variant="simple">
+          <app-ui-message severity="error" size="small" variant="simple">
             {{ formUtils.getErrorMessage(form.get("title")) }}
-          </p-message>
+          </app-ui-message>
         }
       </div>
 
-      <p-floatlabel variant="on">
+      <app-ui-floatlabel variant="on">
         <label for="referencTxt">Descripción</label>
         <textarea
           id="referencTxt"
-          pTextarea
+          appUiTextarea
           rows="2"
           class="w-full"
           formControlName="description"
           [invalid]="formUtils.isInvalid(form.get('description'))"
         ></textarea>
-      </p-floatlabel>
+      </app-ui-floatlabel>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2">
         <div class="flex flex-col gap-1">
-          <p-floatlabel variant="on" class="w-full">
-            <p-datepicker
+          <app-ui-floatlabel variant="on" class="w-full">
+            <app-ui-datepicker
               [showTime]="!isAllDay"
               hourFormat="24"
               class="w-full"
@@ -44,18 +44,18 @@
               [invalid]="formUtils.isInvalid(form.get('startDate'))"
               [maxDate]="form.get('endDate')?.value"
             >
-            </p-datepicker>
+            </app-ui-datepicker>
             <label for="startDatePicker">Inicio</label>
-          </p-floatlabel>
+          </app-ui-floatlabel>
           @if (formUtils.isInvalid(form.get("startDate"))) {
-            <p-message severity="error" size="small" variant="simple">
+            <app-ui-message severity="error" size="small" variant="simple">
               {{ formUtils.getErrorMessage(form.get("startDate")) }}
-            </p-message>
+            </app-ui-message>
           }
         </div>
         @if (!isAllDay) {
-          <p-floatlabel variant="on" class="w-full">
-            <p-datepicker
+          <app-ui-floatlabel variant="on" class="w-full">
+            <app-ui-datepicker
               formControlName="endDate"
               [showTime]="true"
               hourFormat="24"
@@ -63,14 +63,14 @@
               appendTo="body"
               inputId="endDatePicker"
             >
-            </p-datepicker>
+            </app-ui-datepicker>
             <label for="endDatePicker">Fin</label>
-          </p-floatlabel>
+          </app-ui-floatlabel>
         }
       </div>
       <div class="flex gap-6 px-2">
         <div class="flex items-center">
-          <p-checkbox
+          <app-ui-checkbox
             inputId="isActiveCheck"
             name="pizza"
             [binary]="true"
@@ -79,24 +79,24 @@
           <label for="isActiveCheck" class="ml-2"> Activo </label>
         </div>
         <div class="flex items-center">
-          <p-checkbox
+          <app-ui-checkbox
             inputId="allDayCheck"
             formControlName="allDay"
             [binary]="true"
             (onChange)="onAllDayToggle()"
           >
-          </p-checkbox>
+          </app-ui-checkbox>
           <label for="allDayCheck" class="ml-1 font-medium">Todo el día</label>
         </div>
 
         <div class="flex items-center">
-          <p-checkbox
+          <app-ui-checkbox
             inputId="recurrenceCheck"
             [(ngModel)]="isRecurring"
             [ngModelOptions]="{ standalone: true }"
             [binary]="true"
           >
-          </p-checkbox>
+          </app-ui-checkbox>
 
           <label for="recurrenceCheck" class="ml-1 font-medium">
             Repetir
@@ -111,8 +111,8 @@
               form.get("recurrence")?.hasError("requiredFrequency") &&
               formSubmitted();
             <div class="flex flex-col gap-1">
-              <p-floatlabel variant="on">
-                <p-select
+              <app-ui-floatlabel variant="on">
+                <app-ui-select
                   inputId="frequencySelect"
                   [options]="frequencies"
                   formControlName="frequency"
@@ -120,16 +120,16 @@
                   appendTo="body"
                   class="w-full"
                 >
-                </p-select>
+                </app-ui-select>
                 <label for="frequencySelect">Frecuencia</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               @if (frecuencyInvalid) {
-                <p-message severity="error" size="small" variant="simple">
+                <app-ui-message severity="error" size="small" variant="simple">
                   Este campo es requerido.
-                </p-message>
+                </app-ui-message>
               }
             </div>
-            <p-floatlabel variant="on">
+            <app-ui-floatlabel variant="on">
               <p-inputNumber
                 [min]="1"
                 suffix=" vez / veces"
@@ -138,10 +138,10 @@
                 formControlName="interval"
               />
               <label for="intervalTxt">Cada</label>
-            </p-floatlabel>
+            </app-ui-floatlabel>
 
-            <p-floatlabel variant="on">
-              <p-datepicker
+            <app-ui-floatlabel variant="on">
+              <app-ui-datepicker
                 formControlName="until"
                 dateFormat="yy-mm-dd"
                 class="w-full"
@@ -150,15 +150,15 @@
                 [minDate]="form.get('startDate')?.value"
               />
               <label for="untilDatePicker">Hasta</label>
-            </p-floatlabel>
+            </app-ui-floatlabel>
 
             @if (form.get("recurrence.frequency")!.value === "WEEKLY") {
               @let byWeekDaysInvalid =
                 form.get("recurrence")?.hasError("weeklyRequiresDays") &&
                 formSubmitted();
               <div class="flex flex-col gap-1">
-                <p-floatlabel variant="on">
-                  <p-multiselect
+                <app-ui-floatlabel variant="on">
+                  <app-ui-multiselect
                     [options]="weekDays"
                     formControlName="byWeekDays"
                     class="w-full"
@@ -167,11 +167,11 @@
                     [invalid]="byWeekDaysInvalid"
                   />
                   <label for="byWeekDaysSelect">Días de la semana</label>
-                </p-floatlabel>
+                </app-ui-floatlabel>
                 @if (byWeekDaysInvalid) {
-                  <p-message severity="error" size="small" variant="simple">
+                  <app-ui-message severity="error" size="small" variant="simple">
                     Este campo es requerido.
-                  </p-message>
+                  </app-ui-message>
                 }
               </div>
             }
@@ -181,7 +181,7 @@
     </div>
   </div>
   <div class="app-dialog-actions">
-    <p-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <p-button type="submit" label="Guardar" />
+    <app-ui-button label="Cancelar" severity="secondary" (onClick)="close()" />
+    <app-ui-button type="submit" label="Guardar" />
   </div>
-</form>
+</form> -->

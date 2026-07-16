@@ -59,7 +59,7 @@ import { quickAccessTone } from '../landing-presentation';
               }
 
               <i
-                class="pi pi-arrow-up-right absolute right-3 top-3 text-xs opacity-65 transition-opacity group-hover:opacity-100"
+                class="ui-icon ui-icon-arrow-up-right absolute right-3 top-3 text-xs opacity-65 transition-opacity group-hover:opacity-100"
                 [class]="entry.tone.arrow"
                 aria-hidden="true"
               ></i>
@@ -82,15 +82,15 @@ export class LandingQuickAccessSection {
   );
 
   private readonly icons: Readonly<Record<string, string>> = {
-    mail: 'pi pi-envelope',
-    systems: 'pi pi-desktop',
-    documents: 'pi pi-file',
-    gaceta: 'pi pi-book',
-    forms: 'pi pi-list-check',
-    support: 'pi pi-question-circle',
+    mail: 'ui-icon ui-icon-envelope',
+    systems: 'ui-icon ui-icon-desktop',
+    documents: 'ui-icon ui-icon-file',
+    gaceta: 'ui-icon ui-icon-book',
+    forms: 'ui-icon ui-icon-list-check',
+    support: 'ui-icon ui-icon-question-circle',
   };
 
   iconClass(iconKey: string): string {
-    return this.icons[iconKey] ?? 'pi pi-link';
+    return this.icons[iconKey] ?? 'ui-icon ui-icon-link';
   }
 }

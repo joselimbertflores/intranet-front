@@ -3,18 +3,18 @@
     class="sticky top-0 sm:top-2 z-30 flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-0/80 backdrop-blur-lg p-2 rounded-xl border border-surface-200 shadow-sm transition-all"
   >
     <div class="flex items-center gap-2 w-full sm:w-auto">
-      <p-button
-        icon="pi pi-arrow-left"
+      <!-- <app-ui-button
+        icon="ui-icon ui-icon-arrow-left"
         label="Volver"
         [text]="true"
         size="small"
         (onClick)="goBack()"
-      />
+      /> -->
     </div>
     <div class="flex items-center gap-2 w-full sm:w-auto">
-      @if (canUpdate()) {
-        <p-button
-          icon="pi pi-sort"
+      <!-- @if (canUpdate()) {
+        <app-ui-button
+          icon="ui-icon ui-icon-sort"
           aria-label="sort"
           severity="secondary"
           size="small"
@@ -22,8 +22,8 @@
           [disabled]="!isReordered()"
           (onClick)="reoderBlocks()"
         />
-        <p-button
-          icon="pi pi-pencil"
+        <app-ui-button
+          icon="ui-icon ui-icon-pencil"
           aria-label="edit"
           [outlined]="true"
           severity="secondary"
@@ -34,25 +34,26 @@
       }
 
       @if (canCreate()) {
-        <p-button
-          icon="pi pi-plus"
+        <app-ui-button
+          icon="ui-icon ui-icon-plus"
           aria-label="add"
           [outlined]="true"
           label="Agregar"
           size="small"
           (click)="menuBloques.toggle($event)"
         />
-      }
+      } -->
     </div>
   </div>
 
   <div class="px-2 sm:px-4 pb-4 sm:pb-6">
     <div class="flex flex-wrap items-center gap-3 mb-4">
-      @let isPublished = $safeNavigationMigration(tutorial.value()?.isPublished);
-      <p-tag
+      @let isPublished =
+        $safeNavigationMigration(tutorial.value()?.isPublished);
+      <!-- <app-ui-tag
         [severity]="isPublished ? 'success' : 'warn'"
         [value]="isPublished ? 'Publicado' : 'Borrador'"
-      />
+      /> -->
       <span
         class="text-xs sm:text-sm font-semibold text-primary-600 tracking-wider"
       >
@@ -73,7 +74,10 @@
       class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-surface-400 mt-6 font-medium"
     >
       <span class="flex items-center gap-1">
-        Creado: {{ $safeNavigationMigration(tutorial.value()?.createdAt) | date: "short" }}
+        Creado:
+        {{
+          $safeNavigationMigration(tutorial.value()?.createdAt) | date: "short"
+        }}
       </span>
     </div>
   </div>
@@ -101,19 +105,23 @@
   </div>
   @if (canCreate()) {
     <div class="mt-6 mb-4 flex justify-center">
-      <button pButton [outlined]="true" (click)="menuBloques.toggle($event)">
-        <i class="pi pi-plus text-xl"></i>
+      <!-- <button
+        appUiButton
+        [outlined]="true"
+        (click)="menuBloques.toggle($event)"
+      >
+        <i class="ui-icon ui-icon-plus text-xl"></i>
         <span class="font-medium text-lg">Agregar bloque</span>
-      </button>
+      </button> -->
     </div>
   }
-  <p-tieredmenu
+  <!-- <app-ui-tieredmenu
     #menuBloques
     [model]="menuItems"
     [popup]="true"
     appendTo="body"
     styleClass="mt-2 w-56"
-  ></p-tieredmenu>
+  ></app-ui-tieredmenu> -->
   <div #endOfBlocks></div>
 </div>
-<p-confirmdialog />
+<!-- <app-ui-confirmdialog /> -->

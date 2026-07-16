@@ -36,7 +36,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
             class="group inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-1 py-2 text-sm font-bold text-primary-800 no-underline outline-none transition-colors hover:text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-3"
           >
             Ver más documentos
-            <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
+            <i class="ui-icon ui-icon-arrow-right text-xs transition-transform group-hover:translate-x-0.5" aria-hidden="true"></i>
           </a>
         </header>
 
@@ -74,7 +74,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
                   <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-surface-500">
                     <span>{{ doc.file.size | fileSize }}</span>
                     <span class="inline-flex items-center gap-1.5">
-                      <i class="pi pi-download text-[0.68rem]" aria-hidden="true"></i>
+                      <i class="ui-icon ui-icon-download text-[0.68rem]" aria-hidden="true"></i>
                       {{ doc.downloadCount }} descargas
                     </span>
                   </div>
@@ -87,7 +87,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
                     [attr.aria-label]="'Descargar ' + doc.title"
                   >
                     Descargar
-                    <i class="pi pi-download text-xs" aria-hidden="true"></i>
+                    <i class="ui-icon ui-icon-download text-xs" aria-hidden="true"></i>
                   </a>
                 </div>
               </article>

@@ -6,17 +6,6 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 
-import { TableModule, TablePageEvent } from 'primeng/table';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { DialogService } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MenuItem, TreeNode } from 'primeng/api';
-import { PopoverModule } from 'primeng/popover';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
-import { MenuModule } from 'primeng/menu';
-import { TagModule } from 'primeng/tag';
 
 import { finalize } from 'rxjs';
 
@@ -34,26 +23,17 @@ import {
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    FloatLabelModule,
-    TreeSelectModule,
-    InputTextModule,
-    PopoverModule,
-    SelectModule,
-    ButtonModule,
-    MenuModule,
-    TableModule,
-    TagModule,
+   
     FileIcon,
     SearchInput,
     YearSelector,
   ],
   templateUrl: './document-admin.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [DialogService],
 })
 export default class DocumentAdmin {
   private documentDataSource = inject(DocumentDataSource);
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
   private formBuilder = inject(FormBuilder);
 
   limit = signal(10);
@@ -63,7 +43,7 @@ export default class DocumentAdmin {
   dataSize = signal<number>(0);
 
   filterForm: FormGroup = this.formBuilder.group({
-    organizationalUnitNode: [null as TreeNode<string> | null],
+    organizationalUnitNode: [null  ],
     documentTypeId: [null],
     documentSubtypeId: [{ value: null, disabled: true }],
     year: [null],
@@ -82,7 +62,7 @@ export default class DocumentAdmin {
   ];
 
   isLoading = signal(false);
-  menuItems: MenuItem[] = [];
+  menuItems: any[] = [];
 
   ngOnInit() {
     this.getData();
@@ -129,7 +109,7 @@ export default class DocumentAdmin {
     }
   }
 
-  changePage(event: TablePageEvent) {
+  changePage(event: any) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
     this.getData();
@@ -153,46 +133,46 @@ export default class DocumentAdmin {
   }
 
   openCreateDialog() {
-    const diagloRef = this.dialogService.open(DocumentCreate, {
-      header: 'Crear Documentación',
-      modal: true,
-      draggable: false,
-      focusOnShow: false,
-      closable: false,
-      closeOnEscape: false,
-      dismissableMask: false,
-      width: '50vw',
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
-    diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
-      if (!result) return;
-      result.forEach((item) => this.upsertItem(item));
-    });
+    // const diagloRef = this.dialogService.open(DocumentCreate, {
+    //   header: 'Crear Documentación',
+    //   modal: true,
+    //   draggable: false,
+    //   focusOnShow: false,
+    //   closable: false,
+    //   closeOnEscape: false,
+    //   dismissableMask: false,
+    //   width: '50vw',
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
+    // diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
+    //   if (!result) return;
+    //   result.forEach((item) => this.upsertItem(item));
+    // });
   }
 
   openUpdateDialog(item: DocumentManageResponse) {
-    const diagloRef = this.dialogService.open(DocumentEdit, {
-      header: 'Editar Documentación',
-      modal: true,
-      draggable: false,
-      focusOnShow: false,
-      closable: false,
-      closeOnEscape: false,
-      dismissableMask: false,
-      data: item,
-      width: '50vw',
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
-    diagloRef?.onClose.subscribe((result?: DocumentManageResponse) => {
-      if (!result) return;
-      this.upsertItem(result);
-    });
+    // const diagloRef = this.dialogService.open(DocumentEdit, {
+    //   header: 'Editar Documentación',
+    //   modal: true,
+    //   draggable: false,
+    //   focusOnShow: false,
+    //   closable: false,
+    //   closeOnEscape: false,
+    //   dismissableMask: false,
+    //   data: item,
+    //   width: '50vw',
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
+    // diagloRef?.onClose.subscribe((result?: DocumentManageResponse) => {
+    //   if (!result) return;
+    //   this.upsertItem(result);
+    // });
   }
 
   setMenuItems(row: DocumentManageResponse) {
@@ -202,12 +182,12 @@ export default class DocumentAdmin {
         items: [
           {
             label: 'Editar',
-            icon: 'pi pi-fw pi-pencil',
+            icon: 'ui-icon ui-icon-fw ui-icon-pencil',
             command: () => this.openUpdateDialog(row),
           },
           {
             label: 'Descargar archivo',
-            icon: 'pi pi-download',
+            icon: 'ui-icon ui-icon-download',
             command: () => this.downloadFile(row.file.url),
           },
         ],
@@ -240,7 +220,7 @@ export default class DocumentAdmin {
     }
   }
 
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode<string>[] {
+  private toTreeNode(nodes: SectionTreeNodeResponse[]):any {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

@@ -14,9 +14,9 @@ import { RouterModule } from '@angular/router';
 // import dayGridPlugin from '@fullcalendar/daygrid';
 // import listPlugin from '@fullcalendar/list';
 
-import { PopoverModule } from 'primeng/popover';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
+// import { PopoverModule } from '@app/shared/ui-compat';
+// import { ButtonModule } from '@app/shared/ui-compat';
+// import { DialogModule } from '@app/shared/ui-compat';
 
 import { PortalCalendarResponse } from '../../interfaces';
 import { PortalCalendarDataSource } from '../../services';
@@ -27,9 +27,7 @@ import { PublicSectionHeader } from '../../components';
   imports: [
     CommonModule,
     RouterModule,
-    PopoverModule,
-    ButtonModule,
-    DialogModule,
+  
     PublicSectionHeader,
     // FullCalendarModule,
   ],

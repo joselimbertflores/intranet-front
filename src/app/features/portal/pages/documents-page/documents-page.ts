@@ -21,19 +21,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { TreeSelectModule } from 'primeng/treeselect';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { PaginatorModule } from 'primeng/paginator';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputTextModule } from 'primeng/inputtext';
-import { DataViewModule } from 'primeng/dataview';
-import { SkeletonModule } from 'primeng/skeleton';
-import { SelectModule } from 'primeng/select';
-import { ButtonModule } from 'primeng/button';
-import { TreeNode } from 'primeng/api';
-
 import { map } from 'rxjs';
 
 import { YearSelector } from '../../../../shared';
@@ -56,17 +43,7 @@ interface FilterFormMode {
   imports: [
     CommonModule,
     FormsModule,
-    SelectButtonModule,
-    TreeSelectModule,
-    FloatLabelModule,
-    IconFieldModule,
-    InputTextModule,
-    InputIconModule,
-    PaginatorModule,
-    DataViewModule,
-    SkeletonModule,
-    SelectModule,
-    ButtonModule,
+
     YearSelector,
     FormField,
     PublicSectionHeader,
@@ -198,9 +175,10 @@ export default class DocumentsPage {
   selectedTreeNode = linkedSignal(() => {
     const selectedSlug = this.filterForm().value().organizationalUnit;
     if (!selectedSlug) return null;
-    return (
-      this.organizationTree().find((node) => node.data === selectedSlug) ?? null
-    );
+    return [];
+    // return (
+    //   this.organizationTree().find(((node) as any) => node['data'] === selectedSlug) ?? null
+    // );
   });
 
   /**
@@ -242,7 +220,7 @@ export default class DocumentsPage {
     this.setQueryParams({ limit, offset }, { scrollToFilters });
   }
 
-  selectOrganizationUnit(node: TreeNode) {
+  selectOrganizationUnit(node: any) {
     this.filterForm.organizationalUnit().value.set(node.data ?? null);
   }
 
@@ -264,7 +242,7 @@ export default class DocumentsPage {
     this.advancedFiltersOpen.update((isOpen) => !isOpen);
   }
 
-  private toTreeNodes(nodes: DocSectionFilterResponse[]): TreeNode<string>[] {
+  private toTreeNodes(nodes: DocSectionFilterResponse[]): any {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

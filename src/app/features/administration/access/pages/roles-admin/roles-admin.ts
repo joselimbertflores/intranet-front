@@ -7,10 +7,6 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 
-import { TableModule, TablePageEvent } from 'primeng/table';
-import { DialogService } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-
 import { SearchInput } from '../../../../../shared';
 import { RoleApi } from '../../services';
 import { RoleResponse } from '../../interfaces';
@@ -18,12 +14,12 @@ import { RoleEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-roles-admin',
-  imports: [ButtonModule, TableModule, SearchInput],
+  imports: [SearchInput],
   templateUrl: './roles-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class RolesAdmin {
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
   private roleDataSource = inject(RoleApi);
 
   limit = signal(10);
@@ -55,23 +51,23 @@ export default class RolesAdmin {
   });
 
   openRoleDialog(role?: RoleResponse) {
-    const dialogRef = this.dialogService.open(RoleEditor, {
-      header: role ? 'Editar rol' : 'Crear rol',
-      modal: true,
-      draggable: false,
-      closeOnEscape: true,
-      closable: true,
-      width: '35vw',
-      data: role,
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
-    dialogRef?.onClose.subscribe((result?: RoleResponse) => {
-      if (!result) return;
-      this.updateItemDataSource(result);
-    });
+    // const dialogRef = this.dialogService.open(RoleEditor, {
+    //   header: role ? 'Editar rol' : 'Crear rol',
+    //   modal: true,
+    //   draggable: false,
+    //   closeOnEscape: true,
+    //   closable: true,
+    //   width: '35vw',
+    //   data: role,
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
+    // dialogRef?.onClose.subscribe((result?: RoleResponse) => {
+    //   if (!result) return;
+    //   this.updateItemDataSource(result);
+    // });
   }
 
   searchRoles(term: string) {
@@ -79,7 +75,7 @@ export default class RolesAdmin {
     this.searchTerm.set(term);
   }
 
-  changePage(event: TablePageEvent) {
+  changePage(event: any) {
     this.limit.set(event.rows);
     this.offset.set(event.first);
   }

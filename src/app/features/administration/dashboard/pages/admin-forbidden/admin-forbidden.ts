@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
   template: `
     <div class="h-full flex items-center justify-center px-4">
       <div class="text-center space-y-4 max-w-md">
-        <i class="pi pi-lock text-primary" style="font-size: 3rem"></i>
+        <i class="ui-icon ui-icon-lock text-primary" style="font-size: 3rem"></i>
 
         <h1 class="text-2xl font-semibold">Acceso denegado</h1>
 
@@ -19,7 +19,7 @@ import { RouterLink } from '@angular/router';
           routerLink="/admin"
           class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-contrast hover:bg-primary-emphasis transition-colors"
         >
-          <i class="pi pi-arrow-left"></i>
+          <i class="ui-icon ui-icon-arrow-left"></i>
           Volver al inicio
         </a>
       </div>

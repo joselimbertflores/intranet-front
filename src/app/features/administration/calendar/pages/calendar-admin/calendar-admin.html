@@ -1,16 +1,16 @@
-<div class="flex items-center justify-between mb-4">
+<!-- <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Eventos</h2>
   @if (canCreate()) {
-    <p-button
+    <app-ui-button
       label="Agregar"
-      icon="pi pi-plus"
+      icon="ui-icon ui-icon-plus"
       iconPos="left"
       size="small"
       (onClick)="openEventDialog()"
     />
   }
 </div>
-<p-table
+<app-ui-table
   #table
   [value]="dataSource()"
   [totalRecords]="dataSize()"
@@ -25,14 +25,14 @@
   [showCurrentPageReport]="true"
   class="text-sm"
 >
-  <ng-template #caption>
+  <ng-template appUiTemplate="caption">
     <div class="flex sm:justify-end">
       <div class="w-full sm:w-1/4">
         <search-input (search)="onSearch($event)" label="Buscar" />
       </div>
     </div>
   </ng-template>
-  <ng-template #header>
+  <ng-template appUiTemplate="header">
     <tr>
       <th>Evento</th>
       <th>Descripcion</th>
@@ -42,24 +42,24 @@
     </tr>
   </ng-template>
 
-  <ng-template #body let-item>
+  <ng-template appUiTemplate="body" let-item>
     <tr>
       <td>{{ item.title }}</td>
       <td>{{ item.description ? item.description : "----" }}</td>
       <td>{{ item.recurrenceRule === null ? "NO" : "SI" }}</td>
       <td>
         @if (item.isActive) {
-          <p-tag severity="success" value="Activo" />
+          <app-ui-tag severity="success" value="Activo" />
         } @else {
-          <p-tag severity="danger" value="Inactivo" />
+          <app-ui-tag severity="danger" value="Inactivo" />
         }
       </td>
       <td>
         @if (hasRowActions()) {
           <button
-            pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text"
+            appUiButton
+            icon="ui-icon ui-icon-ellipsis-v"
+            class="ui-button-ghost"
             size="small"
             [rounded]="true"
             (click)="openMenu(item, $event); menu.toggle($event)"
@@ -68,11 +68,11 @@
       </td>
     </tr>
   </ng-template>
-  <ng-template #emptymessage>
+  <ng-template appUiTemplate="emptymessage">
     <tr>
       <td colspan="6">Sin resultados.</td>
     </tr>
   </ng-template>
-</p-table>
-<p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
-<p-confirmdialog />
+</app-ui-table>
+<app-ui-menu #menu [popup]="true" [model]="menuItems"></app-ui-menu>
+<app-ui-confirmdialog /> -->

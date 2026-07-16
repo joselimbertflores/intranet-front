@@ -1,4 +1,4 @@
-<form [formGroup]="blockForm" (ngSubmit)="save()">
+<!-- <form [formGroup]="blockForm" (ngSubmit)="save()">
   <div class="mt-1">
     @if (data.type !== "TEXT" && data.type !== "VIDEO_URL") {
       <div class="flex flex-col gap-1">
@@ -15,7 +15,6 @@
             @if (files?.length > 0) {
               @let file = files[0];
               <div class="flex items-center gap-x-4 p-2">
-                <!-- <file-icon [mimeType]="file." /> -->
                 <div class="flex flex-col min-w-0">
                   <span class="text-sm font-medium truncate">
                     {{ file.name }}
@@ -27,7 +26,6 @@
               </div>
             } @else if (data.block?.file) {
               <div class="flex items-center gap-x-4 p-2">
-                <!-- <file-icon [fileName]="data.block?.file!.originalName" /> -->
                 <div class="flex flex-col min-w-0">
                   <span class="text-sm font-medium truncate">
                     {{ data.block?.file!.originalName }}
@@ -47,21 +45,21 @@
           </ng-template>
         </p-fileUpload>
         @if (formSubmitted() && !file && !data.block?.file) {
-          <p-message severity="error" size="small" variant="simple">
+          <app-ui-message severity="error" size="small" variant="simple">
             El archivo es requerido.
-          </p-message>
+          </app-ui-message>
         }
       </div>
     }
 
     @if (data.type === "TEXT") {
       <div class="flex flex-col gap-1">
-        <p-editor
+        <app-ui-editor
           formControlName="content"
           [style]="{ height: '300px' }"
           placeholder="Ingrese el contenido"
         >
-          <ng-template #header>
+          <ng-template appUiTemplate="header">
             <span class="ql-formats">
               <button class="ql-bold"></button>
               <button class="ql-italic"></button>
@@ -80,18 +78,18 @@
               <button class="ql-clean"></button>
             </span>
           </ng-template>
-        </p-editor>
+        </app-ui-editor>
         @if (formUtils.isInvalid(blockForm.get("content"))) {
-          <p-message severity="error" size="small" variant="simple">
+          <app-ui-message severity="error" size="small" variant="simple">
             {{ formUtils.getErrorMessage(blockForm.get("content")) }}
-          </p-message>
+          </app-ui-message>
         }
       </div>
     } @else {
       <div class="flex flex-col gap-1 mt-6">
-        <p-floatlabel variant="on">
+        <app-ui-floatlabel variant="on">
           <input
-            pInputText
+            appUiInput
             type="url"
             class="w-full"
             autocomplete="off"
@@ -111,22 +109,22 @@
               Descripción (Opcional)
             }
           </label>
-        </p-floatlabel>
+        </app-ui-floatlabel>
         @if (formUtils.isInvalid(blockForm.get("content"))) {
-          <p-message severity="error" size="small" variant="simple">
+          <app-ui-message severity="error" size="small" variant="simple">
             {{ formUtils.getErrorMessage(blockForm.get("content")) }}
-          </p-message>
+          </app-ui-message>
         }
       </div>
     }
   </div>
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <app-ui-button
       type="button"
       label="Cancelar"
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button type="submit" label="Guardar" [disabled]="!isFormValid" />
+    <app-ui-button type="submit" label="Guardar" [disabled]="!isFormValid" />
   </div>
-</form>
+</form> -->

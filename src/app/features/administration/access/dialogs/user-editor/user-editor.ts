@@ -8,12 +8,6 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
-
 import { FormUtils } from '../../../../../helpers';
 import { UserResponse } from '../../interfaces';
 import { UserApi } from '../../services';
@@ -22,10 +16,10 @@ import { UserApi } from '../../services';
   selector: 'app-user-editor',
   imports: [
     ReactiveFormsModule,
-    MultiSelectModule,
-    FloatLabelModule,
-    ButtonModule,
-    MessageModule,
+    // MultiSelectModule,
+    // FloatLabelModule,
+    // ButtonModule,
+    // MessageModule,
     TitleCasePipe,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -33,9 +27,9 @@ import { UserApi } from '../../services';
 })
 export class UserEditor {
   private userApi = inject(UserApi);
-  private dialogRef = inject(DynamicDialogRef);
+  // private dialogRef = inject(DynamicDialogRef);
 
-  readonly data: UserResponse = inject(DynamicDialogConfig).data;
+  // readonly data: UserResponse = inject(DynamicDialogConfig).data;
   formUtils = FormUtils;
   userForm: FormGroup = inject(FormBuilder).nonNullable.group({
     roleIds: ['', Validators.required],
@@ -49,16 +43,16 @@ export class UserEditor {
 
   save() {
     const { roleIds } = this.userForm.value;
-    this.userApi.update(this.data.id, roleIds).subscribe((resp) => {
-      this.dialogRef.close(resp);
-    });
+    // this.userApi.update(this.data.id, roleIds).subscribe((resp) => {
+    //   this.dialogRef.close(resp);
+    // });
   }
 
   close() {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   private loadForm() {
-    this.userForm.patchValue({ roleIds: this.data.roles.map(({ id }) => id) });
+    // this.userForm.patchValue({ roleIds: this.data.roles.map(({ id }) => id) });
   }
 }

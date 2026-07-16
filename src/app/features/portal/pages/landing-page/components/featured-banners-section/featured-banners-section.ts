@@ -41,7 +41,7 @@ register();
                 [disabled]="activeIndex() === 0"
                 (click)="previousSlide(featuredSwiper)"
               >
-                <i class="pi pi-arrow-left" aria-hidden="true"></i>
+                <i class="ui-icon ui-icon-arrow-left" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -50,7 +50,7 @@ register();
                 [disabled]="activeIndex() === items().length - 1"
                 (click)="nextSlide(featuredSwiper)"
               >
-                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                <i class="ui-icon ui-icon-arrow-right" aria-hidden="true"></i>
               </button>
             </div>
           }
@@ -80,7 +80,7 @@ register();
                     />
                   } @else {
                     <div class="grid h-full place-items-center text-primary-200/70" aria-hidden="true">
-                      <i class="pi pi-image text-4xl"></i>
+                      <i class="ui-icon ui-icon-image text-4xl"></i>
                     </div>
                   }
                 </div>
@@ -104,7 +104,7 @@ register();
                           class="featured-link inline-flex min-h-11 items-center gap-3 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-primary-900 no-underline outline-none transition-colors hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-950"
                         >
                           {{ banner.linkLabel }}
-                          <i class="pi pi-arrow-right text-xs" aria-hidden="true"></i>
+                          <i class="ui-icon ui-icon-arrow-right text-xs" aria-hidden="true"></i>
                         </a>
                       } @else {
                         <a
@@ -114,7 +114,7 @@ register();
                           class="featured-link inline-flex min-h-11 items-center gap-3 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-primary-900 no-underline outline-none transition-colors hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-950"
                         >
                           {{ banner.linkLabel }}
-                          <i class="pi pi-arrow-up-right text-xs" aria-hidden="true"></i>
+                          <i class="ui-icon ui-icon-arrow-up-right text-xs" aria-hidden="true"></i>
                         </a>
                       }
                     </div>

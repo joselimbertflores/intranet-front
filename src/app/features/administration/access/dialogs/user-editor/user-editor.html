@@ -5,15 +5,15 @@
         <div class="grid grid-cols-1 gap-1 py-2 sm:grid-cols-4 sm:gap-4">
           <dt class="font-medium text-surface-900">Nombre</dt>
           <dd class="text-surface-700 sm:col-span-3">
-            {{ data.fullName | titlecase }}
+            <!-- {{ data.fullName | titlecase }} -->
           </dd>
         </div>
       </dl>
     </div>
 
     <div class="flex flex-col gap-1 mt-6">
-      <p-floatlabel class="w-full" variant="on">
-        <p-multiselect
+      <!-- <app-ui-floatlabel class="w-full" variant="on">
+        <app-ui-multiselect
           inputId="localRole"
           formControlName="roleIds"
           [options]="roles()"
@@ -24,7 +24,7 @@
           filterPlaceHolder="Nombre rol"
           [invalid]="formUtils.isInvalid(userForm.get('roleIds'))"
         >
-          <ng-template #item let-option>
+          <ng-template appUiTemplate="item" let-option>
             <div class="flex flex-col">
               <span class="font-medium text-surface-900">{{
                 option.name
@@ -34,19 +34,19 @@
               </span>
             </div>
           </ng-template>
-        </p-multiselect>
+        </app-ui-multiselect>
         <label for="localRole">Roles del usuario *</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
 
       @if (formUtils.isInvalid(userForm.get("roleIds"))) {
-        <p-message severity="error" size="small" variant="simple">
+        <app-ui-message severity="error" size="small" variant="simple">
           Seleccione al menos un rol local para el usuario.
-        </p-message>
-      }
+        </app-ui-message>
+      } -->
     </div>
 
     <!-- <div class="mt-6">
-      <p-listbox
+      <app-ui-listbox
         [options]="roles()"
         [multiple]="true"
         [checkbox]="true"
@@ -60,25 +60,25 @@
         emptyFilterMessage="Sin resultados"
         emptyMessage="Sin registros"
       >
-        <ng-template #header>
+        <ng-template appUiTemplate="header">
           <span class="racking-wide">Listado de roles</span>
         </ng-template>
-        <ng-template #item let-option>
+        <ng-template appUiTemplate="item" let-option>
           <div class="flex flex-col ml-2">
             <p class="font-medium text-primary">{{ option.name }}</p>
             <span class="text-sm">{{ option.description ?? "----" }}</span>
           </div>
         </ng-template>
-      </p-listbox>
+      </app-ui-listbox>
     </div> -->
   </div>
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <!-- <app-ui-button
       label="Cancelar"
       type="button"
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button label="Guardar" type="submit" [disabled]="userForm.invalid" />
+    <app-ui-button label="Guardar" type="submit" [disabled]="userForm.invalid" /> -->
   </div>
 </form>

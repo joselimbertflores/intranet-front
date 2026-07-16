@@ -11,11 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
-import { InputTextModule } from 'primeng/inputtext';
-import { PaginatorModule } from 'primeng/paginator';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
-import { TagModule } from 'primeng/tag';
+
+
 
 import { SearchInput, WindowScrollStore } from '../../../../../shared';
 import { PortalTutorialDataSource } from '../../../services';
@@ -28,11 +25,6 @@ import { PublicSectionHeader } from '../../../components';
     FormsModule,
     CommonModule,
     RouterModule,
-    InputTextModule,
-    PaginatorModule,
-    SelectModule,
-    ButtonModule,
-    TagModule,
     SearchInput,
     PublicSectionHeader,
   ],

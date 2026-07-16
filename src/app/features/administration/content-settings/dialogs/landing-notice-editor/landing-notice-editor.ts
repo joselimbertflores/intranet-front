@@ -8,14 +8,6 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { DatePickerModule } from 'primeng/datepicker';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
-import { EditorModule } from 'primeng/editor';
 
 import { LandingNoticeResponse, LandingNoticeToSave } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -34,13 +26,7 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ButtonModule,
-    CheckboxModule,
-    DatePickerModule,
-    EditorModule,
-    FloatLabelModule,
-    InputTextModule,
-    MessageModule,
+   
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './landing-notice-editor.html',
@@ -49,8 +35,8 @@ export class LandingNoticeEditor implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly dataSource = inject(ContentSettingsDataSource);
 
-  readonly dialogRef = inject(DynamicDialogRef);
-  readonly data?: LandingNoticeResponse = inject(DynamicDialogConfig).data;
+  // readonly dialogRef = inject(DynamicDialogRef);
+  // readonly data?: LandingNoticeResponse = inject(DynamicDialogConfig).data;
   readonly saving = signal(false);
   readonly submitted = signal(false);
   readonly imageFile = signal<File | null>(null);
@@ -120,22 +106,22 @@ export class LandingNoticeEditor implements OnInit, OnDestroy {
       isPinned: value.isPinned ?? false,
     };
 
-    this.saving.set(true);
-    const request$ = this.data
-      ? this.dataSource.updateLandingNotice(
-          this.data.id,
-          payload,
-          this.imageFile() ?? undefined,
-        )
-      : this.dataSource.createLandingNotice(
-          payload,
-          this.imageFile() ?? undefined,
-        );
+    // this.saving.set(true);
+    // const request$ = this.data
+    //   ? this.dataSource.updateLandingNotice(
+    //       this.data.id,
+    //       payload,
+    //       this.imageFile() ?? undefined,
+    //     )
+    //   : this.dataSource.createLandingNotice(
+    //       payload,
+    //       this.imageFile() ?? undefined,
+    //     );
 
-    request$.subscribe({
-      next: (notice) => this.dialogRef.close(notice),
-      error: () => this.saving.set(false),
-    });
+    // request$.subscribe({
+    //   next: (notice) => this.dialogRef.close(notice),
+    //   error: () => this.saving.set(false),
+    // });
   }
 
   showContentError(): boolean {
@@ -156,18 +142,18 @@ export class LandingNoticeEditor implements OnInit, OnDestroy {
   }
 
   private loadForm(): void {
-    if (!this.data) return;
-    const { visibleFrom, visibleUntil, ...props } = this.data;
-    this.form.patchValue({
-      ...props,
-      visibleFrom: this.data.visibleFrom
-        ? new Date(this.data.visibleFrom)
-        : null,
-      visibleUntil: this.data.visibleUntil
-        ? new Date(this.data.visibleUntil)
-        : null,
-    });
-    this.imagePreview.set(this.data.imageUrl);
+    // if (!this.data) return;
+    // const { visibleFrom, visibleUntil, ...props } = this.data;
+    // this.form.patchValue({
+    //   ...props,
+    //   visibleFrom: this.data.visibleFrom
+    //     ? new Date(this.data.visibleFrom)
+    //     : null,
+    //   visibleUntil: this.data.visibleUntil
+    //     ? new Date(this.data.visibleUntil)
+    //     : null,
+    // });
+    // this.imagePreview.set(this.data.imageUrl);
   }
 
   private isValid(): boolean {

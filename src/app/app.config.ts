@@ -19,9 +19,7 @@ import localeBo from '@angular/common/locales/es-BO';
 import { registerLocaleData } from '@angular/common';
 
 import { definePreset, palette } from '@primeuix/themes';
-import { DialogService } from 'primeng/dynamicdialog';
-import { providePrimeNG } from 'primeng/config';
-import { MessageService } from 'primeng/api';
+
 import { es } from 'primelocale/es.json';
 import theme from '@primeuix/themes/aura';
 
@@ -77,17 +75,17 @@ export const appConfig: ApplicationConfig = {
       withXhr(),
       withInterceptors([httpErrorInterceptor, authInterceptor]),
     ),
-    providePrimeNG({
-      translation: es,
-      theme: {
-        preset: AuraSky,
-        options: {
-          darkModeSelector: false || 'none',
-        },
-      },
-    }),
-    { provide: LOCALE_ID, useValue: 'es-BO' },
-    MessageService,
-    DialogService,
+    // providePrimeNG({
+    //   translation: es,
+    //   theme: {
+    //     preset: AuraSky,
+    //     options: {
+    //       darkModeSelector: false || 'none',
+    //     },
+    //   },
+    // }),
+    // { provide: LOCALE_ID, useValue: 'es-BO' },
+    // MessageService,
+    // DialogService,
   ],
 };

@@ -10,13 +10,13 @@ type FileCategory =
   | 'other';
 
 const FILE_ICONS: Record<FileCategory, string> = {
-  pdf: 'pi pi-file-pdf text-red-500',
-  document: 'pi pi-file-word text-blue-500',
-  spreadsheet: 'pi pi-file-excel text-green-500',
-  image: 'pi pi-image text-yellow-500',
-  video: 'pi pi-video text-purple-500',
-  compressed: 'pi pi-file-zip text-orange-500',
-  other: 'pi pi-file text-gray-500',
+  pdf: 'ui-icon ui-icon-file-pdf text-red-500',
+  document: 'ui-icon ui-icon-file-word text-blue-500',
+  spreadsheet: 'ui-icon ui-icon-file-excel text-green-500',
+  image: 'ui-icon ui-icon-image text-yellow-500',
+  video: 'ui-icon ui-icon-video text-purple-500',
+  compressed: 'ui-icon ui-icon-file-zip text-orange-500',
+  other: 'ui-icon ui-icon-file text-gray-500',
 };
 
 const EXTENSION_MAP: Record<string, FileCategory> = {

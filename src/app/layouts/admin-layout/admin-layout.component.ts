@@ -6,8 +6,6 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 
 import { filter, map } from 'rxjs';
 
-import { ButtonModule } from 'primeng/button';
-import { DrawerModule } from 'primeng/drawer';
 
 import { ProfileOverlay, AdminSidebar } from './components';
 
@@ -20,8 +18,7 @@ const DESKTOP_MEDIA_QUERY = '(min-width: 64rem)';
   },
   imports: [
     RouterModule,
-    ButtonModule,
-    DrawerModule,
+   
     AdminSidebar,
     ProfileOverlay,
     CdkScrollable,

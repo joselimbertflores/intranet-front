@@ -6,11 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { ButtonModule } from 'primeng/button';
+
 
 import { FormUtils } from '../../../../../helpers';
 import { TutorialCategoryDataSource } from '../../services';
@@ -20,20 +16,17 @@ import { TutorialCategoryResponse } from '../../interfaces';
   selector: 'app-tutorial-category-editor',
   imports: [
     ReactiveFormsModule,
-    FloatLabelModule,
-    InputTextModule,
-    MessageModule,
-    ButtonModule,
+   
   ],
   templateUrl: './tutorial-category-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TutorialCategoryEditor {
-  private dialogRef = inject(DynamicDialogRef);
+  // private dialogRef = inject(DynamicDialogRef);
   private formBuilder = inject(FormBuilder);
   private tutorialCategoryDataSource = inject(TutorialCategoryDataSource);
 
-  readonly data?: TutorialCategoryResponse = inject(DynamicDialogConfig).data;
+  // readonly data?: TutorialCategoryResponse = inject(DynamicDialogConfig).data;
   readonly formUtils = FormUtils;
 
   form: FormGroup = this.formBuilder.nonNullable.group({
@@ -52,24 +45,24 @@ export class TutorialCategoryEditor {
       return this.form.markAllAsTouched();
     }
 
-    const subscription = this.data
-      ? this.tutorialCategoryDataSource.update(
-          this.data.id,
-          this.form.getRawValue(),
-        )
-      : this.tutorialCategoryDataSource.create(this.form.getRawValue());
+    // const subscription = this.data
+    //   ? this.tutorialCategoryDataSource.update(
+    //       this.data.id,
+    //       this.form.getRawValue(),
+    //     )
+    //   : this.tutorialCategoryDataSource.create(this.form.getRawValue());
 
-    subscription.subscribe((result) => {
-      this.dialogRef.close(result);
-    });
+    // subscription.subscribe((result) => {
+    //   this.dialogRef.close(result);
+    // });
   }
 
   close() {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   private loadForm() {
-    if (!this.data) return;
-    this.form.patchValue({ name: this.data.name });
+    // if (!this.data) return;
+    // this.form.patchValue({ name: this.data.name });
   }
 }

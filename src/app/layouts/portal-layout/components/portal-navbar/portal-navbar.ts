@@ -69,7 +69,7 @@ interface NavItem {
           (click)="toggleMobileMenu()"
         >
           <i
-            [class]="isMobileMenuOpen() ? 'pi pi-times' : 'pi pi-bars'"
+            [class]="isMobileMenuOpen() ? 'ui-icon ui-icon-times' : 'ui-icon ui-icon-bars'"
             class="text-xl"
             aria-hidden="true"
           ></i>
@@ -146,36 +146,36 @@ export class PortalNavbar {
   readonly isMobileMenuOpen = signal(false);
 
   readonly navItems: readonly NavItem[] = [
-    { label: 'Inicio', route: '/', exact: true, icon: 'pi pi-home' },
+    { label: 'Inicio', route: '/', exact: true, icon: 'ui-icon ui-icon-home' },
     {
       label: 'Documentos',
       route: '/documents',
       exact: false,
-      icon: 'pi pi-file',
+      icon: 'ui-icon ui-icon-file',
     },
     {
       label: 'Comunicados',
       route: '/communications',
       exact: false,
-      icon: 'pi pi-megaphone',
+      icon: 'ui-icon ui-icon-megaphone',
     },
     {
       label: 'Directorio',
       route: '/directory',
       exact: false,
-      icon: 'pi pi-address-book',
+      icon: 'ui-icon ui-icon-address-book',
     },
     {
       label: 'Tutoriales',
       route: '/tutorials',
       exact: false,
-      icon: 'pi pi-graduation-cap',
+      icon: 'ui-icon ui-icon-graduation-cap',
     },
     {
       label: 'Calendario',
       route: '/calendar',
       exact: false,
-      icon: 'pi pi-calendar',
+      icon: 'ui-icon ui-icon-calendar',
     },
   ];
 

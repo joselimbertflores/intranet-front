@@ -9,7 +9,7 @@
       <search-input [value]="term()" (search)="search($event)" />
     </div>
     <div class="w-full md:w-64">
-      <p-select
+      <!-- <app-ui-select
         [showClear]="true"
         [options]="categories()"
         optionLabel="name"
@@ -18,7 +18,7 @@
         class="w-full"
         [ngModel]="category()"
         (onChange)="filterByCategory($event.value)"
-      />
+      /> -->
     </div>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-2">
@@ -28,10 +28,10 @@
         (click)="openDetail(tutorial)"
       >
         <div class="mb-4">
-          <p-tag
+          <!-- <app-ui-tag
             [value]="tutorial.category || 'General'"
             style="font-size: 12px"
-          />
+          /> -->
         </div>
 
         <h3
@@ -56,7 +56,7 @@
           >
             Ver tutorial
             <i
-              class="pi pi-arrow-right ml-2 group-hover:translate-x-1 transition-transform"
+              class="ui-icon ui-icon-arrow-right ml-2 group-hover:translate-x-1 transition-transform"
             ></i>
           </span>
         </div>
@@ -67,7 +67,7 @@
   @if (isLoading() && !dataSource().length) {
     <div class="flex flex-col items-center justify-center py-16">
       <i
-        class="pi pi-spin pi-spinner text-4xl mb-4"
+        class="ui-icon ui-icon-spin ui-icon-spinner text-4xl mb-4"
         style="font-size: 2rem"
       ></i>
       <p class="font-medium text-surface-500 animate-pulse">
@@ -89,12 +89,12 @@
 
   @if (hasMore()) {
     <div class="flex justify-center pt-4">
-      <p-button
+      <!-- <app-ui-button
         [rounded]="true"
         [loading]="isLoading()"
         [label]="isLoading() ? ' Cargando....' : '  Cargar más'"
         (onClick)="fetchMore()"
-      />
+      /> -->
     </div>
   }
 </section>

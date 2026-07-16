@@ -11,7 +11,6 @@ import {
   SectionTreeNodeResponse,
   DocumentManageResponse,
 } from '../interfaces';
-import { TreeNode } from 'primeng/api';
 
 interface CreateDocumentBatchDto {
   organizationalUnitId: string;
@@ -126,7 +125,7 @@ export class DocumentDataSource {
     );
   }
 
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): TreeNode[] {
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): any[] {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

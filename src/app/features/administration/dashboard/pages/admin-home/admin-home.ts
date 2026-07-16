@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   template: `
     <div class="h-full flex items-center justify-center">
       <div class="text-center space-y-4">
-        <i class="pi pi-cog text-primary" style="font-size: 3rem"></i>
+        <i class="ui-icon ui-icon-cog text-primary" style="font-size: 3rem"></i>
 
         <h1 class="text-2xl font-semibold">Panel de Administración</h1>
 

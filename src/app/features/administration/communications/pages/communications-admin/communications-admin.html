@@ -1,13 +1,13 @@
-<div class="flex items-center justify-between mb-2">
+<!-- <div class="flex items-center justify-between mb-2">
   <h2 class="text-2xl font-semibold">Comunicados</h2>
-  <p-button
+  <app-ui-button
     label="Agregar"
-    icon="pi pi-plus"
+    icon="ui-icon ui-icon-plus"
     size="small"
     (onClick)="openCommunicationDialog()"
   />
 </div>
-<p-table
+<app-ui-table
   #table
   [value]="dataSource()"
   [totalRecords]="dataSize()"
@@ -23,14 +23,14 @@
   (onPage)="chagePage($event)"
   [loading]="communicationResource.isLoading()"
 >
-  <ng-template #caption>
+  <ng-template appUiTemplate="caption">
     <div class="flex sm:justify-end">
       <div class="w-full sm:w-1/4">
         <search-input (search)="onSearch($event)" label="Referencia / Cite" />
       </div>
     </div>
   </ng-template>
-  <ng-template #header>
+  <ng-template appUiTemplate="header">
     <tr>
       <th>Tipo</th>
       <th>Cite</th>
@@ -41,7 +41,7 @@
       <th style="width: 3rem"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-item>
+  <ng-template appUiTemplate="body" let-item>
     <tr>
       <td>{{ item.type.name }}</td>
       <td>{{ item.code }}</td>
@@ -49,19 +49,19 @@
       <td>{{ item.eventId ? "SI" : "NO" }}</td>
       <td>
         @if (item.isActive) {
-          <p-tag severity="success" value="Activo" />
+          <app-ui-tag severity="success" value="Activo" />
         } @else {
-          <p-tag severity="danger" value="Inactivo" />
+          <app-ui-tag severity="danger" value="Inactivo" />
         }
       </td>
       <td>
         <a
           [href]="item.file.url"
-          pButton
+          appUiButton
           target="_blank"
           rel="noopener noreferrer"
           size="small"
-          icon="pi pi-external-link"
+          icon="ui-icon ui-icon-external-link"
           label="Abrir"
           severity="secondary"
         >
@@ -69,8 +69,8 @@
       </td>
       <td>
         <button
-          pButton
-          icon="pi pi-ellipsis-v"
+          appUiButton
+          icon="ui-icon ui-icon-ellipsis-v"
           size="small"
           [text]="true"
           [rounded]="true"
@@ -80,14 +80,14 @@
       </td>
     </tr>
   </ng-template>
-  <ng-template #emptymessage>
+  <ng-template appUiTemplate="emptymessage">
     <tr>
       <td colspan="8">
         <div class="py-2">Sin resultados.</div>
       </td>
     </tr>
   </ng-template>
-</p-table>
+</app-ui-table>
 
-<p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
-
+<app-ui-menu #menu [popup]="true" [model]="menuItems"></app-ui-menu>
+ -->

@@ -1,10 +1,10 @@
-<form [formGroup]="tutorialForm" (ngSubmit)="save()">
+<!-- <form [formGroup]="tutorialForm" (ngSubmit)="save()">
   <div class="flex flex-col gap-y-4 mt-1">
     <div class="flex flex-col gap-1">
-      <p-floatlabel variant="on">
+      <app-ui-floatlabel variant="on">
         <input
           id="titleTxt"
-          pInputText
+          appUiInput
           type="text"
           formControlName="title"
           placeholder="Titulo"
@@ -12,28 +12,28 @@
           [invalid]="formUtils.isInvalid(tutorialForm.get('title'))"
         />
         <label for="titleTxt">Titulo</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
       @if (formUtils.isInvalid(tutorialForm.get('title'))) {
-        <p-message severity="error" size="small" variant="simple">
+        <app-ui-message severity="error" size="small" variant="simple">
           {{ formUtils.getErrorMessage(tutorialForm.get("title")) }}
-        </p-message>
+        </app-ui-message>
       }
     </div>
 
-    <p-floatlabel variant="on">
+    <app-ui-floatlabel variant="on">
       <textarea
         id="summaryTxt"
         rows="2"
-        pTextarea
+        appUiTextarea
         formControlName="summary"
         placeholder="Descripcion"
         class="w-full"
       ></textarea>
       <label for="summaryTxt">Resumen</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
-    <p-floatlabel variant="on">
-      <p-select
+    <app-ui-floatlabel variant="on">
+      <app-ui-select
         inputId="category_txt"
         [options]="categories()"
         optionLabel="name"
@@ -44,10 +44,10 @@
         formControlName="categoryId"
       />
       <label for="category_txt">Categoria</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
     <div class="flex items-center">
-      <p-checkbox
+      <app-ui-checkbox
         inputId="published_check"
         name="pizza"
         [binary]="true"
@@ -56,12 +56,12 @@
       <label for="published_check" class="ml-2"> Publicado </label>
     </div>
   </div>
-  <div class="p-dialog-footer">
-    <button pButton severity="secondary" type="button" (click)="close()">
+  <div class="app-dialog-actions">
+    <button appUiButton severity="secondary" type="button" (click)="close()">
       <span pButtonLabel>Cancelar</span>
     </button>
-    <button pButton type="submit">
+    <button appUiButton type="submit">
       <span pButtonLabel>Guardar</span>
     </button>
   </div>
-</form>
+</form> -->

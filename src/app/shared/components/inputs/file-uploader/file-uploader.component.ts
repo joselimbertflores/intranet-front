@@ -6,8 +6,7 @@ import {
   output,
 } from '@angular/core';
 
-import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
-import { ButtonModule } from 'primeng/button';
+
 
 import { PrimengFileIconPipe } from '../../../pipes/primeng-file-icon';
 
@@ -18,10 +17,10 @@ interface UploadedFile {
 
 @Component({
   selector: 'document-file-uploader',
-  imports: [CommonModule, FileUpload, ButtonModule, PrimengFileIconPipe],
+  imports: [CommonModule, PrimengFileIconPipe],
   template: `
     <div class="card h-full">
-      <p-fileupload
+      <!-- <app-ui-fileupload
         name="myfile[]"
         maxFileSize="1000000"
         [multiple]="true"
@@ -35,10 +34,10 @@ interface UploadedFile {
           let-clearCallback="clearCallback"
           let-uploadCallback="uploadCallback"
         >
-        <p-button
+        <app-ui-button
           label="Seleccionar"
           variant="outlined"
-          icon="pi pi-plus"
+          icon="ui-icon ui-icon-plus"
           size="small"
           (onClick)="chooseFiles($event, chooseCallback)"
         />
@@ -61,8 +60,8 @@ interface UploadedFile {
                     <p class="text-xs text-orange-500">Pendiente</p>
                   </div>
                 </div>
-                <p-button
-                  icon="pi pi-times"
+                <app-ui-button
+                  icon="ui-icon ui-icon-times"
                   severity="danger"
                   [rounded]="true"
                   [text]="true"
@@ -81,8 +80,8 @@ interface UploadedFile {
                     <p class="text-xs text-green-500">Completado</p>
                   </div>
                 </div>
-                <p-button
-                  icon="pi pi-times"
+                <app-ui-button
+                  icon="ui-icon ui-icon-times"
                   severity="danger"
                   [rounded]="true"
                   [text]="true"
@@ -96,13 +95,13 @@ interface UploadedFile {
           <ng-template #empty>
             <div class="flex items-center justify-center flex-col h-[300px]">
               <i
-                class="pi pi-cloud-upload !border-2 !rounded-full !p-6 !text-4xl !text-muted-color"
+                class="ui-icon ui-icon-cloud-upload !border-2 !rounded-full !p-6 !text-4xl !text-muted-color"
               ></i>
               <p class="mt-6 mb-0">Seleccione o arrastre los archivos a subir</p>
             </div>
           </ng-template>
         }
-      </p-fileupload>
+      </app-ui-fileupload> -->
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,7 +115,7 @@ export class FileUploaderComponent {
     chooseCallback();
   }
 
-  onSelectedFiles(event: FileSelectEvent) {
+  onSelectedFiles(event: any) {
     this.onSelectFiles.emit(event.currentFiles);
   }
 

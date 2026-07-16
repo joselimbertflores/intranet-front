@@ -9,12 +9,11 @@ import {
 } from '@angular/core';
 
 
-import { ButtonModule } from 'primeng/button';
 import { FileUploadService } from '../../services/file-upload.service';
 
 @Component({
   selector: 'secure-image-uploader',
-  imports: [ButtonModule],
+  imports: [],
   template: `
     <div class="flex flex-col border border-slate-500 p-3 rounded-xl">
       @if(imageDataUrl()){
@@ -25,13 +24,13 @@ import { FileUploadService } from '../../services/file-upload.service';
           class="object-contain rounded-2xl max-h-[350px]"
         />
       </figure>
-      } pi-image
+      } ui-icon-image
       <div class="flex items-center justify-between">
         <div class="text-lg">Imagen</div>
         <div class="flex gap-x-4">
         
-          <button pButton   (click)="imageInput.click()">
-            <i class="pi pi-image" pButtonIcon></i>
+          <button appUiButton   (click)="imageInput.click()">
+            <i class="ui-icon ui-icon-image" pButtonIcon></i>
             <span pButtonLabel>Save</span>
           </button>
 

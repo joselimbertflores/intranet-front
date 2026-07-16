@@ -9,10 +9,6 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 
-import { DialogService } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
 
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
@@ -25,16 +21,14 @@ import { TutorialEditor } from '../../dialogs';
   selector: 'app-tutorials-admin',
   imports: [
     RouterModule,
-    TableModule,
-    ButtonModule,
-    TagModule,
+   
     SearchInput,
   ],
   templateUrl: './tutorials-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TutorialsAdmin {
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
   private tutorialData = inject(TutorialDataSource);
   private authDataSource = inject(AuthDataSource);
 
@@ -69,22 +63,22 @@ export default class TutorialsAdmin {
   }
 
   openEditorDialog(item?: TutorialDetailResponse) {
-    const dialogRef = this.dialogService.open(TutorialEditor, {
-      header: item ? 'Editar tutorial' : 'Crear tutorial',
-      draggable: false,
-      closable: true,
-      width: '30vw',
-      data: item,
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
+    // const dialogRef = this.dialogService.open(TutorialEditor, {
+    //   header: item ? 'Editar tutorial' : 'Crear tutorial',
+    //   draggable: false,
+    //   closable: true,
+    //   width: '30vw',
+    //   data: item,
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
 
-    dialogRef?.onClose.subscribe((result?: TutorialDetailResponse) => {
-      if (!result) return;
-      this.upsertItem(result);
-    });
+    // dialogRef?.onClose.subscribe((result?: TutorialDetailResponse) => {
+    //   if (!result) return;
+    //   this.upsertItem(result);
+    // });
   }
 
   private upsertItem(item: TutorialDetailResponse): void {

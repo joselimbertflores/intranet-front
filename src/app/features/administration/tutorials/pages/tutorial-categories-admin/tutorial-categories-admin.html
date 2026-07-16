@@ -1,17 +1,17 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Categorias tutoriales</h2>
-  @if (canCreate()) {
-    <p-button
+  <!-- @if (canCreate()) {
+    <app-ui-button
       label="Agregar"
-      icon="pi pi-plus"
+      icon="ui-icon ui-icon-plus"
       iconPos="left"
       size="small"
       (onClick)="openEditorDialog()"
     />
-  }
+  } -->
 </div>
 
-<p-table
+<!-- <app-ui-table
   #table
   size="small"
   [value]="dataSource()"
@@ -21,35 +21,35 @@
   [rows]="10"
   [globalFilterFields]="['name']"
 >
-  <ng-template #caption>
+  <ng-template appUiTemplate="caption">
     <div class="flex">
-      <p-iconfield iconPosition="left" class="ml-auto">
-        <p-inputicon>
-          <i class="pi pi-search"></i>
-        </p-inputicon>
+      <app-ui-iconfield iconPosition="left" class="ml-auto">
+        <app-ui-inputicon>
+          <i class="ui-icon ui-icon-search"></i>
+        </app-ui-inputicon>
         <input
-          pInputText
+          appUiInput
           type="text"
           (input)="table.filterGlobal($event.target.value, 'contains')"
           placeholder="Buscar"
         />
-      </p-iconfield>
+      </app-ui-iconfield>
     </div>
   </ng-template>
-  <ng-template #header>
+  <ng-template appUiTemplate="header">
     <tr>
       <th>Nombre</th>
       <th style="width: 6rem"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-item>
+  <ng-template appUiTemplate="body" let-item>
     <tr>
       <td>{{ item.name }}</td>
       <td>
         <div class="flex gap-x-2">
           @if (canUpdate()) {
-            <p-button
-              icon="pi pi-pencil"
+            <app-ui-button
+              icon="ui-icon ui-icon-pencil"
               size="small"
               (click)="openEditorDialog(item)"
               severity="secondary"
@@ -57,8 +57,8 @@
             />
           }
           @if (canDelete()) {
-            <p-button
-              icon="pi pi-trash"
+            <app-ui-button
+              icon="ui-icon ui-icon-trash"
               size="small"
               (click)="remove(item)"
               severity="secondary"
@@ -69,12 +69,12 @@
       </td>
     </tr>
   </ng-template>
-  <ng-template #emptymessage>
+  <ng-template appUiTemplate="emptymessage">
     <tr>
       <td colspan="2">
         <div>Sin categorias registradas.</div>
       </td>
     </tr>
   </ng-template>
-</p-table>
-<p-confirmdialog />
+</app-ui-table>
+<app-ui-confirmdialog /> -->

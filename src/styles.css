@@ -1,92 +1,252 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+
 @import "primeicons/primeicons.css";
 
 @import "swiper/css";
 @import "swiper/css/pagination";
 
+@import "@spartan-ng/brain/hlm-tailwind-preset.css";
+@import "@spartan-ng/brain/hlm-tailwind-preset.css";
 @plugin "tailwindcss-primeui";
 @plugin '@tailwindcss/typography';
 
 :root {
-  --portal-cream: #fbf6e9;
-  --portal-mint: #eef8f1;
-  --portal-sky: #edf6fb;
-  --portal-amber: #fff3d8;
-  --portal-violet: #f4effa;
-  --portal-rose: #fbeef1;
+--portal-cream: #fbf6e9;
+--portal-mint: #eef8f1;
+--portal-sky: #edf6fb;
+--portal-amber: #fff3d8;
+--portal-violet: #f4effa;
+--portal-rose: #fbeef1;
 }
 
 .portal-shell {
-  font-family:
-    Aptos, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system,
-    sans-serif;
+font-family:
+Aptos, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system,
+sans-serif;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
+html {
+scroll-behavior: smooth;
+}
 }
 
 /* CUSTOM CLASS FOR DYNAMIC DIALOG */
 .app-action-dialog .p-dialog-content {
-  padding: 0;
-  overflow: hidden;
+padding: 0;
+overflow: hidden;
 }
 
 .app-action-dialog .app-dialog-layout {
-  display: flex;
-  flex-direction: column;
-  max-height: min(78vh, 720px);
-  min-height: 0;
+display: flex;
+flex-direction: column;
+max-height: min(78vh, 720px);
+min-height: 0;
 }
 
 .app-action-dialog .app-dialog-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  padding: 1.25rem;
+flex: 1 1 auto;
+min-height: 0;
+overflow: auto;
+padding: 1.25rem;
 }
 
 .app-action-dialog .app-dialog-actions {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-top: 1px solid var(--p-conten  t-border-color);
+flex: 0 0 auto;
+display: flex;
+justify-content: flex-end;
+gap: 0.75rem;
+padding: 0.875rem 1rem;
+border-top: 1px solid var(--p-conten  t-border-color);
 }
 
 /* DRAG AND DROP BASE BEHAVIOR */
 .app-drag-card {
-  width: 100%;
-  background: var(--p-surface-0, #ffffff);
+width: 100%;
+background: var(--p-surface-0, #ffffff);
 }
 
 /* Preview flotante */
 .cdk-drag-preview.app-drag-card {
-  box-sizing: border-box;
+box-sizing: border-box;
 
-  background: var(--p-surface-0, #ffffff);
-  border: 1px solid var(--p-surface-200, #e5e7eb);
-  border-radius: 0.75rem;
+background: var(--p-surface-0, #ffffff);
+border: 1px solid var(--p-surface-200, #e5e7eb);
+border-radius: 0.75rem;
 
-  opacity: 1;
-  z-index: 9999;
+opacity: 1;
+z-index: 9999;
 
-  box-shadow:
-    0 20px 25px -5px rgb(0 0 0 / 0.18),
-    0 8px 10px -6px rgb(0 0 0 / 0.18);
+box-shadow:
+0 20px 25px -5px rgb(0 0 0 / 0.18),
+0 8px 10px -6px rgb(0 0 0 / 0.18);
 }
 
 /* Espacio que queda mientras arrastras */
 .cdk-drag-placeholder.app-drag-card {
-  opacity: 0.35;
+opacity: 0.35;
 }
 
 /* Animación al reordenar */
 .cdk-drag-animating.app-drag-card,
 .app-drag-list.cdk-drop-list-dragging
-  .app-drag-card:not(.cdk-drag-placeholder) {
-  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+.app-drag-card:not(.cdk-drag-placeholder) {
+transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+
+:root {
+color-scheme: light;
+
+--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+--radius: 0.625rem;
+--background: oklch(1 0 0);
+--foreground: oklch(0.145 0 0);
+--card: oklch(1 0 0);
+--card-foreground: oklch(0.145 0 0);
+--popover: oklch(1 0 0);
+--popover-foreground: oklch(0.145 0 0);
+--primary: oklch(0.205 0 0);
+--primary-foreground: oklch(0.985 0 0);
+--secondary: oklch(0.97 0 0);
+--secondary-foreground: oklch(0.205 0 0);
+--muted: oklch(0.97 0 0);
+--muted-foreground: oklch(0.556 0 0);
+--accent: oklch(0.97 0 0);
+--accent-foreground: oklch(0.205 0 0);
+--destructive: oklch(0.577 0.245 27.325);
+--border: oklch(0.922 0 0);
+--input: oklch(0.922 0 0);
+--ring: oklch(0.708 0 0);
+--sidebar: oklch(0.985 0 0);
+--sidebar-foreground: oklch(0.145 0 0);
+--sidebar-primary: oklch(0.205 0 0);
+--sidebar-primary-foreground: oklch(0.985 0 0);
+--sidebar-accent: oklch(0.97 0 0);
+--sidebar-accent-foreground: oklch(0.205 0 0);
+--sidebar-border: oklch(0.922 0 0);
+--sidebar-ring: oklch(0.708 0 0);
+}
+
+:root.dark {
+color-scheme: dark;
+
+--background: oklch(0.145 0 0);
+--foreground: oklch(0.985 0 0);
+--card: oklch(0.205 0 0);
+--card-foreground: oklch(0.985 0 0);
+--popover: oklch(0.205 0 0);
+--popover-foreground: oklch(0.985 0 0);
+--primary: oklch(0.922 0 0);
+--primary-foreground: oklch(0.205 0 0);
+--secondary: oklch(0.269 0 0);
+--secondary-foreground: oklch(0.985 0 0);
+--muted: oklch(0.269 0 0);
+--muted-foreground: oklch(0.708 0 0);
+--accent: oklch(0.269 0 0);
+--accent-foreground: oklch(0.985 0 0);
+--destructive: oklch(0.704 0.191 22.216);
+--border: oklch(1 0 0 / 10%);
+--input: oklch(1 0 0 / 15%);
+--ring: oklch(0.556 0 0);
+--sidebar: oklch(0.205 0 0);
+--sidebar-foreground: oklch(0.985 0 0);
+--sidebar-primary: oklch(0.985 0 0);
+--sidebar-primary-foreground: oklch(0.205 0 0);
+--sidebar-accent: oklch(0.269 0 0);
+--sidebar-accent-foreground: oklch(0.985 0 0);
+--sidebar-border: oklch(1 0 0 / 10%);
+--sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+* {
+@apply border-border outline-ring/50;
+}
+body {
+@apply bg-background text-foreground;
+}
+}
+
+:root {
+color-scheme: light;
+
+
+
+--radius: 0.625rem;
+--background: oklch(1 0 0);
+--foreground: oklch(0.145 0 0);
+--card: oklch(1 0 0);
+--card-foreground: oklch(0.145 0 0);
+--popover: oklch(1 0 0);
+--popover-foreground: oklch(0.145 0 0);
+--primary: oklch(0.205 0 0);
+--primary-foreground: oklch(0.985 0 0);
+--secondary: oklch(0.97 0 0);
+--secondary-foreground: oklch(0.205 0 0);
+--muted: oklch(0.97 0 0);
+--muted-foreground: oklch(0.556 0 0);
+--accent: oklch(0.97 0 0);
+--accent-foreground: oklch(0.205 0 0);
+--destructive: oklch(0.577 0.245 27.325);
+--border: oklch(0.922 0 0);
+--input: oklch(0.922 0 0);
+--ring: oklch(0.708 0 0);
+--sidebar: oklch(0.985 0 0);
+--sidebar-foreground: oklch(0.145 0 0);
+--sidebar-primary: oklch(0.205 0 0);
+--sidebar-primary-foreground: oklch(0.985 0 0);
+--sidebar-accent: oklch(0.97 0 0);
+--sidebar-accent-foreground: oklch(0.205 0 0);
+--sidebar-border: oklch(0.922 0 0);
+--sidebar-ring: oklch(0.708 0 0);
+}
+
+:root.dark {
+color-scheme: dark;
+
+--background: oklch(0.145 0 0);
+--foreground: oklch(0.985 0 0);
+--card: oklch(0.205 0 0);
+--card-foreground: oklch(0.985 0 0);
+--popover: oklch(0.205 0 0);
+--popover-foreground: oklch(0.985 0 0);
+--primary: oklch(0.922 0 0);
+--primary-foreground: oklch(0.205 0 0);
+--secondary: oklch(0.269 0 0);
+--secondary-foreground: oklch(0.985 0 0);
+--muted: oklch(0.269 0 0);
+--muted-foreground: oklch(0.708 0 0);
+--accent: oklch(0.269 0 0);
+--accent-foreground: oklch(0.985 0 0);
+--destructive: oklch(0.704 0.191 22.216);
+--border: oklch(1 0 0 / 10%);
+--input: oklch(1 0 0 / 15%);
+--ring: oklch(0.556 0 0);
+--sidebar: oklch(0.205 0 0);
+--sidebar-foreground: oklch(0.985 0 0);
+--sidebar-primary: oklch(0.985 0 0);
+--sidebar-primary-foreground: oklch(0.205 0 0);
+--sidebar-accent: oklch(0.269 0 0);
+--sidebar-accent-foreground: oklch(0.985 0 0);
+--sidebar-border: oklch(1 0 0 / 10%);
+--sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+* {
+@apply border-border outline-ring/50;
+}
+body {
+@apply bg-background text-foreground;
+}
 }

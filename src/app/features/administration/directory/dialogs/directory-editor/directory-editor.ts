@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -7,18 +13,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-
-import {
-  AutoCompleteCompleteEvent,
-  AutoCompleteModule,
-} from 'primeng/autocomplete';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
 
 import {
   DirectoryEntryPayload,
@@ -34,33 +28,26 @@ interface DialogData {
 
 @Component({
   selector: 'app-directory-editor',
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AutoCompleteModule,
-    ButtonModule,
-    CheckboxModule,
-    FloatLabelModule,
-    InputTextModule,
-    MessageModule,
-    SelectModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './directory-editor.html',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class DirectoryEditor implements OnInit {
-  private readonly dialogRef = inject(DynamicDialogRef);
+  // private readonly dialogRef = inject(DynamicDialogRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly directoryDataSource = inject(DirectoryDataSource);
 
-  readonly data: DialogData = inject(DynamicDialogConfig).data ?? {};
+  // readonly data: DialogData = inject(DynamicDialogConfig).data ?? {};
   readonly formUtils = FormUtils;
   readonly sites = signal<DirectorySite[]>([]);
   readonly areaSuggestions = signal<string[]>([]);
   private areaNames: string[] = [];
 
   readonly directoryForm = this.formBuilder.group({
-    areaName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(160)]],
+    areaName: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(160)],
+    ],
     contactLabel: ['', Validators.maxLength(160)],
     extensions: this.formBuilder.array<FormControl<string>>([]),
     phones: this.formBuilder.array<FormControl<string>>([]),
@@ -83,11 +70,13 @@ export class DirectoryEditor implements OnInit {
       this.areaNames = names;
       this.areaSuggestions.set(names);
     });
-    this.directoryDataSource.findSites().subscribe((sites) => this.sites.set(sites));
+    this.directoryDataSource
+      .findSites()
+      .subscribe((sites) => this.sites.set(sites));
     this.loadForm();
   }
 
-  searchAreas(event: AutoCompleteCompleteEvent): void {
+  searchAreas(event: any): void {
     const term = event.query.trim().toLocaleLowerCase();
     this.areaSuggestions.set(
       this.areaNames.filter((name) => name.toLocaleLowerCase().includes(term)),
@@ -111,7 +100,7 @@ export class DirectoryEditor implements OnInit {
   }
 
   close(): void {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   save(): void {
@@ -132,37 +121,39 @@ export class DirectoryEditor implements OnInit {
       isActive: value.isActive ?? true,
     };
 
-    const request = this.data.directory
-      ? this.directoryDataSource.update(this.data.directory.id, dto)
-      : this.directoryDataSource.create(dto);
+    // const request = this.data.directory
+    //   ? this.directoryDataSource.update(this.data.directory.id, dto)
+    //   : this.directoryDataSource.create(dto);
 
-    request.subscribe((directory) => this.dialogRef.close(directory));
+    // request.subscribe((directory) => this.dialogRef.close(directory));
   }
 
   private loadForm(): void {
-    const directory = this.data.directory;
-    if (!directory) {
-      this.addExtension();
-      this.addPhone();
-      return;
-    }
-
-    this.directoryForm.patchValue({
-      areaName: directory.areaName,
-      contactLabel: directory.contactLabel ?? '',
-      email: directory.email ?? '',
-      siteId: directory.siteId,
-      siteDetails: directory.siteDetails ?? '',
-      isActive: directory.isActive,
-    });
-    directory.extensions.forEach((extension) => this.addExtension(extension));
-    directory.phones.forEach((phone) => this.addPhone(phone));
-    if (!directory.extensions.length) this.addExtension();
-    if (!directory.phones.length) this.addPhone();
+    // const directory = this.data.directory;
+    // if (!directory) {
+    //   this.addExtension();
+    //   this.addPhone();
+    //   return;
+    // }
+    // this.directoryForm.patchValue({
+    //   areaName: directory.areaName,
+    //   contactLabel: directory.contactLabel ?? '',
+    //   email: directory.email ?? '',
+    //   siteId: directory.siteId,
+    //   siteDetails: directory.siteDetails ?? '',
+    //   isActive: directory.isActive,
+    // });
+    // directory.extensions.forEach((extension) => this.addExtension(extension));
+    // directory.phones.forEach((phone) => this.addPhone(phone));
+    // if (!directory.extensions.length) this.addExtension();
+    // if (!directory.phones.length) this.addPhone();
   }
 
   private createNumberControl(value: string, maxLength: number) {
-    return this.formBuilder.nonNullable.control(value, Validators.maxLength(maxLength));
+    return this.formBuilder.nonNullable.control(
+      value,
+      Validators.maxLength(maxLength),
+    );
   }
 
   private cleanNumbers(values: string[]): string[] {

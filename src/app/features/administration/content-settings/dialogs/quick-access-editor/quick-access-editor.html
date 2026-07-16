@@ -1,13 +1,13 @@
 <form [formGroup]="form" (ngSubmit)="save()">
   <div class="flex items-center justify-end p-2">
-    <p-button
+    <!-- <app-ui-button
       type="button"
-      icon="pi pi-plus"
+      icon="ui-icon ui-icon-plus"
       size="small"
       label="Agregar"
       [outlined]="true"
       (onClick)="addItem()"
-    />
+    /> -->
   </div>
 
   <div
@@ -30,15 +30,19 @@
                 type="button"
                 cdkDragHandle
                 class="cursor-grab rounded-md p-2 text-surface-400 hover:text-surface-700 active:cursor-grabbing"
-                pTooltip="Arrastrar para ordenar"
+                appUiTooltip="Arrastrar para ordenar"
               >
-                <i class="pi pi-bars text-xl"></i>
+                <i class="ui-icon ui-icon-bars text-xl"></i>
               </button>
               <div
                 class="flex h-12 w-12 items-center justify-center rounded-lg border border-surface-200 bg-surface-50"
               >
                 <i
-                  [class]="getQuickAccessIcon($safeNavigationMigration(item.get('iconKey')?.value))"
+                  [class]="
+                    getQuickAccessIcon(
+                      $safeNavigationMigration(item.get('iconKey')?.value)
+                    )
+                  "
                   class="text-primary-600"
                   style="font-size: 1.5rem"
                 ></i>
@@ -47,48 +51,48 @@
                 Acceso {{ i + 1 }}
               </span>
             </div>
-
-            <p-button
+            <!-- 
+            <app-ui-button
               type="button"
               [text]="true"
               severity="danger"
               [rounded]="true"
-              icon="pi pi-trash"
+              icon="ui-icon ui-icon-trash"
               (onClick)="removeItem(i)"
-              pTooltip="Eliminar acceso"
-            />
+              appUiTooltip="Eliminar acceso"
+            /> -->
           </div>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
             <div class="flex flex-col gap-1 md:col-span-4">
-              <p-floatlabel variant="on">
-                <input pInputText class="w-full" formControlName="title" />
+              <!-- <app-ui-floatlabel variant="on">
+                <input appUiInput class="w-full" formControlName="title" />
                 <label>Título</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               @if (formUtils.isInvalid(form.get("items." + i + ".title"))) {
-                <p-message severity="error" size="small" variant="simple">
+                <app-ui-message severity="error" size="small" variant="simple">
                   {{
                     formUtils.getErrorMessage(form.get("items." + i + ".title"))
                   }}
-                </p-message>
-              }
+                </app-ui-message>
+              } -->
             </div>
 
             <div class="flex flex-col gap-1 md:col-span-5">
-              <p-floatlabel variant="on">
-                <input pInputText class="w-full" formControlName="url" />
+              <!-- <app-ui-floatlabel variant="on">
+                <input appUiInput class="w-full" formControlName="url" />
                 <label>URL</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               @if (formUtils.isInvalid(form.get("items." + i + ".url"))) {
-                <p-message severity="error" size="small" variant="simple">
+                <app-ui-message severity="error" size="small" variant="simple">
                   {{
                     formUtils.getErrorMessage(form.get("items." + i + ".url"))
                   }}
-                </p-message>
-              }
+                </app-ui-message>
+              } -->
             </div>
 
             <div class="flex flex-col gap-1 md:col-span-3">
-              <p-select
+              <!-- <app-ui-select
                 class="w-full"
                 formControlName="iconKey"
                 [options]="iconOptions"
@@ -103,33 +107,33 @@
                     {{ option.label }}
                   </span>
                 </ng-template>
-                <ng-template #item let-option>
+                <ng-template appUiTemplate="item" let-option>
                   <span class="flex items-center gap-2">
                     <i [class]="option.icon"></i>
                     {{ option.label }}
                   </span>
                 </ng-template>
-              </p-select>
+              </app-ui-select> -->
             </div>
 
             <div class="md:col-span-9">
-              <p-floatlabel variant="on">
+              <!-- <app-ui-floatlabel variant="on">
                 <textarea
-                  pTextarea
+                  appUiTextarea
                   class="w-full resize-none"
                   rows="2"
                   formControlName="description"
                 ></textarea>
                 <label>Descripción (opcional)</label>
-              </p-floatlabel>
+              </app-ui-floatlabel> -->
             </div>
 
             <div class="flex items-center gap-2 md:col-span-3">
-              <p-checkbox
+              <!-- <app-ui-checkbox
                 formControlName="isActive"
                 [binary]="true"
                 [inputId]="'quick-access-active-' + i"
-              />
+              /> -->
               <label
                 [for]="'quick-access-active-' + i"
                 class="cursor-pointer text-sm font-medium text-surface-700"
@@ -148,14 +152,14 @@
     }
   </div>
 
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <!-- <app-ui-button
       type="button"
       label="Cancelar"
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button type="submit" label="Guardar" />
+    <app-ui-button type="submit" label="Guardar" /> -->
   </div>
 </form>
-<p-confirmdialog />
+<!-- <app-ui-confirmdialog /> -->

@@ -8,9 +8,6 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-
 import { PortalTutorialDataSource } from '../../../services';
 import { FileIcon, FileSizePipe, SafeUrlPipe } from '../../../../../shared';
 
@@ -18,8 +15,8 @@ import { FileIcon, FileSizePipe, SafeUrlPipe } from '../../../../../shared';
   selector: 'app-tutorials-detail-page',
   imports: [
     CommonModule,
-    ButtonModule,
-    TagModule,
+    // ButtonModule,
+    // TagModule,
     FileIcon,
     FileSizePipe,
     SafeUrlPipe,

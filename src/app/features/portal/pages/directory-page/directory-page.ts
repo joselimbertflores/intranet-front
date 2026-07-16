@@ -2,10 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
-import { SkeletonModule } from 'primeng/skeleton';
-import { TooltipModule } from 'primeng/tooltip';
 
 import { DirectoryEntryResponse } from '../../../administration/directory/interfaces';
 import { SearchInput } from '../../../../shared';
@@ -16,10 +12,7 @@ import { PortalDirectoryDataSource } from '../../services';
   selector: 'app-directory-page',
   imports: [
     FormsModule,
-    ButtonModule,
-    SelectModule,
-    SkeletonModule,
-    TooltipModule,
+   
     SearchInput,
     PublicSectionHeader,
   ],

@@ -1,16 +1,16 @@
-<div class="flex items-center justify-between mb-4">
+<!-- <div class="flex items-center justify-between mb-4">
   <h2 class="text-2xl font-semibold">Organizacion</h2>
-  <p-button
+  <app-ui-button
     label="Agregar"
-    icon="pi pi-plus"
+    icon="ui-icon ui-icon-plus"
     size="small"
     (onClick)="openSectionDialog()"
   />
 </div>
 
-<p-treeTable
+<app-ui-tree-table
   #treeTable
-  class="p-treetable-sm text-sm"
+  class="ui-tree-table-sm text-sm"
   currentPageReportTemplate="{first} - {last} de {totalRecords}"
   filterMode="lenient"
   [paginator]="true"
@@ -23,13 +23,13 @@
   (onNodeExpand)="onExpand($event.node.key)"
   (onNodeCollapse)="onCollapse($event.node.key)"
 >
-  <ng-template #caption>
+  <ng-template appUiTemplate="caption">
     <div class="flex justify-end items-center">
-      <p-floatlabel iconPosition="left" class="w-full sm:w-1/4" variant="on">
-        <p-iconfield>
-          <p-inputicon class="pi pi-search" />
+      <app-ui-floatlabel iconPosition="left" class="w-full sm:w-1/4" variant="on">
+        <app-ui-iconfield>
+          <app-ui-inputicon class="ui-icon ui-icon-search" />
           <input
-            pInputText
+            appUiInput
             type="text"
             class="w-full"
             (input)="
@@ -37,12 +37,12 @@
               treeTable.toggleAll(true)
             "
           />
-        </p-iconfield>
+        </app-ui-iconfield>
         <label>Buscar</label>
-      </p-floatlabel>
+      </app-ui-floatlabel>
     </div>
   </ng-template>
-  <ng-template pTemplate="header">
+  <ng-template appUiTemplate="header">
     <tr>
       <th>Nombre</th>
       <th class="w-[120px]">Estado</th>
@@ -50,33 +50,33 @@
     </tr>
   </ng-template>
 
-  <ng-template #body let-rowNode let-rowData="rowData">
-    <tr [ttRow]="rowNode">
+  <ng-template appUiTemplate="body" let-rowNode let-rowData="rowData">
+    <tr [appUiTreeRow]="rowNode">
       <td>
         <div class="flex items-center gap-2">
-          <p-treetable-toggler [rowNode]="rowNode" />
+          <app-ui-treetable-toggler [rowNode]="rowNode" />
           <span>{{ rowData.name | uppercase }}</span>
         </div>
       </td>
       <td>
         @if (rowData.isActive) {
-          <p-tag severity="success" value="Activo" />
+          <app-ui-tag severity="success" value="Activo" />
         } @else {
-          <p-tag severity="danger" value="Inactivo" />
+          <app-ui-tag severity="danger" value="Inactivo" />
         }
       </td>
       <td>
         <div class="flex gap-x-2">
-          <p-button
+          <app-ui-button
             size="small"
-            icon="pi pi-plus"
+            icon="ui-icon ui-icon-plus"
             [rounded]="true"
             [text]="true"
             (click)="addChild(rowData)"
           />
-          <p-button
+          <app-ui-button
             size="small"
-            icon="pi pi-pencil"
+            icon="ui-icon ui-icon-pencil"
             [rounded]="true"
             [text]="true"
             (click)="openSectionDialog(rowNode)"
@@ -85,9 +85,9 @@
       </td>
     </tr>
   </ng-template>
-  <ng-template #emptymessage>
+  <ng-template appUiTemplate="emptymessage">
     <tr>
       <td colspan="4">Sin resultados.</td>
     </tr>
   </ng-template>
-</p-treeTable>
+</app-ui-tree-table> -->

@@ -1,10 +1,10 @@
-<form [formGroup]="form" (ngSubmit)="save()" class="space-y-6 pt-1">
+<!-- <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6 pt-1">
   <div class="flex flex-col gap-1">
     <div>
       <label for="identityCandidate" class="mb-2 block text-sm font-medium">
         Usuario a importar *
       </label>
-      <p-autocomplete
+      <app-ui-autocomplete
         inputId="identityCandidate"
         formControlName="candidate"
         [minLength]="minimumSearchLength"
@@ -19,7 +19,7 @@
         (completeMethod)="searchCandidates($event)"
         [invalid]="formUtils.isInvalid(form.controls.candidate)"
       >
-        <ng-template #item let-option>
+        <ng-template appUiTemplate="item" let-option>
           <div class="flex flex-col">
             <span class="font-medium text-surface-900">
               {{ option.fullName | titlecase }}
@@ -36,12 +36,12 @@
             </div>
           </div>
         </ng-template>
-      </p-autocomplete>
+      </app-ui-autocomplete>
     </div>
     @if (formUtils.isInvalid(form.controls.candidate)) {
-      <p-message severity="error" size="small" variant="simple">
+      <app-ui-message severity="error" size="small" variant="simple">
         Seleccione al menos un rol local para el usuario.
-      </p-message>
+      </app-ui-message>
     }
     <small id="identityCandidate">
       Ingrese al menos 3 caracteres para buscar.
@@ -54,7 +54,7 @@
         <div
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600"
         >
-          <i class="pi pi-user"></i>
+          <i class="ui-icon ui-icon-user"></i>
         </div>
         <div class="min-w-0 flex-1">
           <div class="min-w-0">
@@ -68,14 +68,14 @@
 
           <div class="mt-3 space-y-2 text-xs text-surface-600">
             <div class="flex min-w-0 items-center gap-2">
-              <i class="pi pi-envelope shrink-0 text-surface-400"></i>
+              <i class="ui-icon ui-icon-envelope shrink-0 text-surface-400"></i>
               <span class="italic">
                 {{ candidate.email ?? "Sin correo electrónico" }}
               </span>
             </div>
 
             <div class="flex items-center gap-2">
-              <i class="pi pi-key shrink-0 text-surface-400"></i>
+              <i class="ui-icon ui-icon-key shrink-0 text-surface-400"></i>
               <span class="font-mono">
                 {{ candidate.externalKey }}
               </span>
@@ -86,8 +86,8 @@
     </section>
   }
   <div class="flex flex-col gap-1">
-    <p-floatlabel class="w-full" variant="on">
-      <p-multiselect
+    <app-ui-floatlabel class="w-full" variant="on">
+      <app-ui-multiselect
         inputId="localRole"
         formControlName="roleIds"
         [options]="roles()"
@@ -98,7 +98,7 @@
         filterPlaceHolder="Nombre rol"
         [invalid]="formUtils.isInvalid(form.controls.roleIds)"
       >
-        <ng-template #item let-option>
+        <ng-template appUiTemplate="item" let-option>
           <div class="flex flex-col">
             <span class="font-medium text-surface-900">{{ option.name }}</span>
             <span class="text-xs text-surface-600">
@@ -106,28 +106,28 @@
             </span>
           </div>
         </ng-template>
-      </p-multiselect>
+      </app-ui-multiselect>
       <label for="localRole">Roles del usuario *</label>
-    </p-floatlabel>
+    </app-ui-floatlabel>
 
     @if (formUtils.isInvalid(form.controls.roleIds)) {
-      <p-message severity="error" size="small" variant="simple">
+      <app-ui-message severity="error" size="small" variant="simple">
         Seleccione al menos un rol local para el usuario.
-      </p-message>
+      </app-ui-message>
     }
   </div>
 
   @if (importError()) {
-    <p-message severity="error"> {{ importError() }} </p-message>
+    <app-ui-message severity="error"> {{ importError() }} </app-ui-message>
   }
 
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <app-ui-button
       label="Cancelar"
       type="button"
       severity="secondary"
       (onClick)="close()"
     />
-    <p-button label="Importar" type="submit" [loading]="isSaving()" />
+    <app-ui-button label="Importar" type="submit" [loading]="isSaving()" />
   </div>
-</form>
+</form> -->

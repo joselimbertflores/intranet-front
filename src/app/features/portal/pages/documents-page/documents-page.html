@@ -13,29 +13,31 @@
       <form [formRoot]="filterForm">
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <div class="lg:col-span-4">
-            <p-iconfield class="block w-full">
-              <p-inputicon class="pi pi-search" />
+            <!-- <app-ui-iconfield class="block w-full">
+              <app-ui-inputicon class="ui-icon ui-icon-search" />
               <input
                 id="term"
-                pInputText
+                appUiInput
                 class="w-full"
                 type="search"
                 autocomplete="off"
                 placeholder="Buscar por nombre"
                 [formField]="$any(filterForm.term)"
               />
-            </p-iconfield>
+            </app-ui-iconfield> -->
           </div>
 
           <div class="flex items-center justify-between gap-2 lg:hidden">
-            <p-button
+            <!-- <app-ui-button
               [label]="
                 activeAdvancedFiltersCount()
                   ? 'Filtros (' + activeAdvancedFiltersCount() + ')'
                   : 'Filtros'
               "
               [icon]="
-                advancedFiltersOpen() ? 'pi pi-chevron-up' : 'pi pi-sliders-h'
+                advancedFiltersOpen()
+                  ? 'ui-icon ui-icon-chevron-up'
+                  : 'ui-icon ui-icon-sliders-h'
               "
               size="small"
               variant="outlined"
@@ -43,16 +45,16 @@
               aria-controls="advanced-document-filters"
               (onClick)="toggleAdvancedFilters()"
             />
-            <p-button
+            <app-ui-button
               type="button"
               label="Limpiar"
               size="small"
               variant="outlined"
               severity="secondary"
-              icon="pi pi-filter-slash"
+              icon="ui-icon ui-icon-filter-slash"
               [disabled]="!hasActiveFilters()"
               (onClick)="resetFilters()"
-            />
+            /> -->
           </div>
 
           <div
@@ -61,8 +63,8 @@
             [ngClass]="advancedFiltersOpen() ? 'grid' : 'hidden'"
           >
             <div class="lg:col-span-4">
-              <p-floatlabel class="block w-full" variant="on">
-                <p-select
+              <!-- <app-ui-floatlabel class="block w-full" variant="on">
+                <app-ui-select
                   inputId="doctype"
                   optionLabel="name"
                   optionValue="slug"
@@ -78,12 +80,12 @@
                   (onChange)="filterForm.documentSubtype().value.set(null)"
                 />
                 <label for="doctype">Tipo de documento</label>
-              </p-floatlabel>
+              </app-ui-floatlabel> -->
             </div>
 
             <div class="lg:col-span-4">
-              <p-floatlabel class="block w-full" variant="on">
-                <p-select
+              <!-- <app-ui-floatlabel class="block w-full" variant="on">
+                <app-ui-select
                   inputId="docsubtype"
                   optionLabel="name"
                   optionValue="slug"
@@ -98,12 +100,12 @@
                   [formField]="$any(filterForm.documentSubtype)"
                 />
                 <label for="docsubtype">Subtipo</label>
-              </p-floatlabel>
+              </app-ui-floatlabel> -->
             </div>
 
             <div class="lg:col-span-8">
-              <p-floatlabel class="block w-full" variant="on">
-                <p-treeSelect
+              <!-- <app-ui-floatlabel class="block w-full" variant="on">
+                <app-ui-tree-select
                   inputId="docsection"
                   appendTo="body"
                   [fluid]="true"
@@ -121,7 +123,7 @@
                   panelStyleClass="mi-panel-arbol"
                 />
                 <label for="docsection">Unidad organizacional</label>
-              </p-floatlabel>
+              </app-ui-floatlabel> -->
             </div>
 
             <div class="lg:col-span-2">
@@ -133,15 +135,15 @@
         <div
           class="mt-4 hidden justify-end border-t border-surface-100 pt-3 lg:flex"
         >
-          <p-button
+          <!-- <app-ui-button
             type="button"
             label="Limpiar filtros"
-            icon="pi pi-filter-slash"
+            icon="ui-icon ui-icon-filter-slash"
             severity="secondary"
             [outlined]="true"
             [disabled]="!hasActiveFilters()"
             (onClick)="resetFilters()"
-          />
+          /> -->
         </div>
       </form>
     </section>
@@ -156,7 +158,7 @@
             class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600"
           >
             <i
-              class="pi pi-exclamation-triangle text-xl"
+              class="ui-icon ui-icon-exclamation-triangle text-xl"
               aria-hidden="true"
             ></i>
           </span>
@@ -166,13 +168,13 @@
           <p class="mx-auto mt-1 max-w-md text-sm text-red-700">
             Ocurrió un problema al obtener la información. Intenta nuevamente.
           </p>
-          <p-button
+          <!-- <app-ui-button
             type="button"
             label="Reintentar"
-            icon="pi pi-refresh"
+            icon="ui-icon ui-icon-refresh"
             styleClass="mt-5"
             (onClick)="dataResource.reload()"
-          />
+          /> -->
         </div>
       } @else if (dataResource.isLoading()) {
         @if (layout() === "list") {
@@ -185,34 +187,34 @@
                 class="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-surface-200 bg-surface-0 p-3 shadow-sm sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4"
               >
                 <div class="flex w-16 flex-col items-center gap-1">
-                  <p-skeleton
+                  <!-- <app-ui-skeleton
                     width="2.5rem"
                     height="2.5rem"
                     borderRadius="0.75rem"
                   />
-                  <p-skeleton width="2.5rem" height="0.625rem" />
+                  <app-ui-skeleton width="2.5rem" height="0.625rem" /> -->
                 </div>
 
                 <div class="min-w-0">
-                  <p-skeleton width="min(100%, 28rem)" height="1rem" />
-                  <p-skeleton
+                  <!-- <app-ui-skeleton width="min(100%, 28rem)" height="1rem" />
+                  <app-ui-skeleton
                     styleClass="mt-2"
                     width="min(90%, 20rem)"
                     height="0.75rem"
                   />
                   <div class="mt-3 flex flex-wrap gap-2">
-                    <p-skeleton width="5rem" height="0.75rem" />
-                    <p-skeleton width="6rem" height="0.75rem" />
-                    <p-skeleton width="4rem" height="0.75rem" />
-                  </div>
+                    <app-ui-skeleton width="5rem" height="0.75rem" />
+                    <app-ui-skeleton width="6rem" height="0.75rem" />
+                    <app-ui-skeleton width="4rem" height="0.75rem" />
+                  </div> -->
                 </div>
 
                 <div class="col-span-2 md:col-span-1">
-                  <p-skeleton
+                  <!-- <app-ui-skeleton
                     width="8rem"
                     height="2.25rem"
                     borderRadius="0.5rem"
-                  />
+                  /> -->
                 </div>
               </article>
             }
@@ -227,35 +229,35 @@
                 class="flex h-full flex-col rounded-2xl border border-surface-200 bg-surface-0 p-3.5 shadow-sm sm:p-4"
               >
                 <div class="flex w-16 flex-col items-center gap-1">
-                  <p-skeleton
+                  <!-- <app-ui-skeleton
                     width="2.5rem"
                     height="2.5rem"
                     borderRadius="0.75rem"
                   />
-                  <p-skeleton width="2.5rem" height="0.625rem" />
+                  <app-ui-skeleton width="2.5rem" height="0.625rem" /> -->
                 </div>
 
-                <p-skeleton
+                <!-- <app-ui-skeleton
                   styleClass="mt-4"
                   width="min(100%, 18rem)"
                   height="1rem"
                 />
-                <p-skeleton
+                <app-ui-skeleton
                   styleClass="mt-2"
                   width="min(90%, 15rem)"
                   height="0.75rem"
                 />
                 <div class="mt-3 flex flex-wrap gap-2">
-                  <p-skeleton width="5rem" height="0.75rem" />
-                  <p-skeleton width="6rem" height="0.75rem" />
-                  <p-skeleton width="4rem" height="0.75rem" />
+                  <app-ui-skeleton width="5rem" height="0.75rem" />
+                  <app-ui-skeleton width="6rem" height="0.75rem" />
+                  <app-ui-skeleton width="4rem" height="0.75rem" />
                 </div>
-                <p-skeleton
+                <app-ui-skeleton
                   styleClass="mt-6"
                   width="100%"
                   height="2.25rem"
                   borderRadius="0.5rem"
-                />
+                /> -->
               </article>
             }
           </div>
@@ -269,7 +271,10 @@
           <span
             class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-100 text-surface-500"
           >
-            <i class="pi pi-folder-open text-xl" aria-hidden="true"></i>
+            <i
+              class="ui-icon ui-icon-folder-open text-xl"
+              aria-hidden="true"
+            ></i>
           </span>
 
           @if (hasActiveFilters()) {
@@ -279,15 +284,15 @@
             <p class="mx-auto mt-1 max-w-md text-sm text-surface-500">
               Intenta ajustar los filtros o limpiar la búsqueda.
             </p>
-            <p-button
+            <!-- <app-ui-button
               type="button"
               label="Limpiar filtros"
-              icon="pi pi-filter-slash"
+              icon="ui-icon ui-icon-filter-slash"
               severity="secondary"
               [outlined]="true"
               styleClass="mt-5"
               (onClick)="resetFilters()"
-            />
+            /> -->
           } @else {
             <h3 class="mt-4 text-base font-semibold text-surface-900">
               Aún no hay documentos disponibles
@@ -301,7 +306,7 @@
         dataResource.hasValue() && dataResource.value().documents.length > 0
       ) {
         <div class="fade-in">
-          <p-dataview
+          <!-- <app-ui-dataview
             [value]="dataResource.value().documents"
             [totalRecords]="dataResource.value().total"
             [rows]="limit()"
@@ -315,7 +320,7 @@
             currentPageReportTemplate="{first} - {last} de {totalRecords}"
             paginatorDropdownAppendTo="body"
           >
-            <ng-template #header>
+            <ng-template appUiTemplate="header">
               <div
                 class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-center"
               >
@@ -337,7 +342,7 @@
                 <div
                   class="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3"
                 >
-                  <p-paginator
+                  <app-ui-paginator
                     class="compact-paginator"
                     [first]="offset()"
                     [rows]="limit()"
@@ -351,31 +356,31 @@
 
                   <div class="ml-auto flex items-center gap-2">
                     <span class="sr-only">Vista</span>
-                    <p-selectbutton
+                    <app-ui-selectbutton
                       [(ngModel)]="layout"
                       [options]="layoutOptions"
                       [allowEmpty]="false"
                       aria-label="Cambiar presentación de resultados"
                     >
-                      <ng-template #item let-item>
+                      <ng-template appUiTemplate="item" let-item>
                         <i
                           class="pi"
                           [ngClass]="{
-                            'pi-bars': item === 'list',
-                            'pi-th-large': item === 'grid',
+                            'ui-icon-bars': item === 'list',
+                            'ui-icon-th-large': item === 'grid',
                           }"
                           [attr.aria-label]="
                             item === 'list' ? 'Lista' : 'Cuadrícula'
                           "
                         ></i>
                       </ng-template>
-                    </p-selectbutton>
+                    </app-ui-selectbutton>
                   </div>
                 </div>
               </div>
             </ng-template>
 
-            <ng-template #list let-items>
+            <ng-template appUiTemplate="list" let-items>
               <div class="flex flex-col gap-2.5">
                 @for (doc of items; track doc.id) {
                   <portal-document-list-item [document]="doc" />
@@ -383,14 +388,14 @@
               </div>
             </ng-template>
 
-            <ng-template #grid let-items>
+            <ng-template appUiTemplate="grid" let-items>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @for (doc of items; track doc.id) {
                   <portal-document-grid-card [document]="doc" />
                 }
               </div>
             </ng-template>
-          </p-dataview>
+          </app-ui-dataview> -->
         </div>
       }
     </section>

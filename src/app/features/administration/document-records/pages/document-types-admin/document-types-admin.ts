@@ -1,10 +1,7 @@
 import { linkedSignal, Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { DialogService } from 'primeng/dynamicdialog';
-import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
+
 
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
 import { DocumentTypeDatasource } from '../../services';
@@ -14,9 +11,7 @@ import { DocumentTypeEditor } from '../../dialogs';
 @Component({
   selector: 'app-document-types-admin',
   imports: [
-    TagModule,
-    TableModule,
-    ButtonModule,
+   
     SearchInput,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -24,7 +19,7 @@ import { DocumentTypeEditor } from '../../dialogs';
 })
 export default class DocumentTypesAdmin {
   private docTypeDataSource = inject(DocumentTypeDatasource);
-  private dialogService = inject(DialogService);
+  // private dialogService = inject(DialogService);
 
   limit = signal(10);
   offset = signal(0);
@@ -55,22 +50,22 @@ export default class DocumentTypesAdmin {
   });
 
   openDocumentTypeDialog(item?: DocumentTypeWithSubTypesResponse) {
-    const ref = this.dialogService.open(DocumentTypeEditor, {
-      header: item ? 'Editar tipo documento' : 'Crear tipo documento',
-      closeOnEscape: true,
-      draggable: false,
-      closable: true,
-      width: '40vw',
-      data: item,
-      breakpoints: {
-        '960px': '75vw',
-        '640px': '90vw',
-      },
-    });
-    ref?.onClose.subscribe((result?: DocumentTypeWithSubTypesResponse) => {
-      if (!result) return;
-      this.upsertItem(result);
-    });
+    // const ref = this.dialogService.open(DocumentTypeEditor, {
+    //   header: item ? 'Editar tipo documento' : 'Crear tipo documento',
+    //   closeOnEscape: true,
+    //   draggable: false,
+    //   closable: true,
+    //   width: '40vw',
+    //   data: item,
+    //   breakpoints: {
+    //     '960px': '75vw',
+    //     '640px': '90vw',
+    //   },
+    // });
+    // ref?.onClose.subscribe((result?: DocumentTypeWithSubTypesResponse) => {
+    //   if (!result) return;
+    //   this.upsertItem(result);
+    // });
   }
 
   search(term: string) {

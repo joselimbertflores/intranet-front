@@ -12,33 +12,25 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { InputTextModule } from 'primeng/inputtext';
-
 @Component({
   selector: 'search-input',
   imports: [
-    IconFieldModule,
-    InputTextModule,
-    InputIconModule,
+
     ReactiveFormsModule,
-    FloatLabelModule,
   ],
   template: `
-    <p-floatlabel iconPosition="left" class="ml-auto" variant="on">
-      <p-iconfield>
-        <p-inputicon class="pi pi-search" />
+    <!-- <app-ui-floatlabel iconPosition="left" class="ml-auto" variant="on">
+      <app-ui-iconfield>
+        <app-ui-inputicon class="ui-icon ui-icon-search" />
         <input
-          pInputText
+          appUiInput
           type="text"
           [formControl]="searchControl"
           class="w-full"
         />
-      </p-iconfield>
+      </app-ui-iconfield>
       <label>{{ label() }}</label>
-    </p-floatlabel>
+    </app-ui-floatlabel> -->
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -7,15 +7,11 @@ import {
   output,
 } from '@angular/core';
 
-import { ButtonModule } from 'primeng/button';
-import { PanelMenuModule } from 'primeng/panelmenu';
-import { MenuItem } from 'primeng/api';
-
 import { AuthDataSource } from '../../../../core/auth/auth-data-source';
 import { Resource } from '../../../../core/auth/auth.types';
 import { AppIcon } from '../../../../shared';
 
-interface SidebarItem extends MenuItem {
+interface SidebarItem {
   resource?: Resource;
 }
 @Component({
@@ -23,7 +19,7 @@ interface SidebarItem extends MenuItem {
   host: {
     class: 'block h-full min-h-0',
   },
-  imports: [PanelMenuModule, ButtonModule, AppIcon],
+  imports: [AppIcon],
   template: `
     <div class="flex h-full min-h-0 flex-col">
       <div class="flex h-14 shrink-0 items-center gap-3 px-4">
@@ -35,24 +31,28 @@ interface SidebarItem extends MenuItem {
         </div>
 
         @if (showCloseButton()) {
-          <p-button
+          <!-- <app-ui-button
             type="button"
             size="small"
-            icon="pi pi-times"
+            icon="ui-icon ui-icon-times"
             [rounded]="true"
             [text]="true"
             ariaLabel="Cerrar menú de administración"
             (onClick)="closeRequested.emit()"
-          />
+          /> -->
         }
       </div>
 
-      <nav
+      <!-- <nav
         class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"
         aria-label="Navegación de administración"
       >
-        <p-panelMenu [model]="filteredMenu()" class="w-full" [multiple]="true" />
-      </nav>
+        <p-panelMenu
+          [model]="filteredMenu()"
+          class="w-full"
+          [multiple]="true"
+        />
+      </nav> -->
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,10 +63,10 @@ export class AdminSidebar {
   readonly showCloseButton = input(false);
   readonly closeRequested = output<void>();
 
-  readonly menu: SidebarItem[] = [
+  readonly menu: any[] = [
     {
       label: 'Portal',
-      icon: 'pi pi-home',
+      icon: 'ui-icon ui-icon-home',
       items: [
         {
           label: 'Página de inicio',
@@ -82,7 +82,7 @@ export class AdminSidebar {
     },
     {
       label: 'Documentación',
-      icon: 'pi pi-folder',
+      icon: 'ui-icon ui-icon-folder',
       items: [
         {
           label: 'Documentos',
@@ -103,7 +103,7 @@ export class AdminSidebar {
     },
     {
       label: 'Comunicación',
-      icon: 'pi pi-megaphone',
+      icon: 'ui-icon ui-icon-megaphone',
       items: [
         {
           label: 'Comunicados',
@@ -119,7 +119,7 @@ export class AdminSidebar {
     },
     {
       label: 'Directorio',
-      icon: 'pi pi-phone',
+      icon: 'ui-icon ui-icon-phone',
       items: [
         {
           label: 'Contactos',
@@ -130,7 +130,7 @@ export class AdminSidebar {
     },
     {
       label: 'Capacitación',
-      icon: 'pi pi-book',
+      icon: 'ui-icon ui-icon-book',
       items: [
         {
           label: 'Tutoriales',
@@ -146,7 +146,7 @@ export class AdminSidebar {
     },
     {
       label: 'Acceso',
-      icon: 'pi pi-lock',
+      icon: 'ui-icon ui-icon-lock',
       items: [
         {
           label: 'Usuarios',
@@ -162,9 +162,9 @@ export class AdminSidebar {
     },
   ];
 
-  filteredMenu = computed<MenuItem[]>(() => this.filterMenu(this.menu));
+  filteredMenu = computed<any[]>(() => this.filterMenu(this.menu));
 
-  private filterMenu(items: SidebarItem[]): MenuItem[] {
+  private filterMenu(items: any[]): any[] {
     return items.flatMap(({ resource, items, ...item }) => {
       if (items) {
         const visibleChildren = this.filterMenu(items);

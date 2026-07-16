@@ -1,16 +1,16 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  <p-stepper [value]="1">
-    <p-step-list>
-      <p-step [value]="1">Propiedades Documento</p-step>
-      <p-step [value]="2">Carga de Archivos</p-step>
-    </p-step-list>
-    <p-step-panels>
-      <p-step-panel [value]="1">
+<!-- <form [formGroup]="form" (ngSubmit)="save()">
+  <app-ui-stepper [value]="1">
+    <app-ui-step-list>
+      <app-ui-step [value]="1">Propiedades Documento</app-ui-step>
+      <app-ui-step [value]="2">Carga de Archivos</app-ui-step>
+    </app-ui-step-list>
+    <app-ui-step-panels>
+      <app-ui-step-panel [value]="1">
         <ng-template #content let-activateCallback="activateCallback">
           <div class="flex flex-col gap-y-4 pt-2">
             <div class="flex flex-col gap-1">
-              <p-floatlabel variant="on">
-                <p-treeSelect
+              <app-ui-floatlabel variant="on">
+                <app-ui-tree-select
                   class="w-full"
                   selectionMode="single"
                   appendTo="body"
@@ -23,11 +23,11 @@
                   "
                   (onNodeSelect)="selectOrganizationUnit($event)"
                 >
-                </p-treeSelect>
+                </app-ui-tree-select>
                 <label for="sectionDoc">Unidad organizacional *</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               @if (formUtils.isInvalid(form.get("organizationalUnitId"))) {
-                <p-message
+                <app-ui-message
                   severity="error"
                   size="small"
                   variant="simple"
@@ -36,12 +36,12 @@
                   {{
                     formUtils.getErrorMessage(form.get("organizationalUnitId"))
                   }}
-                </p-message>
+                </app-ui-message>
               }
             </div>
             <div class="flex flex-col gap-1">
-              <p-floatlabel class="w-full" variant="on">
-                <p-select
+              <app-ui-floatlabel class="w-full" variant="on">
+                <app-ui-select
                   [options]="documentTypes()"
                   optionLabel="name"
                   appendTo="body"
@@ -54,20 +54,20 @@
                   (onChange)="selectDocumentType($event.value)"
                 />
                 <label for="typeId">Tipo de documento *</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               @if (formUtils.isInvalid(form.get("documentTypeId"))) {
-                <p-message
+                <app-ui-message
                   severity="error"
                   variant="simple"
                   size="small"
                   class="ml-2"
                 >
                   {{ formUtils.getErrorMessage(form.get("documentTypeId")) }}
-                </p-message>
+                </app-ui-message>
               }
             </div>
-            <p-floatlabel class="w-full" variant="on">
-              <p-select
+            <app-ui-floatlabel class="w-full" variant="on">
+              <app-ui-select
                 [options]="documentSubtypes()"
                 optionLabel="name"
                 optionValue="id"
@@ -81,11 +81,11 @@
                 [showClear]="true"
               />
               <label for="subtype">Subtipo (Opcional)</label>
-            </p-floatlabel>
+            </app-ui-floatlabel>
 
             <div class="flex flex-col gap-1">
-              <p-floatlabel class="max-w-[250px]" variant="on">
-                <p-select
+              <app-ui-floatlabel class="max-w-[250px]" variant="on">
+                <app-ui-select
                   [options]="yearOptions"
                   [filter]="true"
                   [showClear]="true"
@@ -99,16 +99,16 @@
                   formControlName="year"
                 />
                 <label for="yearInput">Gestión (Opcional)</label>
-              </p-floatlabel>
+              </app-ui-floatlabel>
               <small class="ml-2">
                 Los archivos seleccionados se subiran con esta gestión.
               </small>
             </div>
           </div>
           <div class="flex pt-4 justify-end">
-            <p-button
+            <app-ui-button
               label="Siguiente"
-              icon="pi pi-arrow-right"
+              icon="ui-icon ui-icon-arrow-right"
               iconPos="right"
               (onClick)="activateCallback(2)"
               [outlined]="true"
@@ -116,8 +116,8 @@
             />
           </div>
         </ng-template>
-      </p-step-panel>
-      <p-step-panel [value]="2">
+      </app-ui-step-panel>
+      <app-ui-step-panel [value]="2">
         <ng-template #content let-activateCallback="activateCallback">
           <div class="p-4 rounded-xl border border-surface-200 mt-4">
             <div class="flex justify-between items-center mb-4">
@@ -127,9 +127,9 @@
                   Tamaño máximo: {{ FILE_RULES.maxSizeMB }} MB por archivo.
                 </span>
               </div>
-              <p-button
+              <app-ui-button
                 label="Seleccionar"
-                icon="pi pi-plus"
+                icon="ui-icon ui-icon-plus"
                 size="small"
                 (onClick)="fileInput.click()"
                 [outlined]="true"
@@ -145,10 +145,10 @@
             </div>
             @if (hasInvalidFiles()) {
               <div class="mb-4">
-                <p-message severity="warn" size="small">
+                <app-ui-message severity="warn" size="small">
                   Algunos archivos seleccionados no son válidos o ya existen y
                   no se cargaron.
-                </p-message>
+                </app-ui-message>
               </div>
             }
             <div formArrayName="documents" class="space-y-3">
@@ -161,12 +161,10 @@
                   [formGroupName]="i"
                   class="flex items-center gap-4 p-2 border border-surface-200 rounded-xl hover:bg-surface-50 transition"
                 >
-                  <!-- Icono -->
                   <div class="shrink-0">
                     <file-icon [mimeType]="files()[i].type" />
                   </div>
 
-                  <!-- Contenido -->
                   <div class="flex-1 flex flex-col gap-1 overflow-hidden">
                     <input
                       type="text"
@@ -183,9 +181,13 @@
                     />
 
                     @if (formUtils.isInvalid(item.get("title"))) {
-                      <p-message severity="error" variant="simple" size="small">
+                      <app-ui-message
+                        severity="error"
+                        variant="simple"
+                        size="small"
+                      >
                         {{ formUtils.getErrorMessage(item.get("title")) }}
-                      </p-message>
+                      </app-ui-message>
                     }
 
                     <span class="text-xs text-slate-400">
@@ -194,8 +196,8 @@
                   </div>
 
                   <div class="shrink-0">
-                    <p-button
-                      icon="pi pi-trash"
+                    <app-ui-button
+                      icon="ui-icon ui-icon-trash"
                       [rounded]="true"
                       [text]="true"
                       severity="danger"
@@ -215,9 +217,9 @@
             </div>
           </div>
           <div class="flex pt-6 justify-start">
-            <p-button
+            <app-ui-button
               label="Atras"
-              icon="pi pi-arrow-left"
+              icon="ui-icon ui-icon-arrow-left"
               (onClick)="activateCallback(1)"
               severity="secondary"
               [outlined]="true"
@@ -225,21 +227,21 @@
             />
           </div>
         </ng-template>
-      </p-step-panel>
-    </p-step-panels>
-  </p-stepper>
+      </app-ui-step-panel>
+    </app-ui-step-panels>
+  </app-ui-stepper>
 
-  <div class="p-dialog-footer">
-    <p-button
+  <div class="app-dialog-actions">
+    <app-ui-button
       label="Cancelar"
       severity="secondary"
       [disabled]="isSaving()"
       (onClick)="close()"
     />
-    <p-button
+    <app-ui-button
       type="submit"
       [loading]="isSaving()"
       [label]="isSaving() ? 'Guardando...' : 'Guardar'"
     />
   </div>
-</form>
+</form> -->

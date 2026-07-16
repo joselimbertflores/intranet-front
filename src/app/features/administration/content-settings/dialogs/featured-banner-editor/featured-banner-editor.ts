@@ -21,15 +21,7 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { ConfirmationService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { TextareaModule } from 'primeng/textarea';
+
 
 import { FeaturedBannerResponse, FeaturedBannerToSave } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -45,23 +37,16 @@ interface BannerImage {
     CommonModule,
     ReactiveFormsModule,
     DragDropModule,
-    ButtonModule,
-    CheckboxModule,
-    ConfirmDialogModule,
-    FloatLabelModule,
-    InputTextModule,
-    MessageModule,
-    TextareaModule,
+   
   ],
   templateUrl: './featured-banner-editor.html',
-  providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeaturedBannerEditor implements OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogRef = inject(DynamicDialogRef);
+  // private readonly dialogRef = inject(DynamicDialogRef);
   private readonly contentDataSource = inject(ContentSettingsDataSource);
-  private readonly confirmationService = inject(ConfirmationService);
+  // private readonly confirmationService = inject(ConfirmationService);
 
   readonly images = signal<BannerImage[]>([]);
   readonly saving = signal(false);
@@ -114,21 +99,21 @@ export class FeaturedBannerEditor implements OnDestroy {
       return;
     }
 
-    this.confirmationService.confirm({
-      header: 'Eliminar banner destacado',
-      message: '¿Está seguro de eliminar este banner?',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: { label: 'Eliminar', severity: 'danger' },
-      accept: () => {
-        this.contentDataSource
-          .removeFeaturedBanner(id)
-          .subscribe(() => this.removeLocalBanner(index));
-      },
-    });
+    // this.confirmationService.confirm({
+    //   header: 'Eliminar banner destacado',
+    //   message: '¿Está seguro de eliminar este banner?',
+    //   rejectButtonProps: {
+    //     label: 'Cancelar',
+    //     severity: 'secondary',
+    //     outlined: true,
+    //   },
+    //   acceptButtonProps: { label: 'Eliminar', severity: 'danger' },
+    //   accept: () => {
+    //     this.contentDataSource
+    //       .removeFeaturedBanner(id)
+    //       .subscribe(() => this.removeLocalBanner(index));
+    //   },
+    // });
   }
 
   drop(event: CdkDragDrop<unknown[]>): void {
@@ -168,15 +153,15 @@ export class FeaturedBannerEditor implements OnDestroy {
       },
     );
 
-    this.saving.set(true);
-    this.contentDataSource.saveFeaturedBanners(items).subscribe({
-      next: () => this.dialogRef.close(),
-      error: () => this.saving.set(false),
-    });
+    // this.saving.set(true);
+    // this.contentDataSource.saveFeaturedBanners(items).subscribe({
+    //   next: () => this.dialogRef.close(),
+    //   error: () => this.saving.set(false),
+    // });
   }
 
   close(): void {
-    this.dialogRef.close();
+    // this.dialogRef.close();
   }
 
   private createBannerGroup(banner?: FeaturedBannerResponse): FormGroup {

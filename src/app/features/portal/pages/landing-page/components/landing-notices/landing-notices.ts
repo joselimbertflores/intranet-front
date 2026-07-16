@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 
 import { register } from 'swiper/element/bundle';
-import { DialogModule } from 'primeng/dialog';
 
 import { LandingNotice } from '../../../../models';
 
@@ -19,9 +18,9 @@ register();
 
 @Component({
   selector: 'landing-notices',
-  imports: [DialogModule],
+  imports: [],
   template: `
-    <p-dialog
+    <app-ui-dialog
       header="Avisos"
       [(visible)]="visible"
       [modal]="true"
@@ -97,7 +96,7 @@ register();
           </swiper-slide>
         }
       </swiper-container>
-    </p-dialog>
+    </app-ui-dialog>
   `,
   styles: `
     swiper-container {

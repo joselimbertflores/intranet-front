@@ -1,204 +1,193 @@
-<div class="flex justify-end mb-4">
-  <!-- <app-ui-button
-    [outlined]="true"
-    icon="ui-icon ui-icon-plus"
-    label="Agregar"
-    size="small"
-    (onClick)="addBanner()"
-  /> -->
-</div>
-
-@if (hasErrorMessage()) {
-  <div class="mb-4">
-    <!-- <app-ui-message [life]="3000" severity="error">
-      Revisa el título, la imagen y el formato del enlace de cada banner.
-    </app-ui-message> -->
-  </div>
-}
-
-<form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4">
-  @if (items.length === 0) {
-    <div class="rounded-xl border border-dashed py-10 text-center">
-      <h3 class="mt-3 text-lg font-semibold text-surface-900">Sin banners</h3>
-      <p class="mt-1 text-sm text-surface-500">
-        Agrega el primer banner para mostrarlo en la landing.
-      </p>
-    </div>
-  }
-
-  <!-- <div
-    cdkDropList
-    #scrollContainer
-    formArrayName="items"
-    class="app-drag-list flex max-h-[450px] flex-col gap-4 overflow-y-auto pr-1"
-    (cdkDropListDropped)="drop($event)"
-  >
-    @for (control of items.controls; track control; let i = $index) {
-      <div
-        cdkDrag
-        [formGroupName]="i"
-        class="app-drag-card shrink-0 overflow-hidden rounded-xl border border-surface-200 bg-surface-0"
-      >
-        <div
-          class="flex items-center justify-between gap-3 border-b border-surface-200 bg-surface-50 px-4 py-2"
-        >
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              cdkDragHandle
-              class="cursor-grab rounded-md p-1 text-surface-400 hover:bg-surface-100 hover:text-surface-700 active:cursor-grabbing"
-              appUiTooltip="Arrastrar para reordenar"
-              tooltipPosition="top"
-            >
-              <i class="ui-icon ui-icon-bars"></i>
-            </button>
-
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-surface-800">
-                Banner #{{ i + 1 }}
-              </span>
-
-              @if (control.get("id")?.value) {
-                <app-ui-tag
-                  value="Guardado"
-                  severity="success"
-                  [rounded]="true"
-                />
-              } @else {
-                <app-ui-tag value="Nuevo" severity="warn" [rounded]="true" />
-              }
-            </div>
-          </div>
-
-          <app-ui-button
-            type="button"
-            icon="ui-icon ui-icon-trash"
-            [text]="true"
-            severity="danger"
-            size="small"
-            appUiTooltip="Eliminar banner"
-            tooltipPosition="left"
-            (onClick)="removeBanner(i)"
-          />
-        </div>
-
-        <div class="grid grid-cols-1 gap-5 p-4 md:grid-cols-12 items-center">
-          <div class="md:col-span-4">
-            <div
-              class="group relative flex aspect-video cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-colors"
-              [ngClass]="
-                bannerImages()[i]?.preview
-                  ? 'border-transparent bg-surface-900'
-                  : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400 hover:bg-surface-100'
-              "
-              (click)="fileInput.click()"
-            >
-              @if (bannerImages()[i]?.preview) {
-                <img
-                  [src]="$safeNavigationMigration(bannerImages()[i]?.preview)"
-                  class="h-full w-full object-cover"
-                  alt="Vista previa del banner"
-                />
-
-                <div
-                  class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
-                >
-                  <span
-                    class="rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm"
-                  >
-                    <i class="ui-icon ui-icon-pencil mr-1"></i>
-                    Cambiar imagen
-                  </span>
-                </div>
-              } @else {
-                <i
-                  class="ui-icon ui-icon-image mb-2 text-3xl text-surface-400"
-                ></i>
-                <span class="text-sm font-medium text-surface-600">
-                  Subir imagen
-                </span>
-                <span class="mt-1 text-xs text-surface-400">
-                  Formato horizontal recomendado
-                </span>
-              }
-            </div>
-
-            <input
-              #fileInput
-              type="file"
-              accept="image/*"
-              class="hidden"
-              (change)="onFileSelected($event, i)"
-            />
-          </div>
-
-          <div class="flex flex-col gap-4 md:col-span-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <app-ui-floatlabel variant="on">
-                <input appUiInput class="w-full" formControlName="title" />
-                <label>Título</label>
-              </app-ui-floatlabel>
-
-              <app-ui-floatlabel variant="on">
-                <input
-                  appUiInput
-                  class="w-full"
-                  formControlName="description"
-                />
-                <label>Descripción</label>
-              </app-ui-floatlabel>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <app-ui-floatlabel variant="on">
-                <input appUiInput class="w-full" formControlName="linkLabel" />
-                <label>Texto del botón</label>
-              </app-ui-floatlabel>
-
-              <app-ui-floatlabel variant="on">
-                <input appUiInput class="w-full" formControlName="linkUrl" />
-                <label>Ruta o URL</label>
-              </app-ui-floatlabel>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <app-ui-checkbox
-                formControlName="isActive"
-                [binary]="true"
-                inputId="active-{{ i }}"
-              />
-
-              <label
-                for="active-{{ i }}"
-                class="cursor-pointer select-none text-sm font-medium text-surface-700"
-              >
-                Banner activo
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-  </div>
-  <div class="app-dialog-actions">
-    <app-ui-button
-      type="button"
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="close()"
-    />
-    <app-ui-button type="submit" label="Guardar" />
-  </div> -->
-</form>
-
-<!-- <app-ui-confirmdialog /> -->
-
 <hlm-dialog-header>
   <h3 hlmDialogTitle>Select user</h3>
   <p hlmDialogDescription>Click a row to select a user.</p>
 </hlm-dialog-header>
 
+<div class="w-full">
+  <div class="flex justify-end mb-4">
+    <button hlmBtn variant="outline" (click)="addBanner()">Button</button>
+  </div>
+  <form class="flex flex-col gap-4">
+    @if (items.length === 0) {
+      <div class="rounded-xl border border-dashed py-10 text-center">
+        <h3 class="mt-3 text-lg font-semibold text-surface-900">Sin banners</h3>
+        <p class="mt-1 text-sm text-surface-500">
+          Agrega el primer banner para mostrarlo en la landing.
+        </p>
+      </div>
+    }
+
+    <div
+      cdkDropList
+      #scrollContainer
+      formArrayName="items"
+      class="app-drag-list flex flex-col gap-4 overflow-y-auto pr-1"
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (bannerForm of formSignal; track bannerForm; let i = $index) {
+        <div
+          cdkDrag
+          class="app-drag-card shrink-0 overflow-hidden rounded-xl border border-surface-200 bg-surface-0"
+        >
+          <div
+            class="flex items-center justify-between gap-3 border-b border-surface-200 bg-surface-50 px-4 py-2"
+          >
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                cdkDragHandle
+                class="cursor-grab rounded-md p-1 text-surface-400 hover:bg-surface-100 hover:text-surface-700 active:cursor-grabbing"
+                appUiTooltip="Arrastrar para reordenar"
+                tooltipPosition="top"
+              >
+                <i class="ui-icon ui-icon-bars"></i>
+              </button>
+
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-surface-800">
+                  Banner #{{ i + 1 }}
+                </span>
+
+                <!-- @if (control.get("id")?.value) {
+                  <app-ui-tag
+                    value="Guardado"
+                    severity="success"
+                    [rounded]="true"
+                  />
+                } @else {
+                  <app-ui-tag value="Nuevo" severity="warn" [rounded]="true" />
+                } -->
+              </div>
+            </div>
+
+            <!-- <app-ui-button
+              type="button"
+              icon="ui-icon ui-icon-trash"
+              [text]="true"
+              severity="danger"
+              size="small"
+              appUiTooltip="Eliminar banner"
+              tooltipPosition="left"
+              (onClick)="removeBanner(i)"
+            /> -->
+          </div>
+          <div class="grid grid-cols-1 gap-5 p-4 md:grid-cols-12 items-center">
+            @let image = bannerImages()[i];
+            <div class="md:col-span-4">
+              <div
+                class="group relative flex aspect-video cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-colors"
+                [ngClass]="
+                  image?.preview
+                    ? 'border-transparent bg-surface-900'
+                    : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400 hover:bg-surface-100'
+                "
+                (click)="fileInput.click()"
+              >
+                @if (image?.preview) {
+                  <img
+                    [src]="image?.preview"
+                    class="h-full w-full object-cover"
+                    alt="Vista previa del banner"
+                  />
+
+                  <div
+                    class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <span
+                      class="rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm"
+                    >
+                      <i class="ui-icon ui-icon-pencil mr-1"></i>
+                      Cambiar imagen
+                    </span>
+                  </div>
+                } @else {
+                  <i
+                    class="ui-icon ui-icon-image mb-2 text-3xl text-surface-400"
+                  ></i>
+                  <span class="text-sm font-medium text-surface-600">
+                    Subir imagen
+                  </span>
+                  <span class="mt-1 text-xs text-surface-400">
+                    Formato horizontal recomendado
+                  </span>
+                }
+              </div>
+
+              <input
+                #fileInput
+                type="file"
+                accept="image/*"
+                class="hidden"
+                (change)="onFileSelected($event, i)"
+              />
+            </div>
+
+            <hlm-field-group class="flex flex-col gap-4 md:col-span-8">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <hlm-field>
+                  <label hlmFieldLabel for="form-title">Titulo</label>
+                  <input
+                    hlmInput
+                    type="text"
+                    id="form-title"
+                    placeholder="Ingrese un titulo"
+                    [formField]="bannerForm.title"
+                  />
+                </hlm-field>
+
+                <hlm-field>
+                  <label hlmFieldLabel for="form-description"
+                    >Descripcion</label
+                  >
+                  <textarea
+                    hlmTextarea
+                    id="form-description"
+                    placeholder="Ingrese la descripcion"
+                    [formField]="bannerForm.description"
+                  ></textarea>
+                </hlm-field>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <hlm-field>
+                  <label hlmFieldLabel for="form-link-label">Texto</label>
+                  <input
+                    hlmInput
+                    type="text"
+                    id="form-link-label"
+                    placeholder="Texto del boton"
+                    [formField]="bannerForm.linkLabel"
+                  />
+                </hlm-field>
+                <hlm-field>
+                  <label hlmFieldLabel for="form-link-url">URL</label>
+                  <input
+                    hlmInput
+                    type="text"
+                    id="form-link-url"
+                    placeholder="URL redireccion"
+                    [formField]="bannerForm.linkUrl"
+                  />
+                </hlm-field>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <hlm-checkbox
+                  inputId="active"
+                  [formField]="bannerForm.isActive"
+                />
+                <label hlmLabel for="active">Mostrar</label>
+              </div>
+            </hlm-field-group>
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+</div>
+
+<!-- 
 <hlm-dialog-footer>
   <button hlmBtn variant="outline" hlmDialogClose>Cancelar</button>
   <button hlmBtn type="submit">Aceptar</button>
-</hlm-dialog-footer>
+</hlm-dialog-footer> -->

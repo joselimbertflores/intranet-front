@@ -5,7 +5,6 @@ import {
   inject,
   signal,
   viewChild,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   ReactiveFormsModule,
@@ -24,32 +23,49 @@ import { CommonModule } from '@angular/common';
 import { ContentSettingsDataSource } from '../../services';
 import { HeroSlideResponse } from '../../interfaces';
 import { HlmDialogHeader, HlmDialogFooter } from '@spartan-ng/helm/dialog';
-import { HlmButton } from '@spartan-ng/helm/button';
-import { form, required } from '@angular/forms/signals';
+import { HlmButton, HlmButtonImports } from '@spartan-ng/helm/button';
+import { form, required, FormField, applyEach } from '@angular/forms/signals';
+import {
+  HlmFieldGroup,
+  HlmField,
+  HlmFieldImports,
+} from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
+import { HlmCheckbox, HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
 
-interface FormData {
-  id: string | null;
-  title: string | null;
-  description: string | null;
-  linkLabel: string | null;
-  linkUrl: string | null;
+interface HeroSlideFormData {
+  id: number | null;
+  title: string;
+  description: string;
+  isActive: boolean;
+  linkLabel: string;
+  linkUrl: string;
   imageFileId: string | null;
-  isActive: string | null;
 }
 
 @Component({
   selector: 'banner-editor',
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     DragDropModule,
     DragDropModule,
     HlmDialogHeader,
     HlmDialogFooter,
     HlmButton,
+    HlmFieldGroup,
+    FormField,
+    HlmInputImports,
+    HlmButtonImports,
+    HlmFieldImports,
+    HlmTextareaImports,
+    HlmCheckbox,
+    HlmLabelImports,
+    HlmCheckboxImports,
+    HlmFieldImports,
   ],
   templateUrl: './banner-editor.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class BannerEditor {
   private formBuilder = inject(FormBuilder);
@@ -60,27 +76,28 @@ export class BannerEditor {
 
   bannerImages = signal<{ file?: File; preview?: string }[]>([]);
 
-  formModel = signal<FormData>({
-    id: null,
-    title: null,
-    description: null,
-    linkLabel: null,
-    linkUrl: null,
-    imageFileId: null,
-    isActive: null,
-  });
+  formModel = signal<HeroSlideFormData[]>([]);
 
   form: FormGroup = this.formBuilder.group({
     items: this.formBuilder.array([]),
   });
 
-  formSignal = form(this.formModel);
+  formSignal = form(this.formModel, (schemaPath) => {
+    // applyEach(schemaPath, (item) => {
+    //   required(item.file, {
+    //     when: (ctx) => {
+    //       return ctx.valueOf(item.imageFileId) === null;
+    //     },
+    //   });
+    // });
+  });
 
   hasErrorMessage = signal(false);
 
   readonly scrollContainer = viewChild.required<ElementRef>('scrollContainer');
+
   ngOnInit() {
-    this.getBanners();
+    // this.getBanners();
   }
 
   save() {
@@ -113,18 +130,37 @@ export class BannerEditor {
     if (preview?.startsWith('blob:')) {
       URL.revokeObjectURL(preview);
     }
+
     this.bannerImages.update((images) => {
       images[i] = { file, preview: URL.createObjectURL(file) };
       return [...images];
     });
+
+    // this.formModel.update((values) => {
+    //   values[i].file = file;
+    //   return [...values];
+    // });
   }
 
-  addBanner() {
-    this.items.push(this.createBannerGroup());
-    this.bannerImages.update((values) => [
+  addBanner(item?: HeroSlideFormData) {
+    // this.items.push(this.createBannerGroup());
+    // this.bannerImages.update((values) => [
+    //   ...values,
+    //   { preview: undefined, file: undefined },
+    // ]);
+    this.formModel.update((values) => [
       ...values,
-      { preview: undefined, file: undefined },
+      {
+        id: item?.id ?? null,
+        title: item?.title ?? '',
+        description: '',
+        linkLabel: '',
+        linkUrl: '',
+        imageFileId: null,
+        isActive: true,
+      },
     ]);
+
     setTimeout(() => {
       this.scrollToBottom();
     });
@@ -197,8 +233,19 @@ export class BannerEditor {
   private getBanners(): void {
     this.contentService.getBanners().subscribe((data) => {
       this.bannerImages.set(data.map((item) => ({ preview: item.imageUrl })));
-      data.forEach((item) => this.items.push(this.createBannerGroup(item)));
       this.changeDetectorRef.markForCheck();
+      data.forEach((item) => {
+        this.addBanner({
+          id: item.id,
+          title: item.title,
+          imageFileId: item.imageFileId,
+          description: '',
+
+          linkLabel: '',
+          linkUrl: '',
+          isActive: true,
+        });
+      });
     });
   }
 

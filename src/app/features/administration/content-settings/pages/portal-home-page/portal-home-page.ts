@@ -7,8 +7,8 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideGalleryHorizontal,
-  lucideImages,
   lucideMousePointerClick,
+  lucideImages,
 } from '@ng-icons/lucide';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
@@ -47,22 +47,20 @@ export default class PortalHomePage {
 
   showHeroSectionDialog(): void {
     this.dialogService.open(BannerEditor, {
-      contentClass:
-        'max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-5xl',
+      showCloseButton: false,
+      // contentClass: 'sm:!w-[500px] sm:!max-w-[calc(100vw-8rem)]',
     });
   }
 
   showFeaturedBannersDialog(): void {
     this.dialogService.open(FeaturedBannerEditor, {
-      contentClass:
-        'max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-6xl',
+      contentClass: 'max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-6xl',
     });
   }
 
   showQuickAccessDialog(): void {
     this.dialogService.open(QuickAccessEditor, {
-      contentClass:
-        'max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl',
+      contentClass: 'max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl',
     });
   }
 }

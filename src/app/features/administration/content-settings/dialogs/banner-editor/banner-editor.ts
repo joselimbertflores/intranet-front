@@ -1,5 +1,4 @@
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
@@ -7,33 +6,46 @@ import {
   viewChild,
 } from '@angular/core';
 import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormArray,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+  form,
+  required,
+  FormField,
+  applyEach,
+  maxLength,
+  pattern,
+  minLength,
+  FormRoot,
+  validate,
+} from '@angular/forms/signals';
 import {
   moveItemInArray,
   DragDropModule,
   CdkDragDrop,
 } from '@angular/cdk/drag-drop';
-import { CommonModule } from '@angular/common';
+
+import { finalize, firstValueFrom, tap } from 'rxjs';
+
+import {
+  HlmDialogHeader,
+  HlmDialogFooter,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import {
+  lucideGripVertical,
+  lucideImage,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import { HlmFieldGroup, HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmButton, HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import { BrnDialogRef } from '@spartan-ng/brain/dialog';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
 
 import { ContentSettingsDataSource } from '../../services';
 import { HeroSlideResponse } from '../../interfaces';
-import { HlmDialogHeader, HlmDialogFooter } from '@spartan-ng/helm/dialog';
-import { HlmButton, HlmButtonImports } from '@spartan-ng/helm/button';
-import { form, required, FormField, applyEach } from '@angular/forms/signals';
-import {
-  HlmFieldGroup,
-  HlmField,
-  HlmFieldImports,
-} from '@spartan-ng/helm/field';
-import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
-import { HlmCheckbox, HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
-import { HlmLabelImports } from '@spartan-ng/helm/label';
 
 interface HeroSlideFormData {
   id: number | null;
@@ -48,77 +60,132 @@ interface HeroSlideFormData {
 @Component({
   selector: 'banner-editor',
   imports: [
-    CommonModule,
-    DragDropModule,
     DragDropModule,
     HlmDialogHeader,
     HlmDialogFooter,
-    HlmButton,
+    HlmDialogTitle,
     HlmFieldGroup,
+    HlmButton,
     FormField,
     HlmInputImports,
     HlmButtonImports,
     HlmFieldImports,
     HlmTextareaImports,
-    HlmCheckbox,
     HlmLabelImports,
-    HlmCheckboxImports,
-    HlmFieldImports,
+    HlmCheckbox,
+    FormRoot,
+    NgIcon,
+    HlmSpinner,
   ],
   templateUrl: './banner-editor.html',
+  providers: [
+    provideIcons({
+      lucideGripVertical,
+      lucideImage,
+      lucideTrash2,
+    }),
+  ],
+  host: {
+    class: 'flex flex-col gap-2',
+  },
+  styles: `
+    .hero-slide-card.cdk-drag-preview {
+      box-sizing: border-box;
+      opacity: 1;
+      box-shadow: 0 12px 24px rgb(0 0 0 / 0.18);
+    }
+
+    .hero-slide-card.cdk-drag-placeholder {
+      opacity: 0.35;
+    }
+
+    .hero-slide-card.cdk-drag-animating,
+    .hero-slide-list.cdk-drop-list-dragging
+      .hero-slide-card:not(.cdk-drag-placeholder) {
+      transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+    }
+  `,
 })
 export class BannerEditor {
-  private formBuilder = inject(FormBuilder);
-  // private dialogRef = inject(DynamicDialogRef);
-  private changeDetectorRef = inject(ChangeDetectorRef);
-  private contentService = inject(ContentSettingsDataSource);
-  // private confirmationService = inject(ConfirmationService);
+  private _dialogRef = inject<BrnDialogRef<HeroSlideResponse[]>>(BrnDialogRef);
+  private contenDataSource = inject(ContentSettingsDataSource);
 
-  bannerImages = signal<{ file?: File; preview?: string }[]>([]);
+  readonly isLoading = signal(false);
+  readonly deletedSlideIds = signal<number[]>([]);
+  readonly bannerImages = signal<
+    { file: File | null; preview: string | null }[]
+  >([]);
 
   formModel = signal<HeroSlideFormData[]>([]);
 
-  form: FormGroup = this.formBuilder.group({
-    items: this.formBuilder.array([]),
-  });
+  heroSlidesForm = form(
+    this.formModel,
+    (schemaPath) => {
+      minLength(schemaPath, 1, {
+        message: 'Debe existir al menos un banner',
+      });
+      maxLength(schemaPath, 5, {
+        message: 'No puede registrar más de 5 banners',
+      });
+      validate(schemaPath, ({ value }) => {
+        const images = this.bannerImages();
 
-  formSignal = form(this.formModel, (schemaPath) => {
-    // applyEach(schemaPath, (item) => {
-    //   required(item.file, {
-    //     when: (ctx) => {
-    //       return ctx.valueOf(item.imageFileId) === null;
-    //     },
-    //   });
-    // });
-  });
+        const missingImage = value().some(
+          (item, index) => !item.imageFileId && !images[index]?.file,
+        );
 
-  hasErrorMessage = signal(false);
+        return missingImage
+          ? {
+              kind: 'imageRequired',
+              message: 'Todos los banners deben tener una imagen',
+            }
+          : null;
+      });
+
+      applyEach(schemaPath, (item) => {
+        required(item.title, { message: 'El titulo es requerido' });
+        maxLength(item.title, 80, { message: 'Maximo 80 caracteres' });
+
+        maxLength(item.description, 200, { message: 'Maximo 200 caracteres' });
+
+        required(item.linkLabel, {
+          message: 'Ingrese el texto del botón',
+          when: ({ valueOf }) => Boolean(valueOf(item.linkUrl)?.trim()),
+        });
+        maxLength(item.linkLabel, 40, { message: 'Maximo 40 caracteres' });
+
+        required(item.linkUrl, {
+          message: 'Ingrese la URL del botón',
+          when: ({ valueOf }) => Boolean(valueOf(item.linkLabel)?.trim()),
+        });
+        pattern(item.linkUrl, /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i, {
+          message: 'Ingrese una URL válida',
+        });
+      });
+    },
+    {
+      submission: {
+        action: async (field) => {
+          const response = await firstValueFrom(
+            this.contenDataSource.saveHeroSlides(
+              this.buildItemsToSave(field().value()),
+              this.deletedSlideIds(),
+            ),
+          );
+          this._dialogRef.close(response);
+        },
+      },
+    },
+  );
 
   readonly scrollContainer = viewChild.required<ElementRef>('scrollContainer');
 
   ngOnInit() {
-    // this.getBanners();
-  }
-
-  save() {
-    if (!this.isFormValid) {
-      if (this.items.length > 0) this.showErrorMessage();
-      return;
-    }
-    this.contentService
-      .saveHeroSections(
-        this.items.controls.map((item, i: number) => ({
-          ...item.value,
-          file: this.bannerImages()[i]?.file,
-        })),
-      )
-      .subscribe(() => {
-        // this.dialogRef.close();
-      });
+    this.loadHeroSlides();
   }
 
   close() {
-    // this.dialogRef.close();
+    this._dialogRef.close();
   }
 
   onFileSelected(event: Event, i: number): void {
@@ -126,39 +193,33 @@ export class BannerEditor {
     const [file] = input.files ?? [];
     if (!file) return;
 
-    const preview = this.bannerImages()[i]?.preview;
-    if (preview?.startsWith('blob:')) {
-      URL.revokeObjectURL(preview);
-    }
+    this.revokePreviewUrl(this.bannerImages()[i].preview);
 
     this.bannerImages.update((images) => {
       images[i] = { file, preview: URL.createObjectURL(file) };
       return [...images];
     });
-
-    // this.formModel.update((values) => {
-    //   values[i].file = file;
-    //   return [...values];
-    // });
   }
 
-  addBanner(item?: HeroSlideFormData) {
-    // this.items.push(this.createBannerGroup());
-    // this.bannerImages.update((values) => [
-    //   ...values,
-    //   { preview: undefined, file: undefined },
-    // ]);
+  addBanner() {
+    if (this.heroSlidesForm().value().length === 5) return;
+
     this.formModel.update((values) => [
       ...values,
       {
-        id: item?.id ?? null,
-        title: item?.title ?? '',
+        id: null,
+        title: '',
         description: '',
-        linkLabel: '',
         linkUrl: '',
+        linkLabel: '',
         imageFileId: null,
         isActive: true,
       },
+    ]);
+
+    this.bannerImages.update((values) => [
+      ...values,
+      { preview: null, file: null },
     ]);
 
     setTimeout(() => {
@@ -166,120 +227,92 @@ export class BannerEditor {
     });
   }
 
-  removeBanner(i: number) {
-    const control = this.items.controls[i];
-    // if (control.value['id']) {
-    //   this.confirmationService.confirm({
-    //     message: '¿Esta seguro que desea eliminar el elemento?',
-    //     header: 'Eliminar banner',
-    //     rejectButtonProps: {
-    //       label: 'Cancelar',
-    //       severity: 'secondary',
-    //       outlined: true,
-    //     },
-    //     acceptButtonProps: {
-    //       label: 'Aceptar',
-    //     },
-    //     accept: () => {
-    //       this.contentService
-    //         .removeBanner(control.value['id'])
-    //         .subscribe(() => {
-    //           this.items.removeAt(i);
-    //           this.bannerImages.update((values) => {
-    //             values.splice(i, 1);
-    //             return [...values];
-    //           });
-    //         });
-    //     },
-    //   });
-    // } else {
-    //   this.items.removeAt(i);
-    //   this.bannerImages.update((values) => {
-    //     values.splice(i, 1);
-    //     return [...values];
-    //   });
-    // }
+  removeBanner(index: number) {
+    const banner = this.formModel()[index];
+
+    if (!banner) return;
+
+    const id = banner.id;
+
+    if (id !== null) {
+      this.deletedSlideIds.update((ids) => [...ids, id]);
+    }
+
+    this.revokePreviewUrl(this.bannerImages()[index].preview);
+
+    this.formModel.update((models) => {
+      models.splice(index, 1);
+      return [...models];
+    });
+    this.bannerImages.update((items) => {
+      items.splice(index, 1);
+      return [...items];
+    });
   }
 
   drop(event: CdkDragDrop<unknown>) {
-    moveItemInArray(
-      this.items.controls,
-      event.previousIndex,
-      event.currentIndex,
-    );
-    moveItemInArray(
-      this.bannerImages(),
-      event.previousIndex,
-      event.currentIndex,
-    );
-  }
+    if (event.previousIndex === event.currentIndex) return;
 
-  get items(): FormArray {
-    return this.form.get('items') as FormArray;
-  }
-
-  get isFormValid(): boolean {
-    if (this.form.invalid) return false;
-    if (this.items.length === 0) return false;
-
-    const images = this.bannerImages();
-    return this.items.controls.every((control, i) => {
-      const banner = control.value;
-      const image = images[i];
-      if (!banner.id) return !!image?.file;
-      return true;
+    this.formModel.update((items) => {
+      const next = [...items];
+      moveItemInArray(next, event.previousIndex, event.currentIndex);
+      return next;
     });
-  }
-  private getBanners(): void {
-    this.contentService.getBanners().subscribe((data) => {
-      this.bannerImages.set(data.map((item) => ({ preview: item.imageUrl })));
-      this.changeDetectorRef.markForCheck();
-      data.forEach((item) => {
-        this.addBanner({
-          id: item.id,
-          title: item.title,
-          imageFileId: item.imageFileId,
-          description: '',
 
-          linkLabel: '',
-          linkUrl: '',
-          isActive: true,
-        });
-      });
+    this.bannerImages.update((images) => {
+      const next = [...images];
+      moveItemInArray(next, event.previousIndex, event.currentIndex);
+      return next;
     });
   }
 
-  private createBannerGroup(banner?: HeroSlideResponse): FormGroup {
-    return this.formBuilder.group({
-      id: [banner?.id],
-      title: [
-        banner?.title ?? '',
-        [Validators.required, Validators.maxLength(120)],
-      ],
-      description: [banner?.description],
-      linkLabel: [banner?.linkLabel, Validators.maxLength(80)],
-      linkUrl: [
-        banner?.linkUrl,
-        Validators.pattern(/^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i),
-      ],
-      imageFileId: [banner?.imageFileId],
-      isActive: [banner?.isActive ?? true],
-    });
+  isFieldInvalid(fieldName: keyof HeroSlideFormData, index: number): boolean {
+    const fieldSignal = this.heroSlidesForm[index][fieldName];
+    if (!fieldSignal) return false;
+    const field = fieldSignal();
+    return field && field.touched() && field.errors().length > 0;
   }
 
   private scrollToBottom() {
-    const el = this.scrollContainer().nativeElement;
-    el.scrollTo({
-      top: el.scrollHeight,
-      behavior: 'smooth',
-    });
+    const element = this.scrollContainer().nativeElement as HTMLElement;
+    element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
   }
 
-  private showErrorMessage() {
-    this.hasErrorMessage.set(true);
+  private buildItemsToSave(formValue: HeroSlideFormData[]) {
+    const images = this.bannerImages();
 
-    setTimeout(() => {
-      this.hasErrorMessage.set(false);
-    }, 3000);
+    return formValue.map((item, index) => ({
+      ...item,
+      file: images[index]?.file ?? null,
+    }));
+  }
+
+  private revokePreviewUrl(preview: string | null) {
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
+  }
+
+  private loadHeroSlides(): void {
+    this.isLoading.set(true);
+    this.contenDataSource
+      .getHeroSlides()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe((slides) => {
+        this.formModel.set(
+          slides.map((slide) => ({
+            id: slide.id,
+            title: slide.title,
+            description: slide.description ?? '',
+            linkLabel: slide.linkLabel ?? '',
+            linkUrl: slide.linkUrl ?? '',
+            imageFileId: slide.imageFileId,
+            isActive: slide.isActive,
+          })),
+        );
+        this.bannerImages.set(
+          slides.map((slide) => ({ preview: slide.imageUrl, file: null })),
+        );
+      });
   }
 }

@@ -1,117 +1,139 @@
 <hlm-dialog-header>
-  <h3 hlmDialogTitle>Select user</h3>
-  <p hlmDialogDescription>Click a row to select a user.</p>
+  <h3 hlmDialogTitle>Configurar banners</h3>
 </hlm-dialog-header>
 
-<div class="w-full">
-  <div class="flex justify-end mb-4">
-    <button hlmBtn variant="outline" (click)="addBanner()">Button</button>
-  </div>
-  <form class="flex flex-col gap-4">
-    @if (items.length === 0) {
-      <div class="rounded-xl border border-dashed py-10 text-center">
-        <h3 class="mt-3 text-lg font-semibold text-surface-900">Sin banners</h3>
-        <p class="mt-1 text-sm text-surface-500">
-          Agrega el primer banner para mostrarlo en la landing.
-        </p>
-      </div>
-    }
+<form
+  id="hero-banners-form"
+  class="flex min-h-0 flex-col gap-2"
+  [formRoot]="heroSlidesForm"
+>
+  @let rootErrors = heroSlidesForm().errors();
+  <div
+    class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <div>
+      @if (heroSlidesForm().touched() && rootErrors.length > 0) {
+        @for (error of rootErrors; track error.kind) {
+          <p class="text-sm text-destructive">
+            {{ error.message }}
+          </p>
+        }
+      } @else {
+        <p class="text-sm font-medium">Listado de banners</p>
+      }
+    </div>
 
-    <div
-      cdkDropList
-      #scrollContainer
-      formArrayName="items"
-      class="app-drag-list flex flex-col gap-4 overflow-y-auto pr-1"
-      (cdkDropListDropped)="drop($event)"
+    <button
+      hlmBtn
+      type="button"
+      size="sm"
+      variant="outline"
+      [disabled]="heroSlidesForm.length >= 5 || heroSlidesForm().submitting()"
+      (click)="addBanner()"
     >
-      @for (bannerForm of formSignal; track bannerForm; let i = $index) {
-        <div
+      Agregar banner
+    </button>
+  </div>
+
+  <div
+    #scrollContainer
+    cdkDropList
+    class="hero-slide-list flex max-h-[65dvh] flex-col gap-4 overflow-y-auto pr-1"
+    (cdkDropListDropped)="drop($event)"
+  >
+    @if (isLoading()) {
+      <div
+        class="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground"
+      >
+        <hlm-spinner />
+        <span>Cargando banners...</span>
+      </div>
+    } @else {
+      @for (
+        heroSlideForm of heroSlidesForm;
+        track heroSlideForm;
+        let i = $index
+      ) {
+        @let image = bannerImages()[i];
+
+        <section
           cdkDrag
-          class="app-drag-card shrink-0 overflow-hidden rounded-xl border border-surface-200 bg-surface-0"
+          class="hero-slide-card rounded-lg border bg-background"
         >
-          <div
-            class="flex items-center justify-between gap-3 border-b border-surface-200 bg-surface-50 px-4 py-2"
+          <header
+            class="flex items-center justify-between border-b bg-muted/50 px-4 py-2"
           >
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
               <button
+                hlmBtn
                 type="button"
+                size="icon"
+                variant="ghost"
                 cdkDragHandle
-                class="cursor-grab rounded-md p-1 text-surface-400 hover:bg-surface-100 hover:text-surface-700 active:cursor-grabbing"
+                aria-label="Arrastrar para reordenar"
                 appUiTooltip="Arrastrar para reordenar"
-                tooltipPosition="top"
+                [disabled]="heroSlidesForm().submitting()"
               >
-                <i class="ui-icon ui-icon-bars"></i>
+                <ng-icon name="lucideGripVertical" />
               </button>
 
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-surface-800">
-                  Banner #{{ i + 1 }}
-                </span>
-
-                <!-- @if (control.get("id")?.value) {
-                  <app-ui-tag
-                    value="Guardado"
-                    severity="success"
-                    [rounded]="true"
-                  />
-                } @else {
-                  <app-ui-tag value="Nuevo" severity="warn" [rounded]="true" />
-                } -->
-              </div>
+              <span class="text-sm font-medium"> Banner {{ i + 1 }} </span>
             </div>
 
-            <!-- <app-ui-button
+            <button
+              hlmBtn
               type="button"
-              icon="ui-icon ui-icon-trash"
-              [text]="true"
-              severity="danger"
-              size="small"
+              size="icon"
+              variant="ghost"
+              class="text-destructive hover:text-destructive"
+              aria-label="Eliminar banner"
               appUiTooltip="Eliminar banner"
-              tooltipPosition="left"
-              (onClick)="removeBanner(i)"
-            /> -->
-          </div>
-          <div class="grid grid-cols-1 gap-5 p-4 md:grid-cols-12 items-center">
-            @let image = bannerImages()[i];
-            <div class="md:col-span-4">
-              <div
-                class="group relative flex aspect-video cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-colors"
-                [ngClass]="
+              [disabled]="heroSlidesForm().submitting()"
+              (click)="removeBanner(i)"
+            >
+              <ng-icon name="lucideTrash2" />
+            </button>
+          </header>
+
+          <div class="grid gap-5 p-4 md:grid-cols-[minmax(240px,1fr)_2fr]">
+            <div>
+              <button
+                type="button"
+                class="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                [attr.aria-label]="
                   image?.preview
-                    ? 'border-transparent bg-surface-900'
-                    : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400 hover:bg-surface-100'
+                    ? 'Cambiar imagen del banner ' + (i + 1)
+                    : 'Subir imagen para el banner ' + (i + 1)
                 "
                 (click)="fileInput.click()"
               >
                 @if (image?.preview) {
                   <img
-                    [src]="image?.preview"
-                    class="h-full w-full object-cover"
+                    [src]="image.preview"
+                    class="size-full object-cover"
                     alt="Vista previa del banner"
                   />
 
-                  <div
-                    class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+                  <span
+                    class="absolute inset-0 hidden items-center justify-center bg-black/50 text-sm font-medium text-white group-hover:flex group-focus-visible:flex"
                   >
-                    <span
-                      class="rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm"
-                    >
-                      <i class="ui-icon ui-icon-pencil mr-1"></i>
-                      Cambiar imagen
-                    </span>
-                  </div>
-                } @else {
-                  <i
-                    class="ui-icon ui-icon-image mb-2 text-3xl text-surface-400"
-                  ></i>
-                  <span class="text-sm font-medium text-surface-600">
-                    Subir imagen
+                    Cambiar imagen
                   </span>
-                  <span class="mt-1 text-xs text-surface-400">
-                    Formato horizontal recomendado
+                } @else {
+                  <span class="flex flex-col items-center gap-1">
+                    <ng-icon
+                      name="lucideImage"
+                      class="text-3xl text-muted-foreground"
+                    />
+
+                    <span class="text-sm font-medium"> Subir imagen </span>
+
+                    <span class="text-xs text-muted-foreground">
+                      Formato horizontal recomendado
+                    </span>
                   </span>
                 }
-              </div>
+              </button>
 
               <input
                 #fileInput
@@ -122,72 +144,126 @@
               />
             </div>
 
-            <hlm-field-group class="flex flex-col gap-4 md:col-span-8">
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <hlm-field>
-                  <label hlmFieldLabel for="form-title">Titulo</label>
-                  <input
-                    hlmInput
-                    type="text"
-                    id="form-title"
-                    placeholder="Ingrese un titulo"
-                    [formField]="bannerForm.title"
-                  />
-                </hlm-field>
-
-                <hlm-field>
-                  <label hlmFieldLabel for="form-description"
-                    >Descripcion</label
-                  >
-                  <textarea
-                    hlmTextarea
-                    id="form-description"
-                    placeholder="Ingrese la descripcion"
-                    [formField]="bannerForm.description"
-                  ></textarea>
-                </hlm-field>
-              </div>
-
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <hlm-field>
-                  <label hlmFieldLabel for="form-link-label">Texto</label>
-                  <input
-                    hlmInput
-                    type="text"
-                    id="form-link-label"
-                    placeholder="Texto del boton"
-                    [formField]="bannerForm.linkLabel"
-                  />
-                </hlm-field>
-                <hlm-field>
-                  <label hlmFieldLabel for="form-link-url">URL</label>
-                  <input
-                    hlmInput
-                    type="text"
-                    id="form-link-url"
-                    placeholder="URL redireccion"
-                    [formField]="bannerForm.linkUrl"
-                  />
-                </hlm-field>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <hlm-checkbox
-                  inputId="active"
-                  [formField]="bannerForm.isActive"
+            <hlm-field-group class="grid gap-4 md:grid-cols-2">
+              <hlm-field>
+                <label hlmFieldLabel [for]="'banner-title-' + i">Título</label>
+                <input
+                  hlmInput
+                  [id]="'banner-title-' + i"
+                  placeholder="Ingrese un título"
+                  [formField]="heroSlideForm.title"
                 />
-                <label hlmLabel for="active">Mostrar</label>
+
+                @if (isFieldInvalid("title", i)) {
+                  @for (error of heroSlideForm.title().errors(); track error) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
+                }
+              </hlm-field>
+
+              <hlm-field>
+                <label hlmFieldLabel [for]="'banner-description-' + i">
+                  Descripción
+                </label>
+                <textarea
+                  hlmTextarea
+                  [id]="'banner-description-' + i"
+                  placeholder="Ingrese una descripción"
+                  [formField]="heroSlideForm.description"
+                ></textarea>
+                @if (isFieldInvalid("description", i)) {
+                  @for (error of heroSlideForm.description().errors(); track error) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
+                }
+              </hlm-field>
+
+              <hlm-field>
+                <label hlmFieldLabel [for]="'banner-link-label-' + i">
+                  Texto del botón
+                </label>
+                <input
+                  hlmInput
+                  [id]="'banner-link-label-' + i"
+                  placeholder="Ej. Ver más"
+                  [formField]="heroSlideForm.linkLabel"
+                />
+                 @if (isFieldInvalid("linkLabel", i)) {
+                  @for (error of heroSlideForm.linkLabel().errors(); track error) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
+                }
+              </hlm-field>
+
+              <hlm-field>
+                <label hlmFieldLabel [for]="'banner-link-url-' + i">URL</label>
+                <input
+                  hlmInput
+                  [id]="'banner-link-url-' + i"
+                  placeholder="https://..."
+                  [formField]="heroSlideForm.linkUrl"
+                />
+                 @if (isFieldInvalid("linkUrl", i)) {
+                  @for (error of heroSlideForm.linkUrl().errors(); track error) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
+                }
+              </hlm-field>
+
+              <div class="flex items-center gap-2 md:col-span-2">
+                <hlm-checkbox
+                  [inputId]="'banner-active-' + i"
+                  [formField]="heroSlideForm.isActive"
+                />
+                <label hlmLabel [for]="'banner-active-' + i">
+                  Mostrar banner
+                </label>
               </div>
             </hlm-field-group>
           </div>
+        </section>
+      } @empty {
+        <div class="rounded-lg border border-dashed p-10 text-center">
+          <p class="font-medium">Sin banners</p>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Agregue el primer banner para mostrarlo en la página principal.
+          </p>
         </div>
       }
-    </div>
-  </form>
-</div>
+    }
+  </div>
+</form>
 
-<!-- 
 <hlm-dialog-footer>
-  <button hlmBtn variant="outline" hlmDialogClose>Cancelar</button>
-  <button hlmBtn type="submit">Aceptar</button>
-</hlm-dialog-footer> -->
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="heroSlidesForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+
+  <button
+    hlmBtn
+    type="submit"
+    form="hero-banners-form"
+    [disabled]="isLoading() || heroSlidesForm().submitting()"
+  >
+    @if (heroSlidesForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

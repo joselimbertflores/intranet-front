@@ -48,7 +48,7 @@ export default class PortalHomePage {
   showHeroSectionDialog(): void {
     this.dialogService.open(BannerEditor, {
       showCloseButton: false,
-      // contentClass: 'sm:!w-[500px] sm:!max-w-[calc(100vw-8rem)]',
+      contentClass: 'sm:!w-[90vw] sm:!max-w-[1100px]',
     });
   }
 

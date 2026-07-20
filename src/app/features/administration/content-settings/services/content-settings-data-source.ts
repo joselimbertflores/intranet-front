@@ -16,14 +16,14 @@ import {
 import { FileUploadService } from '../../../../shared';
 
 interface HeroSlideToSave {
-  id?: number;
+  id?: number | null;
   title: string;
-  description?: string | null;
-  linkLabel?: string | null;
-  linkUrl?: string | null;
-  imageFileId?: string;
-  isActive: boolean;
-  file?: File;
+  description: string | null;
+  linkLabel: string | null;
+  linkUrl: string | null;
+  imageFileId: string | null;
+  isActive?: boolean;
+  file?: File | null;
 }
 
 @Injectable({
@@ -41,6 +41,7 @@ export class ContentSettingsDataSource {
   getQuickAccess() {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
   }
+
   replaceQuickAccessItems(items: QuickAccessBatchItem[]) {
     return this.http.put<QuickAccessResponse[]>(
       `${this.QUICK_ACCESS_URL}/batch`,
@@ -54,13 +55,13 @@ export class ContentSettingsDataSource {
     return this.http.delete(`${this.QUICK_ACCESS_URL}/${id}`);
   }
 
-  getBanners() {
+  getHeroSlides() {
     return this.http.get<HeroSlideResponse[]>(
       `${this.HERO_SLIDES_URL}/hero-slides`,
     );
   }
 
-  saveHeroSections(items: HeroSlideToSave[]) {
+  saveHeroSlides(items: HeroSlideToSave[], deletedIds: number[]) {
     const uploads$ = items.map(({ file, ...props }) =>
       file
         ? this.fileUploadService.upload(file, 'hero-slides').pipe(
@@ -72,10 +73,14 @@ export class ContentSettingsDataSource {
         : of(props),
     );
     return forkJoin(uploads$).pipe(
-      switchMap((items) => {
-        return this.http.put(`${this.HERO_SLIDES_URL}/hero-slides/batch`, {
-          items,
-        });
+      switchMap((payloadItems) => {
+        return this.http.post<HeroSlideResponse[]>(
+          `${this.HERO_SLIDES_URL}/hero-slides/batch`,
+          {
+            items: payloadItems,
+            ...(deletedIds.length > 0 && { deletedIds }),
+          },
+        );
       }),
     );
   }
@@ -112,7 +117,9 @@ export class ContentSettingsDataSource {
   }
 
   getLandingNotices() {
-    return this.http.get<{ notices: LandingNoticeResponse[], total: number }>(this.LANDING_NOTICES_URL);
+    return this.http.get<{ notices: LandingNoticeResponse[]; total: number }>(
+      this.LANDING_NOTICES_URL,
+    );
   }
 
   createLandingNotice(notice: LandingNoticeToSave, file?: File) {

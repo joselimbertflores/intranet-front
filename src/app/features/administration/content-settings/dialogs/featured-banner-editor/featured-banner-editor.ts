@@ -1,209 +1,320 @@
-import { CommonModule } from '@angular/common';
 import {
   CdkDragDrop,
   DragDropModule,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
   OnDestroy,
+  OnInit,
   signal,
   viewChild,
 } from '@angular/core';
+
 import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  applyEach,
+  FormField,
+  FormRoot,
+  maxLength,
+  minLength,
+  pattern,
+  required,
+  validate,
+  form,
+} from '@angular/forms/signals';
+import {
+  HlmDialogHeader,
+  HlmDialogFooter,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldGroup, HlmField, HlmFieldError } from '@spartan-ng/helm/field';
+import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { HlmButton } from '@spartan-ng/helm/button';
+import {
+  lucideGripVertical,
+  lucideImage,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import { BrnDialogRef } from '@spartan-ng/brain/dialog';
+import { finalize, firstValueFrom } from 'rxjs';
 
-
-
-import { FeaturedBannerResponse, FeaturedBannerToSave } from '../../interfaces';
+import { FeaturedBannerResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
-
-interface BannerImage {
-  file?: File;
-  preview?: string;
+interface FeaturedBannerFormData {
+  id: number | null;
+  title: string;
+  description: string;
+  linkLabel: string;
+  linkUrl: string;
+  imageId: string | null;
+  isActive: boolean;
 }
 
 @Component({
   selector: 'app-featured-banner-editor',
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
+    FormRoot,
+    FormField,
     DragDropModule,
-   
+    HlmDialogHeader,
+    HlmDialogFooter,
+    HlmInputImports,
+    HlmDialogTitle,
+    HlmTextareaImports,
+    HlmFieldGroup,
+    HlmFieldError,
+    HlmSpinner,
+    HlmField,
+    HlmButton,
+    NgIcon,
+    HlmCheckbox,
   ],
   templateUrl: './featured-banner-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class FeaturedBannerEditor implements OnDestroy {
-  private readonly formBuilder = inject(FormBuilder);
-  // private readonly dialogRef = inject(DynamicDialogRef);
-  private readonly contentDataSource = inject(ContentSettingsDataSource);
-  // private readonly confirmationService = inject(ConfirmationService);
+  host: {
+    class: 'flex flex-col gap-2',
+  },
+  styles: `
+    .featured-banner-card.cdk-drag-preview {
+      box-sizing: border-box;
+      opacity: 1;
+      box-shadow: 0 12px 24px rgb(0 0 0 / 0.18);
+    }
 
-  readonly images = signal<BannerImage[]>([]);
+    .featured-banner-card.cdk-drag-placeholder {
+      opacity: 0.35;
+    }
+
+    .featured-banner-card.cdk-drag-animating,
+    .featured-banner-list.cdk-drop-list-dragging
+      .featured-banner-card:not(.cdk-drag-placeholder) {
+      transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+    }
+  `,
+  providers: [
+    provideIcons({
+      lucideGripVertical,
+      lucideImage,
+      lucideTrash2,
+    }),
+  ],
+})
+export class FeaturedBannerEditor implements OnInit, OnDestroy {
+  private _dialogRef =
+    inject<BrnDialogRef<FeaturedBannerResponse[]>>(BrnDialogRef);
+  private readonly contentDataSource = inject(ContentSettingsDataSource);
+
+  readonly featuredBannerImages = signal<
+    { file: File | null; preview: string | null }[]
+  >([]);
   readonly saving = signal(false);
   readonly hasErrorMessage = signal(false);
   readonly scrollContainer =
     viewChild.required<ElementRef<HTMLElement>>('scrollContainer');
-  readonly form = this.formBuilder.group({ items: this.formBuilder.array([]) });
+
+  readonly deletedBannersIds = signal<number[]>([]);
+
+  formModel = signal<FeaturedBannerFormData[]>([]);
+
+  isLoading = signal(false);
+
+  featuredBannersForm = form(
+    this.formModel,
+    (schemaPath) => {
+      minLength(schemaPath, 1, {
+        message: 'Debe existir al menos un banner',
+      });
+      maxLength(schemaPath, 10, {
+        message: 'No puede registrar más de 10 banners',
+      });
+      validate(schemaPath, ({ value }) => {
+        const images = this.featuredBannerImages();
+
+        const missingImage = value().some(
+          (item, index) => !item.imageId && !images[index]?.file,
+        );
+
+        return missingImage
+          ? {
+              kind: 'imageRequired',
+              message: 'Todos los banners deben tener una imagen',
+            }
+          : null;
+      });
+
+      applyEach(schemaPath, (item) => {
+        required(item.title, { message: 'El titulo es requerido' });
+        maxLength(item.title, 80, { message: 'Maximo 80 caracteres' });
+
+        maxLength(item.description, 200, { message: 'Maximo 200 caracteres' });
+
+        required(item.linkLabel, {
+          message: 'Ingrese el texto del botón',
+          when: ({ valueOf }) => Boolean(valueOf(item.linkUrl)?.trim()),
+        });
+        maxLength(item.linkLabel, 40, { message: 'Maximo 40 caracteres' });
+
+        required(item.linkUrl, {
+          message: 'Ingrese la URL del botón',
+          when: ({ valueOf }) => Boolean(valueOf(item.linkLabel)?.trim()),
+        });
+        pattern(item.linkUrl, /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i, {
+          message: 'Ingrese una URL válida',
+        });
+      });
+    },
+    {
+      submission: {
+        action: async (field) => {
+          const response = await firstValueFrom(
+            this.contentDataSource.saveFeaturedBanners(
+              this.buildItemsToSave(field().value()),
+              this.deletedBannersIds(),
+            ),
+          );
+          this._dialogRef.close(response);
+        },
+      },
+    },
+  );
 
   ngOnInit(): void {
-    this.contentDataSource.getFeaturedBanners().subscribe((banners) => {
-      this.images.set(banners.map(({ imageUrl }) => ({ preview: imageUrl })));
-      banners.forEach((banner) =>
-        this.items.push(this.createBannerGroup(banner)),
-      );
-    });
+    this.loadFeaturedBanners();
   }
 
   ngOnDestroy(): void {
-    this.images().forEach(({ preview }) => this.revokePreview(preview));
-  }
-
-  get items(): FormArray {
-    return this.form.controls.items;
+    this.featuredBannerImages().forEach(({ preview }) =>
+      this.revokePreviewUrl(preview),
+    );
   }
 
   addBanner(): void {
-    this.items.push(this.createBannerGroup());
-    this.images.update((images) => [...images, {}]);
-    setTimeout(() => this.scrollToBottom());
+    if (this.featuredBannersForm().value().length === 5) return;
+
+    this.formModel.update((values) => [
+      ...values,
+      {
+        id: null,
+        title: '',
+        description: '',
+        linkUrl: '',
+        linkLabel: '',
+        imageId: null,
+        isActive: true,
+      },
+    ]);
+
+    this.featuredBannerImages.update((values) => [
+      ...values,
+      { preview: null, file: null },
+    ]);
+
+    setTimeout(() => {
+      this.scrollToBottom();
+    });
+  }
+
+  close() {
+    this._dialogRef.close();
   }
 
   onFileSelected(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    const [file] = input.files ?? [];
     if (!file) return;
 
-    const previousPreview = this.images()[index]?.preview;
-    this.revokePreview(previousPreview);
-    this.images.update((images) => {
+    this.revokePreviewUrl(this.featuredBannerImages()[index].preview);
+
+    this.featuredBannerImages.update((images) => {
       images[index] = { file, preview: URL.createObjectURL(file) };
       return [...images];
     });
-    input.value = '';
   }
 
   removeBanner(index: number): void {
-    const id = this.items.at(index).get('id')?.value as number | null;
-    if (!id) {
-      this.removeLocalBanner(index);
-      return;
+    const banner = this.formModel()[index];
+
+    if (!banner) return;
+
+    const id = banner.id;
+
+    if (id !== null) {
+      this.deletedBannersIds.update((ids) => [...ids, id]);
     }
 
-    // this.confirmationService.confirm({
-    //   header: 'Eliminar banner destacado',
-    //   message: '¿Está seguro de eliminar este banner?',
-    //   rejectButtonProps: {
-    //     label: 'Cancelar',
-    //     severity: 'secondary',
-    //     outlined: true,
-    //   },
-    //   acceptButtonProps: { label: 'Eliminar', severity: 'danger' },
-    //   accept: () => {
-    //     this.contentDataSource
-    //       .removeFeaturedBanner(id)
-    //       .subscribe(() => this.removeLocalBanner(index));
-    //   },
-    // });
+    this.revokePreviewUrl(this.featuredBannerImages()[index].preview);
+
+    this.formModel.update((models) => {
+      models.splice(index, 1);
+      return [...models];
+    });
+    this.featuredBannerImages.update((items) => {
+      items.splice(index, 1);
+      return [...items];
+    });
   }
 
   drop(event: CdkDragDrop<unknown[]>): void {
-    moveItemInArray(
-      this.items.controls,
-      event.previousIndex,
-      event.currentIndex,
-    );
-    this.images.update((images) => {
-      moveItemInArray(images, event.previousIndex, event.currentIndex);
-      return [...images];
+    if (event.previousIndex === event.currentIndex) return;
+
+    this.formModel.update((items) => {
+      const next = [...items];
+      moveItemInArray(next, event.previousIndex, event.currentIndex);
+      return next;
     });
-    this.items.updateValueAndValidity();
-  }
 
-  save(): void {
-    if (!this.isValid()) {
-      this.form.markAllAsTouched();
-      this.hasErrorMessage.set(true);
-      setTimeout(() => this.hasErrorMessage.set(false), 3000);
-      return;
-    }
-
-    const items: FeaturedBannerToSave[] = this.items.controls.map(
-      (control, index) => {
-        const value = control.getRawValue();
-        return {
-          ...(value.id ? { id: value.id } : {}),
-          title: value.title,
-          description: value.description?.trim() || null,
-          linkLabel: value.url?.trim() ? value.linkLabel?.trim() || null : null,
-          url: value.url?.trim() || null,
-          imageFileId: value.imageFileId || undefined,
-          isActive: value.isActive,
-          file: this.images()[index]?.file,
-        };
-      },
-    );
-
-    // this.saving.set(true);
-    // this.contentDataSource.saveFeaturedBanners(items).subscribe({
-    //   next: () => this.dialogRef.close(),
-    //   error: () => this.saving.set(false),
-    // });
-  }
-
-  close(): void {
-    // this.dialogRef.close();
-  }
-
-  private createBannerGroup(banner?: FeaturedBannerResponse): FormGroup {
-    return this.formBuilder.group({
-      id: [banner?.id ?? null],
-      title: [
-        banner?.title ?? '',
-        [Validators.required, Validators.maxLength(120)],
-      ],
-      description: [banner?.description ?? ''],
-      linkLabel: [banner?.linkLabel ?? '', Validators.maxLength(80)],
-      url: [
-        banner?.url ?? '',
-        Validators.pattern(/^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i),
-      ],
-      imageFileId: [banner?.imageFileId ?? null],
-      isActive: [banner?.isActive ?? true],
+    this.featuredBannerImages.update((images) => {
+      const next = [...images];
+      moveItemInArray(next, event.previousIndex, event.currentIndex);
+      return next;
     });
-  }
-
-  private isValid(): boolean {
-    if (this.form.invalid || !this.items.length) return false;
-    return this.items.controls.every(
-      (control, index) =>
-        !!control.get('imageFileId')?.value || !!this.images()[index]?.file,
-    );
-  }
-
-  private removeLocalBanner(index: number): void {
-    this.revokePreview(this.images()[index]?.preview);
-    this.items.removeAt(index);
-    this.images.update((images) =>
-      images.filter((_, itemIndex) => itemIndex !== index),
-    );
-  }
-
-  private revokePreview(preview?: string): void {
-    if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview);
   }
 
   private scrollToBottom(): void {
     const element = this.scrollContainer().nativeElement;
     element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+  }
+
+  private revokePreviewUrl(preview: string | null) {
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
+  }
+
+  private buildItemsToSave(formValue: FeaturedBannerFormData[]) {
+    const images = this.featuredBannerImages();
+
+    return formValue.map((item, index) => ({
+      ...item,
+      file: images[index]?.file ?? null,
+    }));
+  }
+
+  private loadFeaturedBanners(): void {
+    this.isLoading.set(true);
+    this.contentDataSource
+      .getFeaturedBanners()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe((banners) => {
+        this.formModel.set(
+          banners.map((banner) => ({
+            id: banner.id,
+            title: banner.title,
+            description: banner.description ?? '',
+            linkLabel: banner.linkLabel ?? '',
+            linkUrl: banner.linkUrl ?? '',
+            imageId: banner.imageId,
+            isActive: banner.isActive,
+          })),
+        );
+        this.featuredBannerImages.set(
+          banners.map((slide) => ({ preview: slide.imageUrl, file: null })),
+        );
+      });
   }
 }

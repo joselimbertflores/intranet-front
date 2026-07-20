@@ -54,11 +54,11 @@ interface HeroSlideFormData {
   isActive: boolean;
   linkLabel: string;
   linkUrl: string;
-  imageFileId: string | null;
+  imageId: string | null;
 }
 
 @Component({
-  selector: 'banner-editor',
+  selector: 'hero-slide-editor',
   imports: [
     DragDropModule,
     HlmDialogHeader,
@@ -77,7 +77,7 @@ interface HeroSlideFormData {
     NgIcon,
     HlmSpinner,
   ],
-  templateUrl: './banner-editor.html',
+  templateUrl: './hero-slide-editor.html',
   providers: [
     provideIcons({
       lucideGripVertical,
@@ -106,7 +106,7 @@ interface HeroSlideFormData {
     }
   `,
 })
-export class BannerEditor {
+export class HeroSlideEditor {
   private _dialogRef = inject<BrnDialogRef<HeroSlideResponse[]>>(BrnDialogRef);
   private contenDataSource = inject(ContentSettingsDataSource);
 
@@ -131,7 +131,7 @@ export class BannerEditor {
         const images = this.bannerImages();
 
         const missingImage = value().some(
-          (item, index) => !item.imageFileId && !images[index]?.file,
+          (item, index) => !item.imageId && !images[index]?.file,
         );
 
         return missingImage
@@ -212,7 +212,7 @@ export class BannerEditor {
         description: '',
         linkUrl: '',
         linkLabel: '',
-        imageFileId: null,
+        imageId: null,
         isActive: true,
       },
     ]);
@@ -306,7 +306,7 @@ export class BannerEditor {
             description: slide.description ?? '',
             linkLabel: slide.linkLabel ?? '',
             linkUrl: slide.linkUrl ?? '',
-            imageFileId: slide.imageFileId,
+            imageId: slide.imageId,
             isActive: slide.isActive,
           })),
         );

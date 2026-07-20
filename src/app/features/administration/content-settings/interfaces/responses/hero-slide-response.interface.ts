@@ -4,7 +4,7 @@ export interface HeroSlideResponse {
   description: string | null;
   linkLabel: string | null;
   linkUrl: string | null;
-  imageFileId: string;
+  imageId: string;
   imageUrl: string;
   isActive: boolean;
   sortOrder: number;

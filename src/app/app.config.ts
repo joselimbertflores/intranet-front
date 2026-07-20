@@ -18,10 +18,6 @@ import {
 import localeBo from '@angular/common/locales/es-BO';
 import { registerLocaleData } from '@angular/common';
 
-import { definePreset, palette } from '@primeuix/themes';
-
-import { es } from 'primelocale/es.json';
-import theme from '@primeuix/themes/aura';
 import { provideSpartanHlm } from '@spartan-ng/helm/utils';
 
 import { httpErrorInterceptor } from './core/http/http-error-interceptor';
@@ -31,30 +27,6 @@ import { handleTransitionCreated } from './core/router/view-transition.config';
 
 registerLocaleData(localeBo, 'es');
 
-const primaryColor = palette('{green}');
-const AuraSky = definePreset(theme, {
-  semantic: {
-    primary: primaryColor,
-    colorScheme: {
-      light: {
-        primary: {
-          color: '{primary.600}', // Color base por defecto (más fuerte que el 500)
-          hoverColor: '{primary.700}', // Color al pasar el cursor (aún más fuerte/oscuro)
-          activeColor: '{primary.800}', // Color al hacer clic continuo
-          contrastColor: '#ffffff', // Color de texto blanco para un buen contraste
-        },
-      },
-      dark: {
-        primary: {
-          color: '{primary.400}', // En modo oscuro se suele usar un tono un poco más claro para que brille
-          hoverColor: '{primary.300}',
-          activeColor: '{primary.200}',
-          contrastColor: '#111827',
-        },
-      },
-    },
-  },
-});
 
 export const appConfig: ApplicationConfig = {
   providers: [

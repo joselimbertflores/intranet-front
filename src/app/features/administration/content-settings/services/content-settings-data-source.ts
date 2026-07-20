@@ -8,7 +8,6 @@ import {
   LandingNoticeResponse,
   LandingNoticeToSave,
   FeaturedBannerResponse,
-  FeaturedBannerToSave,
   QuickAccessBatchItem,
   QuickAccessResponse,
   HeroSlideResponse,
@@ -21,7 +20,18 @@ interface HeroSlideToSave {
   description: string | null;
   linkLabel: string | null;
   linkUrl: string | null;
-  imageFileId: string | null;
+  imageId: string | null;
+  isActive?: boolean;
+  file?: File | null;
+}
+
+interface FeaturedBannerToSave {
+  id?: number | null;
+  title: string;
+  description: string | null;
+  linkLabel: string | null;
+  linkUrl: string | null;
+  imageId: string | null;
   isActive?: boolean;
   file?: File | null;
 }
@@ -42,11 +52,15 @@ export class ContentSettingsDataSource {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
   }
 
-  replaceQuickAccessItems(items: QuickAccessBatchItem[]) {
+  replaceQuickAccessItems(
+    items: QuickAccessBatchItem[],
+    deletedIds: number[],
+  ) {
     return this.http.put<QuickAccessResponse[]>(
       `${this.QUICK_ACCESS_URL}/batch`,
       {
         items,
+        deletedIds,
       },
     );
   }
@@ -65,9 +79,9 @@ export class ContentSettingsDataSource {
     const uploads$ = items.map(({ file, ...props }) =>
       file
         ? this.fileUploadService.upload(file, 'hero-slides').pipe(
-            map(({ id: imageFileId }) => ({
+            map(({ id }) => ({
               ...props,
-              imageFileId,
+              imageId: id,
             })),
           )
         : of(props),
@@ -93,20 +107,23 @@ export class ContentSettingsDataSource {
     return this.http.get<FeaturedBannerResponse[]>(this.FEATURED_BANNERS_URL);
   }
 
-  saveFeaturedBanners(items: FeaturedBannerToSave[]) {
+  saveFeaturedBanners(items: FeaturedBannerToSave[], deletedIds: number[]) {
     const uploads$ = items.map(({ file, ...banner }) =>
       file
         ? this.fileUploadService
             .upload(file, 'featured-banners')
-            .pipe(map(({ id: imageFileId }) => ({ ...banner, imageFileId })))
+            .pipe(map(({ id }) => ({ ...banner, imageId: id })))
         : of(banner),
     );
 
     return forkJoin(uploads$).pipe(
-      switchMap((uploadedItems) =>
+      switchMap((payloadItems) =>
         this.http.put<FeaturedBannerResponse[]>(
           `${this.FEATURED_BANNERS_URL}/batch`,
-          { items: uploadedItems },
+          {
+            items: payloadItems,
+            ...(deletedIds.length > 0 && { deletedIds }),
+          },
         ),
       ),
     );

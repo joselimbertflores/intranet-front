@@ -196,7 +196,7 @@ export class QuickAccessEditor implements OnInit {
       submission: {
         action: async (field) => {
           const response = await firstValueFrom(
-            this.contentDataSource.replaceQuickAccessItems(
+            this.contentDataSource.saveQuickAccessItems(
               this.buildItemsToSave(field().value()),
               this.deletedQuickAccessIds(),
             ),

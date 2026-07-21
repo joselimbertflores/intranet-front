@@ -1,92 +1,226 @@
-<!-- <div class="mb-4 flex items-center justify-between">
-  <h2 class="text-2xl font-semibold">Avisos emergentes</h2>
-  <app-ui-button
-    label="Agregar"
-    icon="ui-icon ui-icon-plus"
-    size="small"
-    (onClick)="openEditor()"
-  />
-</div>
+<div class="mx-auto w-full max-w-6xl">
+  <header
+    class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+  >
+    <div class="max-w-2xl">
+      <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Avisos de portada
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+        Administra los avisos que se muestran a las personas al ingresar al
+        portal.
+      </p>
+    </div>
 
-<app-ui-table
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  (onPage)="changePage($event)"
-  [showCurrentPageReport]="true"
-  [lazy]="true"
-  [paginator]="true"
-  [loading]="noticesResource.isLoading()"
-  [first]="offset()"
-  [rows]="limit()"
-  [rowsPerPageOptions]="[10, 25, 40, 50]"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  size="small"
-  class="text-sm"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-80">
-        <search-input label="Buscar por título" (search)="onSearch($event)" />
+    <button hlmBtn type="button" class="w-full sm:w-auto" (click)="openEditor()">
+      <ng-icon name="lucidePlus" data-icon="inline-start" />
+      Crear aviso
+    </button>
+  </header>
+
+  <section class="overflow-hidden rounded-xl border bg-card">
+    <div
+      class="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <h2 class="font-medium">Avisos registrados</h2>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ dataSize() }} {{ dataSize() === 1 ? "aviso" : "avisos" }} en total
+        </p>
+      </div>
+
+      <div class="relative w-full sm:w-72">
+        <ng-icon
+          name="lucideSearch"
+          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
+        <input
+          hlmInput
+          type="search"
+          class="w-full pl-9"
+          aria-label="Buscar avisos por título"
+          placeholder="Buscar por título"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
       </div>
     </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Título</th>
-      <th>Fijado</th>
-      <th>Inicio</th>
-      <th>Fin</th>
-      <th style="width: 6rem">Activo</th>
-      <th style="width: 5rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-notice>
-    <tr>
-      <td class="max-w-64 truncate font-medium">{{ notice.title }}</td>
 
-      <td>{{ notice.isPinned ? "Sí" : "No" }}</td>
-      <td>
-        {{ notice.visibleFrom ? (notice.visibleFrom | date: "short") : "—" }}
-      </td>
-      <td>
-        {{ notice.visibleUntil ? (notice.visibleUntil | date: "short") : "—" }}
-      </td>
-      <td>
-        <app-ui-tag
-          [severity]="notice.isActive ? 'success' : 'danger'"
-          [value]="notice.isActive ? 'Activo' : 'Inactivo'"
-        />
-      </td>
-      <td>
-        <div class="flex gap-1">
-          <app-ui-button
-            icon="ui-icon ui-icon-pencil"
-            size="small"
-            [text]="true"
-            [rounded]="true"
-            ariaLabel="Editar aviso"
-            (onClick)="openEditor(notice)"
-          />
-          <app-ui-button
-            icon="ui-icon ui-icon-trash"
-            size="small"
-            severity="danger"
-            [text]="true"
-            [rounded]="true"
-            ariaLabel="Eliminar aviso"
-            (onClick)="confirmRemove(notice)"
-          />
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="6" class="py-4 text-center text-surface-500">
-        Sin avisos emergentes.
-      </td>
-    </tr>
-  </ng-template>
-</app-ui-table>
+    <div hlmTableContainer>
+      <table hlmTable class="min-w-[520px]">
+        <thead hlmTHead>
+          <tr hlmTr>
+            <th hlmTh class="w-full min-w-64">Aviso</th>
+            <th hlmTh class="hidden min-w-52 md:table-cell">Vigencia</th>
+            <th hlmTh>Estado</th>
+            <th hlmTh class="hidden sm:table-cell">Fijado</th>
+            <th hlmTh class="text-right">Acciones</th>
+          </tr>
+        </thead>
 
-<app-ui-confirmdialog /> -->
+        <tbody hlmTBody>
+          @if (noticesResource.isLoading()) {
+            <tr hlmTr>
+              <td hlmTd colspan="5" class="h-44 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <hlm-spinner aria-label="Cargando avisos" />
+                  Cargando avisos...
+                </span>
+              </td>
+            </tr>
+          } @else if (noticesResource.error()) {
+            <tr hlmTr>
+              <td hlmTd colspan="5" class="h-44 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div>
+                    <p class="font-medium">No se pudieron cargar los avisos</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      Intenta nuevamente para actualizar el listado.
+                    </p>
+                  </div>
+                  <button hlmBtn type="button" size="sm" variant="outline" (click)="reload()">
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (notice of filteredNotices(); track notice.id) {
+              <tr hlmTr>
+                <td hlmTd class="!whitespace-normal py-3">
+                  <div class="min-w-0">
+                    <p class="font-medium leading-5">{{ notice.title }}</p>
+                    <p class="mt-1 text-xs text-muted-foreground">
+                      {{ notice.contentHtml ? "Con contenido" : "Sin contenido" }}
+                      <span aria-hidden="true">·</span>
+                      {{ notice.imageId ? "Con imagen" : "Sin imagen" }}
+                    </p>
+                  </div>
+                </td>
+
+                <td hlmTd class="hidden md:table-cell">
+                  <div class="text-xs leading-5">
+                    <p>
+                      <span class="text-muted-foreground">Desde:</span>
+                      {{
+                        notice.visibleFrom
+                          ? (notice.visibleFrom | date: "dd/MM/yyyy, HH:mm")
+                          : "Sin fecha"
+                      }}
+                    </p>
+                    <p>
+                      <span class="text-muted-foreground">Hasta:</span>
+                      {{
+                        notice.visibleUntil
+                          ? (notice.visibleUntil | date: "dd/MM/yyyy, HH:mm")
+                          : "Sin fecha"
+                      }}
+                    </p>
+                  </div>
+                </td>
+
+                <td hlmTd>
+                  <span
+                    hlmBadge
+                    [variant]="notice.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ notice.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+
+                <td hlmTd class="hidden sm:table-cell">
+                  {{ notice.isPinned ? "Sí" : "No" }}
+                </td>
+
+                <td hlmTd>
+                  <div class="flex justify-end gap-1">
+                    <button
+                      hlmBtn
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label="Editar aviso"
+                      title="Editar aviso"
+                      (click)="openEditor(notice)"
+                    >
+                      <ng-icon name="lucidePencil" />
+                    </button>
+
+                    <hlm-alert-dialog #deleteDialog>
+                      <button
+                        hlmBtn
+                        hlmAlertDialogTrigger
+                        type="button"
+                        size="icon-sm"
+                        variant="ghost"
+                        class="text-destructive hover:text-destructive"
+                        aria-label="Eliminar aviso"
+                        title="Eliminar aviso"
+                      >
+                        <ng-icon name="lucideTrash2" />
+                      </button>
+
+                      <hlm-alert-dialog-content *hlmAlertDialogPortal>
+                        <hlm-alert-dialog-header>
+                          <h3 hlmAlertDialogTitle>Eliminar aviso</h3>
+                          <p hlmAlertDialogDescription>
+                            Se eliminará “{{ notice.title }}”. Esta acción no se
+                            puede deshacer.
+                          </p>
+                        </hlm-alert-dialog-header>
+
+                        <hlm-alert-dialog-footer>
+                          <button hlmAlertDialogCancel type="button">
+                            Cancelar
+                          </button>
+                          <button
+                            hlmAlertDialogAction
+                            type="button"
+                            variant="destructive"
+                            (click)="confirmRemove(notice); deleteDialog.close()"
+                          >
+                            Eliminar
+                          </button>
+                        </hlm-alert-dialog-footer>
+                      </hlm-alert-dialog-content>
+                    </hlm-alert-dialog>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="5" class="h-44 text-center">
+                  @if (searchTerm()) {
+                    <p class="font-medium">No hay coincidencias</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      Prueba con otro título.
+                    </p>
+                  } @else {
+                    <p class="font-medium">Aún no hay avisos</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      Crea el primer aviso para mostrarlo en la portada.
+                    </p>
+                    <button
+                      hlmBtn
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      class="mt-4"
+                      (click)="openEditor()"
+                    >
+                      <ng-icon name="lucidePlus" data-icon="inline-start" />
+                      Crear aviso
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

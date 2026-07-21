@@ -1,278 +1,295 @@
-<form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
-  <div class="app-dialog-body flex flex-col gap-5">
-    <div class="flex flex-col gap-1">
-      <!-- <app-ui-floatlabel variant="on">
-        <input
-          appUiInput
-          class="w-full"
-          formControlName="title"
-          [invalid]="formUtils.isInvalid(form.controls.title)"
-        />
-        <label>Título</label>
-      </app-ui-floatlabel>
+<hlm-dialog-header class="shrink-0 border-b px-5 py-4 sm:px-6">
+  <h3 hlmDialogTitle>
+    {{ notice ? "Editar aviso" : "Crear aviso" }}
+  </h3>
+  <p class="text-sm text-muted-foreground">
+    Configura el contenido y el periodo de publicación en la portada.
+  </p>
+</hlm-dialog-header>
 
-      @if (formUtils.isInvalid(form.controls.title)) {
-        <app-ui-message severity="error" size="small" variant="simple">
-          El título es obligatorio y admite hasta 160 caracteres.
-        </app-ui-message>
-      } -->
-    </div>
-
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-surface-700">Contenido</label>
-
-      <app-ui-editor
-        formControlName="contentHtml"
-        [style]="{ height: '180px' }"
-        placeholder="Escriba el contenido del aviso"
-      >
-        <ng-template appUiTemplate="header">
-          <span class="ql-formats">
-            <button type="button" class="ql-bold"></button>
-            <button type="button" class="ql-italic"></button>
-          </span>
-
-          <span class="ql-formats">
-            <button type="button" class="ql-list" value="ordered"></button>
-            <button type="button" class="ql-list" value="bullet"></button>
-          </span>
-
-          <span class="ql-formats">
-            <button type="button" class="ql-link"></button>
-            <button type="button" class="ql-clean"></button>
-          </span>
-        </ng-template>
-      </app-ui-editor>
-
-      @if (showContentError()) {
-        <!-- <app-ui-message severity="error" size="small" variant="simple">
-          Ingrese contenido o seleccione una imagen.
-        </app-ui-message> -->
-      }
-    </div>
-
-    @let preview = imagePreview();
-
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-medium text-surface-700">
-        Imagen opcional
-      </label>
-
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div class="flex flex-col gap-2 md:col-span-1">
-          <button
-            type="button"
-            class="group relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg border-2 transition-colors"
-            [ngClass]="
-              preview
-                ? 'border-transparent bg-surface-900'
-                : 'border-dashed border-surface-300 bg-surface-50 hover:border-primary-400'
-            "
-            [attr.aria-label]="preview ? 'Cambiar imagen' : 'Subir imagen'"
-            (click)="fileInput.click()"
-          >
-            @if (preview) {
-              <img
-                [src]="preview"
-                [alt]="form.controls.imageAlt.value || 'Vista previa del aviso'"
-                class="h-full w-full object-contain"
-              />
-
-              <span
-                class="absolute inset-0 flex items-center justify-center bg-black/50 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                <span class="flex items-center gap-2">
-                  <i class="ui-icon ui-icon-pencil text-sm"></i>
-                  <span>Cambiar imagen</span>
-                </span>
-              </span>
-            } @else {
-              <span class="flex flex-col items-center gap-2 text-surface-500">
-                <i class="ui-icon ui-icon-image text-3xl"></i>
-                <span class="text-sm font-medium">Subir imagen</span>
-              </span>
-            }
-          </button>
-
-          <input
-            #fileInput
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            class="hidden"
-            (change)="onFileSelected($event)"
-          />
-
-          <!-- @if (preview) {
-            <app-ui-button
-              type="button"
-              label="Quitar"
-              icon="ui-icon ui-icon-times"
-              severity="secondary"
-              size="small"
-              [text]="true"
-              styleClass="w-full justify-center"
-              (onClick)="removeImage()"
-            />
-          } -->
+<form
+  id="landing-notice-form"
+  class="flex min-h-0 flex-1 flex-col"
+  [formRoot]="noticeForm"
+>
+  <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+    <div class="space-y-7">
+      <section aria-labelledby="notice-content-heading">
+        <div class="mb-4">
+          <h4 id="notice-content-heading" class="font-medium">Contenido</h4>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Escribe el mensaje principal que verá la persona usuaria.
+          </p>
         </div>
 
-        <div class="md:col-span-3">
-          <!-- @if (preview) {
-            <div class="flex flex-col gap-4">
-              <div class="flex flex-col gap-1">
-                <app-ui-floatlabel variant="on">
-                  <input
-                    appUiInput
-                    class="w-full"
-                    formControlName="imageAlt"
-                    [invalid]="showImageAltRequiredError()"
+        <div class="space-y-5">
+          <hlm-field>
+            <label hlmFieldLabel for="notice-title">Título</label>
+            <input
+              hlmInput
+              id="notice-title"
+              type="text"
+              placeholder="Ej. Comunicado institucional"
+              [formField]="noticeForm.title"
+            />
+
+            @if (noticeForm.title().touched()) {
+              @for (error of noticeForm.title().errors(); track error.kind) {
+                <hlm-field-error [validator]="error.kind">
+                  {{ error.message }}
+                </hlm-field-error>
+              }
+            }
+          </hlm-field>
+
+          <hlm-field>
+            <label hlmFieldLabel>Contenido del aviso</label>
+            <quill-editor-field
+              class="block"
+              theme="snow"
+              format="html"
+              bounds="self"
+              defaultEmptyValue=""
+              placeholder="Escribe el contenido del aviso"
+              [formats]="editorFormats"
+              [modules]="editorModules"
+              [styles]="{ height: '190px' }"
+              [formField]="noticeForm.contentHtml"
+            />
+            <p hlmFieldDescription>
+              El contenido se guarda en formato HTML.
+            </p>
+          </hlm-field>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="notice-image-heading"
+        class="border-t pt-7"
+      >
+        <div class="mb-4">
+          <h4 id="notice-image-heading" class="font-medium">
+            Imagen opcional
+          </h4>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Agrega una imagen complementaria y describe su contenido.
+          </p>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
+          <div class="space-y-2">
+            <button
+              type="button"
+              class="group relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              [attr.aria-label]="
+                imagePreview() ? 'Cambiar imagen' : 'Seleccionar imagen'
+              "
+              [disabled]="noticeForm().submitting()"
+              (click)="fileInput.click()"
+            >
+              @if (imagePreview(); as preview) {
+                <img
+                  [src]="preview"
+                  [alt]="noticeForm.imageAlt().value() || 'Vista previa del aviso'"
+                  class="size-full object-contain"
+                />
+                <span
+                  class="absolute inset-0 hidden items-center justify-center bg-black/55 text-sm font-medium text-white group-hover:flex group-focus-visible:flex"
+                >
+                  Cambiar imagen
+                </span>
+              } @else {
+                <span class="flex flex-col items-center gap-2 px-4 text-center">
+                  <ng-icon
+                    name="lucideImage"
+                    class="text-3xl text-muted-foreground"
                   />
-                  <label>Texto alternativo</label>
-                </app-ui-floatlabel>
+                  <span class="text-sm font-medium">Seleccionar imagen</span>
+                  <span class="text-xs text-muted-foreground">
+                    JPG, PNG o WebP
+                  </span>
+                </span>
+              }
+            </button>
 
-                @if (showImageAltRequiredError()) {
-                  <app-ui-message
-                    severity="error"
-                    size="small"
-                    variant="simple"
-                  >
-                    El texto alternativo es obligatorio cuando hay una imagen.
-                  </app-ui-message>
+            <input
+              #fileInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="hidden"
+              (change)="onFileSelected($event)"
+            />
+
+            @if (imagePreview()) {
+              <button
+                hlmBtn
+                type="button"
+                size="sm"
+                variant="ghost"
+                class="w-full text-destructive hover:text-destructive"
+                [disabled]="noticeForm().submitting()"
+                (click)="removeImage()"
+              >
+                <ng-icon name="lucideTrash2" data-icon="inline-start" />
+                Quitar imagen
+              </button>
+            }
+          </div>
+
+          @if (hasImage()) {
+            <div class="space-y-5">
+              <hlm-field>
+                <label hlmFieldLabel for="notice-image-alt">
+                  Texto alternativo
+                </label>
+                <input
+                  hlmInput
+                  id="notice-image-alt"
+                  type="text"
+                  placeholder="Describe brevemente la imagen"
+                  [formField]="noticeForm.imageAlt"
+                />
+
+                @if (noticeForm.imageAlt().touched()) {
+                  @for (
+                    error of noticeForm.imageAlt().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
+              </hlm-field>
 
-                @if (
-                  submitted() && form.controls.imageAlt.hasError("maxlength")
-                ) {
-                  <app-ui-message
-                    severity="error"
-                    size="small"
-                    variant="simple"
-                  >
-                    El texto alternativo admite hasta 255 caracteres.
-                  </app-ui-message>
+              <hlm-field>
+                <label hlmFieldLabel for="notice-image-link">
+                  Enlace de la imagen
+                  <span class="font-normal text-muted-foreground">
+                    (opcional)
+                  </span>
+                </label>
+                <input
+                  hlmInput
+                  id="notice-image-link"
+                  type="text"
+                  placeholder="/comunicados o https://ejemplo.com"
+                  [formField]="noticeForm.imageLinkUrl"
+                />
+
+                @if (noticeForm.imageLinkUrl().touched()) {
+                  @for (
+                    error of noticeForm.imageLinkUrl().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
-              </div>
-
-              <div class="flex flex-col gap-1">
-                <app-ui-floatlabel variant="on">
-                  <input
-                    appUiInput
-                    class="w-full"
-                    formControlName="imageLinkUrl"
-                    [invalid]="
-                      submitted() && form.controls.imageLinkUrl.invalid
-                    "
-                  />
-                  <label>Enlace de la imagen</label>
-                </app-ui-floatlabel>
-
-                @if (submitted() && form.controls.imageLinkUrl.invalid) {
-                  <app-ui-message
-                    severity="error"
-                    size="small"
-                    variant="simple"
-                  >
-                    Use una URL http(s) o una ruta interna que comience con /.
-                  </app-ui-message>
-                }
-
-                <small class="text-surface-500">
-                  Ejemplo: https://ejemplo.com o /comunicados?year=2026.
-                </small>
-              </div>
+              </hlm-field>
             </div>
           } @else {
             <div
-              class="flex h-full min-h-32 items-center rounded-lg border border-dashed border-surface-200 bg-surface-50 px-4 text-sm text-surface-500"
+              class="flex min-h-32 items-center rounded-lg border border-dashed px-4 text-sm text-muted-foreground"
             >
-              Puede agregar una imagen al aviso. Relacion de aspecto recomendada
-              4:3.
+              Selecciona una imagen para configurar su texto alternativo y su
+              enlace.
             </div>
-          } -->
+          }
         </div>
-      </div>
+      </section>
+
+      <section
+        aria-labelledby="notice-publication-heading"
+        class="border-t pt-7"
+      >
+        <div class="mb-4">
+          <h4 id="notice-publication-heading" class="font-medium">
+            Publicación
+          </h4>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Define cuándo se muestra el aviso y su prioridad en la lista.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <hlm-field>
+            <label hlmFieldLabel for="notice-visible-from">Visible desde</label>
+            <input
+              hlmInput
+              id="notice-visible-from"
+              type="datetime-local"
+              [value]="dateTimeValue(noticeForm.visibleFrom().value())"
+              (input)="updateDate('visibleFrom', $event)"
+              (blur)="touchDate('visibleFrom')"
+            />
+          </hlm-field>
+
+          <hlm-field>
+            <label hlmFieldLabel for="notice-visible-until">Visible hasta</label>
+            <input
+              hlmInput
+              id="notice-visible-until"
+              type="datetime-local"
+              [value]="dateTimeValue(noticeForm.visibleUntil().value())"
+              (input)="updateDate('visibleUntil', $event)"
+              (blur)="touchDate('visibleUntil')"
+            />
+          </hlm-field>
+        </div>
+
+        @if (noticeForm().touched()) {
+          @for (error of noticeForm().errors(); track error.kind) {
+            <p class="mt-3 text-sm text-destructive">{{ error.message }}</p>
+          }
+        }
+
+        <div class="mt-5 flex flex-wrap gap-x-8 gap-y-4">
+          <div class="flex items-center gap-2">
+            <hlm-checkbox
+              inputId="notice-active"
+              [formField]="noticeForm.isActive"
+            />
+            <label hlmLabel for="notice-active">Activo</label>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <hlm-checkbox
+              inputId="notice-pinned"
+              [formField]="noticeForm.isPinned"
+            />
+            <label hlmLabel for="notice-pinned">Fijado</label>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <!-- <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <app-ui-floatlabel variant="on">
-        <app-ui-datepicker
-          formControlName="visibleFrom"
-          [showTime]="true"
-          hourFormat="24"
-          [showClear]="true"
-          appendTo="body"
-          class="w-full"
-          inputId="notice-visible-from"
-          [maxDate]="form.controls.visibleUntil.value"
-        />
-        <label for="notice-visible-from">Mostrar desde</label>
-      </app-ui-floatlabel>
-
-      <app-ui-floatlabel variant="on">
-        <app-ui-datepicker
-          formControlName="visibleUntil"
-          [showTime]="true"
-          hourFormat="24"
-          [showClear]="true"
-          appendTo="body"
-          class="w-full"
-          inputId="notice-visible-until"
-          [minDate]="form.controls.visibleFrom.value"
-        />
-        <label for="notice-visible-until">Mostrar hasta</label>
-      </app-ui-floatlabel>
-    </div> -->
-
-    @if (form.hasError("invalidDateRange")) {
-      <!-- <app-ui-message severity="error" size="small" variant="simple">
-        “Mostrar desde” debe ser anterior o igual a “Mostrar hasta”.
-      </app-ui-message> -->
-    }
-
-    <!-- <div class="flex flex-wrap gap-6 px-1">
-      <div class="flex items-center gap-2">
-        <app-ui-checkbox
-          formControlName="isActive"
-          [binary]="true"
-          inputId="notice-active"
-        />
-        <label
-          for="notice-active"
-          class="cursor-pointer text-sm font-medium text-surface-700"
-        >
-          Activo
-        </label>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <app-ui-checkbox
-          formControlName="isPinned"
-          [binary]="true"
-          inputId="notice-pinned"
-        />
-        <label
-          for="notice-pinned"
-          class="cursor-pointer text-sm font-medium text-surface-700"
-        >
-          Fijado
-        </label>
-      </div>
-    </div> -->
   </div>
 
-  <!-- <div class="app-dialog-actions">
-    <app-ui-button
+  <hlm-dialog-footer
+    class="!mx-0 !mb-0 shrink-0 !rounded-none px-5 py-4 sm:px-6"
+  >
+    <button
+      hlmBtn
       type="button"
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="dialogRef.close()"
-    />
+      variant="outline"
+      [disabled]="noticeForm().submitting()"
+      (click)="close()"
+    >
+      Cancelar
+    </button>
 
-    <app-ui-button
+    <button
+      hlmBtn
       type="submit"
-      label="Guardar"
-      [loading]="saving()"
-      [disabled]="saving()"
-    />
-  </div> -->
+      [disabled]="noticeForm().submitting()"
+    >
+      @if (noticeForm().submitting()) {
+        <hlm-spinner data-icon="inline-start" />
+        Guardando...
+      } @else {
+        {{ notice ? "Guardar cambios" : "Crear aviso" }}
+      }
+    </button>
+  </hlm-dialog-footer>
 </form>

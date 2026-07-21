@@ -1,45 +1,73 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  linkedSignal,
   Component,
   computed,
   inject,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucidePencil,
+  lucidePlus,
+  lucideRefreshCw,
+  lucideSearch,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTableImports } from '@spartan-ng/helm/table';
 
-import { ContentSettingsDataSource } from '../../services';
-import { LandingNoticeResponse } from '../../interfaces';
 import { LandingNoticeEditor } from '../../dialogs';
-import { SearchInput } from '../../../../../shared';
+import { LandingNoticeResponse } from '../../interfaces';
+import { ContentSettingsDataSource } from '../../services';
 
 @Component({
   selector: 'app-landing-notices-admin',
-  imports: [CommonModule, SearchInput],
+  imports: [
+    CommonModule,
+    HlmAlertDialogImports,
+    HlmBadge,
+    HlmButton,
+    HlmInput,
+    HlmSpinner,
+    HlmTableImports,
+    NgIcon,
+  ],
+  providers: [
+    provideIcons({
+      lucidePencil,
+      lucidePlus,
+      lucideRefreshCw,
+      lucideSearch,
+      lucideTrash2,
+    }),
+  ],
   templateUrl: './landing-notices-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LandingNoticesAdmin {
-  // private readonly dialogService = inject(DialogService);
-  // private readonly confirmationService = inject(ConfirmationService);
   private readonly contentDataSource = inject(ContentSettingsDataSource);
+  private readonly dialogService = inject(HlmDialogService);
 
-  searchTerm = signal('');
-  limit = signal(10);
-  offset = signal(0);
+  readonly searchTerm = signal('');
   readonly noticesResource = rxResource({
-    params: () => ({
-      offset: this.offset(),
-      limit: this.limit(),
-      term: this.searchTerm(),
-    }),
     stream: () => this.contentDataSource.getLandingNotices(),
   });
-  dataSource = linkedSignal(() => this.noticesResource.value()?.notices ?? []);
-  dataSize = linkedSignal(() => this.noticesResource.value()?.total ?? 0);
+  readonly dataSource = linkedSignal(
+    () => this.noticesResource.value()?.notices ?? [],
+  );
+  readonly dataSize = linkedSignal(
+    () => this.noticesResource.value()?.total ?? 0,
+  );
 
-  filteredNotices = computed(() => {
+  readonly filteredNotices = computed(() => {
     const term = this.searchTerm().trim().toLocaleLowerCase();
     if (!term) return this.dataSource();
 
@@ -48,65 +76,51 @@ export default class LandingNoticesAdmin {
     );
   });
 
-  onSearch(term: string): void {
-    this.searchTerm.set(term);
+  onSearch(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   openEditor(notice?: LandingNoticeResponse): void {
-    // const dialogRef = this.dialogService.open(LandingNoticeEditor, {
-    //   header: notice ? 'Editar aviso emergente' : 'Crear aviso emergente',
-    //   modal: true,
-    //   closable: true,
-    //   closeOnEscape: true,
-    //   draggable: false,
-    //   width: 'min(92vw, 820px)',
-    //   data: notice,
-    //   styleClass: 'app-action-dialog',
-    // });
-    // dialogRef?.onClose.subscribe((result?: LandingNoticeResponse) => {
-    //   if (result) this.upsertItem(result);
-    // });
+    const dialogRef = this.dialogService.open<LandingNoticeResponse>(
+      LandingNoticeEditor,
+      {
+        showCloseButton: false,
+        disableClose: true,
+        contentClass:
+          '!max-h-[calc(100dvh-2rem)] !gap-0 !overflow-hidden !p-0 sm:!w-[min(92vw,900px)] sm:!max-w-[900px]',
+        context: { notice },
+      },
+    );
+
+    dialogRef.closed$.subscribe((result) => {
+      if (result) this.upsertItem(result);
+    });
   }
 
   confirmRemove(notice: LandingNoticeResponse): void {
-    // this.confirmationService.confirm({
-    //   header: 'Eliminar aviso emergente',
-    //   message: `¿Está seguro de eliminar “${notice.title}”?`,
-    //   rejectButtonProps: {
-    //     label: 'Cancelar',
-    //     severity: 'secondary',
-    //     outlined: true,
-    //   },
-    //   acceptButtonProps: { label: 'Eliminar', severity: 'danger' },
-    //   accept: () => {
-    //     this.contentDataSource.removeLandingNotice(notice.id).subscribe(() => {
-    //       this.dataSource.update((items) =>
-    //         items.filter(({ id }) => id !== notice.id),
-    //       );
-    //       this.dataSize.update((value) => (value -= 1));
-    //       if (this.dataSource().length === 0 && this.dataSize() > 0) {
-    //         this.offset.set(0);
-    //       }
-    //     });
-    //   },
-    // });
+    this.contentDataSource.removeLandingNotice(notice.id).subscribe(() => {
+      this.dataSource.update((items) =>
+        items.filter(({ id }) => id !== notice.id),
+      );
+      this.dataSize.update((value) => Math.max(0, value - 1));
+    });
   }
 
-  changePage(event: any) {
-    this.limit.set(event.rows);
-    this.offset.set(event.first);
+  reload(): void {
+    this.noticesResource.reload();
   }
 
   private upsertItem(item: LandingNoticeResponse): void {
     const index = this.dataSource().findIndex(({ id }) => item.id === id);
+
     if (index === -1) {
       this.dataSource.update((values) => [item, ...values]);
-      this.dataSize.update((value) => (value += 1));
-    } else {
-      this.dataSource.update((values) => {
-        values[index] = item;
-        return [...values];
-      });
+      this.dataSize.update((value) => value + 1);
+      return;
     }
+
+    this.dataSource.update((values) =>
+      values.map((value) => (value.id === item.id ? item : value)),
+    );
   }
 }

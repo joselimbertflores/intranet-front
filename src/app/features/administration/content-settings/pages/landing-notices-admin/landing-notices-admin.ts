@@ -20,13 +20,14 @@ import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
 import { HlmBadge } from '@spartan-ng/helm/badge';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
-import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 
 import { LandingNoticeEditor } from '../../dialogs';
 import { LandingNoticeResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-landing-notices-admin',
@@ -35,7 +36,7 @@ import { ContentSettingsDataSource } from '../../services';
     HlmAlertDialogImports,
     HlmBadge,
     HlmButton,
-    HlmInput,
+    HlmInputGroupImports,
     HlmSpinner,
     HlmTableImports,
     NgIcon,
@@ -58,7 +59,10 @@ export default class LandingNoticesAdmin {
 
   readonly searchTerm = signal('');
   readonly noticesResource = rxResource({
-    stream: () => this.contentDataSource.getLandingNotices(),
+    stream: () =>
+      this.contentDataSource
+        .getLandingNotices()
+        .pipe(tap((resp) => console.log(resp))),
   });
   readonly dataSource = linkedSignal(
     () => this.noticesResource.value()?.notices ?? [],
@@ -86,8 +90,7 @@ export default class LandingNoticesAdmin {
       {
         showCloseButton: false,
         disableClose: true,
-        contentClass:
-          '!max-h-[calc(100dvh-2rem)] !gap-0 !overflow-hidden !p-0 sm:!w-[min(92vw,900px)] sm:!max-w-[900px]',
+        contentClass: 'w-[calc(100vw-2rem)] !max-w-[800px]',
         context: { notice },
       },
     );

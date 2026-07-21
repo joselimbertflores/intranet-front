@@ -11,7 +11,6 @@ import {
   FormRoot,
   maxLength,
   pattern,
-  required,
   validate,
 } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -26,7 +25,6 @@ import {
 } from '@spartan-ng/helm/dialog';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmLabelImports } from '@spartan-ng/helm/label';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { QuillEditorFieldComponent } from 'ngx-quill';
 import type { QuillModules } from 'ngx-quill/config';
@@ -39,7 +37,6 @@ export interface LandingNoticeFormData {
   title: string;
   contentHtml: string;
   imageId: string | null;
-  imageAlt: string;
   imageLinkUrl: string;
   isActive: boolean;
   visibleFrom: Date | null;
@@ -63,7 +60,6 @@ interface LandingNoticeEditorContext {
     HlmDialogTitle,
     HlmFieldImports,
     HlmInputImports,
-    HlmLabelImports,
     HlmSpinner,
     NgIcon,
     QuillEditorFieldComponent,
@@ -72,7 +68,7 @@ interface LandingNoticeEditorContext {
   templateUrl: './landing-notice-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'flex max-h-[calc(100dvh-2rem)] min-h-0 flex-col',
+    class: 'flex flex-col',
   },
 })
 export class LandingNoticeEditor implements OnDestroy {
@@ -124,24 +120,10 @@ export class LandingNoticeEditor implements OnDestroy {
         message: 'El título admite hasta 160 caracteres',
       });
 
-      maxLength(schemaPath.imageAlt, 255, {
-        message: 'El texto alternativo admite hasta 255 caracteres',
-      });
-
-      validate(schemaPath.imageAlt, ({ value }) =>
-        this.hasImage() && !value().trim()
-          ? {
-              kind: 'imageAltRequired',
-              message:
-                'El texto alternativo es obligatorio cuando hay una imagen',
-            }
-          : null,
-      );
-
       maxLength(schemaPath.imageLinkUrl, 2048, {
         message: 'El enlace admite hasta 2048 caracteres',
       });
-      
+
       pattern(
         schemaPath.imageLinkUrl,
         /^(https?:\/\/[^\s]+|\/(?!\/)[^\s]*)$/i,
@@ -209,12 +191,11 @@ export class LandingNoticeEditor implements OnDestroy {
     this.imageFile.set(null);
     this.imagePreview.set(null);
     this.noticeForm.imageId().value.set(null);
-    this.noticeForm.imageAlt().value.set('');
     this.noticeForm.imageLinkUrl().value.set('');
   }
 
   hasImage(): boolean {
-    return Boolean(this.formModel().imageId || this.imageFile());
+    return Boolean(this.imagePreview());
   }
 
   dateTimeValue(value: Date | null): string {
@@ -239,7 +220,6 @@ export class LandingNoticeEditor implements OnDestroy {
       title: this.notice?.title ?? '',
       contentHtml: this.notice?.contentHtml ?? '',
       imageId: this.notice?.imageId ?? null,
-      imageAlt: this.notice?.imageAlt ?? '',
       imageLinkUrl: this.notice?.imageLinkUrl ?? '',
       isActive: this.notice?.isActive ?? true,
       visibleFrom: this.notice?.visibleFrom
@@ -258,7 +238,6 @@ export class LandingNoticeEditor implements OnDestroy {
       title: value.title.trim(),
       contentHtml: value.contentHtml.trim() || null,
       imageId: value.imageId,
-      imageAlt: hasImage ? value.imageAlt.trim() || null : null,
       imageLinkUrl: hasImage ? value.imageLinkUrl.trim() || null : null,
       isActive: value.isActive,
       visibleFrom: value.visibleFrom ? new Date(value.visibleFrom) : null,

@@ -30,9 +30,9 @@
   @case ('ready') {
     <landing-hero-section [heroSlides]="heroSlides()" />
 
-    @if (landingNotices().length) {
+    <!-- @if (landingNotices().length) {
       <landing-notices [items]="landingNotices()" />
-    }
+    } -->
 
     @if (quickAccesses().length) {
       <landing-quick-access-section [items]="quickAccesses()" />

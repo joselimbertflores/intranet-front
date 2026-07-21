@@ -42,21 +42,21 @@ export default class PortalHomePage {
   showHeroSectionDialog(): void {
     this.dialogService.open(HeroSlideEditor, {
       showCloseButton: false,
-      contentClass: 'sm:!w-[90vw] sm:!max-w-[1200px]',
+      contentClass: 'sm:w-[90vw] sm:max-w-[1200px]',
     });
   }
 
   showFeaturedBannersDialog(): void {
     this.dialogService.open(FeaturedBannerEditor, {
       showCloseButton: false,
-      contentClass: 'sm:!w-[90vw] sm:!max-w-[1000px]',
+      contentClass: 'sm:w-[90vw] sm:max-w-[1200px]',
     });
   }
 
   showQuickAccessDialog(): void {
     this.dialogService.open(QuickAccessEditor, {
       showCloseButton: false,
-      contentClass: 'sm:!w-[90vw] sm:!max-w-[800px]',
+      contentClass: 'sm:w-[90vw] sm:max-w-[800px]',
     });
   }
 }

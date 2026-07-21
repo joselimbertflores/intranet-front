@@ -137,7 +137,7 @@ interface QuickAccessFormData {
     }),
   ],
   host: {
-    class: 'flex flex-col gap-2',
+    class: 'flex min-h-0 flex-col gap-4',
   },
 })
 export class QuickAccessEditor implements OnInit {

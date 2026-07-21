@@ -2,308 +2,314 @@
   <h3 hlmDialogTitle>Configurar accesos rápidos</h3>
 </hlm-dialog-header>
 
-<form
-  id="quick-access-form"
-  class="flex min-h-0 flex-col gap-2"
-  [formRoot]="quickAccessForm"
->
-  @let rootErrors = quickAccessForm().errors();
-
-  <div
-    class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+<div #scrollContainer class="max-h-[70dvh] overflow-y-auto">
+  <form
+    id="quick-access-form"
+    class="flex flex-col gap-2"
+    [formRoot]="quickAccessForm"
   >
-    <div>
-      @if (quickAccessForm().touched() && rootErrors.length > 0) {
-        @for (error of rootErrors; track error.kind) {
-          <p class="text-sm text-destructive">
-            {{ error.message }}
+    @let rootErrors = quickAccessForm().errors();
+
+    <div
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        @if (quickAccessForm().touched() && rootErrors.length > 0) {
+          @for (error of rootErrors; track error.kind) {
+            <p class="text-sm text-destructive">
+              {{ error.message }}
+            </p>
+          }
+        } @else {
+          <p class="text-sm font-medium">
+            Listado de accesos rápidos ({{ quickAccessForm.length }})
           </p>
         }
-      } @else {
-        <p class="text-sm font-medium">
-          Listado de accesos rápidos ({{ quickAccessForm.length }})
-        </p>
-      }
+      </div>
+
+      <button
+        hlmBtn
+        type="button"
+        size="sm"
+        variant="outline"
+        [disabled]="
+          isLoading() ||
+          quickAccessForm.length >= maxQuickAccessItems ||
+          quickAccessForm().submitting()
+        "
+        (click)="addQuickAccess()"
+      >
+        Agregar acceso
+      </button>
     </div>
 
-    <button
-      hlmBtn
-      type="button"
-      size="sm"
-      variant="outline"
-      [disabled]="
-        isLoading() ||
-        quickAccessForm.length >= maxQuickAccessItems ||
-        quickAccessForm().submitting()
-      "
-      (click)="addQuickAccess()"
+    <div
+      cdkDropList
+      class="app-drag-list flex flex-col gap-4"
+      (cdkDropListDropped)="drop($event)"
     >
-      Agregar acceso
-    </button>
-  </div>
-
-  <div
-    #scrollContainer
-    cdkDropList
-    class="app-drag-list flex max-h-[65dvh] flex-col gap-4 overflow-y-auto pr-1"
-    (cdkDropListDropped)="drop($event)"
-  >
-    @if (isLoading()) {
-      <div
-        class="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground"
-      >
-        <hlm-spinner />
-        <span>Cargando accesos rápidos...</span>
-      </div>
-    } @else {
-      @for (
-        quickAccessItemForm of quickAccessForm;
-        track quickAccessItemForm;
-        let i = $index
-      ) {
-        <section
-          cdkDrag
-          class="app-drag-card rounded-lg border bg-background"
-          [cdkDragDisabled]="quickAccessForm().submitting()"
+      @if (isLoading()) {
+        <div
+          class="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground"
         >
-          <header
-            class="flex items-center justify-between border-b bg-muted/50 px-4 py-2"
+          <hlm-spinner />
+          <span>Cargando accesos rápidos...</span>
+        </div>
+      } @else {
+        @for (
+          quickAccessItemForm of quickAccessForm;
+          track quickAccessItemForm;
+          let i = $index
+        ) {
+          <section
+            cdkDrag
+            class="app-drag-card rounded-lg border bg-background"
+            [cdkDragDisabled]="quickAccessForm().submitting()"
           >
-            <div class="flex min-w-0 items-center gap-2">
+            <header
+              class="flex items-center justify-between border-b bg-muted/50 px-4 py-2"
+            >
+              <div class="flex min-w-0 items-center gap-2">
+                <button
+                  hlmBtn
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  cdkDragHandle
+                  aria-label="Arrastrar para reordenar"
+                  title="Arrastrar para reordenar"
+                  [disabled]="quickAccessForm().submitting()"
+                >
+                  <ng-icon name="lucideGripVertical" />
+                </button>
+
+                <ng-icon
+                  [name]="
+                    iconConfig(quickAccessItemForm.iconKey().value()).icon
+                  "
+                  class="text-primary"
+                />
+
+                <span class="truncate text-sm font-medium">
+                  Acceso {{ i + 1 }}
+                </span>
+              </div>
+
               <button
                 hlmBtn
                 type="button"
                 size="icon"
                 variant="ghost"
-                cdkDragHandle
-                aria-label="Arrastrar para reordenar"
-                title="Arrastrar para reordenar"
+                class="text-destructive hover:text-destructive"
+                aria-label="Eliminar acceso rápido"
+                title="Eliminar acceso rápido"
                 [disabled]="quickAccessForm().submitting()"
+                (click)="removeQuickAccess(i)"
               >
-                <ng-icon name="lucideGripVertical" />
+                <ng-icon name="lucideTrash2" />
               </button>
+            </header>
 
-              <ng-icon
-                [name]="iconConfig(quickAccessItemForm.iconKey().value()).icon"
-                class="text-primary"
-              />
-
-              <span class="truncate text-sm font-medium">
-                Acceso {{ i + 1 }}
-              </span>
-            </div>
-
-            <button
-              hlmBtn
-              type="button"
-              size="icon"
-              variant="ghost"
-              class="text-destructive hover:text-destructive"
-              aria-label="Eliminar acceso rápido"
-              title="Eliminar acceso rápido"
-              [disabled]="quickAccessForm().submitting()"
-              (click)="removeQuickAccess(i)"
-            >
-              <ng-icon name="lucideTrash2" />
-            </button>
-          </header>
-
-          <hlm-field-group class="grid gap-4 p-4 md:grid-cols-2">
-            <div class="flex flex-col gap-2 md:col-span-2">
-              <p class="text-sm font-medium">Vista previa</p>
-              <div
-                class="flex min-h-14 items-center gap-3 rounded-lg px-4 py-3"
-                [style.background-color]="
-                  quickAccessItemForm.backgroundColor().value()
-                "
-              >
-                <ng-icon
-                  [name]="
-                    iconConfig(quickAccessItemForm.iconKey().value()).icon
+            <hlm-field-group class="grid gap-4 p-4 md:grid-cols-2">
+              <div class="flex flex-col gap-2 md:col-span-2">
+                <p class="text-sm font-medium">Vista previa</p>
+                <div
+                  class="flex min-h-14 items-center gap-3 rounded-lg px-4 py-3"
+                  [style.background-color]="
+                    quickAccessItemForm.backgroundColor().value()
                   "
-                  class="shrink-0 text-xl text-white"
-                />
-                <span class="truncate text-sm font-semibold text-white">
-                  {{
-                    quickAccessItemForm.title().value().trim() ||
-                      "Título del acceso"
-                  }}
-                </span>
-              </div>
-            </div>
-
-            <hlm-field>
-              <label hlmFieldLabel [for]="'quick-access-icon-' + i">
-                Icono
-              </label>
-
-              <hlm-select [formField]="quickAccessItemForm.iconKey">
-                <hlm-select-trigger
-                  class="w-full"
-                  [buttonId]="'quick-access-icon-' + i"
                 >
-                  <ng-template hlmSelectValueTemplate let-iconKey>
-                    <span class="flex min-w-0 items-center gap-2">
-                      <ng-icon [name]="iconConfig(iconKey).icon" />
-                      <span class="truncate">
-                        {{ iconConfig(iconKey).label }}
+                  <ng-icon
+                    [name]="
+                      iconConfig(quickAccessItemForm.iconKey().value()).icon
+                    "
+                    class="shrink-0 text-xl text-white"
+                  />
+                  <span class="truncate text-sm font-semibold text-white">
+                    {{
+                      quickAccessItemForm.title().value().trim() ||
+                        "Título del acceso"
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <hlm-field>
+                <label hlmFieldLabel [for]="'quick-access-icon-' + i">
+                  Icono
+                </label>
+
+                <hlm-select [formField]="quickAccessItemForm.iconKey">
+                  <hlm-select-trigger
+                    class="w-full"
+                    [buttonId]="'quick-access-icon-' + i"
+                  >
+                    <ng-template hlmSelectValueTemplate let-iconKey>
+                      <span class="flex min-w-0 items-center gap-2">
+                        <ng-icon [name]="iconConfig(iconKey).icon" />
+                        <span class="truncate">
+                          {{ iconConfig(iconKey).label }}
+                        </span>
                       </span>
-                    </span>
-                  </ng-template>
-                  <hlm-select-placeholder>
-                    Seleccione un icono
-                  </hlm-select-placeholder>
-                </hlm-select-trigger>
+                    </ng-template>
+                    <hlm-select-placeholder>
+                      Seleccione un icono
+                    </hlm-select-placeholder>
+                  </hlm-select-trigger>
 
-                <hlm-select-content *hlmSelectPortal class="max-h-72">
-                  <hlm-select-group>
-                    @for (option of quickAccessIconOptions; track option.key) {
-                      <hlm-select-item [value]="option.key">
-                        <ng-icon [name]="option.icon" />
-                        <span>{{ option.label }}</span>
-                      </hlm-select-item>
-                    }
-                  </hlm-select-group>
-                </hlm-select-content>
-              </hlm-select>
+                  <hlm-select-content *hlmSelectPortal class="max-h-72">
+                    <hlm-select-group>
+                      @for (
+                        option of quickAccessIconOptions;
+                        track option.key
+                      ) {
+                        <hlm-select-item [value]="option.key">
+                          <ng-icon [name]="option.icon" />
+                          <span>{{ option.label }}</span>
+                        </hlm-select-item>
+                      }
+                    </hlm-select-group>
+                  </hlm-select-content>
+                </hlm-select>
 
-              @if (quickAccessItemForm.iconKey().touched()) {
-                @for (
-                  error of quickAccessItemForm.iconKey().errors();
-                  track error.kind
-                ) {
-                  <hlm-field-error [validator]="error.kind">
-                    {{ error.message }}
-                  </hlm-field-error>
+                @if (quickAccessItemForm.iconKey().touched()) {
+                  @for (
+                    error of quickAccessItemForm.iconKey().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
-              }
-            </hlm-field>
+              </hlm-field>
 
-            <hlm-field>
-              <label hlmFieldLabel [for]="'quick-access-color-' + i">
-                Color de fondo
-              </label>
+              <hlm-field>
+                <label hlmFieldLabel [for]="'quick-access-color-' + i">
+                  Color de fondo
+                </label>
 
-              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3">
+                  <input
+                    hlmInput
+                    type="color"
+                    class="w-16 shrink-0"
+                    [id]="'quick-access-color-' + i"
+                    [formField]="quickAccessItemForm.backgroundColor"
+                  />
+                  <output
+                    class="rounded-lg border bg-muted px-3 py-1.5 font-mono text-sm"
+                    [for]="'quick-access-color-' + i"
+                  >
+                    {{ quickAccessItemForm.backgroundColor().value() }}
+                  </output>
+                </div>
+
+                @if (quickAccessItemForm.backgroundColor().touched()) {
+                  @for (
+                    error of quickAccessItemForm.backgroundColor().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
+                }
+              </hlm-field>
+
+              <hlm-field class="md:col-span-2">
+                <label hlmFieldLabel [for]="'quick-access-title-' + i">
+                  Título
+                </label>
                 <input
                   hlmInput
-                  type="color"
-                  class="w-16 shrink-0"
-                  [id]="'quick-access-color-' + i"
-                  [formField]="quickAccessItemForm.backgroundColor"
+                  [id]="'quick-access-title-' + i"
+                  placeholder="Ingrese un título"
+                  [formField]="quickAccessItemForm.title"
                 />
-                <output
-                  class="rounded-lg border bg-muted px-3 py-1.5 font-mono text-sm"
-                  [for]="'quick-access-color-' + i"
-                >
-                  {{ quickAccessItemForm.backgroundColor().value() }}
-                </output>
-              </div>
 
-              @if (quickAccessItemForm.backgroundColor().touched()) {
-                @for (
-                  error of quickAccessItemForm.backgroundColor().errors();
-                  track error.kind
-                ) {
-                  <hlm-field-error [validator]="error.kind">
-                    {{ error.message }}
-                  </hlm-field-error>
+                @if (quickAccessItemForm.title().touched()) {
+                  @for (
+                    error of quickAccessItemForm.title().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
-              }
-            </hlm-field>
+              </hlm-field>
 
-            <hlm-field class="md:col-span-2">
-              <label hlmFieldLabel [for]="'quick-access-title-' + i">
-                Título
-              </label>
-              <input
-                hlmInput
-                [id]="'quick-access-title-' + i"
-                placeholder="Ingrese un título"
-                [formField]="quickAccessItemForm.title"
-              />
+              <hlm-field class="md:col-span-2">
+                <label hlmFieldLabel [for]="'quick-access-description-' + i">
+                  Descripción (opcional)
+                </label>
+                <textarea
+                  hlmTextarea
+                  [id]="'quick-access-description-' + i"
+                  placeholder="Ingrese una descripción"
+                  rows="2"
+                  [formField]="quickAccessItemForm.description"
+                ></textarea>
 
-              @if (quickAccessItemForm.title().touched()) {
-                @for (
-                  error of quickAccessItemForm.title().errors();
-                  track error.kind
-                ) {
-                  <hlm-field-error [validator]="error.kind">
-                    {{ error.message }}
-                  </hlm-field-error>
+                @if (quickAccessItemForm.description().touched()) {
+                  @for (
+                    error of quickAccessItemForm.description().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
-              }
-            </hlm-field>
+              </hlm-field>
 
-            <hlm-field class="md:col-span-2">
-              <label hlmFieldLabel [for]="'quick-access-description-' + i">
-                Descripción (opcional)
-              </label>
-              <textarea
-                hlmTextarea
-                [id]="'quick-access-description-' + i"
-                placeholder="Ingrese una descripción"
-                rows="2"
-                [formField]="quickAccessItemForm.description"
-              ></textarea>
+              <hlm-field class="md:col-span-2">
+                <label hlmFieldLabel [for]="'quick-access-url-' + i">URL</label>
+                <input
+                  hlmInput
+                  type="url"
+                  [id]="'quick-access-url-' + i"
+                  placeholder="https://..."
+                  autocomplete="off"
+                  [formField]="quickAccessItemForm.url"
+                />
 
-              @if (quickAccessItemForm.description().touched()) {
-                @for (
-                  error of quickAccessItemForm.description().errors();
-                  track error.kind
-                ) {
-                  <hlm-field-error [validator]="error.kind">
-                    {{ error.message }}
-                  </hlm-field-error>
+                @if (quickAccessItemForm.url().touched()) {
+                  @for (
+                    error of quickAccessItemForm.url().errors();
+                    track error.kind
+                  ) {
+                    <hlm-field-error [validator]="error.kind">
+                      {{ error.message }}
+                    </hlm-field-error>
+                  }
                 }
-              }
-            </hlm-field>
+              </hlm-field>
 
-            <hlm-field class="md:col-span-2">
-              <label hlmFieldLabel [for]="'quick-access-url-' + i">URL</label>
-              <input
-                hlmInput
-                type="url"
-                [id]="'quick-access-url-' + i"
-                placeholder="https://..."
-                autocomplete="off"
-                [formField]="quickAccessItemForm.url"
-              />
-
-              @if (quickAccessItemForm.url().touched()) {
-                @for (
-                  error of quickAccessItemForm.url().errors();
-                  track error.kind
-                ) {
-                  <hlm-field-error [validator]="error.kind">
-                    {{ error.message }}
-                  </hlm-field-error>
-                }
-              }
-            </hlm-field>
-
-            <hlm-field orientation="horizontal" class="md:col-span-2">
-              <hlm-checkbox
-                [inputId]="'quick-access-active-' + i"
-                [formField]="quickAccessItemForm.isActive"
-              />
-              <label hlmFieldLabel [for]="'quick-access-active-' + i">
-                Mostrar acceso
-              </label>
-            </hlm-field>
-          </hlm-field-group>
-        </section>
-      } @empty {
-        <div class="rounded-lg border border-dashed p-10 text-center">
-          <p class="font-medium">Sin accesos rápidos</p>
-          <p class="mt-1 text-sm text-muted-foreground">
-            Agregue el primer acceso para mostrarlo en la página principal.
-          </p>
-        </div>
+              <hlm-field orientation="horizontal" class="md:col-span-2">
+                <hlm-checkbox
+                  [inputId]="'quick-access-active-' + i"
+                  [formField]="quickAccessItemForm.isActive"
+                />
+                <label hlmFieldLabel [for]="'quick-access-active-' + i">
+                  Mostrar acceso
+                </label>
+              </hlm-field>
+            </hlm-field-group>
+          </section>
+        } @empty {
+          <div class="rounded-lg border border-dashed p-10 text-center">
+            <p class="font-medium">Sin accesos rápidos</p>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Agregue el primer acceso para mostrarlo en la página principal.
+            </p>
+          </div>
+        }
       }
-    }
-  </div>
-</form>
+    </div>
+  </form>
+</div>
 
 <hlm-dialog-footer>
   <button

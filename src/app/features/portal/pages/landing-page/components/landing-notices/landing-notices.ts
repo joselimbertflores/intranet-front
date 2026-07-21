@@ -20,7 +20,7 @@ register();
   selector: 'landing-notices',
   imports: [],
   template: `
-    <app-ui-dialog
+    <!-- <app-ui-dialog
       header="Avisos"
       [(visible)]="visible"
       [modal]="true"
@@ -96,7 +96,7 @@ register();
           </swiper-slide>
         }
       </swiper-container>
-    </app-ui-dialog>
+    </app-ui-dialog> -->
   `,
   styles: `
     swiper-container {

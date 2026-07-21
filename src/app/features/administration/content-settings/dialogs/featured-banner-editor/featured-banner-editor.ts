@@ -77,7 +77,7 @@ interface FeaturedBannerFormData {
   ],
   templateUrl: './featured-banner-editor.html',
   host: {
-    class: 'flex flex-col gap-2',
+    class: 'flex min-h-0 flex-col gap-4',
   },
   styles: `
     .featured-banner-card.cdk-drag-preview {

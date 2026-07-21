@@ -2,274 +2,275 @@
   <h3 hlmDialogTitle>Configurar banners destacados</h3>
 </hlm-dialog-header>
 
-<form
-  id="featured-banners-form"
-  class="flex min-h-0 flex-col gap-2"
-  [formRoot]="featuredBannersForm"
->
-  @let rootErrors = featuredBannersForm().errors();
-
-  <div
-    class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+<div #scrollContainer class="max-h-[70dvh] overflow-y-auto">
+  <form
+    id="featured-banners-form"
+    class="flex flex-col gap-2"
+    [formRoot]="featuredBannersForm"
   >
-    <div>
-      @if (featuredBannersForm().touched() && rootErrors.length > 0) {
-        @for (error of rootErrors; track error.kind) {
-          <p class="text-sm text-destructive">
-            {{ error.message }}
-          </p>
+    @let rootErrors = featuredBannersForm().errors();
+
+    <div
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        @if (featuredBannersForm().touched() && rootErrors.length > 0) {
+          @for (error of rootErrors; track error.kind) {
+            <p class="text-sm text-destructive">
+              {{ error.message }}
+            </p>
+          }
+        } @else {
+          <p class="text-sm">Listado de banners destacados</p>
         }
-      } @else {
-        <p class="text-sm">Listado de banners destacados</p>
-      }
+      </div>
+
+      <button
+        hlmBtn
+        type="button"
+        size="sm"
+        variant="outline"
+        [disabled]="
+          isLoading() ||
+          featuredBannersForm.length >= 6 ||
+          featuredBannersForm().submitting()
+        "
+        (click)="addBanner()"
+      >
+        Agregar banner
+      </button>
     </div>
 
-    <button
-      hlmBtn
-      type="button"
-      size="sm"
-      variant="outline"
-      [disabled]="
-        isLoading() ||
-        featuredBannersForm.length >= 6 ||
-        featuredBannersForm().submitting()
-      "
-      (click)="addBanner()"
+    <div
+      cdkDropList
+      class="featured-banner-list flex flex-col gap-4"
+      (cdkDropListDropped)="drop($event)"
     >
-      Agregar banner
-    </button>
-  </div>
-
-  <div
-    #scrollContainer
-    cdkDropList
-    class="featured-banner-list flex max-h-[65dvh] flex-col gap-4 overflow-y-auto pr-1"
-    (cdkDropListDropped)="drop($event)"
-  >
-    @if (isLoading()) {
-      <div
-        class="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground"
-      >
-        <hlm-spinner />
-        <span>Cargando banners...</span>
-      </div>
-    } @else {
-      @for (
-        bannerForm of featuredBannersForm;
-        track bannerForm;
-        let i = $index
-      ) {
-        @let image = featuredBannerImages()[i];
-
-        <section
-          cdkDrag
-          class="featured-banner-card rounded-lg border bg-background"
+      @if (isLoading()) {
+        <div
+          class="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground"
         >
-          <header
-            class="flex items-center justify-between border-b bg-muted/50 px-4 py-2"
+          <hlm-spinner />
+          <span>Cargando banners...</span>
+        </div>
+      } @else {
+        @for (
+          bannerForm of featuredBannersForm;
+          track bannerForm;
+          let i = $index
+        ) {
+          @let image = featuredBannerImages()[i];
+
+          <section
+            cdkDrag
+            class="featured-banner-card rounded-lg border bg-background"
           >
-            <div class="flex items-center gap-2">
+            <header
+              class="flex items-center justify-between border-b bg-muted/50 px-4 py-2"
+            >
+              <div class="flex items-center gap-2">
+                <button
+                  hlmBtn
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  cdkDragHandle
+                  aria-label="Arrastrar para reordenar"
+                  appUiTooltip="Arrastrar para reordenar"
+                  [disabled]="featuredBannersForm().submitting()"
+                >
+                  <ng-icon name="lucideGripVertical" />
+                </button>
+
+                <span class="text-sm font-medium"> Destacado {{ i + 1 }} </span>
+              </div>
+
               <button
                 hlmBtn
                 type="button"
                 size="icon"
                 variant="ghost"
-                cdkDragHandle
-                aria-label="Arrastrar para reordenar"
-                appUiTooltip="Arrastrar para reordenar"
+                class="text-destructive hover:text-destructive"
+                aria-label="Eliminar banner destacado"
+                appUiTooltip="Eliminar banner"
                 [disabled]="featuredBannersForm().submitting()"
+                (click)="removeBanner(i)"
               >
-                <ng-icon name="lucideGripVertical" />
+                <ng-icon name="lucideTrash2" />
               </button>
+            </header>
 
-              <span class="text-sm font-medium"> Destacado {{ i + 1 }} </span>
-            </div>
-
-            <button
-              hlmBtn
-              type="button"
-              size="icon"
-              variant="ghost"
-              class="text-destructive hover:text-destructive"
-              aria-label="Eliminar banner destacado"
-              appUiTooltip="Eliminar banner"
-              [disabled]="featuredBannersForm().submitting()"
-              (click)="removeBanner(i)"
-            >
-              <ng-icon name="lucideTrash2" />
-            </button>
-          </header>
-
-          <div class="grid gap-5 p-4 md:grid-cols-[minmax(240px,1fr)_2fr]">
-            <div>
-              <button
-                type="button"
-                class="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                [attr.aria-label]="
-                  image?.preview
-                    ? 'Cambiar imagen del destacado ' + (i + 1)
-                    : 'Subir imagen para el destacado ' + (i + 1)
-                "
-                (click)="fileInput.click()"
-              >
-                @if (image?.preview) {
-                  <img
-                    [src]="image.preview"
-                    class="size-full object-cover"
-                    alt="Vista previa del banner destacado"
-                  />
-
-                  <span
-                    class="absolute inset-0 hidden items-center justify-center bg-black/50 text-sm font-medium text-white group-hover:flex group-focus-visible:flex"
-                  >
-                    Cambiar imagen
-                  </span>
-                } @else {
-                  <span class="flex flex-col items-center gap-1">
-                    <ng-icon
-                      name="lucideImage"
-                      class="text-3xl text-muted-foreground"
+            <div class="grid gap-5 p-4 md:grid-cols-[minmax(240px,1fr)_2fr]">
+              <div>
+                <button
+                  type="button"
+                  class="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  [attr.aria-label]="
+                    image?.preview
+                      ? 'Cambiar imagen del destacado ' + (i + 1)
+                      : 'Subir imagen para el destacado ' + (i + 1)
+                  "
+                  (click)="fileInput.click()"
+                >
+                  @if (image?.preview) {
+                    <img
+                      [src]="image.preview"
+                      class="size-full object-cover"
+                      alt="Vista previa del banner destacado"
                     />
 
-                    <span class="text-sm font-medium"> Subir imagen </span>
-
-                    <span class="text-xs text-muted-foreground">
-                      Formato horizontal recomendado
+                    <span
+                      class="absolute inset-0 hidden items-center justify-center bg-black/50 text-sm font-medium text-white group-hover:flex group-focus-visible:flex"
+                    >
+                      Cambiar imagen
                     </span>
-                  </span>
-                }
-              </button>
+                  } @else {
+                    <span class="flex flex-col items-center gap-1">
+                      <ng-icon
+                        name="lucideImage"
+                        class="text-3xl text-muted-foreground"
+                      />
 
-              <input
-                #fileInput
-                type="file"
-                accept="image/*"
-                class="hidden"
-                (change)="onFileSelected($event, i)"
-              />
-            </div>
+                      <span class="text-sm font-medium"> Subir imagen </span>
 
-            <hlm-field-group class="grid gap-4 md:grid-cols-2">
-              <hlm-field>
-                <label hlmFieldLabel [for]="'featured-title-' + i">
-                  Título
-                </label>
+                      <span class="text-xs text-muted-foreground">
+                        Formato horizontal recomendado
+                      </span>
+                    </span>
+                  }
+                </button>
 
                 <input
-                  hlmInput
-                  [id]="'featured-title-' + i"
-                  placeholder="Ingrese un título"
-                  [formField]="bannerForm.title"
+                  #fileInput
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  (change)="onFileSelected($event, i)"
                 />
-
-                @if (bannerForm.title().touched()) {
-                  @for (
-                    error of bannerForm.title().errors();
-                    track error.kind
-                  ) {
-                    <hlm-field-error [validator]="error.kind">
-                      {{ error.message }}
-                    </hlm-field-error>
-                  }
-                }
-              </hlm-field>
-
-              <hlm-field>
-                <label hlmFieldLabel [for]="'featured-description-' + i">
-                  Descripción
-                </label>
-
-                <textarea
-                  hlmTextarea
-                  [id]="'featured-description-' + i"
-                  placeholder="Ingrese una descripción"
-                  [formField]="bannerForm.description"
-                ></textarea>
-
-                @if (bannerForm.description().touched()) {
-                  @for (
-                    error of bannerForm.description().errors();
-                    track error.kind
-                  ) {
-                    <hlm-field-error [validator]="error.kind">
-                      {{ error.message }}
-                    </hlm-field-error>
-                  }
-                }
-              </hlm-field>
-
-              <hlm-field>
-                <label hlmFieldLabel [for]="'featured-link-label-' + i">
-                  Texto del botón
-                </label>
-
-                <input
-                  hlmInput
-                  [id]="'featured-link-label-' + i"
-                  placeholder="Ej. Ver más"
-                  [formField]="bannerForm.linkLabel"
-                />
-
-                @if (bannerForm.linkLabel().touched()) {
-                  @for (
-                    error of bannerForm.linkLabel().errors();
-                    track error.kind
-                  ) {
-                    <hlm-field-error [validator]="error.kind">
-                      {{ error.message }}
-                    </hlm-field-error>
-                  }
-                }
-              </hlm-field>
-
-              <hlm-field>
-                <label hlmFieldLabel [for]="'featured-url-' + i"> URL </label>
-
-                <input
-                  hlmInput
-                  [id]="'featured-url-' + i"
-                  placeholder="/documents o https://..."
-                  [formField]="bannerForm.linkUrl"
-                />
-
-                @if (bannerForm.linkUrl().touched()) {
-                  @for (
-                    error of bannerForm.linkUrl().errors();
-                    track error.kind
-                  ) {
-                    <hlm-field-error [validator]="error.kind">
-                      {{ error.message }}
-                    </hlm-field-error>
-                  }
-                }
-              </hlm-field>
-
-              <div class="flex items-center gap-2 md:col-span-2">
-                <hlm-checkbox
-                  [inputId]="'featured-active-' + i"
-                  [formField]="bannerForm.isActive"
-                />
-
-                <label hlmLabel [for]="'featured-active-' + i">
-                  Mostrar banner
-                </label>
               </div>
-            </hlm-field-group>
-          </div>
-        </section>
-      } @empty {
-        <div class="rounded-lg border border-dashed p-10 text-center">
-          <p class="font-medium">Sin banners destacados</p>
 
-          <p class="mt-1 text-sm text-muted-foreground">
-            Agregue el primer contenido destacado para mostrarlo en la página
-            principal.
-          </p>
-        </div>
+              <hlm-field-group class="grid gap-4 md:grid-cols-2">
+                <hlm-field>
+                  <label hlmFieldLabel [for]="'featured-title-' + i">
+                    Título
+                  </label>
+
+                  <input
+                    hlmInput
+                    [id]="'featured-title-' + i"
+                    placeholder="Ingrese un título"
+                    [formField]="bannerForm.title"
+                  />
+
+                  @if (bannerForm.title().touched()) {
+                    @for (
+                      error of bannerForm.title().errors();
+                      track error.kind
+                    ) {
+                      <hlm-field-error [validator]="error.kind">
+                        {{ error.message }}
+                      </hlm-field-error>
+                    }
+                  }
+                </hlm-field>
+
+                <hlm-field>
+                  <label hlmFieldLabel [for]="'featured-description-' + i">
+                    Descripción
+                  </label>
+
+                  <textarea
+                    hlmTextarea
+                    [id]="'featured-description-' + i"
+                    placeholder="Ingrese una descripción"
+                    [formField]="bannerForm.description"
+                  ></textarea>
+
+                  @if (bannerForm.description().touched()) {
+                    @for (
+                      error of bannerForm.description().errors();
+                      track error.kind
+                    ) {
+                      <hlm-field-error [validator]="error.kind">
+                        {{ error.message }}
+                      </hlm-field-error>
+                    }
+                  }
+                </hlm-field>
+
+                <hlm-field>
+                  <label hlmFieldLabel [for]="'featured-link-label-' + i">
+                    Texto del botón
+                  </label>
+
+                  <input
+                    hlmInput
+                    [id]="'featured-link-label-' + i"
+                    placeholder="Ej. Ver más"
+                    [formField]="bannerForm.linkLabel"
+                  />
+
+                  @if (bannerForm.linkLabel().touched()) {
+                    @for (
+                      error of bannerForm.linkLabel().errors();
+                      track error.kind
+                    ) {
+                      <hlm-field-error [validator]="error.kind">
+                        {{ error.message }}
+                      </hlm-field-error>
+                    }
+                  }
+                </hlm-field>
+
+                <hlm-field>
+                  <label hlmFieldLabel [for]="'featured-url-' + i"> URL </label>
+
+                  <input
+                    hlmInput
+                    [id]="'featured-url-' + i"
+                    placeholder="/documents o https://..."
+                    [formField]="bannerForm.linkUrl"
+                  />
+
+                  @if (bannerForm.linkUrl().touched()) {
+                    @for (
+                      error of bannerForm.linkUrl().errors();
+                      track error.kind
+                    ) {
+                      <hlm-field-error [validator]="error.kind">
+                        {{ error.message }}
+                      </hlm-field-error>
+                    }
+                  }
+                </hlm-field>
+
+                <div class="flex items-center gap-2 md:col-span-2">
+                  <hlm-checkbox
+                    [inputId]="'featured-active-' + i"
+                    [formField]="bannerForm.isActive"
+                  />
+
+                  <label hlmLabel [for]="'featured-active-' + i">
+                    Mostrar banner
+                  </label>
+                </div>
+              </hlm-field-group>
+            </div>
+          </section>
+        } @empty {
+          <div class="rounded-lg border border-dashed p-10 text-center">
+            <p class="font-medium">Sin banners destacados</p>
+
+            <p class="mt-1 text-sm text-muted-foreground">
+              Agregue el primer contenido destacado para mostrarlo en la página
+              principal.
+            </p>
+          </div>
+        }
       }
-    }
-  </div>
-</form>
+    </div>
+  </form>
+</div>
 
 <hlm-dialog-footer>
   <button

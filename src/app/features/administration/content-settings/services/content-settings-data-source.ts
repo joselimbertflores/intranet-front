@@ -52,15 +52,12 @@ export class ContentSettingsDataSource {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
   }
 
-  saveQuickAccessItems(
-    items: QuickAccessBatchItem[],
-    deletedIds: number[],
-  ) {
+  saveQuickAccessItems(items: QuickAccessBatchItem[], deletedIds: number[]) {
     return this.http.put<QuickAccessResponse[]>(
       `${this.QUICK_ACCESS_URL}/batch`,
       {
         items,
-          ...(deletedIds.length > 0 && { deletedIds }),
+        ...(deletedIds.length > 0 && { deletedIds }),
       },
     );
   }

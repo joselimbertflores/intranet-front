@@ -4,7 +4,6 @@ export interface LandingNoticeResponse {
   contentHtml: string | null;
   imageId: string | null;
   imageUrl: string | null;
-  imageAlt: string | null;
   imageLinkUrl: string | null;
   isActive: boolean;
   visibleFrom: string | null;
@@ -20,7 +19,6 @@ export interface LandingNoticeToSave {
   title: string;
   contentHtml: string | null;
   imageId?: string | null;
-  imageAlt: string | null;
   imageLinkUrl: string | null;
   isActive: boolean;
   visibleFrom: Date | null;

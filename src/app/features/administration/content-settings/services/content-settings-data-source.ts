@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { map, of, forkJoin, switchMap } from 'rxjs';
@@ -34,6 +34,12 @@ interface FeaturedBannerToSave {
   imageId: string | null;
   isActive?: boolean;
   file?: File | null;
+}
+
+interface PaginationParams {
+  limit?: number;
+  offset?: number;
+  term?: string;
 }
 
 @Injectable({
@@ -130,9 +136,13 @@ export class ContentSettingsDataSource {
     return this.http.delete(`${this.FEATURED_BANNERS_URL}/${id}`);
   }
 
-  getLandingNotices() {
+  getLandingNotices({ limit = 10, offset = 0, term }: PaginationParams) {
+    const params = new HttpParams({
+      fromObject: { limit, offset, ...(term && { term }) },
+    });
     return this.http.get<{ notices: LandingNoticeResponse[]; total: number }>(
       this.LANDING_NOTICES_URL,
+      { params },
     );
   }
 

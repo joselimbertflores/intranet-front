@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import {
   form,
   FormField,
@@ -66,7 +60,6 @@ interface LandingNoticeEditorContext {
   ],
   providers: [provideIcons({ lucideImage, lucideTrash2 })],
   templateUrl: './landing-notice-editor.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'flex flex-col',
   },

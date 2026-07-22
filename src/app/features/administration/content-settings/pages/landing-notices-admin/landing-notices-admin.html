@@ -1,218 +1,245 @@
-<header class="mb-4 flex items-center justify-between">
-  <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">Avisos</h1>
+<header class="mb-2 flex items-center justify-between">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Avisos</h1>
   <button hlmBtn type="button" class="w-auto" (click)="openEditor()">
     <ng-icon name="lucidePlus" data-icon="inline-start" />
-    Crear
+    Agregar
   </button>
 </header>
 
-<section class="overflow-hidden rounded-xl border bg-card">
-  <div class="flex border-b px-2 py-2 sm:justify-end">
-    <!-- <div>
-      <h2 class="font-medium">Avisos registrados</h2>
-      <p class="mt-1 text-sm text-muted-foreground">
-        {{ dataSize() }} {{ dataSize() === 1 ? "aviso" : "avisos" }} en total
-      </p>
-    </div> -->
-
-    <div hlmInputGroup class="w-full sm:w-72">
-      <div hlmInputGroupAddon>
-        <ng-icon name="lucideSearch" />
-      </div>
+<section>
+  <div class="flex py-2 sm:justify-end">
+    <hlm-input-group class="w-full sm:w-72">
       <input
-        hlmInputGroupInput
         type="search"
+        hlmInputGroupInput
         aria-label="Buscar avisos por título"
         placeholder="Buscar por título"
-        [value]="searchTerm()"
-        (input)="onSearch($event)"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
       />
-    </div>
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
   </div>
 
-  <div hlmTableContainer>
-    <table hlmTable class="min-w-[520px]">
-      <thead hlmTHead>
-        <tr hlmTr>
-          <th hlmTh class="w-full min-w-64">Aviso</th>
-          <th hlmTh class="hidden min-w-52 md:table-cell">Vigencia</th>
-          <th hlmTh>Estado</th>
-          <th hlmTh class="hidden sm:table-cell">Prioridad</th>
-          <th hlmTh class="text-right">Acciones</th>
-        </tr>
-      </thead>
-
-      <tbody hlmTBody>
-        @if (noticesResource.isLoading()) {
-          <tr hlmTr>
-            <td hlmTd colspan="5" class="h-44 text-center">
-              <span
-                class="inline-flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <hlm-spinner aria-label="Cargando avisos" />
-                Cargando avisos...
-              </span>
-            </td>
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-4">
+    <div hlmTableContainer>
+      <table hlmTable class="w-full">
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead class="w-full min-w-64">Aviso</th>
+            <th hlmTableHead class="min-w-52">Inicio</th>
+            <th hlmTableHead class="min-w-52">Fin</th>
+            <th hlmTableHead class="min-w-20">Prioritario</th>
+            <th hlmTableHead>Estado</th>
+            <th hlmTableHead></th>
           </tr>
-        } @else if (noticesResource.error()) {
-          <tr hlmTr>
-            <td hlmTd colspan="5" class="h-44 text-center">
-              <div class="flex flex-col items-center gap-3">
-                <div>
-                  <p class="font-medium">No se pudieron cargar los avisos</p>
-                  <p class="mt-1 text-sm text-muted-foreground">
-                    Intenta nuevamente para actualizar el listado.
-                  </p>
-                </div>
-                <button
-                  hlmBtn
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  (click)="reload()"
-                >
-                  <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
-                  Reintentar
-                </button>
-              </div>
-            </td>
-          </tr>
-        } @else {
-          @for (notice of dataSource().values(); track notice.id) {
-            <tr hlmTr>
-              <td hlmTd class="whitespace-normal py-3">
-                <div class="min-w-0">
-                  <p class="font-medium leading-5">{{ notice.title }}</p>
-                  <p class="mt-1 text-xs text-muted-foreground">
-                    {{ notice.contentHtml ? "Con contenido" : "Sin contenido" }}
-                    <span aria-hidden="true">·</span>
-                    {{ notice.imageId ? "Con imagen" : "Sin imagen" }}
-                  </p>
-                </div>
-              </td>
+        </thead>
 
-              <td hlmTd class="hidden md:table-cell">
-                <div class="text-xs leading-5">
-                  <p>
-                    <span class="text-muted-foreground">Desde:</span>
-                    {{
-                      notice.visibleFrom
-                        ? (notice.visibleFrom | date: "dd/MM/yyyy, HH:mm")
-                        : "Sin fecha"
-                    }}
-                  </p>
-                  <p>
-                    <span class="text-muted-foreground">Hasta:</span>
-                    {{
-                      notice.visibleUntil
-                        ? (notice.visibleUntil | date: "dd/MM/yyyy, HH:mm")
-                        : "Sin fecha"
-                    }}
-                  </p>
-                </div>
-              </td>
-
-              <td hlmTd>
-                <span
-                  hlmBadge
-                  [variant]="notice.isActive ? 'default' : 'secondary'"
-                >
-                  {{ notice.isActive ? "Activo" : "Inactivo" }}
+        <tbody hlmTableBody>
+          @if (noticesResource.isLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-6 text-center">
+                <span class="inline-flex items-center gap-2 text-sm">
+                  <hlm-spinner aria-label="Cargando avisos" />
+                  Cargando avisos...
                 </span>
               </td>
-
-              <td hlmTd class="hidden sm:table-cell">
-                @if (notice.isPinned) {
-                  <span hlmBadge variant="secondary">Prioritario</span>
-                } @else {
-                  <span class="text-muted-foreground">Normal</span>
-                }
+            </tr>
+          } @else if (noticesResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-6 text-center">
+                <span class="text-sm">No se pudieron cargar los avisos.</span>
               </td>
-
-              <td hlmTd>
-                <div class="flex justify-end gap-1">
+            </tr>
+          } @else {
+            @for (notice of dataSource(); track notice.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>{{ notice.title }}</td>
+                <td hlmTableCell>
+                  {{
+                    notice.visibleFrom
+                      ? (notice.visibleFrom | date: "dd/MM/yyyy, HH:mm")
+                      : "Sin fecha"
+                  }}
+                </td>
+                <td hlmTableCell>
+                  {{
+                    notice.visibleUntil
+                      ? (notice.visibleUntil | date: "dd/MM/yyyy, HH:mm")
+                      : "Sin fecha"
+                  }}
+                </td>
+                <td hlmTableCell>{{ notice.isPinned ? "Sí" : "No" }}</td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="notice.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ notice.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
                   <button
                     hlmBtn
                     type="button"
-                    size="icon-sm"
                     variant="ghost"
-                    aria-label="Editar aviso"
-                    title="Editar aviso"
-                    (click)="openEditor(notice)"
+                    size="icon-sm"
+                    [hlmDropdownMenuTrigger]="menu"
+                    align="end"
                   >
-                    <ng-icon name="lucidePencil" />
+                    <ng-icon name="lucideMoreHorizontal" />
+                    <span class="sr-only">Abrir menú</span>
                   </button>
 
-                  <hlm-alert-dialog #deleteDialog>
-                    <button
-                      hlmBtn
-                      hlmAlertDialogTrigger
-                      type="button"
-                      size="icon-sm"
-                      variant="destructive"
-                      aria-label="Eliminar aviso"
-                      title="Eliminar aviso"
-                    >
-                      <ng-icon name="lucideTrash2" />
-                    </button>
-
-                    <hlm-alert-dialog-content *hlmAlertDialogPortal>
-                      <hlm-alert-dialog-header>
-                        <h3 hlmAlertDialogTitle>Eliminar aviso</h3>
-                        <p hlmAlertDialogDescription>
-                          Se eliminará “{{ notice.title }}”. Esta acción no se
-                          puede deshacer.
-                        </p>
-                      </hlm-alert-dialog-header>
-
-                      <hlm-alert-dialog-footer>
-                        <button hlmAlertDialogCancel type="button">
-                          Cancelar
+                  <ng-template #menu>
+                    <hlm-dropdown-menu>
+                      <hlm-dropdown-menu-group>
+                        <hlm-dropdown-menu-label>
+                          Acciones
+                        </hlm-dropdown-menu-label>
+                        <button
+                          type="button"
+                          hlmDropdownMenuItem
+                          (click)="openEditor(notice)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
                         </button>
                         <button
-                          hlmAlertDialogAction
                           type="button"
+                          hlmDropdownMenuItem
                           variant="destructive"
-                          (click)="confirmRemove(notice); deleteDialog.close()"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="noticeToDelete.set(notice)"
                         >
+                          <ng-icon name="lucideTrash2" />
                           Eliminar
                         </button>
-                      </hlm-alert-dialog-footer>
-                    </hlm-alert-dialog-content>
-                  </hlm-alert-dialog>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr hlmTr>
-              <td hlmTd colspan="5" class="h-44 text-center">
-                @if (searchTerm()) {
-                  <p class="font-medium">No hay coincidencias</p>
-                  <p class="mt-1 text-sm text-muted-foreground">
-                    Prueba con otro título.
-                  </p>
-                } @else {
-                  <p class="font-medium">Aún no hay avisos</p>
-                  <p class="mt-1 text-sm text-muted-foreground">
-                    Crea el primer aviso para mostrarlo en la portada.
-                  </p>
-                  <button
-                    hlmBtn
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    class="mt-4"
-                    (click)="openEditor()"
-                  >
-                    <ng-icon name="lucidePlus" data-icon="inline-start" />
-                    Crear aviso
-                  </button>
-                }
-              </td>
-            </tr>
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="6" class="py-6 text-center">
+                  @if (searchTerm().trim()) {
+                    Sin resultados
+                  } @else {
+                    No hay avisos registrados
+                  }
+                </td>
+              </tr>
+            }
           }
-        }
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+
+    @if (
+      !noticesResource.isLoading() && !noticesResource.error() && dataSize() > 0
+    ) {
+      <hlm-numbered-pagination
+        [pageSizes]="[10, 20, 30, 50]"
+        [currentPage]="currentPage()"
+        (currentPageChange)="currentPage.set($event)"
+        [itemsPerPage]="pageSize()"
+        (itemsPerPageChange)="onPageSizeChange($event)"
+        [totalItems]="dataSize()"
+        [maxSize]="0"
+      />
+      <div
+        class="flex flex-wrap items-center justify-end gap-x-4 gap-y-3 border-t pt-3"
+      >
+        <p class="text-sm text-muted-foreground">
+          {{ firstItem() }}–{{ lastItem() }} de {{ dataSize() }} resultados
+        </p>
+
+        <div class="flex items-center gap-2">
+          <span class="hidden text-sm text-muted-foreground sm:inline">
+            Por página
+          </span>
+
+          <hlm-select
+            [value]="pageSize()"
+            (valueChange)="onPageSizeChange($event)"
+          >
+            <hlm-select-trigger class="w-20">
+              <hlm-select-value />
+            </hlm-select-trigger>
+
+            <hlm-select-content *hlmSelectPortal>
+              @for (size of [10, 20, 30, 50]; track size) {
+                <hlm-select-item [value]="size">
+                  {{ size }}
+                </hlm-select-item>
+              }
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <span class="text-sm text-muted-foreground">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <div class="flex items-center gap-1">
+          <button
+            hlmBtn
+            type="button"
+            size="icon-sm"
+            variant="outline"
+            aria-label="Ir a la página anterior"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()"
+          >
+            <ng-icon name="lucideChevronLeft" />
+          </button>
+
+          <button
+            hlmBtn
+            type="button"
+            size="icon-sm"
+            variant="outline"
+            aria-label="Ir a la página siguiente"
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()"
+          >
+            <ng-icon name="lucideChevronRight" />
+          </button>
+        </div>
+      </div>
+    }
   </div>
 </section>
+
+<hlm-alert-dialog #deleteDialog>
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar aviso</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ noticeToDelete()?.title }}”. Esta acción no se puede
+        deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        (click)="noticeToDelete.set(null)"
+      >
+        Cancelar
+      </button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

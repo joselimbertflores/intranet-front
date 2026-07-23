@@ -27,7 +27,6 @@ import { handleTransitionCreated } from './core/router/view-transition.config';
 
 registerLocaleData(localeBo, 'es');
 
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -49,17 +48,5 @@ export const appConfig: ApplicationConfig = {
       withXhr(),
       withInterceptors([httpErrorInterceptor, authInterceptor]),
     ),
-    // providePrimeNG({
-    //   translation: es,
-    //   theme: {
-    //     preset: AuraSky,
-    //     options: {
-    //       darkModeSelector: false || 'none',
-    //     },
-    //   },
-    // }),
-    // { provide: LOCALE_ID, useValue: 'es-BO' },
-    // MessageService,
-    // DialogService,
   ],
 };

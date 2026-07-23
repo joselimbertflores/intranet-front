@@ -6,8 +6,8 @@
   </button>
 </header>
 
-<section>
-  <div class="flex py-2 sm:justify-end">
+<section class="space-y-2">
+  <div class="flex sm:justify-end">
     <hlm-input-group class="w-full sm:w-72">
       <input
         type="search"
@@ -141,75 +141,11 @@
     @if (
       !noticesResource.isLoading() && !noticesResource.error() && dataSize() > 0
     ) {
-      <hlm-numbered-pagination
-        [pageSizes]="[10, 20, 30, 50]"
-        [currentPage]="currentPage()"
-        (currentPageChange)="currentPage.set($event)"
-        [itemsPerPage]="pageSize()"
-        (itemsPerPageChange)="onPageSizeChange($event)"
+      <app-pagination-controls
         [totalItems]="dataSize()"
-        [maxSize]="0"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
       />
-      <div
-        class="flex flex-wrap items-center justify-end gap-x-4 gap-y-3 border-t pt-3"
-      >
-        <p class="text-sm text-muted-foreground">
-          {{ firstItem() }}–{{ lastItem() }} de {{ dataSize() }} resultados
-        </p>
-
-        <div class="flex items-center gap-2">
-          <span class="hidden text-sm text-muted-foreground sm:inline">
-            Por página
-          </span>
-
-          <hlm-select
-            [value]="pageSize()"
-            (valueChange)="onPageSizeChange($event)"
-          >
-            <hlm-select-trigger class="w-20">
-              <hlm-select-value />
-            </hlm-select-trigger>
-
-            <hlm-select-content *hlmSelectPortal>
-              @for (size of [10, 20, 30, 50]; track size) {
-                <hlm-select-item [value]="size">
-                  {{ size }}
-                </hlm-select-item>
-              }
-            </hlm-select-content>
-          </hlm-select>
-        </div>
-
-        <span class="text-sm text-muted-foreground">
-          Página {{ currentPage() }} de {{ totalPages() }}
-        </span>
-
-        <div class="flex items-center gap-1">
-          <button
-            hlmBtn
-            type="button"
-            size="icon-sm"
-            variant="outline"
-            aria-label="Ir a la página anterior"
-            [disabled]="currentPage() === 1"
-            (click)="previousPage()"
-          >
-            <ng-icon name="lucideChevronLeft" />
-          </button>
-
-          <button
-            hlmBtn
-            type="button"
-            size="icon-sm"
-            variant="outline"
-            aria-label="Ir a la página siguiente"
-            [disabled]="currentPage() === totalPages()"
-            (click)="nextPage()"
-          >
-            <ng-icon name="lucideChevronRight" />
-          </button>
-        </div>
-      </div>
     }
   </div>
 </section>

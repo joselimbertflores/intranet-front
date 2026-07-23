@@ -1,5 +1,12 @@
 import { FormsModule } from '@angular/forms';
-import { Component, computed, debounced, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  debounced,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import {
@@ -17,43 +24,31 @@ import {
 import { HlmBadge } from '@spartan-ng/helm/badge';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
-import { HlmNumberedPagination } from '@spartan-ng/helm/pagination';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 
-import { LandingNoticeEditor } from '../../dialogs';
-import { LandingNoticeResponse } from '../../interfaces';
+import { PaginationControls } from '../../../../../shared';
 import { ContentSettingsDataSource } from '../../services';
-import {
-  HlmSelect,
-  HlmSelectTrigger,
-  HlmSelectValue,
-  HlmSelectContent,
-  HlmSelectItem,
-} from '@spartan-ng/helm/select';
+import { LandingNoticeResponse } from '../../interfaces';
+import { LandingNoticeEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-landing-notices-admin',
   imports: [
     FormsModule,
     DatePipe,
-    HlmAlertDialogImports,
     HlmBadge,
-    HlmButtonImports,
     HlmDropdownMenuImports,
+    HlmAlertDialogImports,
     HlmInputGroupImports,
-    HlmNumberedPagination,
-    HlmSpinner,
+    PaginationControls,
+    HlmButtonImports,
     HlmTableImports,
+    HlmSpinner,
     NgIcon,
-    HlmSelect,
-    HlmSelectTrigger,
-    HlmSelectValue,
-    HlmSelectContent,
-    HlmSelectItem,
   ],
   providers: [
     provideIcons({
@@ -86,20 +81,16 @@ export default class LandingNoticesAdmin {
     }),
     stream: ({ params }) => this.contentDataSource.getLandingNotices(params),
   });
-  readonly dataSource = computed(
+  readonly dataSource = linkedSignal(
     () => this.noticesResource.value()?.notices ?? [],
   );
-  readonly dataSize = computed(() => this.noticesResource.value()?.total ?? 0);
+  readonly dataSize = linkedSignal(
+    () => this.noticesResource.value()?.total ?? 0,
+  );
 
   onSearch(term: string): void {
     this.currentPage.set(1);
     this.searchTerm.set(term);
-  }
-
-  onPageSizeChange(pageSize: number | undefined | null): void {
-    const lastPage = Math.max(1, Math.ceil(this.dataSize() / (pageSize ?? 10)));
-    this.currentPage.update((page) => Math.min(page, lastPage));
-    this.pageSize.set(pageSize ?? 10);
   }
 
   openEditor(notice?: LandingNoticeResponse): void {
@@ -114,7 +105,7 @@ export default class LandingNoticesAdmin {
     );
 
     dialogRef.closed$.subscribe((result) => {
-      if (result) this.noticesResource.reload();
+      if (result) this.upsertItem(result);
     });
   }
 
@@ -123,49 +114,41 @@ export default class LandingNoticesAdmin {
     if (!notice) return;
 
     this.contentDataSource.removeLandingNotice(notice.id).subscribe(() => {
-      const lastPage = Math.max(
-        1,
-        Math.ceil((this.dataSize() - 1) / this.pageSize()),
-      );
-
-      if (this.currentPage() > lastPage) {
-        this.currentPage.set(lastPage);
-      } else {
-        this.noticesResource.reload();
-      }
-
+      this.removeItem(notice.id);
       this.noticeToDelete.set(null);
       deleteDialog.close();
     });
   }
 
-  reload(): void {
-    this.noticesResource.reload();
+  private upsertItem(newItem: LandingNoticeResponse) {
+    const exists = this.dataSource().some((item) => item.id === newItem.id);
+    if (exists) {
+      this.dataSource.update((values) =>
+        values.map((item) => (item.id === newItem.id ? newItem : item)),
+      );
+      return;
+    }
+    this.dataSource.update((values) =>
+      [newItem, ...values].slice(0, this.pageSize()),
+    );
+    this.dataSize.update((total) => (total += 1));
   }
 
-  readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.dataSize() / this.pageSize())),
-  );
+  private removeItem(id: string) {
+    this.dataSource.update((values) => values.filter((item) => id !== item.id));
 
-  readonly firstItem = computed(() => {
-    if (this.dataSize() === 0) return 0;
+    const total = Math.max(0, this.dataSize() - 1);
+    this.dataSize.set(total);
 
-    return (this.currentPage() - 1) * this.pageSize() + 1;
-  });
+    const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
 
-  readonly lastItem = computed(() =>
-    Math.min(this.currentPage() * this.pageSize(), this.dataSize()),
-  );
+    if (this.currentPage() > lastPage) {
+      this.currentPage.set(lastPage);
+      return;
+    }
 
-  previousPage(): void {
-    if (this.currentPage() <= 1) return;
-
-    this.currentPage.update((page) => page - 1);
-  }
-
-  nextPage(): void {
-    if (this.currentPage() >= this.totalPages()) return;
-
-    this.currentPage.update((page) => page + 1);
+    if (this.dataSource().length === 0 && total > 0) {
+      this.noticesResource.reload();
+    }
   }
 }

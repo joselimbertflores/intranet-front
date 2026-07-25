@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -6,44 +12,52 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 
-
 import { finalize } from 'rxjs';
 
 import { FileIcon, SearchInput, YearSelector } from '../../../../../shared';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
 import {
-  DocumentManageResponse,
+  DocumentResponse,
   DocumentSubtypeResponse,
   SectionTreeNodeResponse,
 } from '../../interfaces';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { lucidePencil, lucidePlus } from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-document-admin',
   imports: [
     FormsModule,
     ReactiveFormsModule,
-   
     FileIcon,
     SearchInput,
     YearSelector,
+    NgIcon,
+    HlmButtonImports,
   ],
   templateUrl: './document-admin.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  providers: provideIcons({
+    lucidePlus,
+    lucidePencil,
+  }),
 })
 export default class DocumentAdmin {
   private documentDataSource = inject(DocumentDataSource);
   // private dialogService = inject(DialogService);
   private formBuilder = inject(FormBuilder);
+  private readonly dialogService = inject(HlmDialogService);
 
   limit = signal(10);
   offset = signal(0);
   searchTerm = signal('');
-  dataSource = signal<DocumentManageResponse[]>([]);
+  dataSource = signal<DocumentResponse[]>([]);
   dataSize = signal<number>(0);
 
   filterForm: FormGroup = this.formBuilder.group({
-    organizationalUnitNode: [null  ],
+    organizationalUnitNode: [null],
     documentTypeId: [null],
     documentSubtypeId: [{ value: null, disabled: true }],
     year: [null],
@@ -84,6 +98,22 @@ export default class DocumentAdmin {
         this.dataSource.set(documents);
         this.dataSize.set(total);
       });
+  }
+
+  openEditor(notice?: DocumentResponse): void {
+    const dialogRef = this.dialogService.open<DocumentResponse>(
+      DocumentCreate,
+      {
+        showCloseButton: false,
+        disableClose: true,
+        contentClass: 'w-[calc(100vw-2rem)] !max-w-[700px]',
+        context: { notice },
+      },
+    );
+
+    dialogRef.closed$.subscribe((result) => {
+      if (result) this.upsertItem(result);
+    });
   }
 
   selectSection(id: string) {
@@ -153,7 +183,7 @@ export default class DocumentAdmin {
     // });
   }
 
-  openUpdateDialog(item: DocumentManageResponse) {
+  openUpdateDialog(item: DocumentResponse) {
     // const diagloRef = this.dialogService.open(DocumentEdit, {
     //   header: 'Editar Documentación',
     //   modal: true,
@@ -175,7 +205,7 @@ export default class DocumentAdmin {
     // });
   }
 
-  setMenuItems(row: DocumentManageResponse) {
+  setMenuItems(row: DocumentResponse) {
     this.menuItems = [
       {
         label: 'Opciones',
@@ -207,7 +237,7 @@ export default class DocumentAdmin {
     ).length;
   }
 
-  private upsertItem(newItem: DocumentManageResponse) {
+  private upsertItem(newItem: DocumentResponse) {
     const index = this.dataSource().findIndex((item) => item.id === newItem.id);
     if (index !== -1) {
       this.dataSource.update((values) => {
@@ -220,7 +250,7 @@ export default class DocumentAdmin {
     }
   }
 
-  private toTreeNode(nodes: SectionTreeNodeResponse[]):any {
+  private toTreeNode(nodes: SectionTreeNodeResponse[]): any {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

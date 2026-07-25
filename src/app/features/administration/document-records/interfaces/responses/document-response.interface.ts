@@ -1,4 +1,4 @@
-export interface DocumentManageResponse {
+export interface DocumentResponse {
   id: string;
   title: string;
   year: number;

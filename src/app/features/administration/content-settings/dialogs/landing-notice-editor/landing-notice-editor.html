@@ -21,7 +21,7 @@
           [formField]="noticeForm.title"
         />
 
-        @if (noticeForm.title().touched()) {
+        @if (isFieldInvalid("title")) {
           @for (error of noticeForm.title().errors(); track error.kind) {
             <hlm-field-error [validator]="error.kind">
               {{ error.message }}
@@ -30,7 +30,7 @@
         }
       </div>
 
-      <div hlmField>
+      <div hlmField [forceInvalid]="isFieldInvalid('contentHtml')">
         <label hlmFieldLabel>Contenido del aviso</label>
         <quill-editor-field
           class="block"
@@ -44,6 +44,13 @@
           [styles]="{ height: '200px' }"
           [formField]="noticeForm.contentHtml"
         />
+        @if (isFieldInvalid("contentHtml")) {
+          @for (error of noticeForm.contentHtml().errors(); track error.kind) {
+            <hlm-field-error forceShow>
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
       </div>
     </div>
 
@@ -106,7 +113,7 @@
         }
       </div>
 
-      @if (hasImage()) {
+      @if (imagePreview()) {
         <div hlmField>
           <label hlmFieldLabel for="notice-image-link">
             Enlace de la imagen
@@ -121,7 +128,7 @@
             [formField]="noticeForm.imageLinkUrl"
           />
 
-          @if (noticeForm.imageLinkUrl().touched()) {
+          @if (isFieldInvalid("imageLinkUrl")) {
             @for (
               error of noticeForm.imageLinkUrl().errors();
               track error.kind
@@ -135,7 +142,6 @@
       }
     </div>
 
-    <!-- Publicación -->
     <div class="space-y-5 border-t pt-6">
       <div class="grid gap-5 sm:grid-cols-2">
         <div hlmField>
@@ -151,7 +157,7 @@
           />
         </div>
 
-        <div hlmField>
+        <div hlmField [forceInvalid]="isFieldInvalid('visibleUntil')">
           <label hlmFieldLabel for="notice-visible-until">
             Visible hasta
           </label>
@@ -161,19 +167,23 @@
             id="notice-visible-until"
             type="datetime-local"
             [value]="dateTimeValue(noticeForm.visibleUntil().value())"
+            [min]="dateTimeValue(noticeForm.visibleFrom().value())"
             (input)="updateDate('visibleUntil', $event)"
             (blur)="touchDate('visibleUntil')"
           />
+
+          @if (isFieldInvalid("visibleUntil")) {
+            @for (
+              error of noticeForm.visibleUntil().errors();
+              track error.kind
+            ) {
+              <hlm-field-error forceShow>
+                {{ error.message }}
+              </hlm-field-error>
+            }
+          }
         </div>
       </div>
-
-      @if (noticeForm().touched()) {
-        @for (error of noticeForm().errors(); track error.kind) {
-          <hlm-field-error>
-            {{ error.message }}
-          </hlm-field-error>
-        }
-      }
 
       <div class="grid gap-4 sm:grid-cols-2">
         <div hlmField orientation="horizontal">

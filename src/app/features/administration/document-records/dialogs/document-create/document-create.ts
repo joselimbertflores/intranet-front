@@ -1,4 +1,9 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -7,7 +12,6 @@ import {
   FormGroup,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
 
 import { CustomFormValidators, FormUtils } from '../../../../../helpers';
 import { DocumentDataSource } from '../../services';
@@ -20,16 +24,13 @@ import {
 } from '../../interfaces';
 import { finalize } from 'rxjs';
 
+interface DocumentModel {
+
+}
+
 @Component({
   selector: 'app-document-create',
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-  
-    FileSizePipe,
-    FileIcon,
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, ReactiveFormsModule, FileSizePipe, FileIcon],
   templateUrl: './document-create.html',
 })
 export class DocumentCreate {
@@ -217,7 +218,7 @@ export class DocumentCreate {
     }, 3000);
   }
 
-  private toTreeNodes(nodes: SectionTreeNodeResponse[]):any {
+  private toTreeNodes(nodes: SectionTreeNodeResponse[]): any {
     return nodes.map((node) => ({
       key: node.id,
       label: node.name.toUpperCase(),

@@ -5,6 +5,7 @@ import {
   FormRoot,
   maxLength,
   pattern,
+  required,
   validate,
 } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -72,8 +73,10 @@ export class LandingNoticeEditor implements OnDestroy {
     injectBrnDialogContext<LandingNoticeEditorContext>();
 
   readonly notice = this.context.notice;
+  
   readonly imageFile = signal<File | null>(null);
   readonly imagePreview = signal<string | null>(this.notice?.imageUrl ?? null);
+
   readonly formModel = signal<LandingNoticeFormData>(
     this.createInitialFormData(),
   );
@@ -113,6 +116,15 @@ export class LandingNoticeEditor implements OnDestroy {
         message: 'El título admite hasta 160 caracteres',
       });
 
+      required(schemaPath.contentHtml, {
+        message: 'El contenido o la imagen son requeridos',
+        when: ({ valueOf }) => {
+          return (
+            this.imageFile() === null && valueOf(schemaPath.imageId) === null
+          );
+        },
+      });
+
       maxLength(schemaPath.imageLinkUrl, 2048, {
         message: 'El enlace admite hasta 2048 caracteres',
       });
@@ -125,14 +137,13 @@ export class LandingNoticeEditor implements OnDestroy {
             'Use una URL HTTP/HTTPS o una ruta interna que comience con /',
         },
       );
-
-      validate(schemaPath, ({ value }) => {
-        const { visibleFrom, visibleUntil } = value();
+      validate(schemaPath.visibleUntil, ({ value, valueOf }) => {
+        const visibleFrom = valueOf(schemaPath.visibleFrom);
+        const visibleUntil = value();
         return visibleFrom && visibleUntil && visibleUntil < visibleFrom
           ? {
               kind: 'invalidDateRange',
-              message:
-                '“Visible hasta” debe ser posterior o igual a “Visible desde”',
+              message: 'Debe ser posterior o igual a fecha inicio',
             }
           : null;
       });
@@ -187,10 +198,10 @@ export class LandingNoticeEditor implements OnDestroy {
     this.noticeForm.imageLinkUrl().value.set('');
   }
 
-  hasImage(): boolean {
-    return Boolean(this.imagePreview());
+  isFieldInvalid(fieldName: keyof LandingNoticeFormData): boolean {
+    const field = this.noticeForm[fieldName]();
+    return field.touched() && field.errors().length > 0;
   }
-
   dateTimeValue(value: Date | null): string {
     if (!value) return '';
     const localDate = new Date(
@@ -226,12 +237,11 @@ export class LandingNoticeEditor implements OnDestroy {
   }
 
   private buildPayload(value: LandingNoticeFormData): LandingNoticeToSave {
-    const hasImage = this.hasImage();
     return {
       title: value.title.trim(),
       contentHtml: value.contentHtml.trim() || null,
       imageId: value.imageId,
-      imageLinkUrl: hasImage ? value.imageLinkUrl.trim() || null : null,
+      imageLinkUrl: value.imageLinkUrl.trim() || null,
       isActive: value.isActive,
       visibleFrom: value.visibleFrom ? new Date(value.visibleFrom) : null,
       visibleUntil: value.visibleUntil ? new Date(value.visibleUntil) : null,

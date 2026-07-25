@@ -11,7 +11,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import {
   lucideMoreHorizontal,
-  lucideRefreshCw,
   lucidePencil,
   lucideSearch,
   lucideTrash2,
@@ -54,7 +53,6 @@ import { LandingNoticeEditor } from '../../dialogs';
     provideIcons({
       lucidePencil,
       lucidePlus,
-      lucideRefreshCw,
       lucideSearch,
       lucideTrash2,
       lucideMoreHorizontal,

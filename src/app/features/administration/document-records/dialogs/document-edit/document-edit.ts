@@ -20,7 +20,7 @@ import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
 import { FileIcon, YearSelector } from '../../../../../shared';
 import { FileSizePipe } from '../../pipes';
 import {
-  DocumentManageResponse,
+  DocumentResponse,
   DocumentSubtypeResponse,
   SectionTreeNodeResponse,
 } from '../../interfaces';

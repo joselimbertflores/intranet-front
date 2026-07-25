@@ -80,46 +80,19 @@
                     {{ notice.isActive ? "Activo" : "Inactivo" }}
                   </span>
                 </td>
-                <td hlmTableCell>
+                <td hlmTableCell class="text-right">
                   <button
                     hlmBtn
                     type="button"
                     variant="ghost"
                     size="icon-sm"
                     [hlmDropdownMenuTrigger]="menu"
+                    [hlmDropdownMenuTriggerData]="{ notice: notice }"
                     align="end"
                   >
                     <ng-icon name="lucideMoreHorizontal" />
                     <span class="sr-only">Abrir menú</span>
                   </button>
-
-                  <ng-template #menu>
-                    <hlm-dropdown-menu>
-                      <hlm-dropdown-menu-group>
-                        <hlm-dropdown-menu-label>
-                          Acciones
-                        </hlm-dropdown-menu-label>
-                        <button
-                          type="button"
-                          hlmDropdownMenuItem
-                          (click)="openEditor(notice)"
-                        >
-                          <ng-icon name="lucidePencil" />
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          hlmDropdownMenuItem
-                          variant="destructive"
-                          [hlmAlertDialogTriggerFor]="deleteDialog"
-                          (click)="noticeToDelete.set(notice)"
-                        >
-                          <ng-icon name="lucideTrash2" />
-                          Eliminar
-                        </button>
-                      </hlm-dropdown-menu-group>
-                    </hlm-dropdown-menu>
-                  </ng-template>
                 </td>
               </tr>
             } @empty {
@@ -149,6 +122,28 @@
     }
   </div>
 </section>
+
+<ng-template #menu let-notice="notice">
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <hlm-dropdown-menu-label> Acciones </hlm-dropdown-menu-label>
+      <button type="button" hlmDropdownMenuItem (click)="openEditor(notice)">
+        <ng-icon name="lucidePencil" />
+        Editar
+      </button>
+      <button
+        type="button"
+        hlmDropdownMenuItem
+        variant="destructive"
+        [hlmAlertDialogTriggerFor]="deleteDialog"
+        (click)="noticeToDelete.set(notice)"
+      >
+        <ng-icon name="lucideTrash2" />
+        Eliminar
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>
 
 <hlm-alert-dialog #deleteDialog>
   <hlm-alert-dialog-content *hlmAlertDialogPortal>

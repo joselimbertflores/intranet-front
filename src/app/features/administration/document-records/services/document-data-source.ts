@@ -9,7 +9,7 @@ import { FileUploadService, UploadResult } from '../../../../shared';
 import {
   DocumentTypeWithSubTypesResponse,
   SectionTreeNodeResponse,
-  DocumentManageResponse,
+  DocumentResponse,
 } from '../interfaces';
 
 interface CreateDocumentBatchDto {
@@ -64,7 +64,7 @@ export class DocumentDataSource {
     });
     return this.http
       .get<{
-        documents: DocumentManageResponse[];
+        documents: DocumentResponse[];
         total: number;
       }>(this.URL, { params })
       .pipe(tap((resp) => console.log(resp)));
@@ -81,7 +81,7 @@ export class DocumentDataSource {
           title: documents[index].title.trim(),
         }));
 
-        return this.http.post<DocumentManageResponse[]>(`${this.URL}/batch`, {
+        return this.http.post<DocumentResponse[]>(`${this.URL}/batch`, {
           ...rest,
           ...(year && { year }),
           documents: documentsToCreate,
@@ -97,7 +97,7 @@ export class DocumentDataSource {
       : of(null);
     return uploadTask$.pipe(
       switchMap((uploadedFile) => {
-        return this.http.patch<DocumentManageResponse>(`${this.URL}/${id}`, {
+        return this.http.patch<DocumentResponse>(`${this.URL}/${id}`, {
           ...props,
           ...(uploadedFile && { fileId: uploadedFile.id }),
         });

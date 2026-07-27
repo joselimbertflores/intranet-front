@@ -62,7 +62,8 @@ interface LandingNoticeEditorContext {
   providers: [provideIcons({ lucideImage, lucideTrash2 })],
   templateUrl: './landing-notice-editor.html',
   host: {
-    class: 'flex flex-col',
+    class:
+      'flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden',
   },
 })
 export class LandingNoticeEditor implements OnDestroy {

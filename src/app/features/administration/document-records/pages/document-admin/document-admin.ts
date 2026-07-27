@@ -1,21 +1,16 @@
 import {
   Component,
   computed,
+  debounced,
   inject,
+  linkedSignal,
   signal,
-  ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 
 import { finalize } from 'rxjs';
 
-import { FileIcon, SearchInput, YearSelector } from '../../../../../shared';
-import { DocumentCreate, DocumentEdit } from '../../dialogs';
+import { DocumentCreate } from '../../dialogs';
 import { DocumentDataSource } from '../../services';
 import {
   DocumentResponse,
@@ -25,23 +20,45 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
-import { lucidePencil, lucidePlus } from '@ng-icons/lucide';
+import { lucidePencil, lucidePlus, lucideSearch } from '@ng-icons/lucide';
+import {
+  HlmInputGroup,
+  HlmInputGroupAddon,
+  HlmInputGroupImports,
+} from '@spartan-ng/helm/input-group';
+import { form } from '@angular/forms/signals';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { PaginationControls } from '@app/shared';
+import { HlmTableImports } from '@spartan-ng/helm/table';
+import { JsonPipe } from '@angular/common';
 
+interface FilterData {
+  organizationalUnitId: string | null;
+  documentTypeId: string | null;
+  documentSubtypeId: string | null;
+  year: number | null;
+  status: string | null;
+}
 @Component({
   selector: 'app-document-admin',
   imports: [
     FormsModule,
-    ReactiveFormsModule,
-    FileIcon,
-    SearchInput,
-    YearSelector,
     NgIcon,
     HlmButtonImports,
+    HlmInputGroup,
+    HlmInputGroupAddon,
+    HlmSpinner,
+    PaginationControls,
+    HlmTableImports,
+    JsonPipe,
+    HlmInputGroupImports,
   ],
   templateUrl: './document-admin.html',
   providers: provideIcons({
     lucidePlus,
     lucidePencil,
+    lucideSearch,
   }),
 })
 export default class DocumentAdmin {
@@ -50,11 +67,38 @@ export default class DocumentAdmin {
   private formBuilder = inject(FormBuilder);
   private readonly dialogService = inject(HlmDialogService);
 
+  readonly pageSize = signal(10);
+  readonly currentPage = signal(1);
+  readonly offset = computed(() => this.pageSize() * (this.currentPage() - 1));
   limit = signal(10);
-  offset = signal(0);
-  searchTerm = signal('');
-  dataSource = signal<DocumentResponse[]>([]);
-  dataSize = signal<number>(0);
+
+  readonly searchTerm = signal('');
+  readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
+
+  filterModel = signal<FilterData>({
+    organizationalUnitId: null,
+    documentTypeId: null,
+    documentSubtypeId: null,
+    year: null,
+    status: null,
+  });
+  filterFormSi = form(this.filterModel);
+
+  documentResource = rxResource({
+    params: () => ({
+      limit: this.pageSize(),
+      offset: this.offset(),
+      term: this.debouncedSearchTerm.value().trim(),
+    }),
+    stream: ({ params }) => this.documentDataSource.findAll(params),
+  });
+
+  readonly dataSource = linkedSignal(
+    () => this.documentResource.value()?.documents ?? [],
+  );
+  readonly dataSize = linkedSignal(
+    () => this.documentResource.value()?.total ?? 0,
+  );
 
   filterForm: FormGroup = this.formBuilder.group({
     organizationalUnitNode: [null],
@@ -82,6 +126,11 @@ export default class DocumentAdmin {
     this.getData();
   }
 
+  onSearch(term: string): void {
+    this.currentPage.set(1);
+    this.searchTerm.set(term);
+  }
+
   getData() {
     const { organizationalUnitNode, ...props } = this.filterForm.value;
     this.isLoading.set(true);
@@ -100,19 +149,18 @@ export default class DocumentAdmin {
       });
   }
 
-  openEditor(notice?: DocumentResponse): void {
-    const dialogRef = this.dialogService.open<DocumentResponse>(
+  openEditor(): void {
+    const dialogRef = this.dialogService.open<DocumentResponse[]>(
       DocumentCreate,
       {
         showCloseButton: false,
         disableClose: true,
-        contentClass: 'w-[calc(100vw-2rem)] !max-w-[700px]',
-        context: { notice },
+        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[800px]',
       },
     );
 
-    dialogRef.closed$.subscribe((result) => {
-      if (result) this.upsertItem(result);
+    dialogRef.closed$.subscribe((documents) => {
+      documents?.forEach((document) => this.upsertItem(document));
     });
   }
 
@@ -141,24 +189,24 @@ export default class DocumentAdmin {
 
   changePage(event: any) {
     this.limit.set(event.rows);
-    this.offset.set(event.first);
+    // this.offset.set(event.first);
     this.getData();
   }
 
   search(term: string) {
     this.searchTerm.set(term);
-    this.offset.set(0);
+    // this.offset.set(0);
     this.getData();
   }
 
   applyFilters() {
-    this.offset.set(0);
+    // this.offset.set(0);
     this.getData();
   }
 
   clearFilters() {
     this.filterForm.reset();
-    this.offset.set(0);
+    // this.offset.set(0);
     this.getData();
   }
 

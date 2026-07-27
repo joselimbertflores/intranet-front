@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 
-import { forkJoin, Observable, of, switchMap, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
@@ -12,17 +12,17 @@ import {
   DocumentResponse,
 } from '../interfaces';
 
-interface CreateDocumentBatchDto {
-  organizationalUnitId: string;
-  documentTypeId: number;
-  documentSubtypeId?: number | null;
-  year?: number | null;
-  files: File[];
-  documents: DocumentRecord[];
+export interface CreateDocumentBatchItemDto {
+  fileId: string;
+  title: string;
 }
 
-interface DocumentRecord {
-  title: string;
+export interface CreateDocumentBatchDto {
+  organizationalUnitId?: string | null;
+  documentTypeId: number;
+  documentSubtypeId?: number;
+  year?: number;
+  documents: CreateDocumentBatchItemDto[];
 }
 
 interface UpdateDocumentDto {
@@ -70,23 +70,14 @@ export class DocumentDataSource {
       .pipe(tap((resp) => console.log(resp)));
   }
 
-  create(data: CreateDocumentBatchDto) {
-    const { documents, files, year, ...rest } = data;
-    return forkJoin(
-      files.map((file) => this.fileUploadService.upload(file, 'documents')),
-    ).pipe(
-      switchMap((uploadedFiles) => {
-        const documentsToCreate = uploadedFiles.map((uploadedFile, index) => ({
-          fileId: uploadedFile.id,
-          title: documents[index].title.trim(),
-        }));
+  uploadDocumentFile(file: File) {
+    return this.fileUploadService.upload(file, 'documents');
+  }
 
-        return this.http.post<DocumentResponse[]>(`${this.URL}/batch`, {
-          ...rest,
-          ...(year && { year }),
-          documents: documentsToCreate,
-        });
-      }),
+  createBatch(data: CreateDocumentBatchDto) {
+    return this.http.post<DocumentResponse[]>(
+      `${this.URL}/batch`,
+      data,
     );
   }
 
@@ -123,14 +114,5 @@ export class DocumentDataSource {
         ([_, v]) => v !== null && v !== undefined && v !== '',
       ),
     );
-  }
-
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): any[] {
-    return nodes.map((node) => ({
-      key: node.id,
-      label: node.name.toUpperCase(),
-      data: node.id,
-      children: node.children ? this.toTreeNode(node.children) : [],
-    }));
   }
 }

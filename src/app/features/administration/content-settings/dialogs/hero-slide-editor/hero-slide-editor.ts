@@ -86,7 +86,8 @@ interface HeroSlideFormData {
     }),
   ],
   host: {
-    class: 'flex min-h-0 flex-col gap-4',
+    class:
+      'flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden',
   },
   styles: `
     .hero-slide-card.cdk-drag-preview {

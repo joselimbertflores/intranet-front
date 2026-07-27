@@ -5,7 +5,7 @@ export interface DocumentResponse {
   organizationalUnit: {
     id: string;
     name: string;
-  };
+  } | null;
   documentType: {
     id: number;
     name: string;

@@ -1,247 +1,367 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()">
-  <app-ui-stepper [value]="1">
-    <app-ui-step-list>
-      <app-ui-step [value]="1">Propiedades Documento</app-ui-step>
-      <app-ui-step [value]="2">Carga de Archivos</app-ui-step>
-    </app-ui-step-list>
-    <app-ui-step-panels>
-      <app-ui-step-panel [value]="1">
-        <ng-template #content let-activateCallback="activateCallback">
-          <div class="flex flex-col gap-y-4 pt-2">
-            <div class="flex flex-col gap-1">
-              <app-ui-floatlabel variant="on">
-                <app-ui-tree-select
-                  class="w-full"
-                  selectionMode="single"
-                  appendTo="body"
-                  filterPlaceholder="Buscar unidad"
-                  [options]="organizationTree()"
-                  [filter]="true"
-                  emptyMessage="Sin resultados"
-                  [invalid]="
-                    formUtils.isInvalid(form.get('organizationalUnitId'))
-                  "
-                  (onNodeSelect)="selectOrganizationUnit($event)"
-                >
-                </app-ui-tree-select>
-                <label for="sectionDoc">Unidad organizacional *</label>
-              </app-ui-floatlabel>
-              @if (formUtils.isInvalid(form.get("organizationalUnitId"))) {
-                <app-ui-message
-                  severity="error"
-                  size="small"
-                  variant="simple"
-                  class="ml-2"
-                >
-                  {{
-                    formUtils.getErrorMessage(form.get("organizationalUnitId"))
-                  }}
-                </app-ui-message>
-              }
-            </div>
-            <div class="flex flex-col gap-1">
-              <app-ui-floatlabel class="w-full" variant="on">
-                <app-ui-select
-                  [options]="documentTypes()"
-                  optionLabel="name"
-                  appendTo="body"
-                  class="w-full"
-                  inputId="typeId"
-                  [filter]="true"
-                  emptyMessage="Sin elementos"
-                  filterPlaceholder="Nombre del tipo"
-                  [invalid]="formUtils.isInvalid(form.get('documentTypeId'))"
-                  (onChange)="selectDocumentType($event.value)"
-                />
-                <label for="typeId">Tipo de documento *</label>
-              </app-ui-floatlabel>
-              @if (formUtils.isInvalid(form.get("documentTypeId"))) {
-                <app-ui-message
-                  severity="error"
-                  variant="simple"
-                  size="small"
-                  class="ml-2"
-                >
-                  {{ formUtils.getErrorMessage(form.get("documentTypeId")) }}
-                </app-ui-message>
-              }
-            </div>
-            <app-ui-floatlabel class="w-full" variant="on">
-              <app-ui-select
-                [options]="documentSubtypes()"
-                optionLabel="name"
-                optionValue="id"
-                appendTo="body"
-                class="w-full"
-                emptyMessage="Sin elementos"
-                inputId="subtype"
-                [filter]="true"
-                filterPlaceholder="Nombre del subtipo"
-                formControlName="documentSubtypeId"
-                [showClear]="true"
-              />
-              <label for="subtype">Subtipo (Opcional)</label>
-            </app-ui-floatlabel>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>Crear documentos</h3>
+</hlm-dialog-header>
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form id="document-create-form" [formRoot]="documentForm">
+    <section
+      class="grid grid-cols-1 gap-4 pt-1 lg:grid-cols-5"
+      aria-labelledby="batch-properties-title"
+    >
+      <div hlmField class="lg:col-span-5">
+        <label hlmFieldLabel for="organizational-unit">
+          Unidad organizacional
+        </label>
+        <organizational-unit-picker
+          inputId="organizational-unit"
+          [formField]="documentForm.organizationalUnitId"
+          [options]="organizationalUnitOptions()"
+        />
+        <p hlmFieldDescription>
+          Use “Institucional / transversal” cuando el documento no pertenezca a
+          una unidad específica.
+        </p>
+      </div>
 
-            <div class="flex flex-col gap-1">
-              <app-ui-floatlabel class="max-w-[250px]" variant="on">
-                <app-ui-select
-                  [options]="yearOptions"
-                  [filter]="true"
-                  [showClear]="true"
-                  filterPlaceholder="Buscar gestión"
-                  optionLabel="label"
-                  optionValue="value"
-                  appendTo="body"
-                  class="w-full"
-                  emptyMessage="Sin elementos"
-                  inputId="yearInput"
-                  formControlName="year"
-                />
-                <label for="yearInput">Gestión (Opcional)</label>
-              </app-ui-floatlabel>
-              <small class="ml-2">
-                Los archivos seleccionados se subiran con esta gestión.
-              </small>
-            </div>
-          </div>
-          <div class="flex pt-4 justify-end">
-            <app-ui-button
-              label="Siguiente"
-              icon="ui-icon ui-icon-arrow-right"
-              iconPos="right"
-              (onClick)="activateCallback(2)"
-              [outlined]="true"
-              size="small"
-            />
-          </div>
-        </ng-template>
-      </app-ui-step-panel>
-      <app-ui-step-panel [value]="2">
-        <ng-template #content let-activateCallback="activateCallback">
-          <div class="p-4 rounded-xl border border-surface-200 mt-4">
-            <div class="flex justify-between items-center mb-4">
-              <div class="flex flex-col">
-                <span class="font-medium">Listado de archivos</span>
-                <span class="text-xs text-surface-500">
-                  Tamaño máximo: {{ FILE_RULES.maxSizeMB }} MB por archivo.
-                </span>
-              </div>
-              <app-ui-button
-                label="Seleccionar"
-                icon="ui-icon ui-icon-plus"
-                size="small"
-                (onClick)="fileInput.click()"
-                [outlined]="true"
-              />
-              <input
-                #fileInput
-                type="file"
-                [hidden]="true"
-                [multiple]="true"
-                [accept]="acceptAttribute"
-                (change)="onFileSelect($event)"
-              />
-            </div>
-            @if (hasInvalidFiles()) {
-              <div class="mb-4">
-                <app-ui-message severity="warn" size="small">
-                  Algunos archivos seleccionados no son válidos o ya existen y
-                  no se cargaron.
-                </app-ui-message>
-              </div>
-            }
-            <div formArrayName="documents" class="space-y-3">
+      <div hlmField class="lg:col-span-2">
+        <label hlmFieldLabel for="document-type">Tipo documental</label>
+        <hlm-select
+          [formField]="documentForm.documentTypeId"
+          (valueChange)="onDocumentTypeChange()"
+        >
+          <hlm-select-trigger class="w-full" buttonId="document-type">
+            <ng-template hlmSelectValueTemplate let-documentTypeId>
+              {{ documentTypeNames().get(documentTypeId) }}
+            </ng-template>
+            <hlm-select-placeholder>Seleccione un tipo</hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal class="max-h-72">
+            <hlm-select-group>
+              @for (documentType of documentTypes(); track documentType.id) {
+                <hlm-select-item [value]="documentType.id">
+                  {{ documentType.name }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+
+        @if (documentForm.documentTypeId().touched()) {
+          @for (
+            error of documentForm.documentTypeId().errors();
+            track error.kind
+          ) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField class="lg:col-span-2">
+        <label hlmFieldLabel for="document-subtype">
+          Subtipo
+          <span class="font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        <hlm-select [formField]="documentForm.documentSubtypeId">
+          <hlm-select-trigger class="w-full" buttonId="document-subtype">
+            <ng-template hlmSelectValueTemplate let-documentSubtypeId>
+              {{ documentSubtypeNames().get(documentSubtypeId) }}
+            </ng-template>
+            <hlm-select-placeholder>
+              {{
+                documentSubtypes().length
+                  ? "Sin subtipo"
+                  : "No hay subtipos disponibles"
+              }}
+            </hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal class="max-h-72">
+            <hlm-select-group>
+              <hlm-select-item [value]="null">Sin subtipo</hlm-select-item>
               @for (
-                item of documentsFormArray.controls;
-                track item;
-                let i = $index
+                documentSubtype of documentSubtypes();
+                track documentSubtype.id
               ) {
-                <div
-                  [formGroupName]="i"
-                  class="flex items-center gap-4 p-2 border border-surface-200 rounded-xl hover:bg-surface-50 transition"
-                >
-                  <div class="shrink-0">
-                    <file-icon [mimeType]="files()[i].type" />
-                  </div>
-
-                  <div class="flex-1 flex flex-col gap-1 overflow-hidden">
-                    <input
-                      type="text"
-                      formControlName="title"
-                      class="w-full bg-transparent border-b focus:outline-none py-1 text-sm font-semibold text-surface-700 placeholder-surface-400 truncate"
-                      placeholder="Nombre del archivo"
-                      [ngClass]="{
-                        'border-surface-300 focus:border-primary-500':
-                          $safeNavigationMigration(item.get('title')?.valid),
-                        'border-red-500 focus:border-red-500 focus:ring-red-500':
-                          item.get('title')?.invalid &&
-                          item.get('title')?.touched,
-                      }"
-                    />
-
-                    @if (formUtils.isInvalid(item.get("title"))) {
-                      <app-ui-message
-                        severity="error"
-                        variant="simple"
-                        size="small"
-                      >
-                        {{ formUtils.getErrorMessage(item.get("title")) }}
-                      </app-ui-message>
-                    }
-
-                    <span class="text-xs text-slate-400">
-                      {{ files()[i].size | fileSize }}
-                    </span>
-                  </div>
-
-                  <div class="shrink-0">
-                    <app-ui-button
-                      icon="ui-icon ui-icon-trash"
-                      [rounded]="true"
-                      [text]="true"
-                      severity="danger"
-                      class="opacity-60 hover:opacity-100 transition"
-                      (onClick)="removeFile(i)"
-                    />
-                  </div>
-                </div>
-              } @empty {
-                <div class="text-center py-6if">
-                  <p class="text-surface-500">No hay archivos seleccionados</p>
-                  <span class="text-xs text-surface-500">
-                    Formatos permitidos: {{ allowedExtensionsLabel }}
-                  </span>
-                </div>
+                <hlm-select-item [value]="documentSubtype.id">
+                  {{ documentSubtype.name }}
+                </hlm-select-item>
               }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+      </div>
+
+      <year-selector
+        inputId="document-year"
+        label="Gestión (opcional)"
+        [formField]="documentForm.year"
+      />
+    </section>
+
+    <hlm-separator class="my-5" />
+
+    <section aria-labelledby="file-selection-title">
+      <input
+        #fileInput
+        class="hidden"
+        type="file"
+        multiple
+        [accept]="fileRules.accept"
+        [disabled]="documentForm().submitting()"
+        (change)="onFileSelection($event)"
+      />
+
+      <div class="flex items-center justify-between gap-3">
+        <h4 id="file-selection-title" class="text-sm font-semibold">
+          Documentos seleccionados
+        </h4>
+        <span hlmBadge variant="secondary">
+          {{ selectedFiles().length }}
+          {{ selectedFiles().length === 1 ? "archivo" : "archivos" }}
+        </span>
+      </div>
+
+      <div
+        class="mt-4 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-5 text-center transition-colors"
+        [class.py-7]="selectedFiles().length === 0"
+        [class.py-4]="selectedFiles().length > 0"
+        [class.bg-accent]="isDraggingFiles()"
+        [class.border-primary]="isDraggingFiles()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onFileDrop($event)"
+      >
+        <span
+          class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground"
+          aria-hidden="true"
+        >
+          <ng-icon name="lucideUploadCloud" size="20" />
+        </span>
+
+        <div>
+          <p class="text-sm font-medium">
+            @if (isDraggingFiles()) {
+              Suelte los archivos aquí
+            } @else if (selectedFiles().length > 0) {
+              Arrastre más archivos aquí
+            } @else {
+              Arrastre archivos aquí o selecciónelos desde su equipo
+            }
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Hasta {{ fileRules.maxSizeMB }} MB por archivo ·
+            {{ allowedExtensionsLabel }}
+          </p>
+        </div>
+
+        <button
+          hlmBtn
+          type="button"
+          size="sm"
+          variant="outline"
+          [disabled]="documentForm().submitting()"
+          (click)="fileInput.click()"
+        >
+          <ng-icon name="lucidePlus" data-icon="inline-start" />
+          Agregar archivos
+        </button>
+      </div>
+
+      @if (selectedFiles().length > 0) {
+        <div class="mt-3 grid gap-3">
+          @for (
+            documentField of documentForm.documents;
+            track documentField.clientId().value()
+          ) {
+            @let pendingFile =
+              selectedFilesByClientId().get(documentField.clientId().value());
+
+            @if (pendingFile) {
+              <article
+                class="min-w-0 rounded-xl border bg-card p-3 text-card-foreground"
+              >
+                <div
+                  class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3"
+                >
+                  <span
+                    class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+                    aria-hidden="true"
+                  >
+                    <ng-icon
+                      [name]="fileIconName(pendingFile.file)"
+                      size="18"
+                    />
+                  </span>
+
+                  <div class="min-w-0">
+                    <p
+                      class="truncate text-sm font-medium"
+                      [title]="pendingFile.file.name"
+                    >
+                      {{ pendingFile.file.name }}
+                    </p>
+                    <p class="mt-0.5 truncate text-xs text-muted-foreground">
+                      {{ pendingFile.file.size | fileSize }}
+                      ·
+                      {{ fileExtension(pendingFile.file.name).toUpperCase() }}
+                      @if (pendingFile.file.type) {
+                        · {{ pendingFile.file.type }}
+                      }
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <span
+                      hlmBadge
+                      class="shrink-0"
+                      [variant]="
+                        pendingFile.uploadStatus === 'error'
+                          ? 'destructive'
+                          : pendingFile.uploadStatus === 'pending'
+                            ? 'outline'
+                            : 'secondary'
+                      "
+                    >
+                      @if (pendingFile.uploadStatus === "uploading") {
+                        <hlm-spinner data-icon="inline-start" />
+                      }
+                      {{ uploadStatusLabel(pendingFile.uploadStatus) }}
+                    </span>
+
+                    <button
+                      hlmBtn
+                      type="button"
+                      size="icon-sm"
+                      variant="destructive"
+                      class="shrink-0"
+                      [disabled]="documentForm().submitting()"
+                      [attr.aria-label]="
+                        'Eliminar ' + pendingFile.file.name + ' del lote'
+                      "
+                      [title]="'Eliminar ' + pendingFile.file.name"
+                      (click)="removeDocument(pendingFile.clientId)"
+                    >
+                      <ng-icon name="lucideTrash2" />
+                    </button>
+                  </div>
+                </div>
+
+                <div hlmField class="mt-3">
+                  <label
+                    hlmFieldLabel
+                    [for]="'document-title-' + pendingFile.clientId"
+                  >
+                    Título del documento
+                  </label>
+                  <input
+                    hlmInput
+                    type="text"
+                    autocomplete="off"
+                    [id]="'document-title-' + pendingFile.clientId"
+                    [formField]="documentField.title"
+                  />
+
+                  @if (documentField.title().touched()) {
+                    @for (
+                      error of documentField.title().errors();
+                      track error.kind
+                    ) {
+                      <hlm-field-error [validator]="error.kind">
+                        {{ error.message }}
+                      </hlm-field-error>
+                    }
+                  }
+                </div>
+
+                @if (pendingFile.uploadError) {
+                  <p class="mt-2 text-sm text-destructive" role="alert">
+                    {{ pendingFile.uploadError }}
+                  </p>
+                }
+              </article>
+            }
+          }
+        </div>
+      }
+
+      @if (selectionIssues().length > 0) {
+        <div
+          class="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+          role="alert"
+        >
+          <div class="flex items-start gap-2">
+            <ng-icon
+              name="lucideCircleAlert"
+              class="mt-0.5 shrink-0"
+              aria-hidden="true"
+            />
+            <div class="min-w-0">
+              <p class="font-medium">Algunos archivos no fueron agregados</p>
+              <ul class="mt-1 grid gap-1">
+                @for (issue of selectionIssues(); track $index) {
+                  <li>
+                    <span class="font-medium">{{ issue.fileName }}:</span>
+                    {{ issue.message }}
+                  </li>
+                }
+              </ul>
             </div>
           </div>
-          <div class="flex pt-6 justify-start">
-            <app-ui-button
-              label="Atras"
-              icon="ui-icon ui-icon-arrow-left"
-              (onClick)="activateCallback(1)"
-              severity="secondary"
-              [outlined]="true"
-              size="small"
-            />
-          </div>
-        </ng-template>
-      </app-ui-step-panel>
-    </app-ui-step-panels>
-  </app-ui-stepper>
+        </div>
+      }
 
-  <div class="app-dialog-actions">
-    <app-ui-button
-      label="Cancelar"
-      severity="secondary"
-      [disabled]="isSaving()"
-      (onClick)="close()"
-    />
-    <app-ui-button
-      type="submit"
-      [loading]="isSaving()"
-      [label]="isSaving() ? 'Guardando...' : 'Guardar'"
-    />
-  </div>
-</form> -->
+      @if (
+        documentForm.documents().touched() &&
+        documentForm.documents().errors().length > 0
+      ) {
+        @for (error of documentForm.documents().errors(); track error.kind) {
+          <hlm-field-error class="mt-3" [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </section>
+
+    @if (creationError()) {
+      <div
+        class="mt-4 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+        role="alert"
+      >
+        <ng-icon
+          name="lucideCircleAlert"
+          class="mt-0.5 shrink-0"
+          aria-hidden="true"
+        />
+        <p>{{ creationError() }}</p>
+      </div>
+    }
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="documentForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+
+  <button
+    hlmBtn
+    type="submit"
+    form="document-create-form"
+    [disabled]="documentForm().submitting()"
+  >
+    @if (documentForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

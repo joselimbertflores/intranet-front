@@ -97,7 +97,7 @@ export default class LandingNoticesAdmin {
       {
         showCloseButton: false,
         disableClose: true,
-        contentClass: 'w-[calc(100vw-2rem)] !max-w-[700px]',
+        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[700px]',
         context: { notice },
       },
     );

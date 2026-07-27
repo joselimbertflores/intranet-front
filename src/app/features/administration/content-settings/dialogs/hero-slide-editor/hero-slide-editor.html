@@ -1,8 +1,11 @@
-<hlm-dialog-header>
+<hlm-dialog-header class="shrink-0 pb-4">
   <h3 hlmDialogTitle>Configurar banners</h3>
 </hlm-dialog-header>
 
-<div #scrollContainer class="max-h-[70dvh] overflow-y-auto">
+<div
+  #scrollContainer
+  class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4"
+>
   <form
     id="hero-banners-form"
     class="flex flex-col gap-2"
@@ -259,7 +262,7 @@
   </form>
 </div>
 
-<hlm-dialog-footer>
+<hlm-dialog-footer class="shrink-0">
   <button
     hlmBtn
     type="button"

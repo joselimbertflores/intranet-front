@@ -216,7 +216,6 @@
   </ng-template>
 </app-ui-table> -->
 
-
 <header class="mb-2 flex items-center justify-between">
   <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Documentos</h1>
   <button hlmBtn type="button" class="w-auto" (click)="openEditor()">
@@ -224,3 +223,132 @@
     Agregar
   </button>
 </header>
+
+<section class="space-y-2">
+  <div class="flex sm:justify-end">
+    <hlm-input-group class="w-full sm:w-72">
+      <input
+        type="search"
+        hlmInputGroupInput
+        aria-label="Buscar avisos por título"
+        placeholder="Buscar por título"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-4">
+    <div hlmTableContainer>
+      <table hlmTable class="w-full">
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead>Dcumento</th>
+            <th hlmTableHead>Clasificacion</th>
+            <th hlmTableHead>Unidad</th>
+            <th hlmTableHead>Gestion</th>
+            <th hlmTableHead>Estado</th>
+            <th hlmTableHead></th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (documentResource.isLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-6 text-center">
+                <span class="inline-flex items-center gap-2 text-sm">
+                  <hlm-spinner aria-label="Cargando avisos" />
+                  Cargando avisos...
+                </span>
+              </td>
+            </tr>
+          } @else if (documentResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-6 text-center">
+                <span class="text-sm">No se pudieron cargar los avisos.</span>
+              </td>
+            </tr>
+          } @else {
+            @for (doc of dataSource(); track doc.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>{{ doc.title }}</td>
+                <td hlmTableCell>
+                  <div class="flex flex-col text-xs">
+                    <span class="font-medium">
+                      {{ doc.documentType.name }}
+                    </span>
+                    @if (doc.documentSubtype) {
+                      <span>
+                        {{ doc.documentSubtype.name }}
+                      </span>
+                    } @else {
+                      <span> Sin subtipo </span>
+                    }
+                  </div>
+                </td>
+                <td hlmTableCell>
+                  {{ doc.organizationalUnit?.name ?? "Sin unidad" }}
+                </td>
+                <td hlmTableCell>
+                  {{ doc.year ?? "-" }}
+                </td>
+                <td hlmTableCell>
+                  @switch (doc.status) {
+                    @case ("ACTIVE") {
+                      <span hlmBadge variant="default"> Activo </span>
+                    }
+                    @case ("INACTIVE") {
+                      <span hlmBadge variant="secondary"> Activo </span>
+                    }
+                    @default {
+                      <span hlmBadge variant="outline"> Activo </span>
+                    }
+                  }
+                </td>
+                <td hlmTableCell class="text-right">
+                  <!-- <button
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    [hlmDropdownMenuTrigger]="menu"
+                    [hlmDropdownMenuTriggerData]="{ notice: notice }"
+                    align="end"
+                  >
+                    <ng-icon name="lucideMoreHorizontal" />
+                    <span class="sr-only">Abrir menú</span>
+                  </button> -->
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="6" class="py-4 text-center">
+                  @if (searchTerm().trim()) {
+                    Sin resultados
+                  } @else {
+                    No hay avisos registrados
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (
+      !documentResource.isLoading() &&
+      !documentResource.error() &&
+      dataSize() > 0
+    ) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>

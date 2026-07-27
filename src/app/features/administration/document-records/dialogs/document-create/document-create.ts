@@ -1,241 +1,545 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  FormArray,
-  FormGroup,
-} from '@angular/forms';
-import { CommonModule } from '@angular/common';
+  applyEach,
+  disabled,
+  form,
+  FormField,
+  FormRoot,
+  maxLength,
+  minLength,
+  required,
+  validate,
+} from '@angular/forms/signals';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import { CustomFormValidators, FormUtils } from '../../../../../helpers';
-import { DocumentDataSource } from '../../services';
-import { FileIcon } from '../../../../../shared';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideAudioLines,
+  lucideCircleAlert,
+  lucideFileText,
+  lucideImage,
+  lucidePlus,
+  lucideTrash2,
+  lucideUploadCloud,
+  lucideVideo,
+} from '@ng-icons/lucide';
+import { BrnDialogRef } from '@spartan-ng/brain/dialog';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import {
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmSeparator } from '@spartan-ng/helm/separator';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom } from 'rxjs';
+
+import { YearSelector } from '../../../../../shared';
+import {
+  DOCUMENT_FILE_RULES,
+  DocumentAllowedExtension,
+} from '../../constants/document-file-rules';
+import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
+import { CreateDocumentBatchDto, DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
 import {
-  DocumentTypeWithSubTypesResponse,
-  DocumentSubtypeResponse,
-  SectionTreeNodeResponse,
-} from '../../interfaces';
-import { finalize } from 'rxjs';
+  OrganizationalUnitOption,
+  OrganizationalUnitPicker,
+} from '../../components/organizational-unit-picker/organizational-unit-picker';
 
-interface DocumentModel {
+interface BatchDocumentFormItem {
+  clientId: string;
+  title: string;
+}
 
+interface DocumentBatchFormModel {
+  organizationalUnitId: string | null;
+  documentTypeId: number | null;
+  documentSubtypeId: number | null;
+  year: number | null;
+  documents: BatchDocumentFormItem[];
+}
+
+type UploadStatus = 'pending' | 'uploading' | 'uploaded' | 'error';
+
+interface PendingDocumentFile {
+  clientId: string;
+  file: File;
+  uploadedFileId: string | null;
+  uploadStatus: UploadStatus;
+  uploadError: string | null;
+}
+
+interface FileSelectionIssue {
+  fileName: string;
+  message: string;
 }
 
 @Component({
   selector: 'app-document-create',
-  imports: [CommonModule, ReactiveFormsModule, FileSizePipe, FileIcon],
+  imports: [
+    FileSizePipe,
+    FormField,
+    FormRoot,
+    HlmBadgeImports,
+    HlmButtonImports,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmSelectImports,
+    HlmSeparator,
+    HlmSpinner,
+    NgIcon,
+    OrganizationalUnitPicker,
+    YearSelector,
+  ],
+  providers: [
+    provideIcons({
+      lucideAudioLines,
+      lucideCircleAlert,
+      lucideFileText,
+      lucideImage,
+      lucidePlus,
+      lucideTrash2,
+      lucideUploadCloud,
+      lucideVideo,
+    }),
+  ],
   templateUrl: './document-create.html',
+  host: {
+    class:
+      'flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentCreate {
-  private formBuilder = inject(FormBuilder);
-  // private diagloRef = inject(DynamicDialogRef);
+  private dialogRef = inject<BrnDialogRef<DocumentResponse[]>>(BrnDialogRef);
   private documentDataSource = inject(DocumentDataSource);
+  private nextClientId = 0;
 
-  readonly MIN_YEAR = 2000;
-  readonly MAX_YEAR = new Date().getFullYear() + 1;
-  readonly yearOptions = this.buildYearOptions(this.MIN_YEAR, this.MAX_YEAR);
-  readonly FILE_RULES = {
-    maxSizeMB: 20,
-    allowedExtensions: [
-      'pdf',
-      'odt',
-      'ods',
-      'odp',
-      'docx',
-      'xlsx',
-      'pptx',
-      'jpg',
-      'jpeg',
-      'png',
-      'webp',
-      'mp4',
-      'webm',
-      'mp3',
-      'ogg',
-    ],
-  };
-
-  readonly acceptAttribute = this.FILE_RULES.allowedExtensions
-    .map((ext) => ext.trim().toLowerCase())
-    .map((ext) => (ext.startsWith('.') ? ext : `.${ext}`))
-    .join(',');
-
-  readonly allowedExtensionsLabel = this.FILE_RULES.allowedExtensions
-    .map((ext) => ext.toUpperCase())
+  readonly fileRules = DOCUMENT_FILE_RULES;
+  readonly allowedExtensionsLabel = this.fileRules.allowedExtensions
+    .map((extension) => extension.toUpperCase())
     .join(', ');
 
-  readonly formUtils = FormUtils;
+  readonly organizationalUnits = toSignal(
+    this.documentDataSource.getOrganizationTree(),
+    { initialValue: [] },
+  );
 
-  form: FormGroup = this.formBuilder.group({
-    organizationalUnitId: [null, Validators.required],
-    documentTypeId: [null, Validators.required],
-    documentSubtypeId: [{ value: null, disabled: true }],
-    year: [null],
-    documents: this.formBuilder.array([]),
+  readonly documentTypes = toSignal(
+    this.documentDataSource.getDocumentTypes(),
+    { initialValue: [] },
+  );
+
+  readonly documentSubtypes = computed(() => {
+    const selectedTypeId = this.documentForm.documentTypeId().value();
+    return (
+      this.documentTypes().find(({ id }) => id === selectedTypeId)?.subtypes ??
+      []
+    );
   });
 
-  organizationTree = computed(() =>
-    this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
+  // For display select labels
+  readonly documentTypeNames = computed(
+    () => new Map(this.documentTypes().map(({ id, name }) => [id, name])),
   );
-  documentTypes = computed(() => this.documentDataSource.documentTypes());
-  documentSubtypes = signal<DocumentSubtypeResponse[]>([]);
+  readonly documentSubtypeNames = computed(
+    () => new Map(this.documentSubtypes().map(({ id, name }) => [id, name])),
+  );
+  readonly organizationalUnitOptions = computed<OrganizationalUnitOption[]>(
+    () => this.flattenOrganizationalUnits(this.organizationalUnits()),
+  );
 
-  files = signal<File[]>([]);
-  hasInvalidFiles = signal(false);
+  readonly selectedFiles = signal<PendingDocumentFile[]>([]);
+  readonly selectedFilesByClientId = computed(
+    () =>
+      new Map(
+        this.selectedFiles().map((pendingFile) => [
+          pendingFile.clientId,
+          pendingFile,
+        ]),
+      ),
+  );
+  readonly selectionIssues = signal<FileSelectionIssue[]>([]);
+  readonly creationError = signal<string | null>(null);
+  readonly isDraggingFiles = signal(false);
 
-  private invalidFileMessageTimer?: ReturnType<typeof setTimeout>;
+  readonly formModel = signal<DocumentBatchFormModel>({
+    organizationalUnitId: null,
+    documentTypeId: null,
+    documentSubtypeId: null,
+    year: null,
+    documents: [],
+  });
 
-  isSaving = signal(false);
+  readonly documentForm = form(
+    this.formModel,
+    (schemaPath) => {
+      disabled(schemaPath, {
+        when: ({ state }) => state.submitting(),
+      });
+      required(schemaPath.documentTypeId, {
+        message: 'Seleccione un tipo documental.',
+      });
 
-  save() {
-    if (this.isSaving()) return;
+      disabled(schemaPath.documentSubtypeId, {
+        when: ({ valueOf }) => {
+          const typeId = valueOf(schemaPath.documentTypeId);
+          return !this.documentTypes().some(
+            ({ id, subtypes }) => id === typeId && subtypes.length > 0,
+          );
+        },
+      });
 
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      minLength(schemaPath.documents, 1, {
+        message: 'Seleccione al menos un archivo.',
+      });
+
+      applyEach(schemaPath.documents, (document) => {
+        validate(document.title, ({ value }) =>
+          value().trim()
+            ? null
+            : {
+                kind: 'required',
+                message: 'El título es obligatorio.',
+              },
+        );
+        maxLength(document.title, 150, {
+          message: 'El título admite hasta 150 caracteres.',
+        });
+      });
+    },
+    {
+      submission: {
+        action: async (formField) => {
+          await this.uploadAndCreateBatch(formField().value());
+        },
+      },
+    },
+  );
+
+  close(): void {
+    if (!this.documentForm().submitting()) {
+      this.dialogRef.close();
+    }
+  }
+
+  onDocumentTypeChange(): void {
+    this.documentForm.documentSubtypeId().value.set(null);
+  }
+
+  onFileSelection(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selectedFiles = Array.from(input.files ?? []);
+    input.value = '';
+    this.addSelectedFiles(selectedFiles);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (!this.documentForm().submitting()) {
+      this.isDraggingFiles.set(true);
+    }
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingFiles.set(false);
+  }
+
+  onFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingFiles.set(false);
+
+    if (this.documentForm().submitting()) return;
+    this.addSelectedFiles(Array.from(event.dataTransfer?.files ?? []));
+  }
+
+  removeDocument(clientId: string): void {
+    if (this.documentForm().submitting()) return;
+
+    this.selectedFiles.update((files) =>
+      files.filter((pendingFile) => pendingFile.clientId !== clientId),
+    );
+    this.formModel.update((model) => ({
+      ...model,
+      documents: model.documents.filter(
+        (document) => document.clientId !== clientId,
+      ),
+    }));
+    this.creationError.set(null);
+  }
+
+  fileExtension(fileName: string): string {
+    const finalDotIndex = fileName.lastIndexOf('.');
+    return finalDotIndex < 0
+      ? ''
+      : fileName.slice(finalDotIndex + 1).toLowerCase();
+  }
+
+  fileIconName(file: File): string {
+    const extension = this.fileExtension(file.name);
+
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(extension)) {
+      return 'lucideImage';
+    }
+    if (['mp4', 'webm'].includes(extension)) {
+      return 'lucideVideo';
+    }
+    if (['mp3', 'ogg'].includes(extension)) {
+      return 'lucideAudioLines';
+    }
+    return 'lucideFileText';
+  }
+
+  uploadStatusLabel(status: UploadStatus): string {
+    switch (status) {
+      case 'pending':
+        return 'Pendiente';
+      case 'uploading':
+        return 'Subiendo';
+      case 'uploaded':
+        return 'Subido';
+      case 'error':
+        return 'Error';
+    }
+  }
+
+  private addSelectedFiles(files: File[]): void {
+    if (files.length === 0 || this.documentForm().submitting()) return;
+
+    const knownFileKeys = new Set(
+      this.selectedFiles().map(({ file }) => this.getFileSelectionKey(file)),
+    );
+    const pendingFiles: PendingDocumentFile[] = [];
+    const documentItems: BatchDocumentFormItem[] = [];
+    const issues: FileSelectionIssue[] = [];
+
+    for (const file of files) {
+      const validationMessage = this.validateFile(file, knownFileKeys);
+
+      if (validationMessage) {
+        issues.push({ fileName: file.name, message: validationMessage });
+        continue;
+      }
+
+      knownFileKeys.add(this.getFileSelectionKey(file));
+      const clientId = this.createClientId();
+      pendingFiles.push({
+        clientId,
+        file,
+        uploadedFileId: null,
+        uploadStatus: 'pending',
+        uploadError: null,
+      });
+      documentItems.push({
+        clientId,
+        title: this.removeFinalExtension(file.name),
+      });
+    }
+
+    if (pendingFiles.length > 0) {
+      this.selectedFiles.update((currentFiles) => [
+        ...currentFiles,
+        ...pendingFiles,
+      ]);
+      this.formModel.update((model) => ({
+        ...model,
+        documents: [...model.documents, ...documentItems],
+      }));
+      this.creationError.set(null);
+    }
+
+    this.selectionIssues.set(issues);
+  }
+
+  private validateFile(file: File, knownFileKeys: ReadonlySet<string>) {
+    const extension = this.fileExtension(file.name);
+    if (!this.isAllowedExtension(extension)) {
+      return `La extensión .${extension || '(sin extensión)'} no está permitida.`;
+    }
+    if (file.size > this.fileRules.maxSizeBytes) {
+      return `Supera el tamaño máximo de ${this.fileRules.maxSizeMB} MB.`;
+    }
+
+    if (knownFileKeys.has(this.getFileSelectionKey(file))) {
+      return 'El archivo ya fue agregado.';
+    }
+    return null;
+  }
+
+  private async uploadAndCreateBatch(formValue: DocumentBatchFormModel) {
+    this.creationError.set(null);
+
+    for (const pendingFile of this.selectedFiles()) {
+      if (pendingFile.uploadedFileId !== null) continue;
+
+      this.updateUploadState(pendingFile.clientId, {
+        uploadStatus: 'uploading',
+        uploadError: null,
+      });
+
+      try {
+        const upload = await firstValueFrom(
+          this.documentDataSource.uploadDocumentFile(pendingFile.file),
+        );
+        this.updateUploadState(pendingFile.clientId, {
+          uploadedFileId: upload.id,
+          uploadStatus: 'uploaded',
+          uploadError: null,
+        });
+      } catch (error: unknown) {
+        this.updateUploadState(pendingFile.clientId, {
+          uploadStatus: 'error',
+          uploadError: this.requestErrorMessage(
+            error,
+            'No se pudo subir el archivo. Intente nuevamente.',
+          ),
+        });
+      }
+    }
+
+    const currentFiles = this.selectedFiles();
+    if (currentFiles.some((pendingFile) => !pendingFile.uploadedFileId)) {
+      this.creationError.set(
+        'No se pudieron subir algunos archivos. Revise los errores e inténtelo nuevamente.',
+      );
       return;
     }
 
-    this.isSaving.set(true);
-
-    // this.documentDataSource
-    //   .create({ ...this.form.value, files: this.files() })
-    //   .pipe(finalize(() => this.isSaving.set(false)))
-    //   .subscribe((resp) => {
-    //     this.diagloRef.close(resp);
-    //   });
-  }
-
-  close() {
-    // this.diagloRef.close();
-  }
-
-  removeFile(index: number) {
-    this.files.update((files) => files.filter((_, i) => i !== index));
-    this.documentsFormArray.removeAt(index);
-  }
-
-  onFileSelect(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-
-    if (!inputElement.files || inputElement.files.length === 0) return;
-
-    const files = Array.from(inputElement.files);
-
-    const validFiles = files.filter((file) => this.validateFile(file));
-
-    validFiles.forEach((file) => this.addAttachment(file));
-
-    (event.target as HTMLInputElement).value = '';
-
-    if (validFiles.length !== files.length) {
-      this.showInvalidFileMessage();
+    try {
+      const response = await firstValueFrom(
+        this.documentDataSource.createBatch(
+          this.buildBatchPayload(formValue, currentFiles),
+        ),
+      );
+      this.dialogRef.close(response);
+    } catch (error: unknown) {
+      this.creationError.set(
+        this.requestErrorMessage(
+          error,
+          'Los archivos se subieron, pero no se pudo completar el proceso. Inténtelo nuevamente; no tendrá que volver a subirlos.',
+        ),
+      );
     }
   }
 
-  selectOrganizationUnit(event: any) {
-    this.form.get('organizationalUnitId')?.setValue(event.node.data);
-  }
-
-  selectDocumentType(type: DocumentTypeWithSubTypesResponse) {
-    this.documentSubtypes.set(type.subtypes);
-    this.form.patchValue({ documentTypeId: type.id, documentSubtypeId: null });
-    if (type.subtypes.length > 0) {
-      this.form.get('documentSubtypeId')?.enable();
-    } else {
-      this.form.get('documentSubtypeId')?.disable();
-    }
-  }
-
-  get documentsFormArray() {
-    return this.form.get('documents') as FormArray;
-  }
-
-  private validateFile(file: File): boolean {
-    const ext = file.name.split('.').pop()?.toLowerCase();
-
-    if (!ext || !this.FILE_RULES.allowedExtensions.includes(ext)) {
-      return false;
+  private buildBatchPayload(
+    formValue: DocumentBatchFormModel,
+    pendingFiles: PendingDocumentFile[],
+  ): CreateDocumentBatchDto {
+    if (formValue.documentTypeId === null) {
+      throw new Error('Document type is required.');
     }
 
-    const maxSizeBytes = this.FILE_RULES.maxSizeMB * 1024 * 1024;
+    const uploadedFileIds = new Map(
+      pendingFiles.map(({ clientId, uploadedFileId }) => [
+        clientId,
+        uploadedFileId,
+      ]),
+    );
 
-    if (file.size > maxSizeBytes) {
-      return false;
-    }
-
-    if (this.isFileDuplicate(file)) {
-      return false;
-    }
-
-    return true;
+    return {
+      organizationalUnitId: formValue.organizationalUnitId,
+      documentTypeId: formValue.documentTypeId,
+      ...(formValue.documentSubtypeId !== null && {
+        documentSubtypeId: formValue.documentSubtypeId,
+      }),
+      ...(formValue.year !== null && { year: formValue.year }),
+      documents: formValue.documents.map((document) => {
+        const fileId = uploadedFileIds.get(document.clientId);
+        if (!fileId) {
+          throw new Error(`Uploaded file missing for ${document.clientId}.`);
+        }
+        return {
+          fileId,
+          title: document.title.trim(),
+        };
+      }),
+    };
   }
 
-  private isFileDuplicate(selectedFile: File): boolean {
-    return this.files().some(
-      (item) =>
-        item.name === selectedFile.name &&
-        item.size === selectedFile.size &&
-        item.lastModified === selectedFile.lastModified,
+  private updateUploadState(
+    clientId: string,
+    changes: Partial<
+      Pick<
+        PendingDocumentFile,
+        'uploadedFileId' | 'uploadStatus' | 'uploadError'
+      >
+    >,
+  ): void {
+    this.selectedFiles.update((files) =>
+      files.map((pendingFile) =>
+        pendingFile.clientId === clientId
+          ? { ...pendingFile, ...changes }
+          : pendingFile,
+      ),
     );
   }
 
-  private addAttachment(file: File) {
-    this.files.update((files) => [...files, file]);
-    this.documentsFormArray.push(this.createDocumentForm(file));
-  }
-
-  private createDocumentForm(file: File) {
-    return this.formBuilder.group({
-      title: [
-        this.removeExtension(file.name),
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(150),
-          Validators.pattern(/^[\p{L}\p{N} _.,:'();\-–—]+$/u),
-          CustomFormValidators.notOnlyWhitespace,
-        ],
-      ],
+  private flattenOrganizationalUnits(
+    nodes: SectionTreeNodeResponse[],
+    parentPath: string[] = [],
+    depth = 0,
+  ): OrganizationalUnitOption[] {
+    return nodes.flatMap((node) => {
+      const path = [...parentPath, node.name];
+      return [
+        {
+          id: node.id,
+          name: node.name,
+          depth,
+          searchText: path.join(' / '),
+        },
+        ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
+      ];
     });
   }
 
-  private showInvalidFileMessage(): void {
-    this.hasInvalidFiles.set(true);
+  private requestErrorMessage(error: unknown, fallback: string): string {
+    if (!(error instanceof HttpErrorResponse)) return fallback;
 
-    if (this.invalidFileMessageTimer) {
-      clearTimeout(this.invalidFileMessageTimer);
-    }
+    const responseBody = error.error as
+      | { message?: string | string[] }
+      | null
+      | undefined;
+    const message = responseBody?.message;
 
-    this.invalidFileMessageTimer = setTimeout(() => {
-      this.hasInvalidFiles.set(false);
-    }, 3000);
+    if (Array.isArray(message)) return message.join(' ');
+    return typeof message === 'string' && message.trim() ? message : fallback;
   }
 
-  private toTreeNodes(nodes: SectionTreeNodeResponse[]): any {
-    return nodes.map((node) => ({
-      key: node.id,
-      label: node.name.toUpperCase(),
-      data: node.id,
-      children: node.children ? this.toTreeNodes(node.children) : [],
-    }));
+  private isAllowedExtension(extension: string) {
+    return (this.fileRules.allowedExtensions as readonly string[]).includes(
+      extension,
+    );
   }
 
-  private buildYearOptions(minYear: number, maxYear: number) {
-    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
-      const year = maxYear - index;
-      return { label: String(year), value: year };
-    });
+  private getFileSelectionKey(file: File): string {
+    return JSON.stringify([file.name, file.size, file.lastModified]);
   }
 
-  private removeExtension(fileName: string): string {
-    const lastDot = fileName.lastIndexOf('.');
-    return lastDot === -1 ? fileName : fileName.substring(0, lastDot);
+  private createClientId(): string {
+    this.nextClientId += 1;
+    return `batch-document-${Date.now()}-${this.nextClientId}`;
+  }
+
+  private removeFinalExtension(fileName: string): string {
+    const finalDotIndex = fileName.lastIndexOf('.');
+    return finalDotIndex <= 0 ? fileName : fileName.slice(0, finalDotIndex);
   }
 }

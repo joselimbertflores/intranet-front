@@ -53,11 +53,6 @@ export class DocumentDataSource {
   private readonly URL = `${environment.baseUrl}/api/documents`;
   private readonly fileUploadService = inject(FileUploadService);
 
-  organizationUnitsTree = toSignal(this.getOrganizationTree(), {
-    initialValue: [],
-  });
-  documentTypes = toSignal(this.getDocumentTypes(), { initialValue: [] });
-
   findAll(filterParams: GetDocumentsParams) {
     const params = new HttpParams({
       fromObject: this.removeEmptyParams(filterParams),

@@ -61,10 +61,10 @@ export class DocumentEdit implements OnInit {
   isSaving = signal(false);
   submitted = signal(false);
 
-  organizationTree = computed(() =>
-    this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
-  );
-  documentTypes = computed(() => this.documentDataSource.documentTypes());
+  // organizationTree = computed(() =>
+  //   this.toTreeNodes(this.documentDataSource.organizationUnitsTree()),
+  // );
+  // documentTypes = computed(() => this.documentDataSource.documentTypes());
   documentSubtypes = signal<DocumentSubtypeResponse[]>([]);
   readonly documentStatusOptions = [
     { value: 'ACTIVE', label: 'Activo' },
@@ -125,17 +125,17 @@ export class DocumentEdit implements OnInit {
   }
 
   selectDocumentType(id: number) {
-    const selectedType = this.documentTypes().find((item) => item.id === id);
-    this.documentSubtypes.set(selectedType?.subtypes ?? []);
+    // const selectedType = this.documentTypes().find((item) => item.id === id);
+    // this.documentSubtypes.set(selectedType?.subtypes ?? []);
 
-    const control = this.form.controls['documentSubtypeId'];
-    control.setValue(null);
+    // const control = this.form.controls['documentSubtypeId'];
+    // control.setValue(null);
 
-    if (selectedType?.subtypes.length) {
-      control.enable();
-    } else {
-      control.disable();
-    }
+    // if (selectedType?.subtypes.length) {
+    //   control.enable();
+    // } else {
+    //   control.disable();
+    // }
   }
 
   onSelectFile(event: any): void {

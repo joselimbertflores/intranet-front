@@ -1,155 +1,208 @@
-import {
-  Component,
-  computed,
-  debounced,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
+import { Component, computed, debounced, inject, signal } from '@angular/core';
+import { disabled, form, FormField, FormRoot } from '@angular/forms/signals';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 
-import { finalize } from 'rxjs';
-
-import { DocumentCreate } from '../../dialogs';
-import { DocumentDataSource } from '../../services';
 import {
-  DocumentResponse,
-  DocumentSubtypeResponse,
-  SectionTreeNodeResponse,
-} from '../../interfaces';
+  lucideCircleAlert,
+  lucideRefreshCw,
+  lucideDownload,
+  lucideSearch,
+  lucideFilter,
+  lucidePlus,
+} from '@ng-icons/lucide';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
-import { lucidePencil, lucidePlus, lucideSearch } from '@ng-icons/lucide';
-import {
-  HlmInputGroup,
-  HlmInputGroupAddon,
-  HlmInputGroupImports,
-} from '@spartan-ng/helm/input-group';
-import { form } from '@angular/forms/signals';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
+import { HlmPopoverImports } from '@spartan-ng/helm/popover';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
-import { PaginationControls } from '@app/shared';
 import { HlmTableImports } from '@spartan-ng/helm/table';
-import { JsonPipe } from '@angular/common';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+
+import { PaginationControls, YearSelector } from '@app/shared';
+
+import {
+  OrganizationalUnitPicker,
+  type OrganizationalUnitOption,
+} from '../../components/organizational-unit-picker/organizational-unit-picker';
+import { DocumentCreate } from '../../dialogs';
+import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
+import { DocumentDataSource } from '../../services';
+
+export type { OrganizationalUnitOption } from '../../components/organizational-unit-picker/organizational-unit-picker';
 
 interface FilterData {
   organizationalUnitId: string | null;
-  documentTypeId: string | null;
-  documentSubtypeId: string | null;
+  documentTypeId: number | null;
+  documentSubtypeId: number | null;
   year: number | null;
   status: string | null;
 }
+
+const EMPTY_FILTERS: Readonly<FilterData> = {
+  organizationalUnitId: null,
+  documentTypeId: null,
+  documentSubtypeId: null,
+  year: null,
+  status: null,
+};
+
 @Component({
   selector: 'app-document-admin',
   imports: [
     FormsModule,
+    FormField,
+    FormRoot,
     NgIcon,
+    HlmBadgeImports,
     HlmButtonImports,
-    HlmInputGroup,
-    HlmInputGroupAddon,
-    HlmSpinner,
-    PaginationControls,
-    HlmTableImports,
-    JsonPipe,
+    HlmFieldImports,
     HlmInputGroupImports,
+    HlmPopoverImports,
+    HlmSelectImports,
+    HlmSpinner,
+    HlmTableImports,
+    HlmTooltipImports,
+    OrganizationalUnitPicker,
+    PaginationControls,
+    YearSelector,
   ],
   templateUrl: './document-admin.html',
   providers: provideIcons({
+    lucideCircleAlert,
+    lucideDownload,
+    lucideFilter,
     lucidePlus,
-    lucidePencil,
+    lucideRefreshCw,
     lucideSearch,
   }),
 })
 export default class DocumentAdmin {
-  private documentDataSource = inject(DocumentDataSource);
-  // private dialogService = inject(DialogService);
-  private formBuilder = inject(FormBuilder);
+  private readonly documentDataSource = inject(DocumentDataSource);
   private readonly dialogService = inject(HlmDialogService);
+
+  readonly documentTypes = toSignal(
+    this.documentDataSource.getDocumentTypes(),
+    { initialValue: [] },
+  );
+  readonly organizationalUnits = toSignal(
+    this.documentDataSource.getOrganizationTree(),
+    { initialValue: [] },
+  );
 
   readonly pageSize = signal(10);
   readonly currentPage = signal(1);
   readonly offset = computed(() => this.pageSize() * (this.currentPage() - 1));
-  limit = signal(10);
 
   readonly searchTerm = signal('');
   readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
 
-  filterModel = signal<FilterData>({
-    organizationalUnitId: null,
-    documentTypeId: null,
-    documentSubtypeId: null,
-    year: null,
-    status: null,
-  });
-  filterFormSi = form(this.filterModel);
+  readonly filterModel = signal<FilterData>({ ...EMPTY_FILTERS });
+  readonly appliedFilters = signal<FilterData>({ ...EMPTY_FILTERS });
 
-  documentResource = rxResource({
+  readonly filterForm = form(this.filterModel, (schemaPath) => {
+    disabled(schemaPath.documentSubtypeId, {
+      when: ({ valueOf }) => {
+        const typeId = valueOf(schemaPath.documentTypeId);
+        return !this.documentTypes().some(
+          ({ id, subtypes }) => id === typeId && subtypes.length > 0,
+        );
+      },
+    });
+  });
+
+  readonly documentResource = rxResource({
     params: () => ({
       limit: this.pageSize(),
       offset: this.offset(),
       term: this.debouncedSearchTerm.value().trim(),
+      ...this.appliedFilters(),
     }),
     stream: ({ params }) => this.documentDataSource.findAll(params),
   });
 
-  readonly dataSource = linkedSignal(
+  readonly dataSource = computed(
     () => this.documentResource.value()?.documents ?? [],
   );
-  readonly dataSize = linkedSignal(
-    () => this.documentResource.value()?.total ?? 0,
+  readonly dataSize = computed(() => this.documentResource.value()?.total ?? 0);
+  readonly isListLoading = computed(
+    () =>
+      this.debouncedSearchTerm.isLoading() || this.documentResource.isLoading(),
   );
 
-  filterForm: FormGroup = this.formBuilder.group({
-    organizationalUnitNode: [null],
-    documentTypeId: [null],
-    documentSubtypeId: [{ value: null, disabled: true }],
-    year: [null],
-    status: [null],
+  readonly documentSubTypes = computed(() => {
+    const selectedTypeId = this.filterForm.documentTypeId().value();
+    return (
+      this.documentTypes().find(({ id }) => id === selectedTypeId)?.subtypes ??
+      []
+    );
   });
 
-  documentTypes = computed(() => this.documentDataSource.documentTypes());
-  organizationTree = computed(() =>
-    this.toTreeNode(this.documentDataSource.organizationUnitsTree()),
+  readonly documentSubtypeNames = computed(
+    () => new Map(this.documentSubTypes().map(({ id, name }) => [id, name])),
   );
-  documentSubTypes = signal<DocumentSubtypeResponse[]>([]);
+  readonly documentTypeNames = computed(
+    () => new Map(this.documentTypes().map(({ id, name }) => [id, name])),
+  );
+  readonly organizationalUnitOptions = computed(() =>
+    this.flattenOrganizationalUnits(this.organizationalUnits()),
+  );
 
   readonly statusOptions = [
-    { value: 'ACTIVE', label: 'Activos' },
-    { value: 'INACTIVE', label: 'Inactivos' },
+    { value: 'ACTIVE', label: 'Activo' },
+    { value: 'INACTIVE', label: 'Inactivo' },
   ];
 
-  isLoading = signal(false);
-  menuItems: any[] = [];
+  readonly appliedFiltersCount = computed(
+    () =>
+      Object.values(this.appliedFilters()).filter(
+        (value) => value !== null && value !== undefined && value !== '',
+      ).length,
+  );
+  readonly hasActiveQuery = computed(
+    () =>
+      this.appliedFiltersCount() > 0 ||
+      this.debouncedSearchTerm.value().trim().length > 0,
+  );
 
-  ngOnInit() {
-    this.getData();
-  }
+  protected readonly popoverState = signal<'open' | 'closed'>('closed');
 
   onSearch(term: string): void {
     this.currentPage.set(1);
     this.searchTerm.set(term);
   }
 
-  getData() {
-    const { organizationalUnitNode, ...props } = this.filterForm.value;
-    this.isLoading.set(true);
-    this.documentDataSource
-      .findAll({
-        limit: this.limit(),
-        offset: this.offset(),
-        term: this.searchTerm(),
-        ...props,
-        organizationalUnitId: organizationalUnitNode?.data,
-      })
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe(({ documents, total }) => {
-        this.dataSource.set(documents);
-        this.dataSize.set(total);
-      });
+  onDocumentTypeChange(): void {
+    this.filterForm.documentSubtypeId().value.set(null);
   }
 
-  openEditor(): void {
+  clearFilters(): void {
+    const hadAppliedFilters = this.appliedFiltersCount() > 0;
+    this.filterModel.set({ ...EMPTY_FILTERS });
+
+    if (hadAppliedFilters) {
+      this.appliedFilters.set({ ...EMPTY_FILTERS });
+      this.currentPage.set(1);
+    }
+
+    this.popoverState.set('closed');
+  }
+
+  applyFilters(): void {
+    this.appliedFilters.set({ ...this.filterModel() });
+    this.currentPage.set(1);
+    this.popoverState.set('closed');
+  }
+
+  reloadDocuments(): void {
+    this.documentResource.reload();
+  }
+
+  openCreateDialog(): void {
     const dialogRef = this.dialogService.open<DocumentResponse[]>(
       DocumentCreate,
       {
@@ -160,150 +213,34 @@ export default class DocumentAdmin {
     );
 
     dialogRef.closed$.subscribe((documents) => {
-      documents?.forEach((document) => this.upsertItem(document));
+      if (documents?.length) {
+        this.documentResource.reload();
+      }
     });
   }
 
-  selectSection(id: string) {
-    this.filterForm.patchValue({ sectionId: id });
-  }
-
-  selectDocumentType(selectedId: number | null) {
-    const control = this.filterForm.get('documentSubtypeId');
-    control?.setValue(null);
-
-    if (selectedId) {
-      const documentType = this.documentTypes().find(
-        ({ id }) => id === selectedId,
-      );
-      this.documentSubTypes.set(documentType?.subtypes ?? []);
-      if (documentType?.subtypes.length) {
-        control?.enable();
-      } else {
-        control?.disable();
-      }
-    } else {
-      this.documentSubTypes.set([]);
-    }
-  }
-
-  changePage(event: any) {
-    this.limit.set(event.rows);
-    // this.offset.set(event.first);
-    this.getData();
-  }
-
-  search(term: string) {
-    this.searchTerm.set(term);
-    // this.offset.set(0);
-    this.getData();
-  }
-
-  applyFilters() {
-    // this.offset.set(0);
-    this.getData();
-  }
-
-  clearFilters() {
-    this.filterForm.reset();
-    // this.offset.set(0);
-    this.getData();
-  }
-
-  openCreateDialog() {
-    // const diagloRef = this.dialogService.open(DocumentCreate, {
-    //   header: 'Crear Documentación',
-    //   modal: true,
-    //   draggable: false,
-    //   focusOnShow: false,
-    //   closable: false,
-    //   closeOnEscape: false,
-    //   dismissableMask: false,
-    //   width: '50vw',
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    // });
-    // diagloRef?.onClose.subscribe((result?: DocumentManageResponse[]) => {
-    //   if (!result) return;
-    //   result.forEach((item) => this.upsertItem(item));
-    // });
-  }
-
-  openUpdateDialog(item: DocumentResponse) {
-    // const diagloRef = this.dialogService.open(DocumentEdit, {
-    //   header: 'Editar Documentación',
-    //   modal: true,
-    //   draggable: false,
-    //   focusOnShow: false,
-    //   closable: false,
-    //   closeOnEscape: false,
-    //   dismissableMask: false,
-    //   data: item,
-    //   width: '50vw',
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    // });
-    // diagloRef?.onClose.subscribe((result?: DocumentManageResponse) => {
-    //   if (!result) return;
-    //   this.upsertItem(result);
-    // });
-  }
-
-  setMenuItems(row: DocumentResponse) {
-    this.menuItems = [
-      {
-        label: 'Opciones',
-        items: [
-          {
-            label: 'Editar',
-            icon: 'ui-icon ui-icon-fw ui-icon-pencil',
-            command: () => this.openUpdateDialog(row),
-          },
-          {
-            label: 'Descargar archivo',
-            icon: 'ui-icon ui-icon-download',
-            command: () => this.downloadFile(row.file.url),
-          },
-        ],
-      },
-    ];
-  }
-
-  downloadFile(url: string): void {
-    const fileUrl = new URL(url);
+  downloadFile({ file }: DocumentResponse): void {
+    const fileUrl = new URL(file.url);
     fileUrl.searchParams.set('download', 'true');
     window.open(fileUrl.toString(), '_blank', 'noopener,noreferrer');
   }
 
-  get activeFiltersCount(): number {
-    return Object.values(this.filterForm.value).filter(
-      (v) => v !== null && v !== undefined,
-    ).length;
-  }
-
-  private upsertItem(newItem: DocumentResponse) {
-    const index = this.dataSource().findIndex((item) => item.id === newItem.id);
-    if (index !== -1) {
-      this.dataSource.update((values) => {
-        values[index] = newItem;
-        return [...values];
-      });
-    } else {
-      this.dataSource.update((values) => [newItem, ...values]);
-      this.dataSize.update((value) => (value += 1));
-    }
-  }
-
-  private toTreeNode(nodes: SectionTreeNodeResponse[]): any {
-    return nodes.map((node) => ({
-      key: node.id,
-      label: node.name.toUpperCase(),
-      data: node.id,
-      children: node.children.length ? this.toTreeNode(node.children) : [],
-    }));
+  private flattenOrganizationalUnits(
+    nodes: SectionTreeNodeResponse[],
+    parentPath: string[] = [],
+    depth = 0,
+  ): OrganizationalUnitOption[] {
+    return nodes.flatMap((node) => {
+      const path = [...parentPath, node.name];
+      return [
+        {
+          id: node.id,
+          name: node.name,
+          depth,
+          searchText: path.join(' / '),
+        },
+        ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
+      ];
+    });
   }
 }

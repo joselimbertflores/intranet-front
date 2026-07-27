@@ -62,8 +62,7 @@ interface LandingNoticeEditorContext {
   providers: [provideIcons({ lucideImage, lucideTrash2 })],
   templateUrl: './landing-notice-editor.html',
   host: {
-    class:
-      'flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden',
+    class: 'flex max-h-[calc(100dvh-4rem)] flex-col',
   },
 })
 export class LandingNoticeEditor implements OnDestroy {
@@ -74,7 +73,7 @@ export class LandingNoticeEditor implements OnDestroy {
     injectBrnDialogContext<LandingNoticeEditorContext>();
 
   readonly notice = this.context.notice;
-  
+
   readonly imageFile = signal<File | null>(null);
   readonly imagePreview = signal<string | null>(this.notice?.imageUrl ?? null);
 

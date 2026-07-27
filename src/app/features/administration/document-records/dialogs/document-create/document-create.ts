@@ -120,8 +120,7 @@ interface FileSelectionIssue {
   ],
   templateUrl: './document-create.html',
   host: {
-    class:
-      'flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden',
+    class: 'flex max-h-[calc(100dvh-4rem)] flex-col',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,237 +1,160 @@
-<!-- <div class="flex items-center justify-between mb-2">
-  <h2 class="text-2xl font-semibold">Documentos</h2>
-  <div class="flex items-center gap-x-2">
-    @let isFiltering = activeFiltersCount > 0;
-    <app-ui-button
-      (click)="filterPopover.toggle($event)"
-      [icon]="isFiltering ? 'ui-icon ui-icon-filter-fill' : 'ui-icon ui-icon-filter'"
-      label="Filtros"
-      size="small"
-      [severity]="isFiltering ? 'primary' : 'secondary'"
-      [badge]="isFiltering ? activeFiltersCount.toString() : undefined"
-    />
-    <app-ui-popover #filterPopover>
-      <div class="flex flex-col w-[90vw] sm:w-[600px] gap-y-4">
-        <div class="flex items-center justify-between px-2">
-          <span class="text-lg font-semibold text-surface-700">
-            Filtros avanzados
-          </span>
-          <app-ui-button
-            icon="ui-icon ui-icon-times"
-            severity="secondary"
-            size="small"
-            [text]="true"
-            [rounded]="true"
-            (click)="filterPopover.hide()"
-          />
-        </div>
-        <form [formGroup]="filterForm" class="flex flex-col gap-y-4 mt-2">
-          <app-ui-floatlabel variant="on">
-            <app-ui-tree-select
-              inputId="sectionDoc"
-              size="small"
-              class="w-full"
-              selectionMode="single"
-              appendTo="body"
-              [filter]="true"
-              [showClear]="true"
-              filterPlaceholder="Buscar unidad"
-              emptyMessage="Sin resultados"
-              formControlName="organizationalUnitNode"
-              [options]="organizationTree()"
-            >
-            </app-ui-tree-select>
-            <label for="sectionDoc">Unidad organizacional</label>
-          </app-ui-floatlabel>
-          <app-ui-floatlabel class="w-full" variant="on">
-            <app-ui-select
-              inputId="type"
-              optionLabel="name"
-              optionValue="id"
-              class="w-full"
-              [filter]="true"
-              [showClear]="true"
-              [options]="documentTypes()"
-              (onChange)="selectDocumentType($event.value)"
-              formControlName="documentTypeId"
-            />
-            <label for="type">Tipo de documento</label>
-          </app-ui-floatlabel>
-          <app-ui-floatlabel class="w-full" variant="on">
-            <app-ui-select
-              inputId="subtype"
-              optionValue="id"
-              optionLabel="name"
-              class="w-full"
-              [filter]="true"
-              [showClear]="true"
-              [options]="documentSubTypes()"
-              formControlName="documentSubtypeId"
-            />
-            <label for="subtype">Subtipo de documento</label>
-          </app-ui-floatlabel>
-
-          <div class="flex flex-col sm:flex-row gap-2">
-            <year-selector
-              formControlName="year"
-            />
-            <app-ui-floatlabel class="w-full" variant="on">
-              <app-ui-select
-                [options]="statusOptions"
-                [showClear]="true"
-                filterPlaceholder="Buscar gestión"
-                appendTo="body"
-                class="w-full"
-                emptyMessage="Sin elementos"
-                inputId="statusInput"
-                formControlName="status"
-              />
-              <label for="statusInput">Estado</label>
-            </app-ui-floatlabel>
-          </div>
-        </form>
-        <div class="flex justify-end gap-x-2">
-          <app-ui-button
-            label="Limpiar"
-            severity="secondary"
-            size="small"
-            (onClick)="clearFilters(); filterPopover.hide()"
-          />
-          <app-ui-button
-            label="Aplicar"
-            size="small"
-            (onClick)="applyFilters(); filterPopover.hide()"
-          />
-        </div>
-      </div>
-    </app-ui-popover>
-    <app-ui-button
-      label="Agregar"
-      icon="ui-icon ui-icon-plus"
-      size="small"
-      (onClick)="openCreateDialog()"
-    />
-  </div>
-</div>
-
-<app-ui-table
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  (onPage)="changePage($event)"
-  [first]="offset()"
-  [rows]="limit()"
-  [showCurrentPageReport]="true"
-  [loading]="isLoading()"
-  [lazy]="true"
-  [paginator]="true"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  [rowsPerPageOptions]="[10, 25, 40, 50]"
-  class="text-sm"
-  size="small"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-1/4">
-        <search-input (search)="search($event)" />
-      </div>
-    </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Documento</th>
-      <th>Clasificación</th>
-      <th>Unidad</th>
-      <th>Gestión</th>
-      <th>Estado</th>
-      <th style="width: 3rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>
-        <div class="flex items-center gap-2 min-w-0">
-          <file-icon [mimeType]="item.file.mimeType" />
-          <span class="font-medium truncate">
-            {{ item.title }}
-          </span>
-        </div>
-      </td>
-      <td>
-        <div class="flex flex-col text-xs">
-          <span class="font-medium">
-            {{ item.documentType.name }}
-          </span>
-          @if (item.documentSubtype) {
-            <span class="text-surface-500">
-              {{ item.documentSubtype.name }}
-            </span>
-          } @else {
-            <span class="text-surface-400"> Sin subtipo </span>
-          }
-        </div>
-      </td>
-      <td>
-        <span class="line-clamp-2">
-          {{ item.organizationalUnit.name }}
-        </span>
-      </td>
-      <td>
-        {{ item.year ?? "-" }}
-      </td>
-      <td>
-        @switch (item.status) {
-          @case ("ACTIVE") {
-            <app-ui-tag severity="success" value="Activo" />
-          }
-          @case ("INACTIVE") {
-            <app-ui-tag severity="danger" value="Inactivo" />
-          }
-          @default {
-            <app-ui-tag severity="secondary" [value]="item.status" />
-          }
-        }
-      </td>
-      <td>
-        <app-ui-menu
-          #menu
-          [model]="menuItems"
-          [popup]="true"
-          appendTo="body"
-          (onShow)="setMenuItems(item)"
-        />
-        <app-ui-button
-          severity="secondary"
-          [rounded]="true"
-          size="small"
-          (click)="menu.toggle($event)"
-          icon="ui-icon ui-icon-ellipsis-v"
-        />
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="6">Sin resultados.</td>
-    </tr>
-  </ng-template>
-</app-ui-table> -->
-
-<header class="mb-2 flex items-center justify-between">
+<header class="mb-4 flex flex-wrap items-center justify-between gap-3">
   <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Documentos</h1>
-  <button hlmBtn type="button" class="w-auto" (click)="openEditor()">
+
+  <button type="button" hlmBtn (click)="openCreateDialog()">
     <ng-icon name="lucidePlus" data-icon="inline-start" />
     Agregar
   </button>
 </header>
 
-<section class="space-y-2">
-  <div class="flex sm:justify-end">
-    <hlm-input-group class="w-full sm:w-72">
+<hlm-popover
+  #filterPopover="brnPopover"
+  align="end"
+  [sideOffset]="6"
+  [state]="popoverState()"
+  (stateChanged)="popoverState.set($event)"
+>
+  <hlm-popover-content
+    *hlmPopoverPortal
+    class="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] overflow-hidden sm:w-[440px]"
+  >
+    <hlm-popover-header class="shrink-0">
+      <h3 hlmPopoverTitle>Filtros</h3>
+      <p hlmPopoverDescription>
+        Ajusta los criterios y confirma para actualizar la lista.
+      </p>
+    </hlm-popover-header>
+
+    <form
+      class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+      [formRoot]="filterForm"
+      (submit)="applyFilters()"
+    >
+      <div class="flex min-h-0 flex-col gap-4 overflow-y-auto pe-1">
+        <div hlmField>
+          <label hlmFieldLabel for="organizational-unit">
+            Unidad organizacional
+          </label>
+          <organizational-unit-picker
+            inputId="organizational-unit"
+            [formField]="filterForm.organizationalUnitId"
+            [options]="organizationalUnitOptions()"
+          />
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="document-type">Tipo</label>
+          <hlm-select
+            [formField]="filterForm.documentTypeId"
+            (valueChange)="onDocumentTypeChange()"
+          >
+            <hlm-select-trigger buttonId="document-type" class="w-full">
+              <hlm-select-placeholder>Todos los tipos</hlm-select-placeholder>
+              <ng-template hlmSelectValueTemplate let-value>
+                {{ documentTypeNames().get(value) }}
+              </ng-template>
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                <hlm-select-item [value]="null">
+                  Todos los tipos
+                </hlm-select-item>
+                @for (item of documentTypes(); track item.id) {
+                  <hlm-select-item [value]="item.id">
+                    {{ item.name }}
+                  </hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="document-subtype">Subtipo</label>
+          <hlm-select [formField]="filterForm.documentSubtypeId">
+            <hlm-select-trigger class="w-full" buttonId="document-subtype">
+              <ng-template hlmSelectValueTemplate let-documentSubtypeId>
+                {{ documentSubtypeNames().get(documentSubtypeId) }}
+              </ng-template>
+              <hlm-select-placeholder>
+                {{
+                  documentSubTypes().length
+                    ? "Todos los subtipos"
+                    : "No hay subtipos disponibles"
+                }}
+              </hlm-select-placeholder>
+            </hlm-select-trigger>
+
+            <hlm-select-content *hlmSelectPortal class="max-h-72">
+              <hlm-select-group>
+                <hlm-select-item [value]="null">
+                  Todos los subtipos
+                </hlm-select-item>
+                @for (subtype of documentSubTypes(); track subtype.id) {
+                  <hlm-select-item [value]="subtype.id">
+                    {{ subtype.name }}
+                  </hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div hlmField>
+            <label hlmFieldLabel for="document-status">Estado</label>
+            <hlm-select [formField]="filterForm.status">
+              <hlm-select-trigger buttonId="document-status" class="w-full">
+                <hlm-select-value placeholder="Todos los estados" />
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  <hlm-select-item [value]="null">
+                    Todos los estados
+                  </hlm-select-item>
+                  @for (item of statusOptions; track item.value) {
+                    <hlm-select-item [value]="item.value">
+                      {{ item.label }}
+                    </hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          </div>
+
+          <year-selector
+            inputId="document-year"
+            label="Gestión"
+            [formField]="filterForm.year"
+          />
+        </div>
+      </div>
+
+      <div class="flex shrink-0 flex-wrap justify-end gap-2 border-t pt-3">
+        <button
+          type="button"
+          hlmBtn
+          variant="ghost"
+          (click)="clearFilters()"
+        >
+          Limpiar
+        </button>
+        <button type="submit" hlmBtn>Aplicar filtros</button>
+      </div>
+    </form>
+  </hlm-popover-content>
+</hlm-popover>
+
+<section class="flex flex-col gap-3" aria-label="Administración de documentos">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+    <hlm-input-group class="w-full sm:w-80 lg:w-96">
       <input
         type="search"
+        name="document-search"
+        autocomplete="off"
         hlmInputGroupInput
-        aria-label="Buscar avisos por título"
-        placeholder="Buscar por título"
+        aria-label="Buscar documentos por título"
+        placeholder="Buscar por título…"
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearch($event)"
       />
@@ -239,98 +162,183 @@
         <ng-icon name="lucideSearch" />
       </hlm-input-group-addon>
     </hlm-input-group>
+
+    <button
+      type="button"
+      hlmBtn
+      variant="outline"
+      class="shrink-0"
+      [hlmPopoverTriggerFor]="filterPopover"
+    >
+      <ng-icon name="lucideFilter" data-icon="inline-start" />
+      Filtros
+      @if (appliedFiltersCount() > 0) {
+        <span hlmBadge variant="secondary" aria-hidden="true">
+          {{ appliedFiltersCount() }}
+        </span>
+        <span class="sr-only"> {{ appliedFiltersCount() }} aplicados </span>
+      }
+    </button>
   </div>
 
-  <div class="flex flex-col gap-2 rounded-xl border bg-card p-4">
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
     <div hlmTableContainer>
-      <table hlmTable class="w-full">
+      <table
+        hlmTable
+        class="min-w-[820px] table-fixed"
+        aria-label="Listado de documentos"
+      >
+        <colgroup>
+          <col class="w-[30%]" />
+          <col class="w-[22%]" />
+          <col class="w-[22%]" />
+          <col class="w-24" />
+          <col class="w-28" />
+          <col class="w-12" />
+        </colgroup>
+
         <thead hlmTableHeader>
           <tr hlmTableRow>
-            <th hlmTableHead>Dcumento</th>
-            <th hlmTableHead>Clasificacion</th>
-            <th hlmTableHead>Unidad</th>
-            <th hlmTableHead>Gestion</th>
-            <th hlmTableHead>Estado</th>
-            <th hlmTableHead></th>
+            <th hlmTableHead scope="col">Documento</th>
+            <th hlmTableHead scope="col">Clasificación</th>
+            <th hlmTableHead scope="col">Unidad</th>
+            <th hlmTableHead scope="col" class="text-center">Gestión</th>
+            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
           </tr>
         </thead>
 
         <tbody hlmTableBody>
-          @if (documentResource.isLoading()) {
+          @if (isListLoading()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-6 text-center">
-                <span class="inline-flex items-center gap-2 text-sm">
-                  <hlm-spinner aria-label="Cargando avisos" />
-                  Cargando avisos...
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <hlm-spinner />
+                  Cargando documentos…
                 </span>
               </td>
             </tr>
           } @else if (documentResource.error()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-6 text-center">
-                <span class="text-sm">No se pudieron cargar los avisos.</span>
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <div
+                  class="flex flex-col items-center gap-3 whitespace-normal"
+                  role="alert"
+                >
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">
+                      No se pudieron cargar los documentos
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifica la conexión e intenta nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    hlmBtn
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadDocuments()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
               </td>
             </tr>
           } @else {
             @for (doc of dataSource(); track doc.id) {
               <tr hlmTableRow>
-                <td hlmTableCell>{{ doc.title }}</td>
                 <td hlmTableCell>
-                  <div class="flex flex-col text-xs">
-                    <span class="font-medium">
+                  <span
+                    class="block truncate font-medium"
+                    [hlmTooltip]="doc.title"
+                  >
+                    {{ doc.title }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <div class="flex min-w-0 flex-col gap-0.5 text-xs">
+                    <span
+                      class="block truncate font-medium"
+                      [hlmTooltip]="doc.documentType.name"
+                    >
                       {{ doc.documentType.name }}
                     </span>
                     @if (doc.documentSubtype) {
-                      <span>
+                      <span
+                        class="block truncate text-muted-foreground"
+                        [hlmTooltip]="doc.documentSubtype.name"
+                      >
                         {{ doc.documentSubtype.name }}
                       </span>
                     } @else {
-                      <span> Sin subtipo </span>
+                      <span class="text-muted-foreground">Sin subtipo</span>
                     }
                   </div>
                 </td>
                 <td hlmTableCell>
-                  {{ doc.organizationalUnit?.name ?? "Sin unidad" }}
+                  @if (doc.organizationalUnit; as unit) {
+                    <span class="block truncate" [hlmTooltip]="unit.name">
+                      {{ unit.name }}
+                    </span>
+                  } @else {
+                    <span class="text-muted-foreground">Sin unidad</span>
+                  }
                 </td>
-                <td hlmTableCell>
-                  {{ doc.year ?? "-" }}
+                <td hlmTableCell class="text-center tabular-nums">
+                  {{ doc.year ?? "—" }}
                 </td>
                 <td hlmTableCell>
                   @switch (doc.status) {
                     @case ("ACTIVE") {
-                      <span hlmBadge variant="default"> Activo </span>
+                      <span hlmBadge variant="default">Activo</span>
                     }
                     @case ("INACTIVE") {
-                      <span hlmBadge variant="secondary"> Activo </span>
+                      <span hlmBadge variant="secondary">Inactivo</span>
                     }
                     @default {
-                      <span hlmBadge variant="outline"> Activo </span>
+                      <span hlmBadge variant="outline">Desconocido</span>
                     }
                   }
                 </td>
                 <td hlmTableCell class="text-right">
-                  <!-- <button
-                    hlmBtn
+                  <button
                     type="button"
+                    hlmBtn
                     variant="ghost"
                     size="icon-sm"
-                    [hlmDropdownMenuTrigger]="menu"
-                    [hlmDropdownMenuTriggerData]="{ notice: notice }"
-                    align="end"
+                    hlmTooltip="Descargar archivo"
+                    [attr.aria-label]="'Descargar ' + doc.title"
+                    (click)="downloadFile(doc)"
                   >
-                    <ng-icon name="lucideMoreHorizontal" />
-                    <span class="sr-only">Abrir menú</span>
-                  </button> -->
+                    <ng-icon name="lucideDownload" />
+                  </button>
                 </td>
               </tr>
             } @empty {
               <tr hlmTableRow>
-                <td hlmTableCell colspan="6" class="py-4 text-center">
-                  @if (searchTerm().trim()) {
-                    Sin resultados
-                  } @else {
-                    No hay avisos registrados
-                  }
+                <td hlmTableCell colspan="6" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    @if (hasActiveQuery()) {
+                      <p class="font-medium">No se encontraron documentos</p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otra búsqueda o ajusta los filtros.
+                      </p>
+                    } @else {
+                      <p class="font-medium">No hay documentos registrados</p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega un documento para comenzar.
+                      </p>
+                    }
+                  </div>
                 </td>
               </tr>
             }
@@ -339,11 +347,7 @@
       </table>
     </div>
 
-    @if (
-      !documentResource.isLoading() &&
-      !documentResource.error() &&
-      dataSize() > 0
-    ) {
+    @if (!isListLoading() && !documentResource.error() && dataSize() > 0) {
       <app-pagination-controls
         [totalItems]="dataSize()"
         [(currentPage)]="currentPage"

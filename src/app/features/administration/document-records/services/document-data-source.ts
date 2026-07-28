@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 
-import { Observable, of, switchMap, tap } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
@@ -10,6 +9,7 @@ import {
   DocumentTypeWithSubTypesResponse,
   SectionTreeNodeResponse,
   DocumentResponse,
+  DocumentValidityStatus,
 } from '../interfaces';
 
 export interface CreateDocumentBatchItemDto {
@@ -22,6 +22,7 @@ export interface CreateDocumentBatchDto {
   documentTypeId: number;
   documentSubtypeId?: number;
   year?: number;
+  validityStatus: DocumentValidityStatus;
   documents: CreateDocumentBatchItemDto[];
 }
 
@@ -31,6 +32,7 @@ interface UpdateDocumentDto {
   documentSubtypeId?: number | null;
   year?: number | null;
   status?: string | null;
+  validityStatus?: DocumentValidityStatus;
   file?: File | null;
   title?: string | null;
 }
@@ -44,6 +46,7 @@ interface GetDocumentsParams {
   documentSubtypeId?: number | null;
   year?: number | null;
   status?: string | null;
+  validityStatus?: DocumentValidityStatus | null;
 }
 
 @Injectable({
@@ -58,12 +61,10 @@ export class DocumentDataSource {
     const params = new HttpParams({
       fromObject: this.removeEmptyParams(filterParams),
     });
-    return this.http
-      .get<{
-        documents: DocumentResponse[];
-        total: number;
-      }>(this.URL, { params })
-      .pipe(tap((resp) => console.log(resp)));
+    return this.http.get<{
+      documents: DocumentResponse[];
+      total: number;
+    }>(this.URL, { params });
   }
 
   uploadDocumentFile(file: File) {

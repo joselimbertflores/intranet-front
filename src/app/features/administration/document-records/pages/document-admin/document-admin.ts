@@ -1,37 +1,42 @@
 import {
+  inject,
+  signal,
   Component,
   computed,
   debounced,
-  inject,
   linkedSignal,
-  signal,
 } from '@angular/core';
 import { disabled, form, FormField, FormRoot } from '@angular/forms/signals';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
 import {
-  lucideCircleAlert,
-  lucideDownload,
   lucideEllipsisVertical,
+  lucideCircleAlert,
+  lucideRefreshCw,
+  lucideDownload,
   lucideFilter,
   lucidePencil,
   lucidePlus,
-  lucideRefreshCw,
   lucideSearch,
+  lucideTrash2,
 } from '@ng-icons/lucide';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { HlmBadgeImports } from '@spartan-ng/helm/badge';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import {
+  HlmAlertDialog,
+  HlmAlertDialogImports,
+} from '@spartan-ng/helm/alert-dialog';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
-import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
-import { HlmSelectImports } from '@spartan-ng/helm/select';
-import { HlmSpinner } from '@spartan-ng/helm/spinner';
-import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmTableImports } from '@spartan-ng/helm/table';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
 
 import { PaginationControls, YearSelector } from '@app/shared';
 
@@ -40,10 +45,12 @@ import {
   type OrganizationalUnitOption,
 } from '../../components/organizational-unit-picker/organizational-unit-picker';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
-import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
+import {
+  DocumentResponse,
+  DocumentValidityStatus,
+  SectionTreeNodeResponse,
+} from '../../interfaces';
 import { DocumentDataSource } from '../../services';
-
-export type { OrganizationalUnitOption } from '../../components/organizational-unit-picker/organizational-unit-picker';
 
 interface FilterData {
   organizationalUnitId: string | null;
@@ -51,6 +58,7 @@ interface FilterData {
   documentSubtypeId: number | null;
   year: number | null;
   status: string | null;
+  validityStatus: DocumentValidityStatus | null;
 }
 
 const EMPTY_FILTERS: Readonly<FilterData> = {
@@ -59,6 +67,7 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
   documentSubtypeId: null,
   year: null,
   status: null,
+  validityStatus: null,
 };
 
 @Component({
@@ -68,6 +77,7 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
     FormField,
     FormRoot,
     NgIcon,
+    HlmAlertDialogImports,
     HlmBadgeImports,
     HlmButtonImports,
     HlmDropdownMenuImports,
@@ -84,14 +94,15 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
   ],
   templateUrl: './document-admin.html',
   providers: provideIcons({
-    lucideCircleAlert,
-    lucideDownload,
     lucideEllipsisVertical,
-    lucideFilter,
-    lucidePencil,
-    lucidePlus,
+    lucideCircleAlert,
     lucideRefreshCw,
+    lucideDownload,
+    lucidePencil,
     lucideSearch,
+    lucideTrash2,
+    lucideFilter,
+    lucidePlus,
   }),
 })
 export default class DocumentAdmin {
@@ -174,6 +185,13 @@ export default class DocumentAdmin {
   readonly statusNames = new Map(
     this.statusOptions.map(({ value, label }) => [value, label]),
   );
+  readonly validityStatusOptions = [
+    { value: DocumentValidityStatus.CURRENT, label: 'Vigentes' },
+    { value: DocumentValidityStatus.HISTORICAL, label: 'Históricas' },
+  ];
+  readonly validityStatusNames = new Map(
+    this.validityStatusOptions.map(({ value, label }) => [value, label]),
+  );
 
   readonly appliedFiltersCount = computed(
     () =>
@@ -188,6 +206,8 @@ export default class DocumentAdmin {
   );
 
   protected readonly popoverState = signal<'open' | 'closed'>('closed');
+
+  readonly documentPendingDelete = signal<DocumentResponse | null>(null);
 
   onSearch(term: string): void {
     this.currentPage.set(1);
@@ -232,7 +252,7 @@ export default class DocumentAdmin {
 
     dialogRef.closed$.subscribe((documents) => {
       if (documents?.length) {
-        documents.forEach((document) => this.upsertItem(document));
+        documents.forEach((item) => this.upsertItem(item));
       }
     });
   }
@@ -252,10 +272,28 @@ export default class DocumentAdmin {
     });
   }
 
+  confirmRemove(deleteDialog: HlmAlertDialog): void {
+    const document = this.documentPendingDelete();
+    if (!document) return;
+
+    this.documentDataSource.removeDocument(document.id).subscribe(() => {
+      this.removeItem(document.id);
+      deleteDialog.close();
+    });
+  }
+
   downloadFile(url: string): void {
     const fileUrl = new URL(url);
     fileUrl.searchParams.set('download', 'true');
     window.open(fileUrl.toString(), '_blank', 'noopener,noreferrer');
+  }
+
+  selectDocumentForDeletion(document: DocumentResponse): void {
+    this.documentPendingDelete.set(document);
+  }
+
+  onDeleteDialogClosed(): void {
+    this.documentPendingDelete.set(null);
   }
 
   private flattenOrganizationalUnits(
@@ -277,21 +315,35 @@ export default class DocumentAdmin {
     });
   }
 
-  private upsertItem(item: DocumentResponse): void {
-    const exists = this.dataSource().some(({ id }) => id === item.id);
+  private upsertItem(newItem: DocumentResponse) {
+    const exists = this.dataSource().some((item) => item.id === newItem.id);
     if (exists) {
-      console.log(item);
-      this.dataSource.update((currentItems) =>
-        currentItems.map((currentItem) =>
-          currentItem.id === item.id ? item : currentItem,
-        ),
+      this.dataSource.update((values) =>
+        values.map((item) => (item.id === newItem.id ? newItem : item)),
       );
       return;
     }
-
-    this.dataSource.update((currentItems) =>
-      [item, ...currentItems].slice(0, this.pageSize()),
+    this.dataSource.update((values) =>
+      [newItem, ...values].slice(0, this.pageSize()),
     );
-    this.dataSize.update((total) => total + 1);
+    this.dataSize.update((total) => (total += 1));
+  }
+
+  private removeItem(id: string): void {
+    this.dataSource.update((values) => values.filter((item) => id !== item.id));
+
+    const total = Math.max(0, this.dataSize() - 1);
+    this.dataSize.set(total);
+
+    const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
+
+    if (this.currentPage() > lastPage) {
+      this.currentPage.set(lastPage);
+      return;
+    }
+
+    if (this.dataSource().length === 0 && total > 0) {
+      this.documentResource.reload();
+    }
   }
 }

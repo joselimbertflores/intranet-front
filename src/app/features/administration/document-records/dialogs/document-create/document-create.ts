@@ -50,7 +50,11 @@ import {
   DOCUMENT_FILE_RULES,
   DocumentAllowedExtension,
 } from '../../constants/document-file-rules';
-import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
+import {
+  DocumentResponse,
+  DocumentValidityStatus,
+  SectionTreeNodeResponse,
+} from '../../interfaces';
 import { CreateDocumentBatchDto, DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
 import {
@@ -68,6 +72,7 @@ interface DocumentBatchFormModel {
   documentTypeId: number | null;
   documentSubtypeId: number | null;
   year: number | null;
+  validityStatus: DocumentValidityStatus;
   documents: BatchDocumentFormItem[];
 }
 
@@ -159,6 +164,13 @@ export class DocumentCreate {
   readonly documentSubtypeNames = computed(
     () => new Map(this.documentSubtypes().map(({ id, name }) => [id, name])),
   );
+  readonly validityStatusOptions = [
+    { value: DocumentValidityStatus.CURRENT, label: 'Vigente' },
+    { value: DocumentValidityStatus.HISTORICAL, label: 'Histórica' },
+  ];
+  readonly validityStatusNames = new Map(
+    this.validityStatusOptions.map(({ value, label }) => [value, label]),
+  );
   readonly organizationalUnitOptions = computed<OrganizationalUnitOption[]>(
     () => this.flattenOrganizationalUnits(this.organizationalUnits()),
   );
@@ -182,6 +194,7 @@ export class DocumentCreate {
     documentTypeId: null,
     documentSubtypeId: null,
     year: null,
+    validityStatus: DocumentValidityStatus.CURRENT,
     documents: [],
   });
 
@@ -193,6 +206,9 @@ export class DocumentCreate {
       });
       required(schemaPath.documentTypeId, {
         message: 'Seleccione un tipo documental.',
+      });
+      required(schemaPath.validityStatus, {
+        message: 'Seleccione la vigencia.',
       });
 
       disabled(schemaPath.documentSubtypeId, {
@@ -459,6 +475,7 @@ export class DocumentCreate {
         documentSubtypeId: formValue.documentSubtypeId,
       }),
       ...(formValue.year !== null && { year: formValue.year }),
+      validityStatus: formValue.validityStatus,
       documents: formValue.documents.map((document) => {
         const fileId = uploadedFileIds.get(document.clientId);
         if (!fileId) {

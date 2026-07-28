@@ -1,6 +1,11 @@
 <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
   <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Documentos</h1>
-  <button type="button" hlmBtn (click)="openCreateDialog()">
+  <button
+    id="document-admin-add-button"
+    type="button"
+    hlmBtn
+    (click)="openCreateDialog()"
+  >
     <ng-icon name="lucidePlus" data-icon="inline-start" />
     Agregar
   </button>
@@ -123,6 +128,36 @@
             </hlm-select>
           </div>
 
+          <div hlmField>
+            <label hlmFieldLabel for="document-validity-status-filter">
+              Vigencia
+            </label>
+            <hlm-select [formField]="filterForm.validityStatus">
+              <hlm-select-trigger
+                buttonId="document-validity-status-filter"
+                class="w-full"
+              >
+                <ng-template hlmSelectValueTemplate let-validityStatus>
+                  {{ validityStatusNames.get(validityStatus) }}
+                </ng-template>
+                <hlm-select-placeholder>Todas</hlm-select-placeholder>
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  <hlm-select-item [value]="null">Todas</hlm-select-item>
+                  @for (
+                    validityStatus of validityStatusOptions;
+                    track validityStatus.value
+                  ) {
+                    <hlm-select-item [value]="validityStatus.value">
+                      {{ validityStatus.label }}
+                    </hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          </div>
+
           <year-selector
             inputId="document-year"
             label="Gestión"
@@ -181,14 +216,15 @@
     <div hlmTableContainer>
       <table
         hlmTable
-        class="min-w-[820px] table-fixed"
+        class="min-w-[940px] table-fixed"
         aria-label="Listado de documentos"
       >
         <colgroup>
-          <col class="w-[30%]" />
-          <col class="w-[22%]" />
-          <col class="w-[22%]" />
+          <col class="w-[27%]" />
+          <col class="w-[19%]" />
+          <col class="w-[19%]" />
           <col class="w-24" />
+          <col class="w-28" />
           <col class="w-28" />
           <col class="w-12" />
         </colgroup>
@@ -199,7 +235,8 @@
             <th hlmTableHead scope="col">Clasificación</th>
             <th hlmTableHead scope="col">Unidad</th>
             <th hlmTableHead scope="col" class="text-center">Gestión</th>
-            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">Publicación</th>
+            <th hlmTableHead scope="col">Vigencia</th>
             <th hlmTableHead scope="col">
               <span class="sr-only">Acciones</span>
             </th>
@@ -209,7 +246,7 @@
         <tbody hlmTableBody>
           @if (isListLoading()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-10 text-center">
+              <td hlmTableCell colspan="7" class="py-10 text-center">
                 <span
                   class="inline-flex items-center gap-2 text-sm text-muted-foreground"
                   role="status"
@@ -222,7 +259,7 @@
             </tr>
           } @else if (documentResource.error()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-10 text-center">
+              <td hlmTableCell colspan="7" class="py-10 text-center">
                 <div
                   class="flex flex-col items-center gap-3 whitespace-normal"
                   role="alert"
@@ -305,49 +342,74 @@
                     }
                   }
                 </td>
+                <td hlmTableCell>
+                  @switch (doc.validityStatus) {
+                    @case ("CURRENT") {
+                      <span>Vigente</span>
+                    }
+                    @case ("HISTORICAL") {
+                      <span>Histórico</span>
+                    }
+                    @default {
+                      <span>Desconocido</span>
+                    }
+                  }
+                </td>
                 <td hlmTableCell class="text-right">
                   <button
+                    [id]="'document-actions-' + doc.id"
                     hlmBtn
                     variant="ghost"
                     size="icon-sm"
                     type="button"
-                    aria-label="Acciones del documento"
+                    [attr.aria-label]="'Acciones de ' + doc.title"
                     [hlmDropdownMenuTrigger]="actionsMenu"
                     align="end"
                   >
                     <ng-icon name="lucideEllipsisVertical" />
-                    <span class="sr-only">Acciones del documento</span>
                   </button>
 
                   <ng-template #actionsMenu>
                     <hlm-dropdown-menu class="w-36">
-                      <hlm-dropdown-menu-label>
-                        Acciones
-                      </hlm-dropdown-menu-label>
-                      <button
-                        hlmDropdownMenuItem
-                        type="button"
-                        (click)="openUpdateDialog(doc)"
-                      >
-                        <ng-icon name="lucidePencil" />
-                        Editar
-                      </button>
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openUpdateDialog(doc)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
 
-                      <button
-                        hlmDropdownMenuItem
-                        type="button"
-                        (click)="downloadFile(doc.file.url)"
-                      >
-                        <ng-icon name="lucideDownload" />
-                        Descargar
-                      </button>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="downloadFile(doc.file.url)"
+                        >
+                          <ng-icon name="lucideDownload" />
+                          Descargar
+                        </button>
+                      </hlm-dropdown-menu-group>
+                      <hlm-dropdown-menu-separator />
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="selectDocumentForDeletion(doc)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar
+                        </button>
+                      </hlm-dropdown-menu-group>
                     </hlm-dropdown-menu>
                   </ng-template>
                 </td>
               </tr>
             } @empty {
               <tr hlmTableRow>
-                <td hlmTableCell colspan="6" class="py-10 text-center">
+                <td hlmTableCell colspan="7" class="py-10 text-center">
                   <div class="flex flex-col gap-1 whitespace-normal">
                     @if (hasActiveQuery()) {
                       <p class="font-medium">No se encontraron documentos</p>
@@ -378,3 +440,29 @@
     }
   </div>
 </section>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar documento</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ documentPendingDelete()?.title }}”. Esta acción no se
+        puede deshacer. Si el documento dejó de estar vigente, cancela y cambia
+        su vigencia a Histórica.
+      </p>
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!documentPendingDelete()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

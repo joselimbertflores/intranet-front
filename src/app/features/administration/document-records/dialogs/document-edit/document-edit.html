@@ -1,8 +1,5 @@
 <hlm-dialog-header class="shrink-0 pb-4">
   <h3 hlmDialogTitle>Editar documento</h3>
-  <p hlmDialogDescription>
-    Actualiza los datos del documento o reemplaza su archivo.
-  </p>
 </hlm-dialog-header>
 
 <div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
@@ -119,41 +116,83 @@
         </hlm-select>
       </div>
 
-      <year-selector
-        inputId="document-edit-year"
-        [formField]="documentForm.year"
-      />
+      <div class="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+        <year-selector
+          inputId="document-edit-year"
+          [formField]="documentForm.year"
+        />
 
-      <div hlmField>
-        <label hlmFieldLabel for="document-edit-status">Estado</label>
-        <hlm-select [formField]="documentForm.status">
-          <hlm-select-trigger class="w-full" buttonId="document-edit-status">
-            <ng-template hlmSelectValueTemplate let-status>
-              {{ statusNames.get(status) }}
-            </ng-template>
-            <hlm-select-placeholder>
-              Seleccione un estado
-            </hlm-select-placeholder>
-          </hlm-select-trigger>
+        <div hlmField>
+          <label hlmFieldLabel for="document-edit-status">Estado</label>
+          <hlm-select [formField]="documentForm.status">
+            <hlm-select-trigger class="w-full" buttonId="document-edit-status">
+              <ng-template hlmSelectValueTemplate let-status>
+                {{ statusNames.get(status) }}
+              </ng-template>
+              <hlm-select-placeholder>
+                Seleccione un estado
+              </hlm-select-placeholder>
+            </hlm-select-trigger>
 
-          <hlm-select-content *hlmSelectPortal>
-            <hlm-select-group>
-              @for (status of statusOptions; track status.value) {
-                <hlm-select-item [value]="status.value">
-                  {{ status.label }}
-                </hlm-select-item>
-              }
-            </hlm-select-group>
-          </hlm-select-content>
-        </hlm-select>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                @for (status of statusOptions; track status.value) {
+                  <hlm-select-item [value]="status.value">
+                    {{ status.label }}
+                  </hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
 
-        @if (isFieldInvalid("status")) {
-          @for (error of documentForm.status().errors(); track error.kind) {
-            <hlm-field-error [validator]="error.kind">
-              {{ error.message }}
-            </hlm-field-error>
+          @if (isFieldInvalid("status")) {
+            @for (error of documentForm.status().errors(); track error.kind) {
+              <hlm-field-error [validator]="error.kind">
+                {{ error.message }}
+              </hlm-field-error>
+            }
           }
-        }
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="document-edit-validity-status">
+            Vigencia
+          </label>
+          <hlm-select [formField]="documentForm.validityStatus">
+            <hlm-select-trigger
+              class="w-full"
+              buttonId="document-edit-validity-status"
+            >
+              <ng-template hlmSelectValueTemplate let-validityStatus>
+                {{ validityStatusNames.get(validityStatus) }}
+              </ng-template>
+            </hlm-select-trigger>
+
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                @for (
+                  validityStatus of validityStatusOptions;
+                  track validityStatus.value
+                ) {
+                  <hlm-select-item [value]="validityStatus.value">
+                    {{ validityStatus.label }}
+                  </hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+
+          @if (isFieldInvalid("validityStatus")) {
+            @for (
+              error of documentForm.validityStatus().errors();
+              track error.kind
+            ) {
+              <hlm-field-error [validator]="error.kind">
+                {{ error.message }}
+              </hlm-field-error>
+            }
+          }
+        </div>
       </div>
     </section>
 

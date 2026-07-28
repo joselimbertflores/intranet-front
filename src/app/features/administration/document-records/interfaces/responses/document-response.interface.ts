@@ -1,7 +1,10 @@
+import { DocumentValidityStatus } from '../document-validity-status.enum';
+
 export interface DocumentResponse {
   id: string;
   title: string;
-  year: number;
+  year: number | null;
+  validityStatus: DocumentValidityStatus;
   organizationalUnit: {
     id: string;
     name: string;

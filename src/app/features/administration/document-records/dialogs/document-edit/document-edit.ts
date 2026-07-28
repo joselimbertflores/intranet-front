@@ -20,10 +20,10 @@ import {
 
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideAudioLines,
-  lucideCircleAlert,
-  lucideDownload,
   lucideExternalLink,
+  lucideCircleAlert,
+  lucideAudioLines,
+  lucideDownload,
   lucideFileText,
   lucideImage,
   lucideTrash2,
@@ -34,7 +34,6 @@ import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
 import {
-  HlmDialogDescription,
   HlmDialogFooter,
   HlmDialogHeader,
   HlmDialogTitle,
@@ -52,9 +51,13 @@ import {
   OrganizationalUnitPicker,
 } from '../../components/organizational-unit-picker/organizational-unit-picker';
 import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
-import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
-import { FileSizePipe } from '../../pipes';
+import {
+  DocumentResponse,
+  DocumentValidityStatus,
+  SectionTreeNodeResponse,
+} from '../../interfaces';
 import { DocumentDataSource } from '../../services';
+import { FileSizePipe } from '../../pipes';
 
 interface DocumentEditContext {
   document: DocumentResponse;
@@ -67,6 +70,7 @@ interface DocumentEditFormModel {
   documentSubtypeId: number | null;
   year: number | null;
   status: string | null;
+  validityStatus: DocumentValidityStatus;
   replaceFile: boolean;
 }
 
@@ -79,7 +83,6 @@ interface DocumentEditFormModel {
     FormRoot,
     HlmButtonImports,
     HlmCheckbox,
-    HlmDialogDescription,
     HlmDialogFooter,
     HlmDialogHeader,
     HlmDialogTitle,
@@ -162,6 +165,9 @@ export class DocumentEdit {
       required(schemaPath.status, {
         message: 'Seleccione un estado.',
       });
+      required(schemaPath.validityStatus, {
+        message: 'Seleccione la vigencia.',
+      });
 
       disabled(schemaPath.documentSubtypeId, {
         when: ({ valueOf }) => {
@@ -214,10 +220,13 @@ export class DocumentEdit {
   readonly statusNames = new Map(
     this.statusOptions.map(({ value, label }) => [value, label]),
   );
-
-  ngOnInit(){
-    console.log(this.context.document);
-  }
+  readonly validityStatusOptions = [
+    { value: DocumentValidityStatus.CURRENT, label: 'Vigente' },
+    { value: DocumentValidityStatus.HISTORICAL, label: 'Histórica' },
+  ];
+  readonly validityStatusNames = new Map(
+    this.validityStatusOptions.map(({ value, label }) => [value, label]),
+  );
 
   close(): void {
     if (!this.documentForm().submitting()) {
@@ -308,6 +317,7 @@ export class DocumentEdit {
       documentSubtypeId: this.document.documentSubtype?.id ?? null,
       year: this.document.year ?? null,
       status: this.document.status,
+      validityStatus: this.document.validityStatus,
       replaceFile: false,
     };
   }
@@ -315,7 +325,7 @@ export class DocumentEdit {
   private async updateDocument(
     formValue: DocumentEditFormModel,
   ): Promise<void> {
-    this.updateError.set(null); 
+    this.updateError.set(null);
     try {
       const updatedDocument = await firstValueFrom(
         this.documentDataSource.update(this.document.id, {
@@ -325,6 +335,7 @@ export class DocumentEdit {
           documentSubtypeId: formValue.documentSubtypeId,
           year: formValue.year,
           status: formValue.status,
+          validityStatus: formValue.validityStatus,
           file: formValue.replaceFile ? this.selectedFile() : null,
         }),
       );

@@ -30,6 +30,7 @@ interface UpdateDocumentDto {
   documentTypeId?: number | null;
   documentSubtypeId?: number | null;
   year?: number | null;
+  status?: string | null;
   file?: File | null;
   title?: string | null;
 }
@@ -70,10 +71,7 @@ export class DocumentDataSource {
   }
 
   createBatch(data: CreateDocumentBatchDto) {
-    return this.http.post<DocumentResponse[]>(
-      `${this.URL}/batch`,
-      data,
-    );
+    return this.http.post<DocumentResponse[]>(`${this.URL}/batch`, data);
   }
 
   update(id: string, data: UpdateDocumentDto) {
@@ -89,6 +87,10 @@ export class DocumentDataSource {
         });
       }),
     );
+  }
+
+  removeDocument(id: string) {
+    return this.http.delete(`${this.URL}/${id}`);
   }
 
   getOrganizationTree() {

@@ -1,6 +1,5 @@
 <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
   <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Documentos</h1>
-
   <button type="button" hlmBtn (click)="openCreateDialog()">
     <ng-icon name="lucidePlus" data-icon="inline-start" />
     Agregar
@@ -31,16 +30,13 @@
       (submit)="applyFilters()"
     >
       <div class="flex min-h-0 flex-col gap-4 overflow-y-auto pe-1">
-        <div hlmField>
-          <label hlmFieldLabel for="organizational-unit">
-            Unidad organizacional
-          </label>
-          <organizational-unit-picker
-            inputId="organizational-unit"
-            [formField]="filterForm.organizationalUnitId"
-            [options]="organizationalUnitOptions()"
-          />
-        </div>
+        <organizational-unit-picker
+          inputId="document-filter-organizational-unit"
+          label="Unidad organizacional"
+          placeholder="Todas las unidades"
+          [formField]="filterForm.organizationalUnitId"
+          [options]="organizationalUnitOptions()"
+        />
 
         <div hlmField>
           <label hlmFieldLabel for="document-type">Tipo</label>
@@ -105,7 +101,12 @@
             <label hlmFieldLabel for="document-status">Estado</label>
             <hlm-select [formField]="filterForm.status">
               <hlm-select-trigger buttonId="document-status" class="w-full">
-                <hlm-select-value placeholder="Todos los estados" />
+                <ng-template hlmSelectValueTemplate let-status>
+                  {{ statusNames.get(status) }}
+                </ng-template>
+                <hlm-select-placeholder>
+                  Seleccione un estado
+                </hlm-select-placeholder>
               </hlm-select-trigger>
               <hlm-select-content *hlmSelectPortal>
                 <hlm-select-group>
@@ -131,12 +132,7 @@
       </div>
 
       <div class="flex shrink-0 flex-wrap justify-end gap-2 border-t pt-3">
-        <button
-          type="button"
-          hlmBtn
-          variant="ghost"
-          (click)="clearFilters()"
-        >
+        <button type="button" hlmBtn variant="ghost" (click)="clearFilters()">
           Limpiar
         </button>
         <button type="submit" hlmBtn>Aplicar filtros</button>
@@ -311,16 +307,42 @@
                 </td>
                 <td hlmTableCell class="text-right">
                   <button
-                    type="button"
                     hlmBtn
                     variant="ghost"
                     size="icon-sm"
-                    hlmTooltip="Descargar archivo"
-                    [attr.aria-label]="'Descargar ' + doc.title"
-                    (click)="downloadFile(doc)"
+                    type="button"
+                    aria-label="Acciones del documento"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                    align="end"
                   >
-                    <ng-icon name="lucideDownload" />
+                    <ng-icon name="lucideEllipsisVertical" />
+                    <span class="sr-only">Acciones del documento</span>
                   </button>
+
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-label>
+                        Acciones
+                      </hlm-dropdown-menu-label>
+                      <button
+                        hlmDropdownMenuItem
+                        type="button"
+                        (click)="openUpdateDialog(doc)"
+                      >
+                        <ng-icon name="lucidePencil" />
+                        Editar
+                      </button>
+
+                      <button
+                        hlmDropdownMenuItem
+                        type="button"
+                        (click)="downloadFile(doc.file.url)"
+                      >
+                        <ng-icon name="lucideDownload" />
+                        Descargar
+                      </button>
+                    </hlm-dropdown-menu>
+                  </ng-template>
                 </td>
               </tr>
             } @empty {

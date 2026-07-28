@@ -1,227 +1,418 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
-  <section class="space-y-4 mt-2">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="md:col-span-4">
-        <app-ui-floatlabel variant="on">
-          <input
-            appUiInput
-            id="docName"
-            formControlName="title"
-            class="w-full"
-            [invalid]="formUtils.isInvalid(form.get('title'))"
-          />
-          <label for="docName">Nombre del documento *</label>
-        </app-ui-floatlabel>
-      </div>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>Editar documento</h3>
+  <p hlmDialogDescription>
+    Actualiza los datos del documento o reemplaza su archivo.
+  </p>
+</hlm-dialog-header>
 
-      <div class="md:col-span-4">
-        <app-ui-floatlabel variant="on">
-          <app-ui-tree-select
-            inputId="orgUnit"
-            class="w-full"
-            appendTo="body"
-            [filter]="true"
-            filterPlaceholder="Buscar unidad"
-            emptyMessage="Sin resultados"
-            formControlName="organizationalUnitNode"
-            [invalid]="formUtils.isInvalid(form.get('organizationalUnitNode'))"
-            [options]="organizationTree()"
-          />
-          <label for="orgUnit">Unidad organizacional *</label>
-        </app-ui-floatlabel>
-      </div>
-
-      <div class="md:col-span-2">
-        <app-ui-floatlabel class="w-full" variant="on">
-          <app-ui-select
-            inputId="docType"
-            class="w-full"
-            appendTo="body"
-            [options]="documentTypes()"
-            optionLabel="name"
-            optionValue="id"
-            [filter]="true"
-            filterPlaceholder="Nombre del tipo"
-            emptyMessage="Sin elementos"
-            formControlName="documentTypeId"
-            [invalid]="formUtils.isInvalid(form.get('documentTypeId'))"
-            (onChange)="selectDocumentType($event.value)"
-          />
-          <label for="docType">Tipo de documento *</label>
-        </app-ui-floatlabel>
-      </div>
-      <div class="md:col-span-2">
-        <app-ui-floatlabel class="w-full" variant="on">
-          <app-ui-select
-            inputId="docSubType"
-            class="w-full"
-            appendTo="body"
-            [options]="documentSubtypes()"
-            optionLabel="name"
-            optionValue="id"
-            [filter]="true"
-            [showClear]="true"
-            filterPlaceholder="Nombre del subtipo"
-            emptyMessage="Sin elementos"
-            formControlName="documentSubtypeId"
-          />
-          <label for="docSubType">Subtipo</label>
-        </app-ui-floatlabel>
-      </div>
-
-      <year-selector formControlName="year" />
-
-      <app-ui-floatlabel class="w-full" variant="on">
-        <app-ui-select
-          inputId="statusInput"
-          class="w-full"
-          appendTo="body"
-          [options]="documentStatusOptions"
-          optionLabel="label"
-          optionValue="value"
-          emptyMessage="Sin elementos"
-          formControlName="status"
-          [invalid]="formUtils.isInvalid(form.get('status'))"
-        />
-        <label for="statusInput">Estado *</label>
-      </app-ui-floatlabel>
-    </div>
-  </section>
-
-  <section class="rounded-xl border border-surface-200 p-4">
-    <div
-      class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="document-edit-form"
+    class="flex flex-col gap-5"
+    [formRoot]="documentForm"
+  >
+    <section
+      class="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2"
+      aria-label="Datos del documento"
     >
-      <div>
-        <h3 class="text-sm font-semibold text-surface-900">Archivo actual</h3>
-        <p class="text-xs text-surface-500">
-          Este archivo se mantendrá si no se selecciona uno nuevo
-        </p>
-      </div>
-
-      <div class="flex gap-2">
-        <app-ui-button
-          type="button"
-          label="Ver"
-          icon="ui-icon ui-icon-external-link"
-          size="small"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="openFile(data.file.url)"
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="document-edit-title">Título</label>
+        <input
+          hlmInput
+          id="document-edit-title"
+          type="text"
+          autocomplete="off"
+          placeholder="Título del documento"
+          [formField]="documentForm.title"
         />
 
-        <app-ui-button
-          type="button"
-          label="Descargar"
-          icon="ui-icon ui-icon-download"
-          size="small"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="downloadFile(data.file.url)"
-        />
-      </div>
-    </div>
-
-    <div class="mt-4 flex items-center gap-3 rounded-xl bg-surface-50 p-3">
-      <file-icon [mimeType]="data.file.mimeType" />
-      <div class="min-w-0 flex-1">
-        <p class="truncate text-sm font-medium text-surface-900">
-          {{ data.file.originalName }}
-        </p>
-        <p class="text-xs text-surface-500">
-          {{ data.file.sizeBytes | fileSize }}
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="rounded-xl border border-surface-200 p-4">
-    <div class="flex items-center gap-3">
-      <app-ui-checkbox
-        [binary]="true"
-        [ngModel]="replaceFile()"
-        [ngModelOptions]="{ standalone: true }"
-        (onChange)="onReplaceChange($event.checked)"
-      />
-      <div>
-        <label class="text-sm font-medium text-surface-900">
-          Reemplazar archivo
-        </label>
-        <p class="text-xs text-surface-500">
-          Al guardar, el archivo actual será reemplazado por el nuevo
-          seleccionado.
-        </p>
-      </div>
-    </div>
-
-    @if (replaceFile()) {
-      <div class="mt-4 space-y-3 flex flex-col gap-1">
-        <p-fileUpload
-          mode="basic"
-          class="w-full"
-          [customUpload]="true"
-          [auto]="false"
-          [maxFileSize]="maxFileSizeBytes"
-          [accept]="acceptAttribute"
-          chooseLabel="Seleccionar"
-          invalidFileSizeMessageSummary="Tamaño máximo"
-          [invalidFileSizeMessageDetail]="maxFileSizeLabel"
-          invalidFileTypeMessageSummary="Formatos permitidos:"
-          [invalidFileTypeMessageDetail]="allowedExtensionsLabel"
-          (onSelect)="onSelectFile($event)"
-        />
-
-        @if (fileRequiredError()) {
-          <app-ui-message
-            severity="error"
-            size="small"
-            variant="simple"
-            class="ml-2"
-          >
-            Debe seleccionar un archivo para actualizar.
-          </app-ui-message>
+        @if (isFieldInvalid("title")) {
+          @for (error of documentForm.title().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
         }
       </div>
+
+      <organizational-unit-picker
+        class="sm:col-span-2"
+        inputId="document-edit-organizational-unit"
+        label="Unidad organizacional"
+        placeholder="Seleccione una unidad"
+        [formField]="documentForm.organizationalUnitId"
+        [options]="organizationalUnitOptions()"
+      >
+        <p hlmFieldDescription>
+          Opcional para documentos institucionales o transversales.
+        </p>
+      </organizational-unit-picker>
+
+      <div hlmField>
+        <label hlmFieldLabel for="document-edit-type"> Tipo documental </label>
+        <hlm-select
+          [formField]="documentForm.documentTypeId"
+          (valueChange)="onDocumentTypeChange()"
+        >
+          <hlm-select-trigger class="w-full" buttonId="document-edit-type">
+            <ng-template hlmSelectValueTemplate let-documentTypeId>
+              {{ documentTypeNames().get(documentTypeId) }}
+            </ng-template>
+            <hlm-select-placeholder>Seleccione un tipo</hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal class="max-h-72">
+            <hlm-select-group>
+              @for (documentType of documentTypes(); track documentType.id) {
+                <hlm-select-item [value]="documentType.id">
+                  {{ documentType.name }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+
+        @if (isFieldInvalid("documentTypeId")) {
+          @for (
+            error of documentForm.documentTypeId().errors();
+            track error.kind
+          ) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField>
+        <label hlmFieldLabel for="document-edit-subtype">
+          Subtipo
+          <span class="font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        <hlm-select [formField]="documentForm.documentSubtypeId">
+          <hlm-select-trigger class="w-full" buttonId="document-edit-subtype">
+            <ng-template hlmSelectValueTemplate let-documentSubtypeId>
+              {{ documentSubtypeNames().get(documentSubtypeId) }}
+            </ng-template>
+            <hlm-select-placeholder>
+              {{
+                documentSubtypes().length
+                  ? "Sin subtipo"
+                  : "No hay subtipos disponibles"
+              }}
+            </hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal class="max-h-72">
+            <hlm-select-group>
+              <hlm-select-item [value]="null">Sin subtipo</hlm-select-item>
+              @for (
+                documentSubtype of documentSubtypes();
+                track documentSubtype.id
+              ) {
+                <hlm-select-item [value]="documentSubtype.id">
+                  {{ documentSubtype.name }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+      </div>
+
+      <year-selector
+        inputId="document-edit-year"
+        [formField]="documentForm.year"
+      />
+
+      <div hlmField>
+        <label hlmFieldLabel for="document-edit-status">Estado</label>
+        <hlm-select [formField]="documentForm.status">
+          <hlm-select-trigger class="w-full" buttonId="document-edit-status">
+            <ng-template hlmSelectValueTemplate let-status>
+              {{ statusNames.get(status) }}
+            </ng-template>
+            <hlm-select-placeholder>
+              Seleccione un estado
+            </hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal>
+            <hlm-select-group>
+              @for (status of statusOptions; track status.value) {
+                <hlm-select-item [value]="status.value">
+                  {{ status.label }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+
+        @if (isFieldInvalid("status")) {
+          @for (error of documentForm.status().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+    </section>
+
+    <hlm-separator />
+
+    <section
+      class="flex flex-col gap-3"
+      aria-labelledby="current-document-file-title"
+    >
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 id="current-document-file-title" class="text-sm font-semibold">
+            Archivo actual
+          </h4>
+          <p class="text-xs text-muted-foreground">
+            Se conservará mientras no selecciones un reemplazo.
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            [disabled]="documentForm().submitting()"
+            (click)="openFile(document.file.url)"
+          >
+            <ng-icon name="lucideExternalLink" data-icon="inline-start" />
+            Ver
+          </button>
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            [disabled]="documentForm().submitting()"
+            (click)="downloadFile(document.file.url)"
+          >
+            <ng-icon name="lucideDownload" data-icon="inline-start" />
+            Descargar
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-xl border bg-card p-3 text-card-foreground"
+      >
+        <span
+          class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+          aria-hidden="true"
+        >
+          <ng-icon
+            [name]="
+              fileIconName(document.file.originalName, document.file.mimeType)
+            "
+            size="18"
+          />
+        </span>
+        <div class="min-w-0">
+          <p class="truncate text-sm font-medium">
+            {{ document.file.originalName }}
+          </p>
+          <p class="truncate text-xs text-muted-foreground">
+            {{ document.file.sizeBytes | fileSize }}
+            @if (fileExtension(document.file.originalName)) {
+              ·
+              {{ fileExtension(document.file.originalName).toUpperCase() }}
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hlm-separator />
+
+    <section
+      class="flex flex-col gap-3"
+      aria-labelledby="replace-document-file-title"
+    >
+      <div hlmField orientation="horizontal">
+        <hlm-checkbox
+          inputId="replace-document-file"
+          [formField]="documentForm.replaceFile"
+          (checkedChange)="onReplaceFileChange($event)"
+        />
+        <div>
+          <label
+            id="replace-document-file-title"
+            hlmFieldLabel
+            for="replace-document-file"
+          >
+            Reemplazar archivo
+          </label>
+          <p hlmFieldDescription>
+            El archivo actual se reemplazará únicamente al guardar los cambios.
+          </p>
+        </div>
+      </div>
+
+      @if (documentForm.replaceFile().value()) {
+        <div hlmField [forceInvalid]="isFieldInvalid('replaceFile')">
+          <label hlmFieldLabel for="document-replacement-file">
+            Nuevo archivo
+          </label>
+          <input
+            #replacementFileInput
+            id="document-replacement-file"
+            class="hidden"
+            type="file"
+            [accept]="fileRules.accept"
+            [disabled]="documentForm().submitting()"
+            (change)="onFileSelected($event)"
+          />
+
+          @if (selectedFile(); as replacementFile) {
+            <div
+              class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-card p-3 text-card-foreground"
+            >
+              <span
+                class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+                aria-hidden="true"
+              >
+                <ng-icon
+                  [name]="
+                    fileIconName(replacementFile.name, replacementFile.type)
+                  "
+                  size="18"
+                />
+              </span>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium">
+                  {{ replacementFile.name }}
+                </p>
+                <p class="truncate text-xs text-muted-foreground">
+                  {{ replacementFile.size | fileSize }}
+                  @if (fileExtension(replacementFile.name)) {
+                    · {{ fileExtension(replacementFile.name).toUpperCase() }}
+                  }
+                </p>
+              </div>
+              <button
+                hlmBtn
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Quitar archivo de reemplazo"
+                [disabled]="documentForm().submitting()"
+                (click)="clearReplacementFile()"
+              >
+                <ng-icon name="lucideTrash2" />
+              </button>
+            </div>
+          } @else {
+            <button
+              hlmBtn
+              type="button"
+              size="sm"
+              variant="outline"
+              class="self-start"
+              [disabled]="documentForm().submitting()"
+              (click)="replacementFileInput.click()"
+            >
+              <ng-icon name="lucideUpload" data-icon="inline-start" />
+              Seleccionar archivo
+            </button>
+          }
+
+          <p hlmFieldDescription>
+            Formatos admitidos: {{ fileRules.allowedExtensions.join(", ") }}.
+            Tamaño máximo: {{ fileRules.maxSizeMB }} MB.
+          </p>
+
+          @if (fileSelectionError()) {
+            <hlm-field-error forceShow>
+              {{ fileSelectionError() }}
+            </hlm-field-error>
+          } @else if (isFieldInvalid("replaceFile")) {
+            @for (
+              error of documentForm.replaceFile().errors();
+              track error.kind
+            ) {
+              <hlm-field-error forceShow [validator]="error.kind">
+                {{ error.message }}
+              </hlm-field-error>
+            }
+          }
+        </div>
+      }
+    </section>
+
+    <hlm-separator />
+
+    <section
+      class="flex flex-col gap-3"
+      aria-labelledby="document-record-info-title"
+    >
+      <h4 id="document-record-info-title" class="text-sm font-semibold">
+        Información del registro
+      </h4>
+      <dl class="grid gap-3 text-sm sm:grid-cols-3">
+        <div>
+          <dt class="text-xs text-muted-foreground">Creación</dt>
+          <dd class="font-medium">
+            {{ document.createdAt | date: "dd/MM/yyyy, HH:mm" }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted-foreground">Última edición</dt>
+          <dd class="font-medium">
+            {{ document.updatedAt | date: "dd/MM/yyyy, HH:mm" }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-muted-foreground">Descargas</dt>
+          <dd class="font-medium tabular-nums">
+            {{ document.downloadCount }}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    @if (updateError()) {
+      <div
+        class="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+        role="alert"
+      >
+        <ng-icon
+          name="lucideCircleAlert"
+          class="mt-0.5 shrink-0"
+          aria-hidden="true"
+        />
+        <p>{{ updateError() }}</p>
+      </div>
     }
-  </section>
+  </form>
+</div>
 
-  <section class="rounded-xl border border-surface-200 p-4">
-    <h3 class="text-sm font-semibold text-surface-900">
-      Información del registro
-    </h3>
-
-    <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-      <div>
-        <p class="text-xs text-surface-500">Creacion</p>
-        <p class="font-medium text-surface-800">
-          {{ data.createdAt | date: "short" }}
-        </p>
-      </div>
-
-      <div>
-        <p class="text-xs text-surface-500">Última edición</p>
-        <p class="font-medium text-surface-800">
-          {{ data.updatedAt | date: "short" }}
-        </p>
-      </div>
-
-      <div>
-        <p class="text-xs text-surface-500">Descargas</p>
-        <p class="font-medium text-surface-800">
-          {{ data.downloadCount }}
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <div class="app-dialog-actions">
-    <app-ui-button
-      type="button"
-      label="Cancelar"
-      severity="secondary"
-      [disabled]="isSaving()"
-      (onClick)="close()"
-    />
-    <app-ui-button type="submit" label="Guardar" [loading]="isSaving()" />
-  </div>
-</form> -->
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="documentForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="document-edit-form"
+    [disabled]="documentForm().submitting()"
+  >
+    @if (documentForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar cambios
+    }
+  </button>
+</hlm-dialog-footer>

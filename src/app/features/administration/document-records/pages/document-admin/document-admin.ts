@@ -1,20 +1,30 @@
-import { Component, computed, debounced, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  debounced,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { disabled, form, FormField, FormRoot } from '@angular/forms/signals';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
 import {
   lucideCircleAlert,
-  lucideRefreshCw,
   lucideDownload,
-  lucideSearch,
+  lucideEllipsisVertical,
   lucideFilter,
+  lucidePencil,
   lucidePlus,
+  lucideRefreshCw,
+  lucideSearch,
 } from '@ng-icons/lucide';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
@@ -29,7 +39,7 @@ import {
   OrganizationalUnitPicker,
   type OrganizationalUnitOption,
 } from '../../components/organizational-unit-picker/organizational-unit-picker';
-import { DocumentCreate } from '../../dialogs';
+import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import { DocumentResponse, SectionTreeNodeResponse } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
 
@@ -60,6 +70,7 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
     NgIcon,
     HlmBadgeImports,
     HlmButtonImports,
+    HlmDropdownMenuImports,
     HlmFieldImports,
     HlmInputGroupImports,
     HlmPopoverImports,
@@ -75,7 +86,9 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
   providers: provideIcons({
     lucideCircleAlert,
     lucideDownload,
+    lucideEllipsisVertical,
     lucideFilter,
+    lucidePencil,
     lucidePlus,
     lucideRefreshCw,
     lucideSearch,
@@ -125,10 +138,12 @@ export default class DocumentAdmin {
     stream: ({ params }) => this.documentDataSource.findAll(params),
   });
 
-  readonly dataSource = computed(
+  readonly dataSource = linkedSignal(
     () => this.documentResource.value()?.documents ?? [],
   );
-  readonly dataSize = computed(() => this.documentResource.value()?.total ?? 0);
+  readonly dataSize = linkedSignal(
+    () => this.documentResource.value()?.total ?? 0,
+  );
   readonly isListLoading = computed(
     () =>
       this.debouncedSearchTerm.isLoading() || this.documentResource.isLoading(),
@@ -156,6 +171,9 @@ export default class DocumentAdmin {
     { value: 'ACTIVE', label: 'Activo' },
     { value: 'INACTIVE', label: 'Inactivo' },
   ];
+  readonly statusNames = new Map(
+    this.statusOptions.map(({ value, label }) => [value, label]),
+  );
 
   readonly appliedFiltersCount = computed(
     () =>
@@ -208,19 +226,34 @@ export default class DocumentAdmin {
       {
         showCloseButton: false,
         disableClose: true,
-        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[800px]',
+        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[1200px]',
       },
     );
 
     dialogRef.closed$.subscribe((documents) => {
       if (documents?.length) {
-        this.documentResource.reload();
+        documents.forEach((document) => this.upsertItem(document));
       }
     });
   }
 
-  downloadFile({ file }: DocumentResponse): void {
-    const fileUrl = new URL(file.url);
+  openUpdateDialog(document: DocumentResponse): void {
+    const dialogRef = this.dialogService.open<DocumentResponse>(DocumentEdit, {
+      showCloseButton: false,
+      disableClose: true,
+      contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[800px]',
+      context: { document },
+    });
+
+    dialogRef.closed$.subscribe((updatedDocument) => {
+      if (updatedDocument) {
+        this.upsertItem(updatedDocument);
+      }
+    });
+  }
+
+  downloadFile(url: string): void {
+    const fileUrl = new URL(url);
     fileUrl.searchParams.set('download', 'true');
     window.open(fileUrl.toString(), '_blank', 'noopener,noreferrer');
   }
@@ -242,5 +275,23 @@ export default class DocumentAdmin {
         ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
       ];
     });
+  }
+
+  private upsertItem(item: DocumentResponse): void {
+    const exists = this.dataSource().some(({ id }) => id === item.id);
+    if (exists) {
+      console.log(item);
+      this.dataSource.update((currentItems) =>
+        currentItems.map((currentItem) =>
+          currentItem.id === item.id ? item : currentItem,
+        ),
+      );
+      return;
+    }
+
+    this.dataSource.update((currentItems) =>
+      [item, ...currentItems].slice(0, this.pageSize()),
+    );
+    this.dataSize.update((total) => total + 1);
   }
 }

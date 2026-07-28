@@ -7,20 +7,18 @@
       class="grid grid-cols-1 gap-4 pt-1 lg:grid-cols-5"
       aria-labelledby="batch-properties-title"
     >
-      <div hlmField class="lg:col-span-5">
-        <label hlmFieldLabel for="organizational-unit">
-          Unidad organizacional
-        </label>
-        <organizational-unit-picker
-          inputId="organizational-unit"
-          [formField]="documentForm.organizationalUnitId"
-          [options]="organizationalUnitOptions()"
-        />
+      <organizational-unit-picker
+        class="lg:col-span-5"
+        inputId="document-create-organizational-unit"
+        label="Unidad organizacional"
+        placeholder="Seleccione una unidad"
+        [formField]="documentForm.organizationalUnitId"
+        [options]="organizationalUnitOptions()"
+      >
         <p hlmFieldDescription>
-          Use “Institucional / transversal” cuando el documento no pertenezca a
-          una unidad específica.
+          Opcional para documentos institucionales o transversales.
         </p>
-      </div>
+      </organizational-unit-picker>
 
       <div hlmField class="lg:col-span-2">
         <label hlmFieldLabel for="document-type">Tipo documental</label>

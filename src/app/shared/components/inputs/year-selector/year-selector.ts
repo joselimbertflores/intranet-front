@@ -35,7 +35,7 @@ interface YearOption {
       >
         <hlm-select-trigger class="w-full" [buttonId]="inputId()">
           <hlm-select-value />
-          <hlm-select-placeholder>Sin gestión</hlm-select-placeholder>
+          <hlm-select-placeholder>{{ placeholder() }}</hlm-select-placeholder>
         </hlm-select-trigger>
 
         <hlm-select-content *hlmSelectPortal class="max-h-72">
@@ -72,6 +72,7 @@ export class YearSelector
 {
   readonly label = input('Gestión');
   readonly inputId = input('year-input');
+  readonly placeholder = input('Seleccione una gestión');
   readonly minYear = input(2000);
   readonly maxYear = input(new Date().getFullYear() + 1);
   readonly showClear = input(true);

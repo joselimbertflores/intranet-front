@@ -19,8 +19,8 @@ export interface CreateDocumentBatchItemDto {
 
 export interface CreateDocumentBatchDto {
   organizationalUnitId?: number | null;
-  documentTypeId: number;
-  documentSubtypeId?: number;
+  typeId: number;
+  subtypeId?: number;
   year?: number;
   validityStatus: DocumentValidityStatus;
   documents: CreateDocumentBatchItemDto[];

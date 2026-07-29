@@ -85,11 +85,12 @@
                 </td>
 
                 <td hlmTableCell>
-                  <span
-                    class="block truncate text-muted-foreground"
-                    [title]="subtypeSummary(documentType)"
-                  >
-                    {{ subtypeSummary(documentType) }}
+                  <span class="block truncate text-muted-foreground">
+                    {{
+                      documentType.subtypes.length > 0
+                        ? documentType.subtypes.length
+                        : "-"
+                    }}
                   </span>
                 </td>
 
@@ -111,12 +112,35 @@
                     align="end"
                     [attr.aria-label]="'Acciones de ' + documentType.name"
                     [hlmDropdownMenuTrigger]="actionsMenu"
-                    [hlmDropdownMenuTriggerData]="{
-                      documentType: documentType,
-                    }"
                   >
                     <ng-icon name="lucideEllipsisVertical" />
                   </button>
+
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openDocumentTypeDialog(documentType)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
+
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="documentTypePendingDelete.set(documentType)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar
+                        </button>
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
                 </td>
               </tr>
             } @empty {
@@ -157,32 +181,6 @@
   </div>
 </section>
 
-<ng-template #actionsMenu let-documentType="documentType">
-  <hlm-dropdown-menu class="w-36">
-    <hlm-dropdown-menu-group>
-      <button
-        hlmDropdownMenuItem
-        type="button"
-        (click)="openDocumentTypeDialog(documentType)"
-      >
-        <ng-icon name="lucidePencil" />
-        Editar
-      </button>
-
-      <button
-        hlmDropdownMenuItem
-        type="button"
-        variant="destructive"
-        [hlmAlertDialogTriggerFor]="deleteDialog"
-        (click)="selectDocumentTypeForDeletion(documentType)"
-      >
-        <ng-icon name="lucideTrash2" />
-        Eliminar
-      </button>
-    </hlm-dropdown-menu-group>
-  </hlm-dropdown-menu>
-</ng-template>
-
 <hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
   <hlm-alert-dialog-content *hlmAlertDialogPortal>
     <hlm-alert-dialog-header>
@@ -191,35 +189,18 @@
         Se eliminará “{{ documentTypePendingDelete()?.name }}”. Esta acción no
         se puede deshacer.
       </p>
-
-      @if (deleteError()) {
-        <p class="text-sm text-destructive" role="alert">
-          {{ deleteError() }}
-        </p>
-      }
     </hlm-alert-dialog-header>
 
     <hlm-alert-dialog-footer>
-      <button
-        hlmAlertDialogCancel
-        type="button"
-        [disabled]="isDeleting()"
-      >
-        Cancelar
-      </button>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
       <button
         hlmAlertDialogAction
         type="button"
         variant="destructive"
-        [disabled]="!documentTypePendingDelete() || isDeleting()"
+        [disabled]="!documentTypePendingDelete()"
         (click)="confirmRemove(deleteDialog)"
       >
-        @if (isDeleting()) {
-          <hlm-spinner data-icon="inline-start" />
-          Eliminando...
-        } @else {
-          Eliminar
-        }
+        Eliminar
       </button>
     </hlm-alert-dialog-footer>
   </hlm-alert-dialog-content>

@@ -1,30 +1,26 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, debounced, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideEllipsisVertical,
   lucidePencil,
   lucidePlus,
+  lucideSearch,
   lucideTrash2,
 } from '@ng-icons/lucide';
 import {
   HlmAlertDialog,
   HlmAlertDialogImports,
 } from '@spartan-ng/helm/alert-dialog';
-import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
+import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
-import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
-import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTableImports } from '@spartan-ng/helm/table';
-import { finalize } from 'rxjs';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmBadge } from '@spartan-ng/helm/badge';
 
 import { OrganizationalUnitEditor } from '../../dialogs';
 import { OrganizationalUnitResponse } from '../../interfaces';
@@ -32,6 +28,7 @@ import { OrganizationalUnitDatasource } from '../../services';
 
 interface OrganizationalUnitTableRow extends OrganizationalUnitResponse {
   depth: number;
+  searchTerm: string;
   parent: OrganizationalUnitResponse | null;
 }
 
@@ -45,6 +42,8 @@ interface OrganizationalUnitTableRow extends OrganizationalUnitResponse {
     HlmSpinner,
     HlmTableImports,
     NgIcon,
+    FormsModule,
+    HlmInputGroupImports,
   ],
   providers: [
     provideIcons({
@@ -52,10 +51,10 @@ interface OrganizationalUnitTableRow extends OrganizationalUnitResponse {
       lucidePencil,
       lucidePlus,
       lucideTrash2,
+      lucideSearch,
     }),
   ],
   templateUrl: './organizational-unit-admin.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class OrganizationalUnitAdmin {
   private readonly organizationalUnitDataSource = inject(
@@ -63,18 +62,28 @@ export default class OrganizationalUnitAdmin {
   );
   private readonly dialogService = inject(HlmDialogService);
 
-  readonly organizationalUnitPendingDelete =
-    signal<OrganizationalUnitTableRow | null>(null);
-  readonly isDeleting = signal(false);
-  readonly deleteError = signal<string | null>(null);
+  readonly orgUnitPendingDelete = signal<OrganizationalUnitTableRow | null>(
+    null,
+  );
 
   readonly organizationalUnitsResource = rxResource({
     stream: () => this.organizationalUnitDataSource.findTree(),
   });
 
-  readonly organizationalUnits = computed(() =>
+  readonly tableRows = computed(() =>
     this.flattenTree(this.organizationalUnitsResource.value() ?? []),
   );
+
+  searchTerm = signal('');
+  readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
+
+  readonly filteredRows = computed(() => {
+    const term = this.normalizeSearch(this.debouncedSearchTerm.value());
+    if (!term) {
+      return this.tableRows();
+    }
+    return this.tableRows().filter((row) => row.searchTerm.includes(term));
+  });
 
   openOrganizationalUnitDialog(
     organizationalUnit?: OrganizationalUnitTableRow,
@@ -98,68 +107,52 @@ export default class OrganizationalUnitAdmin {
     });
   }
 
-  selectOrganizationalUnitForDeletion(
-    organizationalUnit: OrganizationalUnitTableRow,
-  ): void {
-    this.deleteError.set(null);
-    this.organizationalUnitPendingDelete.set(organizationalUnit);
+  selectOrgUnitForDeletion(orgUnit: OrganizationalUnitTableRow): void {
+    this.orgUnitPendingDelete.set(orgUnit);
   }
 
   confirmRemove(deleteDialog: HlmAlertDialog): void {
-    const organizationalUnit = this.organizationalUnitPendingDelete();
-    if (!organizationalUnit || this.isDeleting()) return;
-
-    this.isDeleting.set(true);
-    this.deleteError.set(null);
-
+    const organizationalUnit = this.orgUnitPendingDelete();
+    if (!organizationalUnit) return;
     this.organizationalUnitDataSource
       .remove(organizationalUnit.id)
-      .pipe(finalize(() => this.isDeleting.set(false)))
-      .subscribe({
-        next: () => {
-          this.organizationalUnitsResource.reload();
-          deleteDialog.close();
-        },
-        error: (error: unknown) => {
-          this.deleteError.set(this.getDeleteErrorMessage(error));
-        },
+      .subscribe(() => {
+        this.organizationalUnitsResource.reload();
+        deleteDialog.close();
       });
   }
 
   onDeleteDialogClosed(): void {
-    this.organizationalUnitPendingDelete.set(null);
-    this.deleteError.set(null);
+    this.orgUnitPendingDelete.set(null);
   }
 
   private flattenTree(
     nodes: readonly OrganizationalUnitResponse[],
     depth = 0,
     parent: OrganizationalUnitResponse | null = null,
+    parentPath: readonly string[] = [],
   ): OrganizationalUnitTableRow[] {
-    return nodes.flatMap((node) => [
-      { ...node, depth, parent },
-      ...this.flattenTree(node.children, depth + 1, node),
-    ]);
+    return nodes.flatMap((node) => {
+      const path = [...parentPath, node.name];
+
+      return [
+        {
+          ...node,
+          depth,
+          parent,
+          path,
+          searchTerm: this.normalizeSearch(path.join(' / ')),
+        },
+        ...this.flattenTree(node.children, depth + 1, node, path),
+      ];
+    });
   }
 
-  private getDeleteErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'No se pudo eliminar la unidad. Intenta nuevamente.';
-    }
-
-    const responseBody = error.error as
-      | { message?: string | string[] }
-      | string
-      | null
-      | undefined;
-    const message =
-      typeof responseBody === 'string' ? responseBody : responseBody?.message;
-
-    if (Array.isArray(message)) return message.join(' ');
-    if (typeof message === 'string' && message.trim()) return message;
-
-    return error.status === 409
-      ? 'La unidad no puede eliminarse porque tiene documentos o unidades hijas.'
-      : 'No se pudo eliminar la unidad. Intenta nuevamente.';
+  private normalizeSearch(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .trim();
   }
 }

@@ -1,4 +1,4 @@
-<hlm-dialog-header class="shrink-0">
+<hlm-dialog-header class="shrink-0 pb-4">
   <h3 hlmDialogTitle>
     @if (organizationalUnit) {
       Editar unidad organizacional
@@ -8,27 +8,23 @@
       Crear unidad raíz
     }
   </h3>
-
-  <p hlmDialogDescription>
-    @if (parent) {
-      Unidad superior: {{ parent.name }}.
-      @if (organizationalUnit) {
-        El padre no puede modificarse desde este editor.
-      }
-    } @else if (organizationalUnit) {
-      Esta unidad se encuentra en el nivel raíz.
-    } @else {
-      La nueva unidad se creará en el nivel raíz.
-    }
-  </p>
 </hlm-dialog-header>
 
 <form
   id="organizational-unit-form"
-  class="flex min-h-0 flex-col gap-5"
+  class="flex min-h-0 flex-col gap-5 pb-4"
   [formRoot]="organizationalUnitForm"
-  (submit)="save()"
 >
+  <hlm-field data-disabled="true">
+    <label hlmFieldLabel for="input-disabled">Raíz</label>
+    <input
+      hlmInput
+      id="input-disabled"
+      disabled
+      [value]="parent ? parent.name : '- UNIDAD SUPERIOR -'"
+    />
+  </hlm-field>
+
   <div hlmField>
     <label hlmFieldLabel for="organizational-unit-name">Nombre</label>
     <input
@@ -41,10 +37,7 @@
     />
 
     @if (organizationalUnitForm.name().touched()) {
-      @for (
-        error of organizationalUnitForm.name().errors();
-        track error.kind
-      ) {
+      @for (error of organizationalUnitForm.name().errors(); track error.kind) {
         <hlm-field-error [validator]="error.kind">
           {{ error.message }}
         </hlm-field-error>
@@ -57,16 +50,8 @@
       inputId="organizational-unit-active"
       [formField]="organizationalUnitForm.isActive"
     />
-    <label hlmFieldLabel for="organizational-unit-active">
-      Unidad activa
-    </label>
+    <label hlmFieldLabel for="organizational-unit-active"> Activo </label>
   </div>
-
-  @if (saveError()) {
-    <p class="text-sm text-destructive" role="alert">
-      {{ saveError() }}
-    </p>
-  }
 </form>
 
 <hlm-dialog-footer class="shrink-0">
@@ -89,10 +74,8 @@
     @if (organizationalUnitForm().submitting()) {
       <hlm-spinner data-icon="inline-start" />
       Guardando...
-    } @else if (organizationalUnit) {
-      Guardar cambios
     } @else {
-      Crear unidad
+      Guardar
     }
   </button>
 </hlm-dialog-footer>

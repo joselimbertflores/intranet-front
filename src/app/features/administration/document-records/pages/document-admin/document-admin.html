@@ -301,16 +301,16 @@
                   <div class="flex min-w-0 flex-col gap-0.5 text-xs">
                     <span
                       class="block truncate font-medium"
-                      [hlmTooltip]="doc.documentType.name"
+                      [hlmTooltip]="doc.type.name"
                     >
-                      {{ doc.documentType.name }}
+                      {{ doc.type.name }}
                     </span>
-                    @if (doc.documentSubtype) {
+                    @if (doc.subtype) {
                       <span
                         class="block truncate text-muted-foreground"
-                        [hlmTooltip]="doc.documentSubtype.name"
+                        [hlmTooltip]="doc.subtype.name"
                       >
-                        {{ doc.documentSubtype.name }}
+                        {{ doc.subtype.name }}
                       </span>
                     } @else {
                       <span class="text-muted-foreground">Sin subtipo</span>

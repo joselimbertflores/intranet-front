@@ -27,12 +27,11 @@ import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTableImports } from '@spartan-ng/helm/table';
-import { finalize } from 'rxjs';
 
-import { PaginationControls } from '../../../../../shared';
-import { DocumentTypeEditor } from '../../dialogs';
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
+import { PaginationControls } from '../../../../../shared';
 import { DocumentTypeDatasource } from '../../services';
+import { DocumentTypeEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-document-types-admin',
@@ -71,8 +70,6 @@ export default class DocumentTypesAdmin {
 
   readonly documentTypePendingDelete =
     signal<DocumentTypeWithSubTypesResponse | null>(null);
-  readonly isDeleting = signal(false);
-  readonly deleteError = signal<string | null>(null);
 
   readonly documentTypeResource = rxResource({
     params: () => ({
@@ -108,16 +105,15 @@ export default class DocumentTypesAdmin {
   openDocumentTypeDialog(
     documentType?: DocumentTypeWithSubTypesResponse,
   ): void {
-    const dialogRef =
-      this.dialogService.open<DocumentTypeWithSubTypesResponse>(
-        DocumentTypeEditor,
-        {
-          showCloseButton: false,
-          disableClose: true,
-          contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[720px]',
-          context: { documentType },
-        },
-      );
+    const dialogRef = this.dialogService.open<DocumentTypeWithSubTypesResponse>(
+      DocumentTypeEditor,
+      {
+        showCloseButton: false,
+        autoFocus: false,
+        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[720px]',
+        context: { documentType },
+      },
+    );
 
     dialogRef.closed$.subscribe((result) => {
       if (result) this.upsertItem(result);
@@ -127,51 +123,20 @@ export default class DocumentTypesAdmin {
   selectDocumentTypeForDeletion(
     documentType: DocumentTypeWithSubTypesResponse,
   ): void {
-    this.deleteError.set(null);
     this.documentTypePendingDelete.set(documentType);
   }
 
   confirmRemove(deleteDialog: HlmAlertDialog): void {
     const documentType = this.documentTypePendingDelete();
-    if (!documentType || this.isDeleting()) return;
-
-    this.isDeleting.set(true);
-    this.deleteError.set(null);
-
-    this.documentTypeDataSource
-      .remove(documentType.id)
-      .pipe(finalize(() => this.isDeleting.set(false)))
-      .subscribe({
-        next: () => {
-          this.removeItem(documentType.id);
-          deleteDialog.close();
-        },
-        error: () => {
-          this.deleteError.set(
-            'No se pudo eliminar el tipo de documento. Verifica que no esté en uso.',
-          );
-        },
-      });
+    if (!documentType) return;
+    this.documentTypeDataSource.remove(documentType.id).subscribe(() => {
+      this.removeItem(documentType.id);
+      deleteDialog.close();
+    });
   }
 
   onDeleteDialogClosed(): void {
     this.documentTypePendingDelete.set(null);
-    this.deleteError.set(null);
-  }
-
-  subtypeSummary(documentType: DocumentTypeWithSubTypesResponse): string {
-    const { subtypes } = documentType;
-    if (subtypes.length === 0) return 'Sin subtipos';
-
-    const names = subtypes
-      .slice(0, 2)
-      .map(({ name }) => name)
-      .join(', ');
-    const remaining = subtypes.length - 2;
-
-    return `${subtypes.length} ${
-      subtypes.length === 1 ? 'subtipo' : 'subtipos'
-    } · ${names}${remaining > 0 ? ` y ${remaining} más` : ''}`;
   }
 
   private upsertItem(newItem: DocumentTypeWithSubTypesResponse): void {

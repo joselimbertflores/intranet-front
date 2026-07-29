@@ -114,6 +114,9 @@
       ],
       "@spartan-ng/helm/collapsible": [
         "./libs/ui/collapsible/src/index.ts"
+      ],
+      "@spartan-ng/helm/alert": [
+        "./libs/ui/alert/src/index.ts"
       ]
     }
   },

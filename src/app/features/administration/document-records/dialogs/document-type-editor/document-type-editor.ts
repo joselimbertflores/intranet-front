@@ -2,30 +2,28 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
   applyEach,
-  form,
   FormField,
   FormRoot,
   maxLength,
-  submit,
   validate,
+  form,
 } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideTrash2 } from '@ng-icons/lucide';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
-import {
-  HlmAlertDialog,
-  HlmAlertDialogImports,
-} from '@spartan-ng/helm/alert-dialog';
-import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
 import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import { HlmButton } from '@spartan-ng/helm/button';
+
 import {
   HlmDialogFooter,
   HlmDialogHeader,
   HlmDialogTitle,
 } from '@spartan-ng/helm/dialog';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
-import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmInput } from '@spartan-ng/helm/input';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -61,6 +59,7 @@ interface DocumentTypeFormData {
     HlmInput,
     HlmSpinner,
     NgIcon,
+    HlmAlertImports,
   ],
   providers: [provideIcons({ lucidePlus, lucideTrash2 })],
   templateUrl: './document-type-editor.html',
@@ -77,7 +76,6 @@ export class DocumentTypeEditor {
 
   readonly documentType = this.context.documentType;
   readonly subtypeIdsToDelete = signal<number[]>([]);
-  readonly saveError = signal<string | null>(null);
 
   readonly formModel = signal<DocumentTypeFormData>({
     name: this.documentType?.name ?? '',
@@ -90,20 +88,48 @@ export class DocumentTypeEditor {
       })) ?? [],
   });
 
-  readonly documentTypeForm = form(this.formModel, (schemaPath) => {
-    validate(schemaPath.name, ({ value }) =>
-      this.validateName(value(), 'El nombre del tipo es obligatorio'),
-    );
-    maxLength(schemaPath.name, 50, {
-      message: 'El nombre admite hasta 50 caracteres',
-    });
-
-    applyEach(schemaPath.subtypes, (subtype) => {
-      validate(subtype.name, ({ value }) =>
-        this.validateName(value(), 'El nombre del subtipo es obligatorio'),
+  readonly documentTypeForm = form(
+    this.formModel,
+    (schemaPath) => {
+      validate(schemaPath.name, ({ value }) =>
+        this.validateName(value(), 'El nombre del tipo es obligatorio'),
       );
-    });
-  });
+      maxLength(schemaPath.name, 50, {
+        message: 'El nombre admite hasta 50 caracteres',
+      });
+
+      applyEach(schemaPath.subtypes, (subtype) => {
+        validate(subtype.name, ({ value }) =>
+          this.validateName(value(), 'El nombre del subtipo es obligatorio'),
+        );
+      });
+    },
+    {
+      submission: {
+        action: async (formField) => {
+          try {
+            const request = this.documentType
+              ? this.documentTypeDataSource.update(
+                  this.documentType.id,
+                  this.buildUpdateDto(formField().value()),
+                )
+              : this.documentTypeDataSource.create(
+                  this.buildCreateDto(formField().value()),
+                );
+
+            const response = await firstValueFrom(request);
+            this.dialogRef.close(response);
+            return;
+          } catch (error: unknown) {
+            return {
+              kind: 'server',
+              message: this.getSaveErrorMessage(error),
+            };
+          }
+        },
+      },
+    },
+  );
 
   close(): void {
     if (this.documentTypeForm().submitting()) return;
@@ -111,8 +137,6 @@ export class DocumentTypeEditor {
   }
 
   addSubtype(): void {
-    if (this.documentTypeForm().submitting()) return;
-
     this.formModel.update((value) => ({
       ...value,
       subtypes: [...value.subtypes, { name: '', isActive: true }],
@@ -120,15 +144,11 @@ export class DocumentTypeEditor {
   }
 
   removeSubtype(index: number): void {
-    if (this.documentTypeForm().submitting()) return;
-
     const subtype = this.formModel().subtypes[index];
     if (!subtype) return;
 
     if (subtype.id !== undefined) {
-      this.subtypeIdsToDelete.update((ids) =>
-        ids.includes(subtype.id!) ? ids : [...ids, subtype.id!],
-      );
+      this.subtypeIdsToDelete.update((ids) => [...ids, subtype.id!]);
     }
 
     this.formModel.update((value) => ({
@@ -139,51 +159,9 @@ export class DocumentTypeEditor {
     }));
   }
 
-  requestSave(deleteDialog: HlmAlertDialog): void {
-    if (this.documentTypeForm().submitting()) return;
-
-    this.documentTypeForm().markAsTouched();
-    if (this.documentTypeForm().invalid()) return;
-
-    this.saveError.set(null);
-
-    if (this.documentType && this.subtypeIdsToDelete().length > 0) {
-      deleteDialog.open();
-      return;
-    }
-
-    void this.save();
-  }
-
-  confirmSave(deleteDialog: HlmAlertDialog): void {
-    if (this.documentTypeForm().submitting()) return;
-    void this.save(deleteDialog);
-  }
-
-  onDeleteConfirmationClosed(): void {
-    this.saveError.set(null);
-  }
-
-  private async save(deleteDialog?: HlmAlertDialog): Promise<void> {
-    this.saveError.set(null);
-
-    try {
-      await submit(this.documentTypeForm, async (field) => {
-        const value = field().value();
-        const request = this.documentType
-          ? this.documentTypeDataSource.update(
-              this.documentType.id,
-              this.buildUpdateDto(value),
-            )
-          : this.documentTypeDataSource.create(this.buildCreateDto(value));
-
-        const response = await firstValueFrom(request);
-        deleteDialog?.close();
-        this.dialogRef.close(response);
-      });
-    } catch (error: unknown) {
-      this.saveError.set(this.getSaveErrorMessage(error));
-    }
+  isFieldInvalid(fieldName: keyof DocumentTypeFormData): boolean {
+    const field = this.documentTypeForm[fieldName]();
+    return field.touched() && field.errors().length > 0;
   }
 
   private buildCreateDto(value: DocumentTypeFormData): DocumentTypeCreateDto {

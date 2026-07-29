@@ -313,8 +313,8 @@ export class DocumentEdit {
     return {
       title: this.document.title,
       organizationalUnitId: this.document.organizationalUnit?.id ?? null,
-      documentTypeId: this.document.documentType.id,
-      documentSubtypeId: this.document.documentSubtype?.id ?? null,
+      documentTypeId: this.document.type.id,
+      documentSubtypeId: this.document.subtype?.id ?? null,
       year: this.document.year ?? null,
       status: this.document.status,
       validityStatus: this.document.validityStatus,

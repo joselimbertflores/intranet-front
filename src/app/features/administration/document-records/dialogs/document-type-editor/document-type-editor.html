@@ -1,15 +1,14 @@
-<hlm-dialog-header class="shrink-0">
+<hlm-dialog-header class="shrink-0 pb-4">
   <h3 hlmDialogTitle>
     {{ documentType ? "Editar tipo de documento" : "Crear tipo de documento" }}
   </h3>
 </hlm-dialog-header>
 
-<div class="min-h-0 overflow-y-auto px-0.5">
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
   <form
     id="document-type-form"
     class="flex flex-col gap-5"
     [formRoot]="documentTypeForm"
-    (submit)="requestSave(deleteSubtypesDialog)"
   >
     <section class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
       <div hlmField>
@@ -23,11 +22,9 @@
           [formField]="documentTypeForm.name"
         />
 
-        @if (documentTypeForm.name().touched()) {
-          @for (
-            error of documentTypeForm.name().errors();
-            track error.kind
-          ) {
+        @let fieldState = documentTypeForm.name();
+        @if (fieldState.invalid() && fieldState.touched()) {
+          @for (error of documentTypeForm.name().errors(); track error.kind) {
             <hlm-field-error [validator]="error.kind">
               {{ error.message }}
             </hlm-field-error>
@@ -63,7 +60,6 @@
           type="button"
           size="sm"
           variant="outline"
-          [disabled]="documentTypeForm().submitting()"
           (click)="addSubtype()"
         >
           <ng-icon name="lucidePlus" data-icon="inline-start" />
@@ -92,12 +88,9 @@
                 [placeholder]="'Subtipo ' + (i + 1)"
                 [formField]="subtypeForm.name"
               />
-
-              @if (subtypeForm.name().touched()) {
-                @for (
-                  error of subtypeForm.name().errors();
-                  track error.kind
-                ) {
+              @let fieldState = subtypeForm.name();
+              @if (fieldState.invalid() && fieldState.touched()) {
+                @for (error of subtypeForm.name().errors(); track error.kind) {
                   <hlm-field-error [validator]="error.kind">
                     {{ error.message }}
                   </hlm-field-error>
@@ -105,19 +98,12 @@
               }
             </div>
 
-            <div
-              hlmField
-              orientation="horizontal"
-              class="sm:mt-7 sm:min-w-24"
-            >
+            <div hlmField orientation="horizontal" class="sm:mt-7 sm:min-w-24">
               <hlm-checkbox
                 [inputId]="'document-subtype-active-' + i"
                 [formField]="subtypeForm.isActive"
               />
-              <label
-                hlmFieldLabel
-                [for]="'document-subtype-active-' + i"
-              >
+              <label hlmFieldLabel [for]="'document-subtype-active-' + i">
                 Activo
               </label>
             </div>
@@ -130,7 +116,6 @@
               class="text-destructive hover:text-destructive sm:mt-6"
               [attr.aria-label]="'Quitar subtipo ' + (i + 1)"
               [title]="'Quitar subtipo ' + (i + 1)"
-              [disabled]="documentTypeForm().submitting()"
               (click)="removeSubtype(i)"
             >
               <ng-icon name="lucideTrash2" />
@@ -140,21 +125,24 @@
           <div class="rounded-lg border border-dashed p-8 text-center">
             <p class="font-medium">Sin subtipos</p>
             <p class="mt-1 text-sm text-muted-foreground">
-              Este tipo puede guardarse sin subtipos o puedes agregar el
-              primero.
+              Este tipo puede guardarse sin subtipos o puede agregar el primero.
             </p>
           </div>
         }
       </div>
     </section>
-
-    @if (saveError() && subtypeIdsToDelete().length === 0) {
-      <p class="text-sm text-destructive" role="alert">
-        {{ saveError() }}
-      </p>
-    }
   </form>
 </div>
+
+@if (documentTypeForm().errors().length > 0) {
+  <hlm-alert role="alert" variant="destructive" class="shrink-0 my-2">
+    <div hlmAlertDescription class="space-y-1">
+      @for (error of documentTypeForm().errors(); track $index) {
+        <p>{{ error.message }}</p>
+      }
+    </div>
+  </hlm-alert>
+}
 
 <hlm-dialog-footer class="shrink-0">
   <button
@@ -169,66 +157,15 @@
 
   <button
     hlmBtn
-    type="button"
+    type="submit"
+    form="document-type-form"
     [disabled]="documentTypeForm().submitting()"
-    (click)="requestSave(deleteSubtypesDialog)"
   >
     @if (documentTypeForm().submitting()) {
       <hlm-spinner data-icon="inline-start" />
       Guardando...
     } @else {
-      {{ documentType ? "Guardar cambios" : "Crear tipo" }}
+      Guardar
     }
   </button>
 </hlm-dialog-footer>
-
-<hlm-alert-dialog
-  #deleteSubtypesDialog
-  (closed)="onDeleteConfirmationClosed()"
->
-  <hlm-alert-dialog-content *hlmAlertDialogPortal>
-    <hlm-alert-dialog-header>
-      <h3 hlmAlertDialogTitle>Confirmar cambios</h3>
-      <p hlmAlertDialogDescription>
-        Al guardar se eliminarán
-        {{ subtypeIdsToDelete().length }}
-        {{
-          subtypeIdsToDelete().length === 1
-            ? "subtipo existente"
-            : "subtipos existentes"
-        }}.
-        Esta acción no se puede deshacer.
-      </p>
-
-      @if (saveError()) {
-        <p class="text-sm text-destructive" role="alert">
-          {{ saveError() }}
-        </p>
-      }
-    </hlm-alert-dialog-header>
-
-    <hlm-alert-dialog-footer>
-      <button
-        hlmAlertDialogCancel
-        type="button"
-        [disabled]="documentTypeForm().submitting()"
-      >
-        Volver
-      </button>
-      <button
-        hlmAlertDialogAction
-        type="button"
-        variant="destructive"
-        [disabled]="documentTypeForm().submitting()"
-        (click)="confirmSave(deleteSubtypesDialog)"
-      >
-        @if (documentTypeForm().submitting()) {
-          <hlm-spinner data-icon="inline-start" />
-          Guardando...
-        } @else {
-          Guardar y eliminar
-        }
-      </button>
-    </hlm-alert-dialog-footer>
-  </hlm-alert-dialog-content>
-</hlm-alert-dialog>

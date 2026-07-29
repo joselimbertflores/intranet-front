@@ -69,8 +69,8 @@ interface BatchDocumentFormItem {
 
 interface DocumentBatchFormModel {
   organizationalUnitId: number | null;
-  documentTypeId: number | null;
-  documentSubtypeId: number | null;
+  typeId: number | null;
+  subtypeId: number | null;
   year: number | null;
   validityStatus: DocumentValidityStatus;
   documents: BatchDocumentFormItem[];
@@ -150,7 +150,7 @@ export class DocumentCreate {
   );
 
   readonly documentSubtypes = computed(() => {
-    const selectedTypeId = this.documentForm.documentTypeId().value();
+    const selectedTypeId = this.documentForm.typeId().value();
     return (
       this.documentTypes().find(({ id }) => id === selectedTypeId)?.subtypes ??
       []
@@ -191,8 +191,8 @@ export class DocumentCreate {
 
   readonly formModel = signal<DocumentBatchFormModel>({
     organizationalUnitId: null,
-    documentTypeId: null,
-    documentSubtypeId: null,
+    typeId: null,
+    subtypeId: null,
     year: null,
     validityStatus: DocumentValidityStatus.CURRENT,
     documents: [],
@@ -204,16 +204,16 @@ export class DocumentCreate {
       disabled(schemaPath, {
         when: ({ state }) => state.submitting(),
       });
-      required(schemaPath.documentTypeId, {
+      required(schemaPath.typeId, {
         message: 'Seleccione un tipo documental.',
       });
       required(schemaPath.validityStatus, {
         message: 'Seleccione la vigencia.',
       });
 
-      disabled(schemaPath.documentSubtypeId, {
+      disabled(schemaPath.subtypeId, {
         when: ({ valueOf }) => {
-          const typeId = valueOf(schemaPath.documentTypeId);
+          const typeId = valueOf(schemaPath.typeId);
           return !this.documentTypes().some(
             ({ id, subtypes }) => id === typeId && subtypes.length > 0,
           );
@@ -254,7 +254,7 @@ export class DocumentCreate {
   }
 
   onDocumentTypeChange(): void {
-    this.documentForm.documentSubtypeId().value.set(null);
+    this.documentForm.subtypeId().value.set(null);
   }
 
   onFileSelection(event: Event): void {
@@ -457,7 +457,7 @@ export class DocumentCreate {
     formValue: DocumentBatchFormModel,
     pendingFiles: PendingDocumentFile[],
   ): CreateDocumentBatchDto {
-    if (formValue.documentTypeId === null) {
+    if (formValue.typeId === null) {
       throw new Error('Document type is required.');
     }
 
@@ -470,9 +470,9 @@ export class DocumentCreate {
 
     return {
       organizationalUnitId: formValue.organizationalUnitId,
-      documentTypeId: formValue.documentTypeId,
-      ...(formValue.documentSubtypeId !== null && {
-        documentSubtypeId: formValue.documentSubtypeId,
+      typeId: formValue.typeId,
+      ...(formValue.subtypeId !== null && {
+        subtypeId: formValue.subtypeId,
       }),
       ...(formValue.year !== null && { year: formValue.year }),
       validityStatus: formValue.validityStatus,

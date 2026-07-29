@@ -9,11 +9,11 @@ export interface DocumentResponse {
     id: number;
     name: string;
   } | null;
-  documentType: {
+  type: {
     id: number;
     name: string;
   };
-  documentSubtype: {
+  subtype: {
     id: number;
     name: string;
   } | null;

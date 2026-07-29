@@ -83,7 +83,7 @@ export const routes: Routes = [
       },
       {
         path: 'document-sections',
-        title: 'Administracion - Secciones documento',
+        title: 'Administracion - Unidades organizacionales',
         data: { resource: Resource.DOCUMENTS },
         canActivate: [resourceGuard],
         loadComponent: () =>

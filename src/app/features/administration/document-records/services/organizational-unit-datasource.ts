@@ -1,35 +1,36 @@
-import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../../../environments/environment';
-import { SectionTreeNodeResponse } from '../interfaces';
+import {
+  CreateOrganizationalUnitDto,
+  OrganizationalUnitResponse,
+  UpdateOrganizationalUnitDto,
+} from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrganizationalUnitDatasource {
-  private http = inject(HttpClient);
-
+  private readonly http = inject(HttpClient);
   private readonly URL = `${environment.baseUrl}/api/organizational-units`;
 
-  readonly sections = signal<SectionTreeNodeResponse[]>([]);
-
-  constructor() {
-    this.loadTree();
+  findTree() {
+    return this.http.get<OrganizationalUnitResponse[]>(this.URL);
   }
 
-  loadTree() {
-    this.http.get<SectionTreeNodeResponse[]>(this.URL).subscribe((data) => {
-      this.sections.set(data);
-    });
+  create(dto: CreateOrganizationalUnitDto) {
+    return this.http.post<OrganizationalUnitResponse>(this.URL, dto);
   }
 
-  create(form: object) {
-    return this.http.post<SectionTreeNodeResponse>(this.URL, form);
+  update(id: number, dto: UpdateOrganizationalUnitDto) {
+    return this.http.patch<OrganizationalUnitResponse>(
+      `${this.URL}/${id}`,
+      dto,
+    );
   }
 
-  update(id: string, form: Record<string, string | number | boolean>) {
-    delete form['parentId'];
-    return this.http.patch<SectionTreeNodeResponse>(`${this.URL}/${id}`, form);
+  remove(id: number) {
+    return this.http.delete<void>(`${this.URL}/${id}`);
   }
 }

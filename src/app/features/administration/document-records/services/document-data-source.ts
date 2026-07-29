@@ -7,7 +7,7 @@ import { environment } from '../../../../../environments/environment';
 import { FileUploadService, UploadResult } from '../../../../shared';
 import {
   DocumentTypeWithSubTypesResponse,
-  SectionTreeNodeResponse,
+  OrganizationalUnitResponse,
   DocumentResponse,
   DocumentValidityStatus,
 } from '../interfaces';
@@ -18,7 +18,7 @@ export interface CreateDocumentBatchItemDto {
 }
 
 export interface CreateDocumentBatchDto {
-  organizationalUnitId?: string | null;
+  organizationalUnitId?: number | null;
   documentTypeId: number;
   documentSubtypeId?: number;
   year?: number;
@@ -27,7 +27,7 @@ export interface CreateDocumentBatchDto {
 }
 
 interface UpdateDocumentDto {
-  organizationalUnitId?: string | null;
+  organizationalUnitId?: number | null;
   documentTypeId?: number | null;
   documentSubtypeId?: number | null;
   year?: number | null;
@@ -41,7 +41,7 @@ interface GetDocumentsParams {
   limit?: number | null;
   offset?: number | null;
   term?: string | null;
-  organizationalUnitId?: string | null;
+  organizationalUnitId?: number | null;
   documentTypeId?: number | null;
   documentSubtypeId?: number | null;
   year?: number | null;
@@ -95,7 +95,7 @@ export class DocumentDataSource {
   }
 
   getOrganizationTree() {
-    return this.http.get<SectionTreeNodeResponse[]>(
+    return this.http.get<OrganizationalUnitResponse[]>(
       `${this.URL}/organizational-units/tree`,
     );
   }

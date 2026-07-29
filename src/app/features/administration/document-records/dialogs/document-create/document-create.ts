@@ -53,7 +53,7 @@ import {
 import {
   DocumentResponse,
   DocumentValidityStatus,
-  SectionTreeNodeResponse,
+  OrganizationalUnitResponse,
 } from '../../interfaces';
 import { CreateDocumentBatchDto, DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
@@ -68,7 +68,7 @@ interface BatchDocumentFormItem {
 }
 
 interface DocumentBatchFormModel {
-  organizationalUnitId: string | null;
+  organizationalUnitId: number | null;
   documentTypeId: number | null;
   documentSubtypeId: number | null;
   year: number | null;
@@ -508,7 +508,7 @@ export class DocumentCreate {
   }
 
   private flattenOrganizationalUnits(
-    nodes: SectionTreeNodeResponse[],
+    nodes: OrganizationalUnitResponse[],
     parentPath: string[] = [],
     depth = 0,
   ): OrganizationalUnitOption[] {

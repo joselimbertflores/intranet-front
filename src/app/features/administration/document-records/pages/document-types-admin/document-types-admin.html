@@ -1,68 +1,226 @@
-<!-- <div class="flex items-center justify-between mb-2">
-  <h2 class="text-2xl font-semibold">Tipos de Documentos</h2>
-  <app-ui-button
-    label="Agregar"
-    icon="ui-icon ui-icon-plus"
-    size="small"
-    (onClick)="openDocumentTypeDialog()"
-  />
-</div>
+<header class="mb-2 flex items-center justify-between">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">
+    Tipos de documentos
+  </h1>
 
-<app-ui-table
-  #table
-  [lazy]="true"
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  [loading]="docTypeResource.isLoading()"
-  [paginator]="true"
-  [first]="offset()"
-  [rows]="limit()"
-  [rowsPerPageOptions]="[10, 25, 40, 50]"
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  size="small"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-1/4">
-        <search-input (search)="search($event)" />
-      </div>
+  <button hlmBtn type="button" (click)="openDocumentTypeDialog()">
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Agregar
+  </button>
+</header>
+
+<section class="flex flex-col gap-2">
+  <div class="flex sm:justify-end">
+    <hlm-input-group class="w-full sm:w-72">
+      <input
+        hlmInputGroupInput
+        type="search"
+        aria-label="Buscar tipos de documentos"
+        placeholder="Buscar por nombre"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-4">
+    <div hlmTableContainer>
+      <table hlmTable class="min-w-[720px] table-fixed">
+        <colgroup>
+          <col class="w-[34%]" />
+          <col class="w-[44%]" />
+          <col class="w-32" />
+          <col class="w-16" />
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead>Nombre</th>
+            <th hlmTableHead>Subtipos</th>
+            <th hlmTableHead>Estado</th>
+            <th hlmTableHead>
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="4" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <hlm-spinner aria-label="Cargando tipos de documentos" />
+                  Cargando tipos de documentos...
+                </span>
+              </td>
+            </tr>
+          } @else if (documentTypeResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="4" class="py-10 text-center">
+                <div class="flex flex-col gap-1 whitespace-normal">
+                  <p class="font-medium">
+                    No se pudieron cargar los tipos de documentos
+                  </p>
+                  <p class="text-sm text-muted-foreground">
+                    Intenta actualizar la página.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (documentType of dataSource(); track documentType.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span
+                    class="block truncate font-medium"
+                    [title]="documentType.name"
+                  >
+                    {{ documentType.name }}
+                  </span>
+                </td>
+
+                <td hlmTableCell>
+                  <span
+                    class="block truncate text-muted-foreground"
+                    [title]="subtypeSummary(documentType)"
+                  >
+                    {{ subtypeSummary(documentType) }}
+                  </span>
+                </td>
+
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="documentType.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ documentType.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+
+                <td hlmTableCell class="text-right">
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + documentType.name"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                    [hlmDropdownMenuTriggerData]="{
+                      documentType: documentType,
+                    }"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="4" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    @if (searchTerm().trim()) {
+                      <p class="font-medium">
+                        No se encontraron tipos de documentos
+                      </p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otro nombre.
+                      </p>
+                    } @else {
+                      <p class="font-medium">
+                        No hay tipos de documentos registrados
+                      </p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega un tipo de documento para comenzar.
+                      </p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th>Subtipos</th>
-      <th class="w-[120px]">Estado</th>
-      <th style="width: 3rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>{{ item.name }}</td>
-      <td>{{ item.subtypes.length > 0 ? item.subtypes.length : "Ninguno" }}</td>
-      <td>
-        @if (item.isActive) {
-          <app-ui-tag severity="success" value="Activo"></app-ui-tag>
-        } @else {
-          <app-ui-tag severity="danger" value="Inactivo"></app-ui-tag>
-        }
-      </td>
 
-      <td>
-        <app-ui-button
-          icon="ui-icon ui-icon-pencil"
-          size="small"
-          (click)="openDocumentTypeDialog(item)"
-          severity="secondary"
-          rounded
-        />
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="4">Sin resultados.</td>
-    </tr>
-  </ng-template>
-</app-ui-table> -->
+    @if (!isListLoading() && !documentTypeResource.error() && dataSize() > 0) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>
+
+<ng-template #actionsMenu let-documentType="documentType">
+  <hlm-dropdown-menu class="w-36">
+    <hlm-dropdown-menu-group>
+      <button
+        hlmDropdownMenuItem
+        type="button"
+        (click)="openDocumentTypeDialog(documentType)"
+      >
+        <ng-icon name="lucidePencil" />
+        Editar
+      </button>
+
+      <button
+        hlmDropdownMenuItem
+        type="button"
+        variant="destructive"
+        [hlmAlertDialogTriggerFor]="deleteDialog"
+        (click)="selectDocumentTypeForDeletion(documentType)"
+      >
+        <ng-icon name="lucideTrash2" />
+        Eliminar
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar tipo de documento</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ documentTypePendingDelete()?.name }}”. Esta acción no
+        se puede deshacer.
+      </p>
+
+      @if (deleteError()) {
+        <p class="text-sm text-destructive" role="alert">
+          {{ deleteError() }}
+        </p>
+      }
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        [disabled]="isDeleting()"
+      >
+        Cancelar
+      </button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!documentTypePendingDelete() || isDeleting()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        @if (isDeleting()) {
+          <hlm-spinner data-icon="inline-start" />
+          Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

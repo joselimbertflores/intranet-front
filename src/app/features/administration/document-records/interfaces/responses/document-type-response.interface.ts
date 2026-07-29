@@ -16,3 +16,19 @@ export interface DocumentTypeResponse {
   name: string;
   isActive: boolean;
 }
+
+export interface DocumentSubtypeToSave {
+  id?: number;
+  name: string;
+  isActive: boolean;
+}
+
+export interface DocumentTypeCreateDto {
+  name: string;
+  isActive: boolean;
+  subtypes: DocumentSubtypeToSave[];
+}
+
+export interface DocumentTypeUpdateDto extends DocumentTypeCreateDto {
+  subtypeIdsToDelete: number[];
+}

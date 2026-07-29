@@ -1,43 +1,98 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-4 pt-2">
-    <div class="flex flex-col gap-1">
-      <app-ui-floatlabel variant="on">
-        <label>Nombre</label>
-        <input
-          appUiInput
-          class="w-full"
-          formControlName="name"
-          [invalid]="formUtils.isInvalid(form.get('name'))"
-        />
-      </app-ui-floatlabel>
-      @if (formUtils.isInvalid(form.get("name"))) {
-        <app-ui-message severity="error" size="small" variant="simple">
-          {{ formUtils.getErrorMessage(form.get("name")) }}
-        </app-ui-message>
+<hlm-dialog-header class="shrink-0">
+  <h3 hlmDialogTitle>
+    @if (organizationalUnit) {
+      Editar unidad organizacional
+    } @else if (parent) {
+      Crear unidad hija
+    } @else {
+      Crear unidad raíz
+    }
+  </h3>
+
+  <p hlmDialogDescription>
+    @if (parent) {
+      Unidad superior: {{ parent.name }}.
+      @if (organizationalUnit) {
+        El padre no puede modificarse desde este editor.
       }
-    </div>
-    <app-ui-floatlabel variant="on">
-      <input
-        id="parentLabel"
-        appUiInput
-        [value]="data.parent?.name || '— Raíz —'"
-        [disabled]="true"
-        class="w-full"
-      />
-      <label for="parentLabel">Seccion superior</label>
-    </app-ui-floatlabel>
-    <div class="flex items-center">
-      <app-ui-checkbox [binary]="true" formControlName="isActive" />
-      <label class="ml-2"> Activo </label>
-    </div>
-  </div>
-  <div class="app-dialog-actions">
-    <app-ui-button
-      type="button"
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="close()"
+    } @else if (organizationalUnit) {
+      Esta unidad se encuentra en el nivel raíz.
+    } @else {
+      La nueva unidad se creará en el nivel raíz.
+    }
+  </p>
+</hlm-dialog-header>
+
+<form
+  id="organizational-unit-form"
+  class="flex min-h-0 flex-col gap-5"
+  [formRoot]="organizationalUnitForm"
+  (submit)="save()"
+>
+  <div hlmField>
+    <label hlmFieldLabel for="organizational-unit-name">Nombre</label>
+    <input
+      hlmInput
+      id="organizational-unit-name"
+      type="text"
+      autocomplete="organization"
+      placeholder="Ej. Dirección Administrativa"
+      [formField]="organizationalUnitForm.name"
     />
-    <app-ui-button type="submit" label="Guardar" />
+
+    @if (organizationalUnitForm.name().touched()) {
+      @for (
+        error of organizationalUnitForm.name().errors();
+        track error.kind
+      ) {
+        <hlm-field-error [validator]="error.kind">
+          {{ error.message }}
+        </hlm-field-error>
+      }
+    }
   </div>
-</form> -->
+
+  <div hlmField orientation="horizontal">
+    <hlm-checkbox
+      inputId="organizational-unit-active"
+      [formField]="organizationalUnitForm.isActive"
+    />
+    <label hlmFieldLabel for="organizational-unit-active">
+      Unidad activa
+    </label>
+  </div>
+
+  @if (saveError()) {
+    <p class="text-sm text-destructive" role="alert">
+      {{ saveError() }}
+    </p>
+  }
+</form>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="organizationalUnitForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+
+  <button
+    hlmBtn
+    type="submit"
+    form="organizational-unit-form"
+    [disabled]="organizationalUnitForm().submitting()"
+  >
+    @if (organizationalUnitForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else if (organizationalUnit) {
+      Guardar cambios
+    } @else {
+      Crear unidad
+    }
+  </button>
+</hlm-dialog-footer>

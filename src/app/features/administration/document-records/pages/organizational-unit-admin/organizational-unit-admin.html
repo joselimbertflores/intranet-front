@@ -1,93 +1,210 @@
-<!-- <div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Organizacion</h2>
-  <app-ui-button
-    label="Agregar"
-    icon="ui-icon ui-icon-plus"
-    size="small"
-    (onClick)="openSectionDialog()"
-  />
-</div>
+<header class="mb-2 flex items-center justify-between gap-4">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">
+    Unidades organizacionales
+  </h1>
 
-<app-ui-tree-table
-  #treeTable
-  class="ui-tree-table-sm text-sm"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  filterMode="lenient"
-  [paginator]="true"
-  [rowHover]="true"
-  [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 20, 30, 50]"
-  [rows]="10"
-  [globalFilterFields]="['name']"
-  [value]="treeSections()"
-  (onNodeExpand)="onExpand($event.node.key)"
-  (onNodeCollapse)="onCollapse($event.node.key)"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex justify-end items-center">
-      <app-ui-floatlabel iconPosition="left" class="w-full sm:w-1/4" variant="on">
-        <app-ui-iconfield>
-          <app-ui-inputicon class="ui-icon ui-icon-search" />
-          <input
-            appUiInput
-            type="text"
-            class="w-full"
-            (input)="
-              treeTable.filterGlobal($event.target.value, 'contains');
-              treeTable.toggleAll(true)
-            "
-          />
-        </app-ui-iconfield>
-        <label>Buscar</label>
-      </app-ui-floatlabel>
-    </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th class="w-[120px]">Estado</th>
-      <th class="w-[100px]"></th>
-    </tr>
-  </ng-template>
+  <button
+    hlmBtn
+    type="button"
+    (click)="openOrganizationalUnitDialog()"
+  >
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Nueva unidad
+  </button>
+</header>
 
-  <ng-template appUiTemplate="body" let-rowNode let-rowData="rowData">
-    <tr [appUiTreeRow]="rowNode">
-      <td>
-        <div class="flex items-center gap-2">
-          <app-ui-treetable-toggler [rowNode]="rowNode" />
-          <span>{{ rowData.name | uppercase }}</span>
-        </div>
-      </td>
-      <td>
-        @if (rowData.isActive) {
-          <app-ui-tag severity="success" value="Activo" />
+<section class="rounded-xl border bg-card p-4">
+  <div hlmTableContainer>
+    <table hlmTable class="min-w-[640px] table-fixed">
+      <colgroup>
+        <col class="w-[65%]" />
+        <col class="w-[20%]" />
+        <col class="w-[15%]" />
+      </colgroup>
+
+      <thead hlmTableHeader>
+        <tr hlmTableRow>
+          <th hlmTableHead>Unidad organizacional</th>
+          <th hlmTableHead>Estado</th>
+          <th hlmTableHead class="text-right">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody hlmTableBody>
+        @if (organizationalUnitsResource.isLoading()) {
+          <tr hlmTableRow>
+            <td hlmTableCell colspan="3" class="py-10 text-center">
+              <span
+                class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <hlm-spinner aria-label="Cargando unidades organizacionales" />
+                Cargando unidades organizacionales...
+              </span>
+            </td>
+          </tr>
+        } @else if (organizationalUnitsResource.error()) {
+          <tr hlmTableRow>
+            <td hlmTableCell colspan="3" class="py-10 text-center">
+              <div class="flex flex-col gap-1 whitespace-normal">
+                <p class="font-medium">
+                  No se pudieron cargar las unidades organizacionales
+                </p>
+                <p class="text-sm text-muted-foreground">
+                  Intenta actualizar la página.
+                </p>
+              </div>
+            </td>
+          </tr>
         } @else {
-          <app-ui-tag severity="danger" value="Inactivo" />
+          @for (
+            organizationalUnit of organizationalUnits();
+            track organizationalUnit.id
+          ) {
+            <tr hlmTableRow>
+              <td hlmTableCell>
+                <div
+                  class="min-w-0"
+                  [style.padding-inline-start.rem]="
+                    organizationalUnit.depth * 1.5
+                  "
+                >
+                  <span
+                    class="block truncate font-medium"
+                    [title]="organizationalUnit.name"
+                  >
+                    {{ organizationalUnit.name }}
+                  </span>
+                </div>
+              </td>
+
+              <td hlmTableCell>
+                <span
+                  hlmBadge
+                  [variant]="
+                    organizationalUnit.isActive ? 'default' : 'secondary'
+                  "
+                >
+                  {{ organizationalUnit.isActive ? "Activo" : "Inactivo" }}
+                </span>
+              </td>
+
+              <td hlmTableCell class="text-right">
+                <button
+                  hlmBtn
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  align="end"
+                  [attr.aria-label]="
+                    'Acciones de ' + organizationalUnit.name
+                  "
+                  [hlmDropdownMenuTrigger]="actionsMenu"
+                  [hlmDropdownMenuTriggerData]="{
+                    organizationalUnit: organizationalUnit,
+                  }"
+                >
+                  <ng-icon name="lucideEllipsisVertical" />
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="3" class="py-10 text-center">
+                <div class="flex flex-col gap-1 whitespace-normal">
+                  <p class="font-medium">
+                    No hay unidades organizacionales registradas
+                  </p>
+                  <p class="text-sm text-muted-foreground">
+                    Crea una unidad raíz para comenzar.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
         }
-      </td>
-      <td>
-        <div class="flex gap-x-2">
-          <app-ui-button
-            size="small"
-            icon="ui-icon ui-icon-plus"
-            [rounded]="true"
-            [text]="true"
-            (click)="addChild(rowData)"
-          />
-          <app-ui-button
-            size="small"
-            icon="ui-icon ui-icon-pencil"
-            [rounded]="true"
-            [text]="true"
-            (click)="openSectionDialog(rowNode)"
-          />
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="4">Sin resultados.</td>
-    </tr>
-  </ng-template>
-</app-ui-tree-table> -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<ng-template
+  #actionsMenu
+  let-organizationalUnit="organizationalUnit"
+>
+  <hlm-dropdown-menu class="w-52">
+    <hlm-dropdown-menu-group>
+      <button
+        hlmDropdownMenuItem
+        type="button"
+        (click)="openOrganizationalUnitDialog(organizationalUnit)"
+      >
+        <ng-icon name="lucidePencil" />
+        Editar
+      </button>
+
+      <button
+        hlmDropdownMenuItem
+        type="button"
+        (click)="
+          openOrganizationalUnitDialog(undefined, organizationalUnit)
+        "
+      >
+        <ng-icon name="lucidePlus" />
+        Agregar unidad hija
+      </button>
+
+      <button
+        hlmDropdownMenuItem
+        type="button"
+        variant="destructive"
+        [hlmAlertDialogTriggerFor]="deleteDialog"
+        (click)="selectOrganizationalUnitForDeletion(organizationalUnit)"
+      >
+        <ng-icon name="lucideTrash2" />
+        Eliminar
+      </button>
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar unidad organizacional</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ organizationalUnitPendingDelete()?.name }}”. Esta
+        acción no se puede deshacer.
+      </p>
+
+      @if (deleteError()) {
+        <p class="text-sm text-destructive" role="alert">
+          {{ deleteError() }}
+        </p>
+      }
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        [disabled]="isDeleting()"
+      >
+        Cancelar
+      </button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!organizationalUnitPendingDelete() || isDeleting()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        @if (isDeleting()) {
+          <hlm-spinner data-icon="inline-start" />
+          Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

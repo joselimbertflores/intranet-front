@@ -10,7 +10,7 @@ import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 
 export interface OrganizationalUnitOption {
-  id: string;
+  id: number;
   name: string;
   depth: number;
   searchText: string;
@@ -66,7 +66,7 @@ export interface OrganizationalUnitOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrganizationalUnitPicker implements FormValueControl<
-  string | null
+  number | null
 > {
   readonly options =
     input.required<readonly OrganizationalUnitOption[]>();
@@ -75,7 +75,7 @@ export class OrganizationalUnitPicker implements FormValueControl<
   readonly placeholder = input('Seleccione una unidad');
   readonly disabled = input(false);
 
-  readonly value = model<string | null>(null);
+  readonly value = model<number | null>(null);
 
   readonly selectedOption = computed(
     () =>

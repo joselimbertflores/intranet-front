@@ -1,130 +1,242 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
 import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  FormArray,
-  FormGroup,
-} from '@angular/forms';
-
+  applyEach,
+  form,
+  FormField,
+  FormRoot,
+  maxLength,
+  submit,
+  validate,
+} from '@angular/forms/signals';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucidePlus, lucideTrash2 } from '@ng-icons/lucide';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import {
+  HlmAlertDialog,
+  HlmAlertDialogImports,
+} from '@spartan-ng/helm/alert-dialog';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import {
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom } from 'rxjs';
 
 import {
+  DocumentSubtypeToSave,
+  DocumentTypeCreateDto,
+  DocumentTypeUpdateDto,
   DocumentTypeWithSubTypesResponse,
-  DocumentSubtypeResponse,
 } from '../../interfaces';
-
 import { DocumentTypeDatasource } from '../../services';
-import { FormUtils } from '../../../../../helpers';
 
-interface SubTypeOption {
-  id: number | null;
+interface DocumentTypeEditorContext {
+  documentType?: DocumentTypeWithSubTypesResponse;
+}
+
+interface DocumentTypeFormData {
   name: string;
   isActive: boolean;
+  subtypes: DocumentSubtypeToSave[];
 }
+
 @Component({
   selector: 'app-document-type-editor',
   imports: [
-    ReactiveFormsModule,
-   
+    FormField,
+    FormRoot,
+    HlmAlertDialogImports,
+    HlmButton,
+    HlmCheckbox,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInput,
+    HlmSpinner,
+    NgIcon,
   ],
+  providers: [provideIcons({ lucidePlus, lucideTrash2 })],
   templateUrl: './document-type-editor.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  host: {
+    class: 'flex max-h-[calc(100dvh-4rem)] min-h-0 flex-col',
+  },
 })
 export class DocumentTypeEditor {
-  private formBuilder = inject(FormBuilder);
-  // private confirmationService = inject(ConfirmationService);
-  private docTypeDatasource = inject(DocumentTypeDatasource);
+  private readonly dialogRef =
+    inject<BrnDialogRef<DocumentTypeWithSubTypesResponse>>(BrnDialogRef);
+  private readonly documentTypeDataSource = inject(DocumentTypeDatasource);
+  private readonly context =
+    injectBrnDialogContext<DocumentTypeEditorContext>();
 
-  // diagloRef = inject(DynamicDialogRef);
-  // readonly data: DocumentTypeWithSubTypesResponse | undefined =
-  //   inject(DynamicDialogConfig).data;
+  readonly documentType = this.context.documentType;
+  readonly subtypeIdsToDelete = signal<number[]>([]);
+  readonly saveError = signal<string | null>(null);
 
-  form: FormGroup = this.formBuilder.nonNullable.group({
-    name: [
-      '',
-      [Validators.required, Validators.minLength(3), Validators.maxLength(50)],
-    ],
-    subtypes: this.formBuilder.array([]),
-    isActive: [true],
+  readonly formModel = signal<DocumentTypeFormData>({
+    name: this.documentType?.name ?? '',
+    isActive: this.documentType?.isActive ?? true,
+    subtypes:
+      this.documentType?.subtypes.map(({ id, name, isActive }) => ({
+        id,
+        name,
+        isActive,
+      })) ?? [],
   });
 
-  readonly formUtils = FormUtils;
-
-  ngOnInit() {
-    this.loadForm();
-  }
-
-  save() {
-    // if (this.form.invalid) return this.form.markAllAsTouched();
-    // const subscription = this.data
-    //   ? this.docTypeDatasource.update(this.data!.id, this.form.value)
-    //   : this.docTypeDatasource.create(this.form.value);
-
-    // subscription.subscribe((data) => {
-    //   this.diagloRef.close(data);
-    // });
-  }
-
-  addSubtype(subtype?: DocumentSubtypeResponse) {
-    this.subtypes.push(
-      this.formBuilder.group({
-        id: [subtype?.id ?? null],
-        name: [
-          subtype?.name ?? '',
-          [Validators.required, Validators.minLength(3)],
-        ],
-        isActive: [subtype?.isActive ?? true, Validators.required],
-      }),
+  readonly documentTypeForm = form(this.formModel, (schemaPath) => {
+    validate(schemaPath.name, ({ value }) =>
+      this.validateName(value(), 'El nombre del tipo es obligatorio'),
     );
+    maxLength(schemaPath.name, 50, {
+      message: 'El nombre admite hasta 50 caracteres',
+    });
+
+    applyEach(schemaPath.subtypes, (subtype) => {
+      validate(subtype.name, ({ value }) =>
+        this.validateName(value(), 'El nombre del subtipo es obligatorio'),
+      );
+    });
+  });
+
+  close(): void {
+    if (this.documentTypeForm().submitting()) return;
+    this.dialogRef.close();
   }
 
-  deleteSubtype(index: number) {
-    // const subtype: SubTypeOption = this.subtypes.at(index).getRawValue();
+  addSubtype(): void {
+    if (this.documentTypeForm().submitting()) return;
 
-    // const subtypeId = subtype.id;
-
-    // if (!subtypeId) {
-    //   this.subtypes.removeAt(index);
-    //   return;
-    // }
-
-    // const typeId = this.data?.id;
-    // if (!typeId) return;
-
-    // this.confirmationService.confirm({
-    //   header: 'Confirmar eliminación',
-    //   message: `¿Eliminar el subtipo "${subtype.name}"?`,
-    //   icon: 'ui-icon ui-icon-info-circle',
-    //   rejectButtonProps: {
-    //     label: 'Cancelar',
-    //     severity: 'secondary',
-    //     outlined: true,
-    //   },
-    //   acceptButtonProps: {
-    //     label: 'Eliminar',
-    //     severity: 'danger',
-    //   },
-    //   accept: () => {
-    //     this.docTypeDatasource.removeSubtype(subtypeId).subscribe(() => {
-    //       this.subtypes.removeAt(index);
-    //       this.docTypeDatasource.emitSubtypeRemoved(typeId, subtypeId);
-    //     });
-    //   },
-    // });
+    this.formModel.update((value) => ({
+      ...value,
+      subtypes: [...value.subtypes, { name: '', isActive: true }],
+    }));
   }
 
-  get subtypes() {
-    return this.form.get('subtypes') as FormArray;
+  removeSubtype(index: number): void {
+    if (this.documentTypeForm().submitting()) return;
+
+    const subtype = this.formModel().subtypes[index];
+    if (!subtype) return;
+
+    if (subtype.id !== undefined) {
+      this.subtypeIdsToDelete.update((ids) =>
+        ids.includes(subtype.id!) ? ids : [...ids, subtype.id!],
+      );
+    }
+
+    this.formModel.update((value) => ({
+      ...value,
+      subtypes: value.subtypes.filter(
+        (_, subtypeIndex) => subtypeIndex !== index,
+      ),
+    }));
   }
 
-  private loadForm() {
-    // if (!this.data) return;
-    // const { subtypes, ...props } = this.data;
+  requestSave(deleteDialog: HlmAlertDialog): void {
+    if (this.documentTypeForm().submitting()) return;
 
-    // subtypes.forEach((item) => {
-    //   this.addSubtype(item);
-    // });
+    this.documentTypeForm().markAsTouched();
+    if (this.documentTypeForm().invalid()) return;
 
-    // this.form.patchValue(props);
+    this.saveError.set(null);
+
+    if (this.documentType && this.subtypeIdsToDelete().length > 0) {
+      deleteDialog.open();
+      return;
+    }
+
+    void this.save();
+  }
+
+  confirmSave(deleteDialog: HlmAlertDialog): void {
+    if (this.documentTypeForm().submitting()) return;
+    void this.save(deleteDialog);
+  }
+
+  onDeleteConfirmationClosed(): void {
+    this.saveError.set(null);
+  }
+
+  private async save(deleteDialog?: HlmAlertDialog): Promise<void> {
+    this.saveError.set(null);
+
+    try {
+      await submit(this.documentTypeForm, async (field) => {
+        const value = field().value();
+        const request = this.documentType
+          ? this.documentTypeDataSource.update(
+              this.documentType.id,
+              this.buildUpdateDto(value),
+            )
+          : this.documentTypeDataSource.create(this.buildCreateDto(value));
+
+        const response = await firstValueFrom(request);
+        deleteDialog?.close();
+        this.dialogRef.close(response);
+      });
+    } catch (error: unknown) {
+      this.saveError.set(this.getSaveErrorMessage(error));
+    }
+  }
+
+  private buildCreateDto(value: DocumentTypeFormData): DocumentTypeCreateDto {
+    return {
+      name: value.name,
+      isActive: value.isActive,
+      subtypes: value.subtypes.map((subtype) => ({
+        ...(subtype.id !== undefined && { id: subtype.id }),
+        name: subtype.name,
+        isActive: subtype.isActive,
+      })),
+    };
+  }
+
+  private buildUpdateDto(value: DocumentTypeFormData): DocumentTypeUpdateDto {
+    return {
+      ...this.buildCreateDto(value),
+      subtypeIdsToDelete: this.subtypeIdsToDelete(),
+    };
+  }
+
+  private validateName(value: string, requiredMessage: string) {
+    const name = value.trim();
+    if (!name) {
+      return { kind: 'required', message: requiredMessage };
+    }
+
+    return name.length < 3
+      ? {
+          kind: 'minLength',
+          message: 'El nombre debe tener al menos 3 caracteres',
+        }
+      : null;
+  }
+
+  private getSaveErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage =
+        typeof error.error === 'object' &&
+        error.error !== null &&
+        'message' in error.error
+          ? error.error.message
+          : null;
+
+      if (error.status === 409) {
+        return typeof backendMessage === 'string'
+          ? backendMessage
+          : 'No se pueden eliminar los subtipos porque están asignados a documentos.';
+      }
+
+      if (typeof backendMessage === 'string') return backendMessage;
+    }
+
+    return 'No se pudieron guardar los cambios. Intenta nuevamente.';
   }
 }

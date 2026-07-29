@@ -48,12 +48,12 @@ import { DocumentCreate, DocumentEdit } from '../../dialogs';
 import {
   DocumentResponse,
   DocumentValidityStatus,
-  SectionTreeNodeResponse,
+  OrganizationalUnitResponse,
 } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
 
 interface FilterData {
-  organizationalUnitId: string | null;
+  organizationalUnitId: number | null;
   documentTypeId: number | null;
   documentSubtypeId: number | null;
   year: number | null;
@@ -297,7 +297,7 @@ export default class DocumentAdmin {
   }
 
   private flattenOrganizationalUnits(
-    nodes: SectionTreeNodeResponse[],
+    nodes: OrganizationalUnitResponse[],
     parentPath: string[] = [],
     depth = 0,
   ): OrganizationalUnitOption[] {

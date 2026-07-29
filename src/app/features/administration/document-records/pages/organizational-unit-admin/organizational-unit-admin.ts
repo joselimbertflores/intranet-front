@@ -1,101 +1,165 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { computed } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideEllipsisVertical,
+  lucidePencil,
+  lucidePlus,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import {
+  HlmAlertDialog,
+  HlmAlertDialogImports,
+} from '@spartan-ng/helm/alert-dialog';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTableImports } from '@spartan-ng/helm/table';
+import { finalize } from 'rxjs';
 
-
-
-import { SectionTreeNodeResponse } from '../../interfaces';
 import { OrganizationalUnitEditor } from '../../dialogs';
+import { OrganizationalUnitResponse } from '../../interfaces';
 import { OrganizationalUnitDatasource } from '../../services';
+
+interface OrganizationalUnitTableRow extends OrganizationalUnitResponse {
+  depth: number;
+  parent: OrganizationalUnitResponse | null;
+}
 
 @Component({
   selector: 'app-organizational-unit-admin',
   imports: [
-    CommonModule,
-    
+    HlmAlertDialogImports,
+    HlmBadge,
+    HlmButtonImports,
+    HlmDropdownMenuImports,
+    HlmSpinner,
+    HlmTableImports,
+    NgIcon,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  providers: [
+    provideIcons({
+      lucideEllipsisVertical,
+      lucidePencil,
+      lucidePlus,
+      lucideTrash2,
+    }),
+  ],
   templateUrl: './organizational-unit-admin.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class OrganizationalUnitAdmin {
-  // private dialogService = inject(DialogService);
-  private orgUnitApi = inject(OrganizationalUnitDatasource);
+  private readonly organizationalUnitDataSource = inject(
+    OrganizationalUnitDatasource,
+  );
+  private readonly dialogService = inject(HlmDialogService);
 
-  treeSections = computed(() =>
-    this.orgUnitApi.sections().map((section) => this.toTreeNode(section)),
+  readonly organizationalUnitPendingDelete =
+    signal<OrganizationalUnitTableRow | null>(null);
+  readonly isDeleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
+
+  readonly organizationalUnitsResource = rxResource({
+    stream: () => this.organizationalUnitDataSource.findTree(),
+  });
+
+  readonly organizationalUnits = computed(() =>
+    this.flattenTree(this.organizationalUnitsResource.value() ?? []),
   );
 
-  private expandedKeys = new Set<string>();
+  openOrganizationalUnitDialog(
+    organizationalUnit?: OrganizationalUnitTableRow,
+    parent?: OrganizationalUnitResponse,
+  ): void {
+    const dialogRef = this.dialogService.open<OrganizationalUnitResponse>(
+      OrganizationalUnitEditor,
+      {
+        showCloseButton: false,
+        disableClose: true,
+        contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[480px]',
+        context: {
+          organizationalUnit,
+          parent: parent ?? organizationalUnit?.parent ?? undefined,
+        },
+      },
+    );
 
-  openSectionDialog(item?:any)  {
-    // const ref = this.dialogService.open(OrganizationalUnitEditor, {
-    //   header: item
-    //     ? 'Editar unidad organizacional'
-    //     : 'Crear unidad organizacional',
-    //   modal: true,
-    //   draggable: false,
-    //   closeOnEscape: true,
-    //   closable: true,
-    //   width: '35vw',
-    //   data: item?.node
-    //     ? { section: item.node.data, parent: item.node.parent?.data }
-    //     : {},
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    // });
-    // ref?.onClose.subscribe((result) => {
-    //   if (!result) return;
-    //   this.orgUnitApi.loadTree();
-    // });
+    dialogRef.closed$.subscribe((result) => {
+      if (result) this.organizationalUnitsResource.reload();
+    });
   }
 
-  addChild(item: SectionTreeNodeResponse) {
-    // const ref = this.dialogService.open(OrganizationalUnitEditor, {
-    //   header: 'Crear unidad organizacional',
-    //   modal: true,
-    //   draggable: false,
-    //   closeOnEscape: true,
-    //   closable: true,
-    //   width: '35vw',
-    //   data: {
-    //     parent: item,
-    //   },
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    // });
-    // ref?.onClose.subscribe((result) => {
-    //   if (!result) return;
-    //   this.orgUnitApi.loadTree();
-    // });
+  selectOrganizationalUnitForDeletion(
+    organizationalUnit: OrganizationalUnitTableRow,
+  ): void {
+    this.deleteError.set(null);
+    this.organizationalUnitPendingDelete.set(organizationalUnit);
   }
 
-  onExpand(nodeKey: string | undefined) {
-    if (nodeKey) {
-      this.expandedKeys.add(nodeKey);
+  confirmRemove(deleteDialog: HlmAlertDialog): void {
+    const organizationalUnit = this.organizationalUnitPendingDelete();
+    if (!organizationalUnit || this.isDeleting()) return;
+
+    this.isDeleting.set(true);
+    this.deleteError.set(null);
+
+    this.organizationalUnitDataSource
+      .remove(organizationalUnit.id)
+      .pipe(finalize(() => this.isDeleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.organizationalUnitsResource.reload();
+          deleteDialog.close();
+        },
+        error: (error: unknown) => {
+          this.deleteError.set(this.getDeleteErrorMessage(error));
+        },
+      });
+  }
+
+  onDeleteDialogClosed(): void {
+    this.organizationalUnitPendingDelete.set(null);
+    this.deleteError.set(null);
+  }
+
+  private flattenTree(
+    nodes: readonly OrganizationalUnitResponse[],
+    depth = 0,
+    parent: OrganizationalUnitResponse | null = null,
+  ): OrganizationalUnitTableRow[] {
+    return nodes.flatMap((node) => [
+      { ...node, depth, parent },
+      ...this.flattenTree(node.children, depth + 1, node),
+    ]);
+  }
+
+  private getDeleteErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'No se pudo eliminar la unidad. Intenta nuevamente.';
     }
-  }
 
-  onCollapse(nodeKey: string | undefined) {
-    if (nodeKey) {
-      this.expandedKeys.delete(nodeKey);
-    }
-  }
+    const responseBody = error.error as
+      | { message?: string | string[] }
+      | string
+      | null
+      | undefined;
+    const message =
+      typeof responseBody === 'string' ? responseBody : responseBody?.message;
 
-  private toTreeNode(
-    node: SectionTreeNodeResponse,
-  ): any{
-    return {
-      key: node.id,
-      label: node.name,
-      data: node,
-      expanded: this.expandedKeys.has(node.id),
-      children: node.children?.length
-        ? node.children.map((child) => this.toTreeNode(child))
-        : [],
-    };
+    if (Array.isArray(message)) return message.join(' ');
+    if (typeof message === 'string' && message.trim()) return message;
+
+    return error.status === 409
+      ? 'La unidad no puede eliminarse porque tiene documentos o unidades hijas.'
+      : 'No se pudo eliminar la unidad. Intenta nuevamente.';
   }
 }

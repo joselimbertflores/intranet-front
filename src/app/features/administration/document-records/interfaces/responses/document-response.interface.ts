@@ -6,7 +6,7 @@ export interface DocumentResponse {
   year: number | null;
   validityStatus: DocumentValidityStatus;
   organizationalUnit: {
-    id: string;
+    id: number;
     name: string;
   } | null;
   documentType: {

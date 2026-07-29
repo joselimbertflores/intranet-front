@@ -54,7 +54,7 @@ import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
 import {
   DocumentResponse,
   DocumentValidityStatus,
-  SectionTreeNodeResponse,
+  OrganizationalUnitResponse,
 } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
@@ -65,7 +65,7 @@ interface DocumentEditContext {
 
 interface DocumentEditFormModel {
   title: string;
-  organizationalUnitId: string | null;
+  organizationalUnitId: number | null;
   documentTypeId: number | null;
   documentSubtypeId: number | null;
   year: number | null;
@@ -367,7 +367,7 @@ export class DocumentEdit {
   }
 
   private flattenOrganizationalUnits(
-    nodes: SectionTreeNodeResponse[],
+    nodes: OrganizationalUnitResponse[],
     parentPath: string[] = [],
     depth = 0,
   ): OrganizationalUnitOption[] {

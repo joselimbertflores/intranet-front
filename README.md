@@ -9,6 +9,8 @@ Este sistema permite acceder a la documentación institucional, comunicados inte
 ## Funcionalidades principales
 
 - Consulta de documentación institucional
+- Administración de tipos de documentos y sus subtipos
+- Administración jerárquica de unidades organizacionales
 - Visualización de comunicados internos
 - Acceso a directorios institucionales
 - Consulta de tutoriales

@@ -5,12 +5,3 @@ export interface DocSectionManageResponse {
   name: string;
   documentTypes: DocumentTypeResponse[];
 }
-export interface SectionTreeNodeResponse {
-  id: string;
-  name: string;
-  slug: string;
-  level: number;
-  isActive: boolean;
-  parentId: string | null;
-  children: SectionTreeNodeResponse[];
-}

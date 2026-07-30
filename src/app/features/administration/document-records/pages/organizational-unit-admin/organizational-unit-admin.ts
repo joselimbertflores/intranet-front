@@ -86,9 +86,9 @@ export default class OrganizationalUnitAdmin {
   });
 
   openOrganizationalUnitDialog(
-    organizationalUnit?: OrganizationalUnitTableRow,
+    unit?: OrganizationalUnitTableRow,
     parent?: OrganizationalUnitResponse,
-  ): void {
+  ) {
     const dialogRef = this.dialogService.open<OrganizationalUnitResponse>(
       OrganizationalUnitEditor,
       {
@@ -96,8 +96,8 @@ export default class OrganizationalUnitAdmin {
         disableClose: true,
         contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[480px]',
         context: {
-          organizationalUnit,
-          parent: parent ?? organizationalUnit?.parent ?? undefined,
+          organizationalUnit: unit,
+          parent: parent ?? unit?.parent ?? undefined,
         },
       },
     );
@@ -105,10 +105,6 @@ export default class OrganizationalUnitAdmin {
     dialogRef.closed$.subscribe((result) => {
       if (result) this.organizationalUnitsResource.reload();
     });
-  }
-
-  selectOrgUnitForDeletion(orgUnit: OrganizationalUnitTableRow): void {
-    this.orgUnitPendingDelete.set(orgUnit);
   }
 
   confirmRemove(deleteDialog: HlmAlertDialog): void {
@@ -120,10 +116,6 @@ export default class OrganizationalUnitAdmin {
         this.organizationalUnitsResource.reload();
         deleteDialog.close();
       });
-  }
-
-  onDeleteDialogClosed(): void {
-    this.orgUnitPendingDelete.set(null);
   }
 
   private flattenTree(

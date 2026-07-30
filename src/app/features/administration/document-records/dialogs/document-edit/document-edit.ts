@@ -45,17 +45,12 @@ import { HlmSeparator } from '@spartan-ng/helm/separator';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
 
-import { YearSelector } from '../../../../../shared';
 import {
-  OrganizationalUnitOption,
-  OrganizationalUnitPicker,
-} from '../../components/organizational-unit-picker/organizational-unit-picker';
+  HierarchicalCombobox,
+  YearSelector,
+} from '../../../../../shared';
 import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
-import {
-  DocumentResponse,
-  DocumentValidityStatus,
-  OrganizationalUnitResponse,
-} from '../../interfaces';
+import { DocumentResponse, DocumentValidityStatus } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
 
@@ -92,7 +87,7 @@ interface DocumentEditFormModel {
     HlmSeparator,
     HlmSpinner,
     NgIcon,
-    OrganizationalUnitPicker,
+    HierarchicalCombobox,
     YearSelector,
   ],
   providers: [
@@ -209,10 +204,6 @@ export class DocumentEdit {
   readonly documentSubtypeNames = computed(
     () => new Map(this.documentSubtypes().map(({ id, name }) => [id, name])),
   );
-  readonly organizationalUnitOptions = computed<OrganizationalUnitOption[]>(
-    () => this.flattenOrganizationalUnits(this.organizationalUnits()),
-  );
-
   readonly statusOptions = [
     { value: 'ACTIVE', label: 'Activo' },
     { value: 'INACTIVE', label: 'Inactivo' },
@@ -364,25 +355,6 @@ export class DocumentEdit {
       return `El archivo supera el tamaño máximo de ${this.fileRules.maxSizeMB} MB.`;
     }
     return null;
-  }
-
-  private flattenOrganizationalUnits(
-    nodes: OrganizationalUnitResponse[],
-    parentPath: string[] = [],
-    depth = 0,
-  ): OrganizationalUnitOption[] {
-    return nodes.flatMap((node) => {
-      const path = [...parentPath, node.name];
-      return [
-        {
-          id: node.id,
-          name: node.name,
-          depth,
-          searchText: path.join(' / '),
-        },
-        ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
-      ];
-    });
   }
 
   private requestErrorMessage(error: unknown, fallback: string): string {

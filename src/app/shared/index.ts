@@ -7,6 +7,7 @@ export * from "./components/file-icon/file-icon"
 export * from "./components/app-icon/app-icon"
 export * from "./components/theme-switcher/theme-switcher"
 export * from "./components/pagination-controls/pagination-controls"
+export * from "./components/inputs/hierarchical-combobox/hierarchical-combobox"
 
 export * from "./pipes/primeng-file-icon"
 export * from "./pipes/form-error-messages"

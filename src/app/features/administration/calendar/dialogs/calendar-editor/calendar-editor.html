@@ -1,187 +1,318 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
-  <div class="app-dialog-body">
-    <div class="space-y-6 pt-2">
-      <div class="flex flex-col gap-1">
-        <app-ui-floatlabel variant="on">
-          <input
-            appUiInput
-            id="titleTxt"
-            class="w-full"
-            formControlName="title"
-            [invalid]="formUtils.isInvalid(form.get('title'))"
-          />
-          <label for="titleTxt">Titulo</label>
-        </app-ui-floatlabel>
-        @if (formUtils.isInvalid(form.get("title"))) {
-          <app-ui-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(form.get("title")) }}
-          </app-ui-message>
-        }
-      </div>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>
+    {{ isEditing ? "Editar evento" : "Crear evento" }}
+  </h3>
+</hlm-dialog-header>
 
-      <app-ui-floatlabel variant="on">
-        <label for="referencTxt">Descripción</label>
-        <textarea
-          id="referencTxt"
-          appUiTextarea
-          rows="2"
-          class="w-full"
-          formControlName="description"
-          [invalid]="formUtils.isInvalid(form.get('description'))"
-        ></textarea>
-      </app-ui-floatlabel>
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="calendar-event-editor-form"
+    class="flex flex-col gap-5"
+    [formRoot]="calendarForm"
+  >
+    <section
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+      aria-label="Datos del evento"
+    >
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="calendar-event-title">Título</label>
+        <input
+          hlmInput
+          id="calendar-event-title"
+          type="text"
+          autocomplete="off"
+          placeholder="Título del evento"
+          [formField]="calendarForm.title"
+        />
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2">
-        <div class="flex flex-col gap-1">
-          <app-ui-floatlabel variant="on" class="w-full">
-            <app-ui-datepicker
-              [showTime]="!isAllDay"
-              hourFormat="24"
-              class="w-full"
-              appendTo="body"
-              inputId="startDatePicker"
-              formControlName="startDate"
-              [invalid]="formUtils.isInvalid(form.get('startDate'))"
-              [maxDate]="form.get('endDate')?.value"
-            >
-            </app-ui-datepicker>
-            <label for="startDatePicker">Inicio</label>
-          </app-ui-floatlabel>
-          @if (formUtils.isInvalid(form.get("startDate"))) {
-            <app-ui-message severity="error" size="small" variant="simple">
-              {{ formUtils.getErrorMessage(form.get("startDate")) }}
-            </app-ui-message>
+        @if (isFieldInvalid("title")) {
+          @for (error of calendarForm.title().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
           }
-        </div>
-        @if (!isAllDay) {
-          <app-ui-floatlabel variant="on" class="w-full">
-            <app-ui-datepicker
-              formControlName="endDate"
-              [showTime]="true"
-              hourFormat="24"
-              class="w-full"
-              appendTo="body"
-              inputId="endDatePicker"
-            >
-            </app-ui-datepicker>
-            <label for="endDatePicker">Fin</label>
-          </app-ui-floatlabel>
         }
       </div>
-      <div class="flex gap-6 px-2">
-        <div class="flex items-center">
-          <app-ui-checkbox
-            inputId="isActiveCheck"
-            name="pizza"
-            [binary]="true"
-            formControlName="isActive"
+
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="calendar-event-description">
+          Descripción
+          <span class="font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        <textarea
+          hlmTextarea
+          id="calendar-event-description"
+          rows="3"
+          placeholder="Detalles del evento"
+          [formField]="calendarForm.description"
+        ></textarea>
+      </div>
+
+      <div hlmField [forceInvalid]="isFieldInvalid('startDate')">
+        <label hlmFieldLabel for="calendar-event-start">Inicio</label>
+        <input
+          hlmInput
+          id="calendar-event-start"
+          [type]="formModel().allDay ? 'date' : 'datetime-local'"
+          [value]="
+            formModel().allDay
+              ? dateInputValue(calendarForm.startDate().value())
+              : dateTimeInputValue(calendarForm.startDate().value())
+          "
+          [max]="
+            formModel().allDay
+              ? dateInputValue(calendarForm.endDate().value())
+              : dateTimeInputValue(calendarForm.endDate().value())
+          "
+          (input)="updateEventDate('startDate', $event)"
+          (blur)="touchDate('startDate')"
+        />
+
+        @if (isFieldInvalid("startDate")) {
+          @for (
+            error of calendarForm.startDate().errors();
+            track error.kind
+          ) {
+            <hlm-field-error forceShow [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField [forceInvalid]="isFieldInvalid('endDate')">
+        <label hlmFieldLabel for="calendar-event-end">Fin</label>
+        <input
+          hlmInput
+          id="calendar-event-end"
+          [type]="formModel().allDay ? 'date' : 'datetime-local'"
+          [value]="
+            formModel().allDay
+              ? dateInputValue(calendarForm.endDate().value())
+              : dateTimeInputValue(calendarForm.endDate().value())
+          "
+          [min]="
+            formModel().allDay
+              ? dateInputValue(calendarForm.startDate().value())
+              : dateTimeInputValue(calendarForm.startDate().value())
+          "
+          (input)="updateEventDate('endDate', $event)"
+          (blur)="touchDate('endDate')"
+        />
+
+        @if (isFieldInvalid("endDate")) {
+          @for (error of calendarForm.endDate().errors(); track error.kind) {
+            <hlm-field-error forceShow [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+    </section>
+
+    <fieldset hlmFieldSet>
+      <legend hlmFieldLegend>Opciones</legend>
+      <div hlmFieldGroup class="grid gap-4 sm:grid-cols-3">
+        <div hlmField orientation="horizontal">
+          <hlm-checkbox
+            inputId="calendar-event-active"
+            [formField]="calendarForm.isActive"
           />
-          <label for="isActiveCheck" class="ml-2"> Activo </label>
-        </div>
-        <div class="flex items-center">
-          <app-ui-checkbox
-            inputId="allDayCheck"
-            formControlName="allDay"
-            [binary]="true"
-            (onChange)="onAllDayToggle()"
-          >
-          </app-ui-checkbox>
-          <label for="allDayCheck" class="ml-1 font-medium">Todo el día</label>
+          <label hlmFieldLabel for="calendar-event-active">Activo</label>
         </div>
 
-        <div class="flex items-center">
-          <app-ui-checkbox
-            inputId="recurrenceCheck"
-            [(ngModel)]="isRecurring"
-            [ngModelOptions]="{ standalone: true }"
-            [binary]="true"
-          >
-          </app-ui-checkbox>
-
-          <label for="recurrenceCheck" class="ml-1 font-medium">
-            Repetir
+        <div hlmField orientation="horizontal">
+          <hlm-checkbox
+            inputId="calendar-event-all-day"
+            [formField]="calendarForm.allDay"
+            (checkedChange)="onAllDayChange($event)"
+          />
+          <label hlmFieldLabel for="calendar-event-all-day">
+            Todo el día
           </label>
         </div>
+
+        <div hlmField orientation="horizontal">
+          <hlm-checkbox
+            inputId="calendar-event-recurring"
+            [checked]="isRecurring()"
+            [disabled]="calendarForm().submitting()"
+            (checkedChange)="toggleRecurrence($event)"
+          />
+          <label hlmFieldLabel for="calendar-event-recurring">Repetir</label>
+        </div>
       </div>
+    </fieldset>
 
-      @if (isRecurring()) {
-        <div formGroupName="recurrence">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @let frecuencyInvalid =
-              form.get("recurrence")?.hasError("requiredFrequency") &&
-              formSubmitted();
-            <div class="flex flex-col gap-1">
-              <app-ui-floatlabel variant="on">
-                <app-ui-select
-                  inputId="frequencySelect"
-                  [options]="frequencies"
-                  formControlName="frequency"
-                  [invalid]="frecuencyInvalid"
-                  appendTo="body"
-                  class="w-full"
-                >
-                </app-ui-select>
-                <label for="frequencySelect">Frecuencia</label>
-              </app-ui-floatlabel>
-              @if (frecuencyInvalid) {
-                <app-ui-message severity="error" size="small" variant="simple">
-                  Este campo es requerido.
-                </app-ui-message>
+    @if (isRecurring()) {
+      <fieldset hlmFieldSet class="border-t pt-5">
+        <legend hlmFieldLegend>Recurrencia</legend>
+
+        <div hlmFieldGroup class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div hlmField>
+            <label hlmFieldLabel for="calendar-event-frequency">
+              Frecuencia
+            </label>
+            <hlm-select
+              [formField]="calendarForm.recurrenceConfig.frequency"
+            >
+              <hlm-select-trigger
+                class="w-full"
+                buttonId="calendar-event-frequency"
+              >
+                <ng-template hlmSelectValueTemplate let-frequency>
+                  {{ frequencyNames.get(frequency) }}
+                </ng-template>
+                <hlm-select-placeholder>
+                  Seleccione una frecuencia
+                </hlm-select-placeholder>
+              </hlm-select-trigger>
+
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  @for (frequency of frequencies; track frequency.value) {
+                    <hlm-select-item [value]="frequency.value">
+                      {{ frequency.label }}
+                    </hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          </div>
+
+          <div hlmField>
+            <label hlmFieldLabel for="calendar-event-interval">Cada</label>
+            <input
+              hlmInput
+              id="calendar-event-interval"
+              type="number"
+              step="1"
+              [formField]="calendarForm.recurrenceConfig.interval"
+            />
+            <p hlmFieldDescription>
+              Número de periodos entre cada repetición.
+            </p>
+
+            @if (
+              calendarForm.recurrenceConfig.interval().touched() &&
+              calendarForm.recurrenceConfig.interval().errors().length
+            ) {
+              @for (
+                error of calendarForm.recurrenceConfig.interval().errors();
+                track error.kind
+              ) {
+                <hlm-field-error [validator]="error.kind">
+                  {{ error.message }}
+                </hlm-field-error>
               }
-            </div>
-            <app-ui-floatlabel variant="on">
-              <p-inputNumber
-                [min]="1"
-                suffix=" vez / veces"
-                class="w-full"
-                inputId="intervalTxt"
-                formControlName="interval"
-              />
-              <label for="intervalTxt">Cada</label>
-            </app-ui-floatlabel>
+            }
+          </div>
 
-            <app-ui-floatlabel variant="on">
-              <app-ui-datepicker
-                formControlName="until"
-                dateFormat="yy-mm-dd"
-                class="w-full"
-                appendTo="body"
-                [showClear]="true"
-                [minDate]="form.get('startDate')?.value"
-              />
-              <label for="untilDatePicker">Hasta</label>
-            </app-ui-floatlabel>
-
-            @if (form.get("recurrence.frequency")!.value === "WEEKLY") {
-              @let byWeekDaysInvalid =
-                form.get("recurrence")?.hasError("weeklyRequiresDays") &&
-                formSubmitted();
-              <div class="flex flex-col gap-1">
-                <app-ui-floatlabel variant="on">
-                  <app-ui-multiselect
-                    [options]="weekDays"
-                    formControlName="byWeekDays"
-                    class="w-full"
-                    appendTo="body"
-                    inputId="byWeekDaysSelect"
-                    [invalid]="byWeekDaysInvalid"
-                  />
-                  <label for="byWeekDaysSelect">Días de la semana</label>
-                </app-ui-floatlabel>
-                @if (byWeekDaysInvalid) {
-                  <app-ui-message severity="error" size="small" variant="simple">
-                    Este campo es requerido.
-                  </app-ui-message>
+          @if (isWeekly()) {
+            <fieldset hlmFieldSet class="sm:col-span-2">
+              <legend hlmFieldLegend>Días de la semana</legend>
+              <hlm-toggle-group
+                type="multiple"
+                variant="outline"
+                spacing="1"
+                class="flex flex-wrap"
+                [formField]="calendarForm.recurrenceConfig.byWeekDays"
+              >
+                @for (day of weekDays; track day.value) {
+                  <button
+                    hlmToggleGroupItem
+                    type="button"
+                    size="sm"
+                    [value]="day.value"
+                  >
+                    {{ day.label }}
+                  </button>
                 }
-              </div>
+              </hlm-toggle-group>
+
+              @if (
+                calendarForm.recurrenceConfig.byWeekDays().touched() &&
+                calendarForm.recurrenceConfig.byWeekDays().errors().length
+              ) {
+                @for (
+                  error of
+                    calendarForm.recurrenceConfig.byWeekDays().errors();
+                  track error.kind
+                ) {
+                  <hlm-field-error [validator]="error.kind">
+                    {{ error.message }}
+                  </hlm-field-error>
+                }
+              }
+            </fieldset>
+          }
+
+          <div
+            hlmField
+            [forceInvalid]="
+              calendarForm.recurrenceConfig.until().touched() &&
+              calendarForm.recurrenceConfig.until().errors().length > 0
+            "
+          >
+            <label hlmFieldLabel for="calendar-event-until">
+              Fecha límite
+              <span class="font-normal text-muted-foreground">(opcional)</span>
+            </label>
+            <input
+              hlmInput
+              id="calendar-event-until"
+              type="date"
+              [value]="
+                dateInputValue(
+                  calendarForm.recurrenceConfig.until().value()
+                )
+              "
+              [min]="dateInputValue(calendarForm.startDate().value())"
+              (input)="updateRecurrenceUntil($event)"
+              (blur)="touchDate('until')"
+            />
+
+            @if (
+              calendarForm.recurrenceConfig.until().touched() &&
+              calendarForm.recurrenceConfig.until().errors().length
+            ) {
+              @for (
+                error of calendarForm.recurrenceConfig.until().errors();
+                track error.kind
+              ) {
+                <hlm-field-error forceShow [validator]="error.kind">
+                  {{ error.message }}
+                </hlm-field-error>
+              }
             }
           </div>
         </div>
-      }
-    </div>
-  </div>
-  <div class="app-dialog-actions">
-    <app-ui-button label="Cancelar" severity="secondary" (onClick)="close()" />
-    <app-ui-button type="submit" label="Guardar" />
-  </div>
-</form> -->
+      </fieldset>
+    }
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="calendarForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="calendar-event-editor-form"
+    [disabled]="calendarForm().submitting()"
+  >
+    @if (calendarForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

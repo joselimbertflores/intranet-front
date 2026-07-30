@@ -11,18 +11,19 @@
         Propiedades compartidas del lote
       </h4>
 
-      <organizational-unit-picker
+      <hierarchical-combobox
         class="lg:col-span-6"
+        emptyText="Sin unidades coincidentes."
         inputId="document-create-organizational-unit"
         label="Unidad organizacional"
         placeholder="Seleccione una unidad"
         [formField]="documentForm.organizationalUnitId"
-        [options]="organizationalUnitOptions()"
+        [items]="organizationalUnits()"
       >
         <p hlmFieldDescription>
           Opcional para documentos institucionales o transversales.
         </p>
-      </organizational-unit-picker>
+      </hierarchical-combobox>
 
       <div hlmField class="lg:col-span-2">
         <label hlmFieldLabel for="document-type">Tipo documental</label>

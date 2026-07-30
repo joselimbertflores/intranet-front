@@ -174,7 +174,7 @@
         type="button"
         variant="destructive"
         [hlmAlertDialogTriggerFor]="deleteDialog"
-        (click)="selectOrgUnitForDeletion(organizationalUnit)"
+        (click)="orgUnitPendingDelete.set(organizationalUnit)"
       >
         <ng-icon name="lucideTrash2" />
         Eliminar
@@ -183,7 +183,7 @@
   </hlm-dropdown-menu>
 </ng-template>
 
-<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+<hlm-alert-dialog #deleteDialog (closed)="orgUnitPendingDelete.set(null)">
   <hlm-alert-dialog-content *hlmAlertDialogPortal>
     <hlm-alert-dialog-header>
       <h3 hlmAlertDialogTitle>Eliminar unidad organizacional</h3>

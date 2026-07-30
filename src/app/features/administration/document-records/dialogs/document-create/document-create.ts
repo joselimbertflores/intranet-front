@@ -45,22 +45,17 @@ import { HlmSeparator } from '@spartan-ng/helm/separator';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
 
-import { YearSelector } from '../../../../../shared';
+import {
+  HierarchicalCombobox,
+  YearSelector,
+} from '../../../../../shared';
 import {
   DOCUMENT_FILE_RULES,
   DocumentAllowedExtension,
 } from '../../constants/document-file-rules';
-import {
-  DocumentResponse,
-  DocumentValidityStatus,
-  OrganizationalUnitResponse,
-} from '../../interfaces';
+import { DocumentResponse, DocumentValidityStatus } from '../../interfaces';
 import { CreateDocumentBatchDto, DocumentDataSource } from '../../services';
 import { FileSizePipe } from '../../pipes';
-import {
-  OrganizationalUnitOption,
-  OrganizationalUnitPicker,
-} from '../../components/organizational-unit-picker/organizational-unit-picker';
 
 interface BatchDocumentFormItem {
   clientId: string;
@@ -108,7 +103,7 @@ interface FileSelectionIssue {
     HlmSeparator,
     HlmSpinner,
     NgIcon,
-    OrganizationalUnitPicker,
+    HierarchicalCombobox,
     YearSelector,
   ],
   providers: [
@@ -171,10 +166,6 @@ export class DocumentCreate {
   readonly validityStatusNames = new Map(
     this.validityStatusOptions.map(({ value, label }) => [value, label]),
   );
-  readonly organizationalUnitOptions = computed<OrganizationalUnitOption[]>(
-    () => this.flattenOrganizationalUnits(this.organizationalUnits()),
-  );
-
   readonly selectedFiles = signal<PendingDocumentFile[]>([]);
   readonly selectedFilesByClientId = computed(
     () =>
@@ -505,25 +496,6 @@ export class DocumentCreate {
           : pendingFile,
       ),
     );
-  }
-
-  private flattenOrganizationalUnits(
-    nodes: OrganizationalUnitResponse[],
-    parentPath: string[] = [],
-    depth = 0,
-  ): OrganizationalUnitOption[] {
-    return nodes.flatMap((node) => {
-      const path = [...parentPath, node.name];
-      return [
-        {
-          id: node.id,
-          name: node.name,
-          depth,
-          searchText: path.join(' / '),
-        },
-        ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
-      ];
-    });
   }
 
   private requestErrorMessage(error: unknown, fallback: string): string {

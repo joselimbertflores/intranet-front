@@ -133,7 +133,7 @@
                           type="button"
                           variant="destructive"
                           [hlmAlertDialogTriggerFor]="deleteDialog"
-                          (click)="documentTypePendingDelete.set(documentType)"
+                          (click)="typePendingDelete.set(documentType)"
                         >
                           <ng-icon name="lucideTrash2" />
                           Eliminar
@@ -181,13 +181,13 @@
   </div>
 </section>
 
-<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+<hlm-alert-dialog #deleteDialog (closed)="typePendingDelete.set(null)">
   <hlm-alert-dialog-content *hlmAlertDialogPortal>
     <hlm-alert-dialog-header>
       <h3 hlmAlertDialogTitle>Eliminar tipo de documento</h3>
       <p hlmAlertDialogDescription>
-        Se eliminará “{{ documentTypePendingDelete()?.name }}”. Esta acción no
-        se puede deshacer.
+        Se eliminará “{{ typePendingDelete()?.name }}”. Esta acción no se puede
+        deshacer.
       </p>
     </hlm-alert-dialog-header>
 
@@ -197,7 +197,7 @@
         hlmAlertDialogAction
         type="button"
         variant="destructive"
-        [disabled]="!documentTypePendingDelete()"
+        [disabled]="!typePendingDelete()"
         (click)="confirmRemove(deleteDialog)"
       >
         Eliminar

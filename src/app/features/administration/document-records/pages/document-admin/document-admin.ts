@@ -38,18 +38,14 @@ import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 
-import { PaginationControls, YearSelector } from '@app/shared';
+import {
+  HierarchicalCombobox,
+  PaginationControls,
+  YearSelector,
+} from '@app/shared';
 
-import {
-  OrganizationalUnitPicker,
-  type OrganizationalUnitOption,
-} from '../../components/organizational-unit-picker/organizational-unit-picker';
 import { DocumentCreate, DocumentEdit } from '../../dialogs';
-import {
-  DocumentResponse,
-  DocumentValidityStatus,
-  OrganizationalUnitResponse,
-} from '../../interfaces';
+import { DocumentResponse, DocumentValidityStatus } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
 
 interface FilterData {
@@ -88,7 +84,7 @@ const EMPTY_FILTERS: Readonly<FilterData> = {
     HlmSpinner,
     HlmTableImports,
     HlmTooltipImports,
-    OrganizationalUnitPicker,
+    HierarchicalCombobox,
     PaginationControls,
     YearSelector,
   ],
@@ -174,10 +170,6 @@ export default class DocumentAdmin {
   readonly documentTypeNames = computed(
     () => new Map(this.documentTypes().map(({ id, name }) => [id, name])),
   );
-  readonly organizationalUnitOptions = computed(() =>
-    this.flattenOrganizationalUnits(this.organizationalUnits()),
-  );
-
   readonly statusOptions = [
     { value: 'ACTIVE', label: 'Activo' },
     { value: 'INACTIVE', label: 'Inactivo' },
@@ -294,25 +286,6 @@ export default class DocumentAdmin {
 
   onDeleteDialogClosed(): void {
     this.documentPendingDelete.set(null);
-  }
-
-  private flattenOrganizationalUnits(
-    nodes: OrganizationalUnitResponse[],
-    parentPath: string[] = [],
-    depth = 0,
-  ): OrganizationalUnitOption[] {
-    return nodes.flatMap((node) => {
-      const path = [...parentPath, node.name];
-      return [
-        {
-          id: node.id,
-          name: node.name,
-          depth,
-          searchText: path.join(' / '),
-        },
-        ...this.flattenOrganizationalUnits(node.children, path, depth + 1),
-      ];
-    });
   }
 
   private upsertItem(newItem: DocumentResponse) {

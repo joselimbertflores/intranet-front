@@ -1,114 +1,257 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()" class="app-dialog-layout">
-  <div class="app-dialog-body">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-2">
-      <div class="sm:col-span-2">
-        <div class="flex flex-col">
-          <app-ui-floatlabel variant="on">
-            <label for="referenc_txt">Referencia</label>
-            <textarea
-              appUiTextarea
-              id="referenc_txt"
-              formControlName="reference"
-              rows="2"
-              class="w-full"
-              [invalid]="formUtils.isInvalid(form.get('reference'))"
-            ></textarea>
-          </app-ui-floatlabel>
-          @if (formUtils.isInvalid(form.get("reference"))) {
-            <app-ui-message severity="error" size="small" variant="simple">
-              {{ formUtils.getErrorMessage(form.get("reference")) }}
-            </app-ui-message>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>
+    {{ isEditing() ? "Editar comunicado" : "Crear comunicado" }}
+  </h3>
+</hlm-dialog-header>
+
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="communication-editor-form"
+    class="flex flex-col gap-5"
+    [formRoot]="communicationForm"
+  >
+    <section
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+      aria-label="Datos del comunicado"
+    >
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="communication-reference">Referencia</label>
+        <textarea
+          hlmTextarea
+          id="communication-reference"
+          rows="3"
+          placeholder="Asunto o referencia del comunicado"
+          [formField]="communicationForm.reference"
+        ></textarea>
+
+        @if (isFieldInvalid("reference")) {
+          @for (
+            error of communicationForm.reference().errors();
+            track error.kind
+          ) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
           }
-        </div>
-      </div>
-      <div>
-        <div class="flex flex-col gap-1">
-          <app-ui-floatlabel variant="on">
-            <label>CITE</label>
-            <input
-              appUiInput
-              class="w-full"
-              formControlName="code"
-              [invalid]="formUtils.isInvalid(form.get('code'))"
-            />
-          </app-ui-floatlabel>
-          @if (formUtils.isInvalid(form.get("code"))) {
-            <app-ui-message severity="error" size="small" variant="simple">
-              {{ formUtils.getErrorMessage(form.get("code")) }}
-            </app-ui-message>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-1">
-        <app-ui-floatlabel class="w-full" variant="on">
-          <app-ui-select
-            inputId="type_txt"
-            appendTo="body"
-            class="w-full"
-            optionLabel="name"
-            optionValue="id"
-            [invalid]="formUtils.isInvalid(form.get('typeId'))"
-            [options]="types()"
-            formControlName="typeId"
-          />
-          <label for="type_txt">Tipo</label>
-        </app-ui-floatlabel>
-        @if (formUtils.isInvalid(form.get("typeId"))) {
-          <app-ui-message severity="error" size="small" variant="simple">
-            {{ formUtils.getErrorMessage(form.get("typeId")) }}
-          </app-ui-message>
         }
       </div>
 
-      <div class="flex items-center">
-        <app-ui-checkbox
-          inputId="isActiveCheck"
-          name="pizza"
-          [binary]="true"
-          formControlName="isActive"
+      <div hlmField>
+        <label hlmFieldLabel for="communication-code">CITE</label>
+        <input
+          hlmInput
+          id="communication-code"
+          type="text"
+          autocomplete="off"
+          placeholder="Ej. CITE-001/2026"
+          [formField]="communicationForm.code"
         />
-        <label for="isActiveCheck" class="ml-2"> Activo </label>
+
+        @if (isFieldInvalid("code")) {
+          @for (error of communicationForm.code().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
       </div>
 
-      @if (data?.file) {
-        <div class="mt-2 sm:col-span-2">
-          <div class="font-medium">Documento actual:</div>
-          <div class="p-2">
-            <div class="flex items-center space-x-2">
-              <i
-                class="ui-icon ui-icon-file-pdf text-red-500"
-                style="font-size: 1.5rem"
-              ></i>
-              <p class="font-medium text-sm">
-                {{ data?.file?.originalName }}
-              </p>
-            </div>
+      <div hlmField>
+        <label hlmFieldLabel for="communication-type">Tipo</label>
+        <hlm-select [formField]="communicationForm.typeId">
+          <hlm-select-trigger class="w-full" buttonId="communication-type">
+            <ng-template hlmSelectValueTemplate let-typeId>
+              {{ typeNames().get(typeId) }}
+            </ng-template>
+            <hlm-select-placeholder>
+              Seleccione un tipo
+            </hlm-select-placeholder>
+          </hlm-select-trigger>
+
+          <hlm-select-content *hlmSelectPortal>
+            <hlm-select-group>
+              @for (type of types(); track type.id) {
+                <hlm-select-item [value]="type.id">
+                  {{ type.name }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+
+        @if (isFieldInvalid("typeId")) {
+          @for (
+            error of communicationForm.typeId().errors();
+            track error.kind
+          ) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField orientation="horizontal" class="sm:col-span-2">
+        <hlm-checkbox
+          inputId="communication-active"
+          [formField]="communicationForm.isActive"
+        />
+        <div>
+          <label hlmFieldLabel for="communication-active">
+            Comunicado activo
+          </label>
+          <p hlmFieldDescription>
+            Los comunicados inactivos no se muestran en el portal.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="flex flex-col gap-3 border-t pt-5"
+      aria-labelledby="communication-file-title"
+    >
+      <div>
+        <h4 id="communication-file-title" class="text-sm font-semibold">
+          Archivo PDF
+        </h4>
+        <p class="text-xs text-muted-foreground">
+          {{
+            isEditing()
+              ? "Selecciona un archivo solo si deseas reemplazar el actual."
+              : "Selecciona el documento que se publicará."
+          }}
+        </p>
+      </div>
+
+      @if (currentFile(); as file) {
+        <div
+          class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-card p-3 text-card-foreground"
+        >
+          <span
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+            aria-hidden="true"
+          >
+            <ng-icon name="lucideFileText" size="18" />
+          </span>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium">{{ file.originalName }}</p>
+            <p class="text-xs text-muted-foreground">Archivo actual</p>
           </div>
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            [disabled]="communicationForm().submitting()"
+            (click)="openCurrentFile()"
+          >
+            <ng-icon name="lucideExternalLink" data-icon="inline-start" />
+            Ver
+          </button>
         </div>
       }
-      <div class="sm:col-span-2">
-        <div class="flex flex-col gap-1">
-          <app-ui-fileupload
-            mode="basic"
-            [chooseLabel]="data ? 'Remplazar PDF' : 'Seleccionar PDF'"
-            chooseIcon="ui-icon ui-icon-upload"
-            accept="application/pdf"
-            [auto]="false"
-            (onSelect)="selectFile($event)"
-          />
 
-          @if (formSubmitted() && !file() && !this.data?.file) {
-            <app-ui-message severity="error" size="small" variant="simple">
-              Seleccione un archivo {{ data?.file ?? "" }}
-            </app-ui-message>
+      <div
+        hlmField
+        [forceInvalid]="
+          communicationForm().touched() &&
+          communicationForm().errors().length > 0
+        "
+      >
+        <input
+          #pdfInput
+          id="communication-pdf"
+          class="hidden"
+          type="file"
+          accept=".pdf,application/pdf"
+          [disabled]="communicationForm().submitting()"
+          (change)="onFileSelected($event)"
+        />
+
+        @if (selectedFile(); as file) {
+          <div
+            class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-card p-3 text-card-foreground"
+          >
+            <span
+              class="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+              aria-hidden="true"
+            >
+              <ng-icon name="lucideFileText" size="18" />
+            </span>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium">{{ file.name }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{
+                  isEditing() ? "Reemplazará al archivo actual" : "Nuevo PDF"
+                }}
+              </p>
+            </div>
+            <button
+              hlmBtn
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              aria-label="Quitar archivo seleccionado"
+              [disabled]="communicationForm().submitting()"
+              (click)="clearSelectedFile()"
+            >
+              <ng-icon name="lucideTrash2" />
+            </button>
+          </div>
+        } @else {
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            class="self-start"
+            [disabled]="communicationForm().submitting()"
+            (click)="pdfInput.click()"
+          >
+            <ng-icon name="lucideUpload" data-icon="inline-start" />
+            {{ isEditing() ? "Reemplazar PDF" : "Seleccionar PDF" }}
+          </button>
+        }
+
+        <p hlmFieldDescription>Solo se admiten archivos PDF.</p>
+
+        @if (
+          communicationForm().touched() &&
+          communicationForm().errors().length > 0
+        ) {
+          @for (error of communicationForm().errors(); track error.kind) {
+            <hlm-field-error forceShow [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
           }
-        </div>
+        }
       </div>
-    </div>
-  </div>
-  <div class="app-dialog-actions">
-    <app-ui-button label="Cancelar" severity="secondary" [disabled]="isSaving()" (onClick)="close()" />
-    <app-ui-button type="submit" label="Guardar" [disabled]="isSaving()" [loading]="isSaving()"  />
-  </div>
-</form>
-<app-ui-confirmdialog /> -->
+    </section>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="communicationForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="communication-editor-form"
+    [disabled]="communicationForm().submitting()"
+  >
+    @if (communicationForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

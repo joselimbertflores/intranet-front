@@ -19,11 +19,14 @@ import {
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 import { map } from 'rxjs';
 
-import { YearSelector } from '../../../../shared';
+import {
+  HierarchicalCombobox,
+  HierarchicalComboboxItem,
+  YearSelector,
+} from '../../../../shared';
 import { DocSectionFilterResponse } from '../../interfaces';
 import { PortalDocumentDataSource } from '../../services';
 import { PublicSectionHeader } from '../../components';
@@ -32,24 +35,29 @@ import { PortalDocumentListItem } from './components/portal-document-list-item/p
 
 interface FilterFormMode {
   term: string | null;
-  organizationalUnit: string | null;
+  organizationalUnitId: number | null;
   documentType: string | null;
   documentSubtype: string | null;
   year: number | null;
+}
+
+interface PortalOrganizationalUnitData {
+  readonly items: readonly HierarchicalComboboxItem[];
+  readonly idBySlug: ReadonlyMap<string, number>;
+  readonly slugById: ReadonlyMap<number, string>;
 }
 
 @Component({
   selector: 'app-documents-page',
   imports: [
     CommonModule,
-    FormsModule,
-
-    YearSelector,
     FormField,
+    FormRoot,
+    HierarchicalCombobox,
     PublicSectionHeader,
     PortalDocumentGridCard,
     PortalDocumentListItem,
-    FormRoot,
+    YearSelector,
   ],
   styles: `
     ::ng-deep .p-dataview .p-dataview-header {
@@ -119,10 +127,34 @@ export default class DocumentsPage {
     stream: ({ params }) => this.documentDataSource.searchDocuments(params),
   });
 
-  readonly organizationTree = computed(() =>
-    this.toTreeNodes(
-      this.documentDataSource.documentFilters().organizationalUnits,
-    ),
+  readonly organizationalUnitData = computed<PortalOrganizationalUnitData>(
+    () => {
+      let nextId = 1;
+      const idBySlug = new Map<string, number>();
+      const slugById = new Map<number, string>();
+
+      const toItems = (
+        nodes: readonly DocSectionFilterResponse[],
+      ): readonly HierarchicalComboboxItem[] =>
+        nodes.map((node) => {
+          const id = nextId++;
+          idBySlug.set(node.slug, id);
+          slugById.set(id, node.slug);
+          return {
+            id,
+            name: node.name,
+            children: toItems(node.children),
+          };
+        });
+
+      return {
+        items: toItems(
+          this.documentDataSource.documentFilters().organizationalUnits,
+        ),
+        idBySlug,
+        slugById,
+      };
+    },
   );
   readonly types = computed(() => {
     return this.documentDataSource.documentFilters().types;
@@ -157,12 +189,19 @@ export default class DocumentsPage {
     ).length;
   });
 
-  filterFormModel = signal<FilterFormMode>({
-    organizationalUnit: null,
-    documentType: null,
-    documentSubtype: null,
-    term: null,
-    year: null,
+  filterFormModel = linkedSignal<FilterFormMode>(() => {
+    const params = this.queryParams();
+    return {
+      organizationalUnitId: params.organizationalUnit
+        ? (this.organizationalUnitData().idBySlug.get(
+            params.organizationalUnit,
+          ) ?? null)
+        : null,
+      documentType: params.documentType,
+      documentSubtype: params.documentSubtype,
+      term: params.term,
+      year: params.year,
+    };
   });
 
   filterForm = form(this.filterFormModel, (schemaPath) => {
@@ -170,15 +209,6 @@ export default class DocumentsPage {
     disabled(schemaPath.documentSubtype, {
       when: ({ valueOf }) => valueOf(schemaPath.documentType) === null,
     });
-  });
-
-  selectedTreeNode = linkedSignal(() => {
-    const selectedSlug = this.filterForm().value().organizationalUnit;
-    if (!selectedSlug) return null;
-    return [];
-    // return (
-    //   this.organizationTree().find(((node) as any) => node['data'] === selectedSlug) ?? null
-    // );
   });
 
   /**
@@ -193,7 +223,7 @@ export default class DocumentsPage {
     effect(() => {
       const values = this.filterForm().value();
       const filters = {
-        unit: this.normalizeFilterValue(values.organizationalUnit),
+        unit: this.organizationalUnitSlug(values.organizationalUnitId),
         type: this.normalizeFilterValue(values.documentType),
         subtype: this.normalizeFilterValue(values.documentSubtype),
         year: this.normalizeFilterValue(values.year),
@@ -207,10 +237,6 @@ export default class DocumentsPage {
     });
   }
 
-  ngOnInit() {
-    this.syncFormFromQueryParams();
-  }
-
   changePage(
     event: { rows?: number; first?: number },
     scrollToFilters?: boolean,
@@ -220,17 +246,9 @@ export default class DocumentsPage {
     this.setQueryParams({ limit, offset }, { scrollToFilters });
   }
 
-  selectOrganizationUnit(node: any) {
-    this.filterForm.organizationalUnit().value.set(node.data ?? null);
-  }
-
-  clearOrganizationUnit() {
-    this.filterForm.organizationalUnit().value.set(null);
-  }
-
   resetFilters() {
     this.filterFormModel.set({
-      organizationalUnit: null,
+      organizationalUnitId: null,
       documentSubtype: null,
       documentType: null,
       term: null,
@@ -240,21 +258,6 @@ export default class DocumentsPage {
 
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((isOpen) => !isOpen);
-  }
-
-  private toTreeNodes(nodes: DocSectionFilterResponse[]): any {
-    return nodes.map((node) => ({
-      key: node.id,
-      label: node.name.toUpperCase(),
-      data: node.slug,
-      children: node.children ? this.toTreeNodes(node.children) : [],
-    }));
-  }
-
-  private syncFormFromQueryParams(): void {
-    this.filterFormModel.set(
-      this.mapQueryParams(this.route.snapshot.queryParams),
-    );
   }
 
   private mapQueryParams(params: Record<string, string | undefined>) {
@@ -296,6 +299,14 @@ export default class DocumentsPage {
     if (value == null) return null;
     const normalized = String(value).trim();
     return normalized.length ? normalized : null;
+  }
+
+  private organizationalUnitSlug(id: number | null): string | null {
+    const unitData = this.organizationalUnitData();
+    if (id !== null) return unitData.slugById.get(id) ?? null;
+    return unitData.items.length
+      ? null
+      : this.queryParams().organizationalUnit;
   }
 
   private parseLimit(value: string | undefined): number {

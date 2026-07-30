@@ -104,26 +104,14 @@
             </div>
 
             <div class="lg:col-span-8">
-              <!-- <app-ui-floatlabel class="block w-full" variant="on">
-                <app-ui-tree-select
-                  inputId="docsection"
-                  appendTo="body"
-                  [fluid]="true"
-                  [showClear]="true"
-                  [filter]="true"
-                  [resetFilterOnHide]="true"
-                  filterPlaceholder="Buscar unidad"
-                  [filterInputAutoFocus]="true"
-                  emptyMessage="Sin resultados"
-                  [(ngModel)]="selectedTreeNode"
-                  [ngModelOptions]="{ standalone: true }"
-                  [options]="organizationTree()"
-                  (onNodeSelect)="selectOrganizationUnit($event.node)"
-                  (onClear)="clearOrganizationUnit()"
-                  panelStyleClass="mi-panel-arbol"
-                />
-                <label for="docsection">Unidad organizacional</label>
-              </app-ui-floatlabel> -->
+              <hierarchical-combobox
+                emptyText="Sin unidades coincidentes."
+                inputId="portal-document-organizational-unit"
+                label="Unidad organizacional"
+                placeholder="Todas las unidades"
+                [formField]="filterForm.organizationalUnitId"
+                [items]="organizationalUnitData().items"
+              />
             </div>
 
             <div class="lg:col-span-2">

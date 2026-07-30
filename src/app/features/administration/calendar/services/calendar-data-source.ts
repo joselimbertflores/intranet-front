@@ -2,23 +2,34 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../../../environments/environment';
-import { CalendarEventResponse } from '../interfaces';
+import {
+  CalendarEventResponse,
+  RecurrenceFrequency,
+  WeekDay,
+} from '../interfaces';
 
-export interface FormCalendarProps {
+export interface SaveCalendarEventDto {
   title: string;
-  description: string;
+  description: string | null;
   startDate: Date;
-  endDate?: Date | null;
-  allDay?: boolean;
-  recurrence?: RecurrenceConfig | null;
+  endDate: Date;
+  allDay: boolean;
+  isActive: boolean;
+  recurrence: RecurrenceConfigDto | null;
   communicationId?: string | null;
 }
 
-export interface RecurrenceConfig {
-  frequency: string | null;
+export interface RecurrenceConfigDto {
+  frequency: RecurrenceFrequency;
   interval: number;
-  byWeekDays: string[];
+  byWeekDays?: WeekDay[];
   until?: Date | null;
+}
+
+export interface GetCalendarEventsParams {
+  term?: string;
+  limit: number;
+  offset: number;
 }
 
 @Injectable({
@@ -26,33 +37,19 @@ export interface RecurrenceConfig {
 })
 export class CalendarDataSource {
   private readonly URL = `${environment.baseUrl}/api/calendar`;
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  constructor() {}
-
-  create(form: FormCalendarProps) {
-    const { recurrence, ...props } = form;
-    return this.http.post(this.URL, {
-      ...props,
-      recurrence: recurrence?.frequency
-        ? this.toRecurrenceDto(recurrence)
-        : null,
-    });
+  create(data: SaveCalendarEventDto) {
+    return this.http.post<CalendarEventResponse>(this.URL, data);
   }
 
-  update(id: string, form: Partial<FormCalendarProps>) {
-    const { recurrence, ...props } = form;
-    return this.http.patch(`${this.URL}/${id}`, {
-      ...props,
-      recurrence: recurrence?.frequency
-        ? this.toRecurrenceDto(recurrence)
-        : null,
-    });
+  update(id: string, data: SaveCalendarEventDto) {
+    return this.http.patch<CalendarEventResponse>(`${this.URL}/${id}`, data);
   }
 
-  findAll(limit: number, offset: number, term?: string) {
+  findAll({ term, ...pagination }: GetCalendarEventsParams) {
     const params = new HttpParams({
-      fromObject: { limit, offset, ...(term && { term }) },
+      fromObject: { ...pagination, ...(term && { term }) },
     });
     return this.http.get<{
       events: CalendarEventResponse[];
@@ -65,17 +62,12 @@ export class CalendarDataSource {
   }
 
   remove(id: string) {
-    return this.http.delete(`${this.URL}/${id}`);
+    return this.http.delete<void>(`${this.URL}/${id}`);
   }
 
-  private toRecurrenceDto(recurrence: RecurrenceConfig) {
-    return {
-      frequency: recurrence.frequency,
-      interval: recurrence.interval,
-      until: recurrence.until,
-      ...(recurrence.frequency === 'WEEKLY' && {
-        byWeekDays: recurrence.byWeekDays,
-      }),
-    };
+  removeWithCommunication(eventId: string) {
+    return this.http.delete<void>(
+      `${this.URL}/${eventId}/with-communication`,
+    );
   }
 }

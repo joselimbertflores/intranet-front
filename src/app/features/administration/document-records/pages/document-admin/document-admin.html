@@ -35,12 +35,13 @@
       (submit)="applyFilters()"
     >
       <div class="flex min-h-0 flex-col gap-4 overflow-y-auto pe-1">
-        <organizational-unit-picker
+        <hierarchical-combobox
+          emptyText="Sin unidades coincidentes."
           inputId="document-filter-organizational-unit"
           label="Unidad organizacional"
           placeholder="Todas las unidades"
           [formField]="filterForm.organizationalUnitId"
-          [options]="organizationalUnitOptions()"
+          [items]="organizationalUnits()"
         />
 
         <div hlmField>

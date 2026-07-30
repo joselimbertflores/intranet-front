@@ -17,6 +17,13 @@ interface GetCommunicationsParams {
   offset: number;
 }
 
+export interface SaveCommunicationDto {
+  reference: string;
+  code: string;
+  isActive: boolean;
+  typeId: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,10 +46,10 @@ export class CommunicationAdminDataSource {
     });
   }
 
-  create(data: object, pdf: File) {
+  create(data: SaveCommunicationDto, pdf: File) {
     return this.fileUploadService.upload(pdf, 'communications').pipe(
       switchMap(({ id: fileId }) =>
-        this.http.post(`${this.URL}`, {
+        this.http.post<CommunicationResponse>(`${this.URL}`, {
           ...data,
           fileId,
         }),
@@ -50,18 +57,22 @@ export class CommunicationAdminDataSource {
     );
   }
 
-  update(id: string, data: object, file: File | null) {
-    const fileUploadObserbable: Observable<null | UploadResult> = file
+  update(id: string, data: SaveCommunicationDto, file: File | null) {
+    const fileUploadObservable: Observable<null | UploadResult> = file
       ? this.fileUploadService.upload(file, 'communications')
       : of(null);
-    return fileUploadObserbable.pipe(
+    return fileUploadObservable.pipe(
       switchMap((uploadResult) =>
-        this.http.patch(`${this.URL}/${id}`, {
+        this.http.patch<CommunicationResponse>(`${this.URL}/${id}`, {
           ...data,
           ...(uploadResult && { fileId: uploadResult.id }),
         }),
       ),
     );
+  }
+
+  remove(id: string) {
+    return this.http.delete<void>(`${this.URL}/${id}`);
   }
 
   private getTypes() {

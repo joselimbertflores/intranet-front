@@ -32,18 +32,19 @@
         }
       </div>
 
-      <organizational-unit-picker
+      <hierarchical-combobox
         class="sm:col-span-2"
+        emptyText="Sin unidades coincidentes."
         inputId="document-edit-organizational-unit"
         label="Unidad organizacional"
         placeholder="Seleccione una unidad"
         [formField]="documentForm.organizationalUnitId"
-        [options]="organizationalUnitOptions()"
+        [items]="organizationalUnits()"
       >
         <p hlmFieldDescription>
           Opcional para documentos institucionales o transversales.
         </p>
-      </organizational-unit-picker>
+      </hierarchical-combobox>
 
       <div hlmField>
         <label hlmFieldLabel for="document-edit-type"> Tipo documental </label>

@@ -1,145 +1,466 @@
 import {
-  inject,
-  Component,
   ChangeDetectionStrategy,
-  OnInit,
+  Component,
+  computed,
+  inject,
   signal,
-  effect,
 } from '@angular/core';
 import {
-  FormGroup,
-  Validators,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  disabled,
+  form,
+  FormField,
+  FormRoot,
+  maxLength,
+  min,
+  required,
+  validate,
+} from '@angular/forms/signals';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import {
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTextarea } from '@spartan-ng/helm/textarea';
+import { HlmToggleGroupImports } from '@spartan-ng/helm/toggle-group';
+import { firstValueFrom } from 'rxjs';
 
-import { CalendarEventResponse } from '../../interfaces';
-import { CalendarDataSource } from '../../services';
-import { recurrenceValidator } from '../../helpers';
-import { FormUtils } from '../../../../../helpers';
+import {
+  CalendarEventResponse,
+  RecurrenceFrequency,
+  WeekDay,
+} from '../../interfaces';
+import {
+  CalendarDataSource,
+  SaveCalendarEventDto,
+} from '../../services';
+
+export interface CalendarEventEditorInitialValues {
+  title?: string;
+  description?: string;
+  startDate?: Date | string;
+}
+
+export interface CalendarEventEditorContext {
+  event?: CalendarEventResponse;
+  communicationId?: string;
+  initialValues?: CalendarEventEditorInitialValues;
+}
+
+interface RecurrenceConfigFormModel {
+  frequency: RecurrenceFrequency | null;
+  interval: number;
+  byWeekDays: WeekDay[];
+  until: Date | null;
+}
+
+interface CalendarEventFormModel {
+  title: string;
+  description: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  allDay: boolean;
+  isActive: boolean;
+  recurrenceConfig: RecurrenceConfigFormModel;
+}
 
 @Component({
-  selector: 'app-calendar-editor',
-  imports: [ReactiveFormsModule, FormsModule],
+  selector: 'app-calendar-event-editor',
+  imports: [
+    FormField,
+    FormRoot,
+    HlmButtonImports,
+    HlmCheckbox,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmSelectImports,
+    HlmSpinner,
+    HlmTextarea,
+    HlmToggleGroupImports,
+  ],
   templateUrl: './calendar-editor.html',
+  host: {
+    class: 'flex max-h-[calc(100dvh-4rem)] min-h-0 flex-col',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CalendarEditor implements OnInit {
-  private formBuilder = inject(FormBuilder);
-  // private diagloRef = inject(DynamicDialogRef);
-  private calendarDataSource = inject(CalendarDataSource);
+export class CalendarEventEditor {
+  private readonly dialogRef =
+    inject<BrnDialogRef<CalendarEventResponse>>(BrnDialogRef);
+  private readonly calendarDataSource = inject(CalendarDataSource);
+  private readonly context =
+    injectBrnDialogContext<CalendarEventEditorContext>();
 
-  readonly currentDate = new Date();
-  // readonly data?: CalendarEventResponse = inject(DynamicDialogConfig).data;
+  readonly event = this.context.event;
+  readonly isEditing = this.event !== undefined;
+  readonly communicationId =
+    this.context.communicationId ?? this.event?.communicationId ?? null;
 
-  formSubmitted = signal(false);
-
-  form: FormGroup = this.formBuilder.group({
-    title: ['', [Validators.required, Validators.maxLength(150)]],
-    description: [''],
-    startDate: [this.currentDate, Validators.required],
-    endDate: [null],
-    allDay: [true],
-    isActive: [true],
-    recurrence: this.formBuilder.group(
-      {
-        frequency: [null],
-        interval: [1],
-        byWeekDays: [[]],
-        until: [null],
-      },
-      { validators: recurrenceValidator },
-    ),
-  });
-  isRecurring = signal(false);
-  formUtils = FormUtils;
-
-  constructor() {
-    effect(() => {
-      this.onRecurringToggle(this.isRecurring());
-    });
-  }
-
-  ngOnInit(): void {
-    this.loadForm();
-  }
-
-  readonly frequencies = [
-    { label: 'Diario', value: 'DAILY' },
+  readonly frequencies: ReadonlyArray<{
+    label: string;
+    value: RecurrenceFrequency;
+  }> = [
+    { label: 'Diaria', value: 'DAILY' },
     { label: 'Semanal', value: 'WEEKLY' },
     { label: 'Mensual', value: 'MONTHLY' },
     { label: 'Anual', value: 'YEARLY' },
   ];
 
-  readonly weekDays = [
-    { label: 'Lunes', value: 'MO' },
-    { label: 'Martes', value: 'TU' },
-    { label: 'Miércoles', value: 'WE' },
-    { label: 'Jueves', value: 'TH' },
-    { label: 'Viernes', value: 'FR' },
-    { label: 'Sábado', value: 'SA' },
-    { label: 'Domingo', value: 'SU' },
+  readonly frequencyNames = new Map(
+    this.frequencies.map(({ label, value }) => [value, label]),
+  );
+
+  readonly weekDays: ReadonlyArray<{ label: string; value: WeekDay }> = [
+    { label: 'Lun', value: 'MO' },
+    { label: 'Mar', value: 'TU' },
+    { label: 'Mié', value: 'WE' },
+    { label: 'Jue', value: 'TH' },
+    { label: 'Vie', value: 'FR' },
+    { label: 'Sáb', value: 'SA' },
+    { label: 'Dom', value: 'SU' },
   ];
 
-  save() {
-    this.formSubmitted.set(true);
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  readonly formModel = signal<CalendarEventFormModel>(
+    this.createInitialFormModel(),
+  );
+
+  readonly calendarForm = form(
+    this.formModel,
+    (schemaPath) => {
+      disabled(schemaPath, {
+        when: ({ state }) => state.submitting(),
+      });
+
+      validate(schemaPath.title, ({ value }) =>
+        value().trim()
+          ? null
+          : {
+              kind: 'required',
+              message: 'El título es obligatorio.',
+            },
+      );
+      maxLength(schemaPath.title, 150, {
+        message: 'El título admite hasta 150 caracteres.',
+      });
+
+      required(schemaPath.startDate, {
+        message: 'La fecha inicial es obligatoria.',
+      });
+      required(schemaPath.endDate, {
+        message: 'La fecha final es obligatoria.',
+      });
+      validate(schemaPath.endDate, ({ value, valueOf }) => {
+        const startDate = valueOf(schemaPath.startDate);
+        const endDate = value();
+        if (!startDate || !endDate) return null;
+
+        const isValid = valueOf(schemaPath.allDay)
+          ? endDate >= startDate
+          : endDate > startDate;
+        return isValid
+          ? null
+          : {
+              kind: 'invalidDateRange',
+              message: valueOf(schemaPath.allDay)
+                ? 'La fecha final debe ser igual o posterior a la inicial.'
+                : 'La fecha final debe ser posterior a la inicial.',
+            };
+      });
+
+      min(schemaPath.recurrenceConfig.interval, 1, {
+        message: 'El intervalo debe ser al menos 1.',
+      });
+      validate(
+        schemaPath.recurrenceConfig.byWeekDays,
+        ({ value, valueOf }) =>
+          valueOf(schemaPath.recurrenceConfig.frequency) === 'WEEKLY' &&
+          value().length === 0
+            ? {
+                kind: 'weeklyRequiresDays',
+                message: 'Selecciona al menos un día de la semana.',
+              }
+            : null,
+      );
+      validate(
+        schemaPath.recurrenceConfig.until,
+        ({ value, valueOf }) => {
+          const startDate = valueOf(schemaPath.startDate);
+          const until = value();
+          return startDate && until && until <= startDate
+            ? {
+                kind: 'invalidRecurrenceEnd',
+                message: 'La fecha límite debe ser posterior a la inicial.',
+              }
+            : null;
+        },
+      );
+    },
+    {
+      submission: {
+        action: async (formField) => {
+          const payload = this.buildPayload(formField().value());
+          const request = this.event
+            ? this.calendarDataSource.update(this.event.id, payload)
+            : this.calendarDataSource.create(payload);
+
+          const response = await firstValueFrom(request);
+          this.dialogRef.close(response);
+        },
+      },
+    },
+  );
+
+  readonly isRecurring = computed(
+    () => this.calendarForm.recurrenceConfig.frequency().value() !== null,
+  );
+  readonly isWeekly = computed(
+    () =>
+      this.calendarForm.recurrenceConfig.frequency().value() === 'WEEKLY',
+  );
+
+  close(): void {
+    if (!this.calendarForm().submitting()) {
+      this.dialogRef.close();
+    }
+  }
+
+  toggleRecurrence(enabled: boolean): void {
+    this.formModel.update((value) => ({
+      ...value,
+      recurrenceConfig: enabled
+        ? {
+            ...value.recurrenceConfig,
+            frequency: value.recurrenceConfig.frequency ?? 'DAILY',
+          }
+        : {
+            frequency: null,
+            interval: 1,
+            byWeekDays: [],
+            until: null,
+          },
+    }));
+  }
+
+  onAllDayChange(allDay: boolean): void {
+    const { startDate, endDate } = this.formModel();
+    if (!startDate || !endDate) return;
+
+    if (allDay) {
+      this.formModel.update((value) => ({
+        ...value,
+        allDay: true,
+        startDate: this.startOfLocalDay(startDate),
+        endDate: this.startOfLocalDay(endDate),
+      }));
       return;
     }
-    // const saveObservable = this.data?.id
-    //   ? this.calendarDataSource.update(this.data.id, this.form.value)
-    //   : this.calendarDataSource.create({
-    //       ...this.form.value,
-    //       communicationId: this.data?.communicationId,
-    //     });
 
-    // saveObservable.subscribe((resp) => {
-    //   this.diagloRef.close(resp);
-    // });
-  }
-
-  onAllDayToggle() {
-    if (this.isAllDay) {
-      this.form.patchValue({ endDate: null });
+    const timedStart = this.withTime(startDate, 9);
+    let timedEnd = this.withTime(endDate, 10);
+    if (timedEnd <= timedStart) {
+      timedEnd = new Date(timedStart.getTime() + 60 * 60 * 1000);
     }
+
+    this.formModel.update((value) => ({
+      ...value,
+      allDay: false,
+      startDate: timedStart,
+      endDate: timedEnd,
+    }));
   }
 
-  close() {
-    // this.diagloRef.close();
+  dateInputValue(value: Date | null): string {
+    if (!value) return '';
+    return [
+      value.getFullYear(),
+      String(value.getMonth() + 1).padStart(2, '0'),
+      String(value.getDate()).padStart(2, '0'),
+    ].join('-');
   }
 
-  get isAllDay() {
-    return this.form.get('allDay')?.value;
+  dateTimeInputValue(value: Date | null): string {
+    if (!value) return '';
+    const localDate = new Date(
+      value.getTime() - value.getTimezoneOffset() * 60_000,
+    );
+    return localDate.toISOString().slice(0, 16);
   }
 
-  private onRecurringToggle(checked: boolean) {
-    const recurrenceGroup = this.form.get('recurrence');
-    if (!checked) {
-      recurrenceGroup?.disable();
-    } else {
-      recurrenceGroup?.reset({
-        frequency: null,
-        interval: 1,
-        byWeekDays: [],
-        until: null,
-      });
-      recurrenceGroup?.enable();
+  updateEventDate(
+    fieldName: 'startDate' | 'endDate',
+    event: Event,
+  ): void {
+    const inputValue = (event.target as HTMLInputElement).value;
+    const value = inputValue
+      ? this.formModel().allDay
+        ? this.parseLocalDate(inputValue)
+        : new Date(inputValue)
+      : null;
+
+    this.calendarForm[fieldName]().value.set(value);
+  }
+
+  updateRecurrenceUntil(event: Event): void {
+    const inputValue = (event.target as HTMLInputElement).value;
+    const value = inputValue
+      ? this.endOfLocalDay(this.parseLocalDate(inputValue))
+      : null;
+    this.calendarForm.recurrenceConfig.until().value.set(value);
+  }
+
+  touchDate(
+    fieldName: 'startDate' | 'endDate' | 'until',
+  ): void {
+    if (fieldName === 'until') {
+      this.calendarForm.recurrenceConfig.until().markAsTouched();
+      return;
     }
+    this.calendarForm[fieldName]().markAsTouched();
   }
 
-  private loadForm(): void {
-  //   if (!this.data) return;
-  //   const { recurrenceConfig, startDate, endDate, ...props } = this.data;
-  //   if (recurrenceConfig) this.isRecurring.set(true);
-  //   setTimeout(() => {
-  //     this.form.patchValue({
-  //       ...props,
-  //       ...(startDate && { startDate: new Date(startDate) }),
-  //       ...(endDate && { endDate: new Date(endDate) }),
-  //       recurrence: recurrenceConfig,
-  //     });
-  //   }, 0);
+  isFieldInvalid(
+    fieldName: 'title' | 'startDate' | 'endDate',
+  ): boolean {
+    const field = this.calendarForm[fieldName]();
+    return field.touched() && field.errors().length > 0;
+  }
+
+  private createInitialFormModel(): CalendarEventFormModel {
+    const startDate = this.initialStartDate();
+    const allDay = this.event?.allDay ?? true;
+
+    return {
+      title:
+        this.event?.title ?? this.context.initialValues?.title ?? '',
+      description:
+        this.event?.description ??
+        this.context.initialValues?.description ??
+        '',
+      startDate: allDay ? this.startOfLocalDay(startDate) : startDate,
+      endDate: this.initialEndDate(startDate, allDay),
+      allDay,
+      isActive: this.event?.isActive ?? true,
+      recurrenceConfig: {
+        frequency: this.event?.recurrenceConfig?.frequency ?? null,
+        interval: this.event?.recurrenceConfig?.interval ?? 1,
+        byWeekDays: this.event?.recurrenceConfig?.byWeekDays ?? [],
+        until: this.event?.recurrenceConfig?.until
+          ? new Date(this.event.recurrenceConfig.until)
+          : null,
+      },
+    };
+  }
+
+  private initialStartDate(): Date {
+    const value =
+      this.event?.startDate ??
+      this.context.initialValues?.startDate ??
+      new Date();
+    const parsed = value instanceof Date ? new Date(value) : new Date(value);
+    return Number.isFinite(parsed.getTime()) ? parsed : new Date();
+  }
+
+  private initialEndDate(startDate: Date, allDay: boolean): Date {
+    if (!this.event?.endDate) {
+      return allDay
+        ? this.startOfLocalDay(startDate)
+        : new Date(startDate.getTime() + 60 * 60 * 1000);
+    }
+
+    const endDate = new Date(this.event.endDate);
+    if (!allDay) return endDate;
+
+    const inclusiveEndDate = this.addLocalDays(
+      this.startOfLocalDay(endDate),
+      -1,
+    );
+    return inclusiveEndDate < this.startOfLocalDay(startDate)
+      ? this.startOfLocalDay(startDate)
+      : inclusiveEndDate;
+  }
+
+  private buildPayload(
+    value: CalendarEventFormModel,
+  ): SaveCalendarEventDto {
+    const startDate = new Date(value.startDate!);
+    let endDate = new Date(value.endDate!);
+
+    if (value.allDay) {
+      endDate = this.addLocalDays(this.startOfLocalDay(endDate), 1);
+    }
+
+    const { frequency, interval, byWeekDays, until } =
+      value.recurrenceConfig;
+
+    return {
+      title: value.title.trim(),
+      description: value.description.trim() || null,
+      startDate: value.allDay
+        ? this.startOfLocalDay(startDate)
+        : startDate,
+      endDate,
+      allDay: value.allDay,
+      isActive: value.isActive,
+      recurrence: frequency
+        ? {
+            frequency,
+            interval,
+            ...(frequency === 'WEEKLY' && { byWeekDays }),
+            ...(until && { until }),
+          }
+        : null,
+      ...(this.communicationId !== null && {
+        communicationId: this.communicationId,
+      }),
+    };
+  }
+
+  private parseLocalDate(value: string): Date {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private startOfLocalDay(value: Date): Date {
+    return new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+    );
+  }
+
+  private endOfLocalDay(value: Date): Date {
+    return new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+  }
+
+  private addLocalDays(value: Date, days: number): Date {
+    const result = new Date(value);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  private withTime(value: Date, hour: number): Date {
+    return new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+      hour,
+    );
   }
 }

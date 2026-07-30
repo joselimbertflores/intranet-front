@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { rxResource } from '@angular/core/rxjs-interop';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideEllipsisVertical,
@@ -20,13 +21,13 @@ import {
   HlmAlertDialog,
   HlmAlertDialogImports,
 } from '@spartan-ng/helm/alert-dialog';
-import { HlmBadge } from '@spartan-ng/helm/badge';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmDialogService } from '@spartan-ng/helm/dialog';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
-import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
 import { HlmTableImports } from '@spartan-ng/helm/table';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmBadge } from '@spartan-ng/helm/badge';
 
 import { DocumentTypeWithSubTypesResponse } from '../../interfaces';
 import { PaginationControls } from '../../../../../shared';
@@ -37,15 +38,15 @@ import { DocumentTypeEditor } from '../../dialogs';
   selector: 'app-document-types-admin',
   imports: [
     FormsModule,
-    HlmAlertDialogImports,
-    HlmBadge,
-    HlmButtonImports,
     HlmDropdownMenuImports,
+    HlmAlertDialogImports,
     HlmInputGroupImports,
-    HlmSpinner,
-    HlmTableImports,
-    NgIcon,
     PaginationControls,
+    HlmButtonImports,
+    HlmTableImports,
+    HlmSpinner,
+    HlmBadge,
+    NgIcon,
   ],
   providers: [
     provideIcons({
@@ -68,8 +69,9 @@ export default class DocumentTypesAdmin {
   readonly searchTerm = signal('');
   readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
 
-  readonly documentTypePendingDelete =
-    signal<DocumentTypeWithSubTypesResponse | null>(null);
+  readonly typePendingDelete = signal<DocumentTypeWithSubTypesResponse | null>(
+    null,
+  );
 
   readonly documentTypeResource = rxResource({
     params: () => ({
@@ -120,23 +122,13 @@ export default class DocumentTypesAdmin {
     });
   }
 
-  selectDocumentTypeForDeletion(
-    documentType: DocumentTypeWithSubTypesResponse,
-  ): void {
-    this.documentTypePendingDelete.set(documentType);
-  }
-
   confirmRemove(deleteDialog: HlmAlertDialog): void {
-    const documentType = this.documentTypePendingDelete();
+    const documentType = this.typePendingDelete();
     if (!documentType) return;
     this.documentTypeDataSource.remove(documentType.id).subscribe(() => {
       this.removeItem(documentType.id);
       deleteDialog.close();
     });
-  }
-
-  onDeleteDialogClosed(): void {
-    this.documentTypePendingDelete.set(null);
   }
 
   private upsertItem(newItem: DocumentTypeWithSubTypesResponse): void {

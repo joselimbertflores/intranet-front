@@ -1,78 +1,262 @@
-<!-- <div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Eventos</h2>
-  @if (canCreate()) {
-    <app-ui-button
-      label="Agregar"
-      icon="ui-icon ui-icon-plus"
-      iconPos="left"
-      size="small"
-      (onClick)="openEventDialog()"
-    />
-  }
-</div>
-<app-ui-table
-  #table
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  [paginator]="true"
-  [totalRecords]="dataSize()"
-  [rows]="limit()"
-  [first]="offset()"
-  [lazy]="true"
-  size="small"
-  [rowsPerPageOptions]="[10, 25, 50]"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  [showCurrentPageReport]="true"
-  class="text-sm"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-1/4">
-        <search-input (search)="onSearch($event)" label="Buscar" />
-      </div>
-    </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Evento</th>
-      <th>Descripcion</th>
-      <th>Recurrente</th>
-      <th>Estado</th>
-      <th style="width: 3rem"></th>
-    </tr>
-  </ng-template>
+<header class="mb-2 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Eventos</h1>
 
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>{{ item.title }}</td>
-      <td>{{ item.description ? item.description : "----" }}</td>
-      <td>{{ item.recurrenceRule === null ? "NO" : "SI" }}</td>
-      <td>
-        @if (item.isActive) {
-          <app-ui-tag severity="success" value="Activo" />
-        } @else {
-          <app-ui-tag severity="danger" value="Inactivo" />
-        }
-      </td>
-      <td>
-        @if (hasRowActions()) {
-          <button
-            appUiButton
-            icon="ui-icon ui-icon-ellipsis-v"
-            class="ui-button-ghost"
-            size="small"
-            [rounded]="true"
-            (click)="openMenu(item, $event); menu.toggle($event)"
-          ></button>
-        }
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="6">Sin resultados.</td>
-    </tr>
-  </ng-template>
-</app-ui-table>
-<app-ui-menu #menu [popup]="true" [model]="menuItems"></app-ui-menu>
-<app-ui-confirmdialog /> -->
+  @if (canCreate()) {
+    <button
+      #addEventButton
+      hlmBtn
+      type="button"
+      (click)="openEventDialog(undefined, addEventButton)"
+    >
+      <ng-icon name="lucidePlus" data-icon="inline-start" />
+      Agregar
+    </button>
+  }
+</header>
+
+<section class="flex flex-col gap-2" aria-label="Administración de eventos">
+  <div class="flex justify-end">
+    <hlm-input-group class="w-full sm:w-80 lg:w-96">
+      <input
+        id="calendar-admin-search"
+        hlmInputGroupInput
+        type="search"
+        autocomplete="off"
+        aria-label="Buscar eventos por título"
+        placeholder="Buscar por título…"
+        [formField]="searchForm.term"
+        (input)="onSearchChange()"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer>
+      <table
+        hlmTable
+        class="min-w-[880px] table-fixed"
+        aria-label="Listado de eventos"
+      >
+        <colgroup>
+          <col class="w-[24%]" />
+          <col />
+          <col class="w-44" />
+          <col class="w-36" />
+          <col class="w-28" />
+          <col class="w-12" />
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Evento</th>
+            <th hlmTableHead scope="col">Descripción</th>
+            <th hlmTableHead scope="col">Inicio</th>
+            <th hlmTableHead scope="col">Recurrencia</th>
+            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <hlm-spinner />
+                  Cargando eventos…
+                </span>
+              </td>
+            </tr>
+          } @else if (eventResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <div
+                  class="flex flex-col items-center gap-3 whitespace-normal"
+                  role="alert"
+                >
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">
+                      No se pudieron cargar los eventos
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifica la conexión e intenta nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadEvents()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (event of dataSource(); track event.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span
+                    class="block truncate font-medium"
+                    [hlmTooltip]="event.title"
+                  >
+                    {{ event.title }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span
+                    class="block truncate text-muted-foreground"
+                    [hlmTooltip]="event.description || 'Sin descripción'"
+                  >
+                    {{ event.description || "—" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span class="block text-sm">
+                    {{
+                      event.startDate
+                        | date
+                          : event.allDay
+                            ? "dd/MM/yyyy"
+                            : "dd/MM/yyyy, HH:mm"
+                          : "-0400"
+                    }}
+                  </span>
+                  @if (event.allDay) {
+                    <span class="text-xs text-muted-foreground">
+                      Todo el día
+                    </span>
+                  }
+                </td>
+                <td hlmTableCell>
+                  {{ recurrenceLabel(event) }}
+                </td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="event.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ event.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+                <td hlmTableCell class="text-right">
+                  @if (hasRowActions()) {
+                    <button
+                      #actionsButton
+                      hlmBtn
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      align="end"
+                      [attr.aria-label]="'Acciones de ' + event.title"
+                      [hlmDropdownMenuTrigger]="actionsMenu"
+                    >
+                      <ng-icon name="lucideEllipsisVertical" />
+                    </button>
+
+                    <ng-template #actionsMenu>
+                      <hlm-dropdown-menu class="w-36">
+                        <hlm-dropdown-menu-group>
+                          @if (canUpdate()) {
+                            <button
+                              hlmDropdownMenuItem
+                              type="button"
+                              (click)="openEventDialog(event, actionsButton)"
+                            >
+                              <ng-icon name="lucidePencil" />
+                              Editar
+                            </button>
+                          }
+
+                          @if (canDelete()) {
+                            <button
+                              hlmDropdownMenuItem
+                              type="button"
+                              variant="destructive"
+                              [hlmAlertDialogTriggerFor]="deleteDialog"
+                              (click)="
+                                selectEventForDeletion(event, actionsButton)
+                              "
+                            >
+                              <ng-icon name="lucideTrash2" />
+                              Eliminar
+                            </button>
+                          }
+                        </hlm-dropdown-menu-group>
+                      </hlm-dropdown-menu>
+                    </ng-template>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="6" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    @if (hasSearchTerm()) {
+                      <p class="font-medium">No se encontraron eventos</p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otro título.
+                      </p>
+                    } @else {
+                      <p class="font-medium">No hay eventos registrados</p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega un evento para comenzar.
+                      </p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isListLoading() && !eventResource.error() && dataSize() > 0) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [pageSizes]="pageSizeOptions"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar evento</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ eventPendingDelete()?.title }}”. Esta acción no se
+        puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!eventPendingDelete()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

@@ -1,165 +1,251 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  linkedSignal,
   Component,
   computed,
+  debounced,
   inject,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { form, FormField } from '@angular/forms/signals';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideCircleAlert,
+  lucideEllipsisVertical,
+  lucidePencil,
+  lucidePlus,
+  lucideRefreshCw,
+  lucideSearch,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import {
+  HlmAlertDialog,
+  HlmAlertDialogImports,
+} from '@spartan-ng/helm/alert-dialog';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
+import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTableImports } from '@spartan-ng/helm/table';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 
 import {
   PermissionAction,
   Resource,
 } from '../../../../../core/auth/auth.types';
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
-import { CalendarEventResponse } from '../../interfaces';
-import { SearchInput } from '../../../../../shared';
+import { PaginationControls } from '../../../../../shared';
+import {
+  CalendarEventEditor,
+  CalendarEventEditorContext,
+} from '../../dialogs';
+import {
+  CalendarEventResponse,
+  RecurrenceFrequency,
+} from '../../interfaces';
 import { CalendarDataSource } from '../../services';
-import { CalendarEditor } from '../../dialogs';
+
+interface CalendarSearchModel {
+  term: string;
+}
 
 @Component({
   selector: 'app-calendar-admin',
-  imports: [CommonModule, SearchInput],
+  imports: [
+    DatePipe,
+    FormField,
+    HlmAlertDialogImports,
+    HlmBadge,
+    HlmButtonImports,
+    HlmDropdownMenuImports,
+    HlmInputGroupImports,
+    HlmSpinner,
+    HlmTableImports,
+    HlmTooltipImports,
+    NgIcon,
+    PaginationControls,
+  ],
+  providers: [
+    provideIcons({
+      lucideCircleAlert,
+      lucideEllipsisVertical,
+      lucidePencil,
+      lucidePlus,
+      lucideRefreshCw,
+      lucideSearch,
+      lucideTrash2,
+    }),
+  ],
   templateUrl: './calendar-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CalendarAdmin {
-  // private dialogService = inject(DialogService);
-  private calendarDataSource = inject(CalendarDataSource);
-  // private confirmationService = inject(ConfirmationService);
-  private authDataSource = inject(AuthDataSource);
+  private readonly calendarDataSource = inject(CalendarDataSource);
+  private readonly authDataSource = inject(AuthDataSource);
+  private readonly dialogService = inject(HlmDialogService);
 
-  limit = signal(10);
-  term = signal('');
-  offset = signal(0);
-  canCreate = computed(() =>
+  readonly pageSize = signal(10);
+  readonly currentPage = signal(1);
+  readonly pageSizeOptions = [10, 25, 50];
+  readonly offset = computed(() => this.pageSize() * (this.currentPage() - 1));
+
+  readonly searchModel = signal<CalendarSearchModel>({ term: '' });
+  readonly searchForm = form(this.searchModel);
+  readonly debouncedSearchModel = debounced(this.searchModel, 300);
+
+  readonly canCreate = computed(() =>
     this.authDataSource.can(Resource.CALENDAR, PermissionAction.CREATE),
   );
-  canUpdate = computed(() =>
+  readonly canUpdate = computed(() =>
     this.authDataSource.can(Resource.CALENDAR, PermissionAction.UPDATE),
   );
-  canDelete = computed(() =>
+  readonly canDelete = computed(() =>
     this.authDataSource.can(Resource.CALENDAR, PermissionAction.DELETE),
   );
-  hasRowActions = computed(() => this.canUpdate() || this.canDelete());
-  resource = rxResource({
+  readonly hasRowActions = computed(
+    () => this.canUpdate() || this.canDelete(),
+  );
+
+  readonly eventResource = rxResource({
     params: () => ({
       offset: this.offset(),
-      limit: this.limit(),
-      term: this.term(),
+      limit: this.pageSize(),
+      term: this.debouncedSearchModel.value().term.trim(),
     }),
-    stream: ({ params }) =>
-      this.calendarDataSource.findAll(params.limit, params.offset, params.term),
+    stream: ({ params }) => this.calendarDataSource.findAll(params),
   });
 
-  dataSource = linkedSignal(() => {
-    if (!this.resource.hasValue()) return [];
-    return this.resource.value().events;
-  });
+  readonly dataSource = linkedSignal(
+    () => this.eventResource.value()?.events ?? [],
+  );
+  readonly dataSize = linkedSignal(
+    () => this.eventResource.value()?.total ?? 0,
+  );
+  readonly isListLoading = computed(
+    () =>
+      this.debouncedSearchModel.isLoading() ||
+      this.eventResource.isLoading(),
+  );
+  readonly hasSearchTerm = computed(
+    () => this.debouncedSearchModel.value().term.trim().length > 0,
+  );
 
-  dataSize = linkedSignal(() => {
-    if (!this.resource.hasValue()) return 0;
-    return this.resource.value().total;
-  });
+  readonly eventPendingDelete = signal<CalendarEventResponse | null>(null);
+  private readonly deleteFocusTarget = signal<HTMLElement | null>(null);
 
-  menuItems: any[] = [];
+  private readonly recurrenceNames: Readonly<
+    Record<RecurrenceFrequency, string>
+  > = {
+    DAILY: 'Diaria',
+    WEEKLY: 'Semanal',
+    MONTHLY: 'Mensual',
+    YEARLY: 'Anual',
+  };
 
-  openEventDialog(item?: CalendarEventResponse) {
-    // const dialogRef = this.dialogService.open(CalendarEditor, {
-    //   header: item ? 'Editar evento' : 'Crear evento',
-    //   modal: true,
-    //   draggable: false,
-    //   closeOnEscape: true,
-    //   closable: true,
-    //   width: '40vw',
-    //   data: item,
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    //   styleClass: 'app-action-dialog',
-    // });
-    // dialogRef?.onClose.subscribe((result?: CalendarEventResponse) => {
-    //   if (!result) return;
-    //   this.updateItemDataSource(result);
-    // });
+  onSearchChange(): void {
+    this.currentPage.set(1);
   }
 
-  openMenu(row: CalendarEventResponse, event: Event) {
-    const items: any[] = [];
+  reloadEvents(): void {
+    this.eventResource.reload();
+  }
 
-    if (this.canUpdate()) {
-      items.push({
-        label: 'Editar',
-        icon: 'ui-icon ui-icon-pencil',
-        command: () => this.openEventDialog(row),
-      });
+  openEventDialog(
+    event?: CalendarEventResponse,
+    focusTarget?: HTMLElement,
+  ): void {
+    const context: CalendarEventEditorContext = { event };
+    const dialogRef = this.dialogService.open<
+      CalendarEventResponse,
+      CalendarEventEditorContext
+    >(CalendarEventEditor, {
+      showCloseButton: false,
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: focusTarget ?? true,
+      contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[760px]',
+      context,
+    });
+
+    dialogRef.closed$.subscribe((result) => {
+      if (result) this.upsertItem(result);
+    });
+  }
+
+  selectEventForDeletion(
+    event: CalendarEventResponse,
+    focusTarget: HTMLElement,
+  ): void {
+    this.eventPendingDelete.set(event);
+    this.deleteFocusTarget.set(focusTarget);
+  }
+
+  confirmRemove(deleteDialog: HlmAlertDialog): void {
+    const event = this.eventPendingDelete();
+    if (!event) return;
+
+    this.calendarDataSource.remove(event.id).subscribe(() => {
+      this.removeItem(event.id);
+      deleteDialog.close();
+    });
+  }
+
+  onDeleteDialogClosed(): void {
+    const focusTarget = this.deleteFocusTarget();
+    this.eventPendingDelete.set(null);
+    this.deleteFocusTarget.set(null);
+    queueMicrotask(() => {
+      if (focusTarget?.isConnected) {
+        focusTarget.focus();
+        return;
+      }
+      document.getElementById('calendar-admin-search')?.focus();
+    });
+  }
+
+  recurrenceLabel(event: CalendarEventResponse): string {
+    const recurrence = event.recurrenceConfig;
+    if (!recurrence) return 'No';
+
+    const frequency = this.recurrenceNames[recurrence.frequency];
+    return recurrence.interval === 1
+      ? frequency
+      : `${frequency}, cada ${recurrence.interval}`;
+  }
+
+  private upsertItem(newItem: CalendarEventResponse): void {
+    const exists = this.dataSource().some((item) => item.id === newItem.id);
+    if (exists) {
+      this.dataSource.update((values) =>
+        values.map((item) => (item.id === newItem.id ? newItem : item)),
+      );
+      return;
     }
 
-    if (this.canDelete()) {
-      items.push({
-        label: 'Eliminar',
-        icon: 'ui-icon ui-icon-calendar',
-        command: () => this.remove(row.id, event),
-      });
+    this.dataSource.update((values) =>
+      [newItem, ...values].slice(0, this.pageSize()),
+    );
+    this.dataSize.update((total) => total + 1);
+  }
+
+  private removeItem(id: string): void {
+    this.dataSource.update((values) => values.filter((item) => item.id !== id));
+
+    const total = Math.max(0, this.dataSize() - 1);
+    this.dataSize.set(total);
+
+    const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
+    if (this.currentPage() > lastPage) {
+      this.currentPage.set(lastPage);
+      return;
     }
 
-    this.menuItems = [
-      {
-        label: 'Opciones',
-        items,
-      },
-    ];
-  }
-
-  onSearch(term: string) {
-    this.offset.set(0);
-    this.term.set(term);
-  }
-
-  chagePage(event: any) {
-    this.limit.set(event.rows);
-    this.offset.set(event.first);
-  }
-
-  private remove(id: string, event: Event) {
-    // this.confirmationService.confirm({
-    //   target: event.target as EventTarget,
-    //   message: '¿Esta seguro que desea eliminar este evento?',
-    //   header: 'Eliminar evento',
-    //   rejectButtonProps: {
-    //     label: 'Cancelar',
-    //     severity: 'secondary',
-    //     outlined: true,
-    //   },
-    //   acceptButtonProps: {
-    //     label: 'Aceptar',
-    //   },
-    //   accept: () => {
-    //     this.calendarDataSource.remove(id).subscribe(() => {
-    //       this.dataSize.update((value) => (value -= 1));
-    //       this.dataSource.update((values) => {
-    //         const index = values.findIndex((item) => item.id === id);
-    //         values.splice(index, 1);
-    //         return [...values];
-    //       });
-    //     });
-    //   },
-    // });
-  }
-
-  private updateItemDataSource(item: CalendarEventResponse): void {
-    const index = this.dataSource().findIndex(({ id }) => item.id === id);
-    if (index === -1) {
-      this.dataSource.update((values) => [item, ...values]);
-      this.dataSize.update((value) => (value += 1));
-    } else {
-      this.dataSource.update((values) => {
-        values[index] = item;
-        return [...values];
-      });
+    if (this.dataSource().length === 0 && total > 0) {
+      this.eventResource.reload();
     }
   }
 }

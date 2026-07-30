@@ -1,11 +1,10 @@
 export interface CalendarEventResponse {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   startDate: string;
-  endDate: string | null;
+  endDate: string;
   allDay: boolean;
-  recurrenceRule: string | null;
   recurrenceConfig: RecurrenceConfigResponse | null;
   isActive: boolean;
   createdAt: string;
@@ -14,8 +13,12 @@ export interface CalendarEventResponse {
 }
 
 export interface RecurrenceConfigResponse {
-  until: null;
+  frequency: RecurrenceFrequency;
   interval: number;
-  frequency: string;
-  byWeekDays: string[];
+  byWeekDays?: WeekDay[];
+  until?: string;
 }
+
+export type RecurrenceFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+
+export type WeekDay = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';

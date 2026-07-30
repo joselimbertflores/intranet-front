@@ -1,1 +1,1 @@
-export  * from "./calendar-editor/calendar-editor"
+export * from './calendar-editor/calendar-editor';

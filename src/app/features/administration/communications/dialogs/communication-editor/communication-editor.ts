@@ -1,121 +1,248 @@
-import { Component, inject, signal } from '@angular/core';
 import {
-  FormGroup,
-  Validators,
-  FormsModule,
-  FormBuilder,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { CommonModule } from '@angular/common';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  disabled,
+  form,
+  FormField,
+  FormRoot,
+  maxLength,
+  minLength,
+  pattern,
+  required,
+  validate,
+} from '@angular/forms/signals';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideExternalLink,
+  lucideFileText,
+  lucideTrash2,
+  lucideUpload,
+} from '@ng-icons/lucide';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import {
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmTextarea } from '@spartan-ng/helm/textarea';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom } from 'rxjs';
 
-import { CommunicationAdminDataSource } from '../../services';
 import { CommunicationResponse } from '../../interfaces';
-import { FormUtils } from '../../../../../helpers';
-import { finalize } from 'rxjs';
+import {
+  CommunicationAdminDataSource,
+  SaveCommunicationDto,
+} from '../../services';
+
+interface CommunicationEditorContext {
+  communication?: CommunicationResponse;
+}
+
+interface CommunicationFormModel {
+  reference: string;
+  code: string;
+  isActive: boolean;
+  typeId: number | null;
+}
 
 @Component({
   selector: 'app-communication-editor',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [
+    FormField,
+    FormRoot,
+    HlmButtonImports,
+    HlmCheckbox,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmSelectImports,
+    HlmSpinner,
+    HlmTextarea,
+    NgIcon,
+  ],
+  providers: [
+    provideIcons({
+      lucideExternalLink,
+      lucideFileText,
+      lucideTrash2,
+      lucideUpload,
+    }),
+  ],
   templateUrl: './communication-editor.html',
+  host: {
+    class: 'flex max-h-[calc(100dvh-4rem)] flex-col',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CommunicationEditor {
-  private formBuilder = inject(FormBuilder);
-  // private dialogRef = inject(DynamicDialogRef);
+  private readonly dialogRef =
+    inject<BrnDialogRef<CommunicationResponse>>(BrnDialogRef);
+  private readonly communicationDataSource = inject(
+    CommunicationAdminDataSource,
+  );
+  private readonly context =
+    injectBrnDialogContext<CommunicationEditorContext>();
 
-  // readonly data?: CommunicationResponse = inject(DynamicDialogConfig).data;
+  readonly communication = signal(this.context.communication ?? null);
+  readonly isEditing = computed(() => this.communication() !== null);
+  readonly selectedFile = signal<File | null>(null);
+  readonly currentFile = computed(() => this.communication()?.file ?? null);
 
-  private communicationService = inject(CommunicationAdminDataSource);
-  // private confirmationService = inject(ConfirmationService);
+  readonly types = this.communicationDataSource.types;
+  readonly typeNames = computed(
+    () => new Map(this.types().map(({ id, name }) => [id, name])),
+  );
 
-  readonly types = this.communicationService.types;
-  readonly formUtils = FormUtils;
+  readonly formModel = signal<CommunicationFormModel>(
+    this.createInitialFormModel(),
+  );
 
-  formSubmitted = signal(false);
-  isSaving = signal(false);
+  readonly communicationForm = form(
+    this.formModel,
+    (schemaPath) => {
+      disabled(schemaPath, {
+        when: ({ state }) => state.submitting(),
+      });
 
-  form = this.formBuilder.group({
-    reference: ['', [Validators.required, Validators.minLength(3)]],
-    code: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(5),
-        Validators.maxLength(50),
-        Validators.pattern(/^[a-zA-Z0-9\/-]+$/),
-      ],
-    ],
-    isActive: [true],
-    typeId: [null as number | null, Validators.required],
-  });
-  file = signal<File | null>(null);
+      validate(schemaPath.reference, ({ value }) =>
+        value().trim()
+          ? null
+          : {
+              kind: 'required',
+              message: 'La referencia es obligatoria.',
+            },
+      );
+      minLength(schemaPath.reference, 3, {
+        message: 'La referencia debe tener al menos 3 caracteres.',
+      });
 
-  ngOnInit() {
-    this.loadFormData();
-  }
+      validate(schemaPath.code, ({ value }) =>
+        value().trim()
+          ? null
+          : {
+              kind: 'required',
+              message: 'El CITE es obligatorio.',
+            },
+      );
+      minLength(schemaPath.code, 5, {
+        message: 'El CITE debe tener al menos 5 caracteres.',
+      });
+      maxLength(schemaPath.code, 50, {
+        message: 'El CITE admite hasta 50 caracteres.',
+      });
+      pattern(schemaPath.code, /^[a-zA-Z0-9/-]+$/, {
+        message: 'Use únicamente letras, números, guiones y barras.',
+      });
 
-  save() {
-    if (this.isSaving()) return;
+      required(schemaPath.typeId, {
+        message: 'Seleccione un tipo de comunicado.',
+      });
 
-    this.formSubmitted.set(true);
+      validate(schemaPath, () => {
+        const file = this.selectedFile();
+        if (!this.isEditing() && !file) {
+          return {
+            kind: 'fileRequired',
+            message: 'Seleccione el archivo PDF del comunicado.',
+          };
+        }
+        return file && !this.isPdf(file)
+          ? {
+              kind: 'invalidFileType',
+              message: 'El archivo seleccionado debe estar en formato PDF.',
+            }
+          : null;
+      });
+    },
+    {
+      submission: {
+        action: async (formField) => {
+          const communication = this.communication();
+          const selectedFile = this.selectedFile();
+          const payload = this.buildPayload(formField().value());
+          const request = communication
+            ? this.communicationDataSource.update(
+                communication.id,
+                payload,
+                selectedFile,
+              )
+            : this.communicationDataSource.create(payload, selectedFile!);
 
-    if (!this.isFormValid) {
-      this.form.markAllAsTouched();
-      return;
+          const response = await firstValueFrom(request);
+          this.dialogRef.close(response);
+        },
+      },
+    },
+  );
+
+  close(): void {
+    if (!this.communicationForm().submitting()) {
+      this.dialogRef.close();
     }
-
-    // const isDisablingWithEvent =
-    //   this.data?.isActive === true &&
-    //   this.form.controls.isActive.value === false &&
-    //   !!this.data.eventId;
-
-    // if (isDisablingWithEvent) {
-    //   this.confirmationService.confirm({
-    //     header: 'Desactivar comunicado',
-    //     message: 'El comunicado tiene un evento asociado. El evento conservará su estado.',
-    //     acceptButtonProps: { label: 'Desactivar' },
-    //     rejectButtonProps: { label: 'Cancelar', severity: 'secondary' },
-    //     accept: () => this.persistCommunication(),
-    //   });
-    //   return;
-    // }
-    this.persistCommunication();
   }
 
-  close() {
-    // this.dialogRef.close();
-  }
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const [file] = input.files ?? [];
+    input.value = '';
 
-  selectFile(event: any) {
-    const [file] = event.files;
     if (!file) return;
-    this.file.set(file);
+    this.selectedFile.set(file);
   }
 
-  get isFormValid() {
-    return false;
-    // return this.form.valid && (this.data?.file || this.file());
+  clearSelectedFile(): void {
+    this.selectedFile.set(null);
   }
 
-  private loadFormData(): void {
-    // if (!this.data) return;
-    // const { type, file, ...props } = this.data;
-    // this.form.patchValue({ ...props, typeId: type.id });
+  openCurrentFile(): void {
+    const url = this.currentFile()?.url;
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   }
 
-  private persistCommunication() {
-    // if (this.isSaving()) return;
-    // this.isSaving.set(true);
-    // const request$ = this.data
-    //   ? this.communicationService.update(
-    //       this.data.id,
-    //       this.form.getRawValue(),
-    //       this.file(),
-    //     )
-    //   : this.communicationService.create(this.form.getRawValue(), this.file()!);
-    // request$
-    //   .pipe(finalize(() => this.isSaving.set(false)))
-    //   .subscribe((response) => {
-    //     this.dialogRef.close(response);
-    //   });
+  isFieldInvalid(fieldName: keyof CommunicationFormModel): boolean {
+    const field = this.communicationForm[fieldName]();
+    return field.touched() && field.errors().length > 0;
+  }
+
+  private createInitialFormModel(): CommunicationFormModel {
+    const communication = this.communication();
+    return {
+      reference: communication?.reference ?? '',
+      code: communication?.code ?? '',
+      isActive: communication?.isActive ?? true,
+      typeId: communication?.type.id ?? null,
+    };
+  }
+
+  private buildPayload(
+    formValue: CommunicationFormModel,
+  ): SaveCommunicationDto {
+    return {
+      reference: formValue.reference.trim(),
+      code: formValue.code.trim(),
+      isActive: formValue.isActive,
+      typeId: formValue.typeId!,
+    };
+  }
+
+  private isPdf(file: File): boolean {
+    return (
+      file.type === 'application/pdf' ||
+      file.name.toLocaleLowerCase().endsWith('.pdf')
+    );
   }
 }

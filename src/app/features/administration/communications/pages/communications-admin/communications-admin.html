@@ -1,93 +1,332 @@
-<!-- <div class="flex items-center justify-between mb-2">
-  <h2 class="text-2xl font-semibold">Comunicados</h2>
-  <app-ui-button
-    label="Agregar"
-    icon="ui-icon ui-icon-plus"
-    size="small"
-    (onClick)="openCommunicationDialog()"
-  />
-</div>
-<app-ui-table
-  #table
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  [paginator]="true"
-  [lazy]="true"
-  [first]="offset()"
-  [rows]="limit()"
-  [rowsPerPageOptions]="[10, 25, 50]"
-  currentPageReportTemplate="{first} - {last} de {totalRecords}"
-  [showCurrentPageReport]="true"
-  class="text-sm"
-  size="small"
-  (onPage)="chagePage($event)"
-  [loading]="communicationResource.isLoading()"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-1/4">
-        <search-input (search)="onSearch($event)" label="Referencia / Cite" />
-      </div>
-    </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Tipo</th>
-      <th>Cite</th>
-      <th>Referencia</th>
-      <th>Evento</th>
-      <th>Estado</th>
-      <th class="w-24">Adjunto</th>
-      <th style="width: 3rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>{{ item.type.name }}</td>
-      <td>{{ item.code }}</td>
-      <td class="truncate max-w-[350px]">{{ item.reference }}</td>
-      <td>{{ item.eventId ? "SI" : "NO" }}</td>
-      <td>
-        @if (item.isActive) {
-          <app-ui-tag severity="success" value="Activo" />
-        } @else {
-          <app-ui-tag severity="danger" value="Inactivo" />
-        }
-      </td>
-      <td>
-        <a
-          [href]="item.file.url"
-          appUiButton
-          target="_blank"
-          rel="noopener noreferrer"
-          size="small"
-          icon="ui-icon ui-icon-external-link"
-          label="Abrir"
-          severity="secondary"
-        >
-        </a>
-      </td>
-      <td>
-        <button
-          appUiButton
-          icon="ui-icon ui-icon-ellipsis-v"
-          size="small"
-          [text]="true"
-          [rounded]="true"
-          [outlined]="true"
-          (click)="openMenu(item); menu.toggle($event)"
-        ></button>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="8">
-        <div class="py-2">Sin resultados.</div>
-      </td>
-    </tr>
-  </ng-template>
-</app-ui-table>
+<header class="mb-2 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Comunicados</h1>
+  <button
+    id="communications-admin-add-button"
+    hlmBtn
+    type="button"
+    (click)="openEditor()"
+  >
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Agregar
+  </button>
+</header>
 
-<app-ui-menu #menu [popup]="true" [model]="menuItems"></app-ui-menu>
- -->
+<section class="flex flex-col gap-2" aria-label="Administración de comunicados">
+  <div class="flex justify-end">
+    <hlm-input-group class="w-full sm:w-80 lg:w-96">
+      <input
+        id="communications-admin-search"
+        hlmInputGroupInput
+        type="search"
+        autocomplete="off"
+        aria-label="Buscar comunicados por referencia o CITE"
+        placeholder="Buscar por referencia o CITE…"
+        [formField]="searchForm.term"
+        (input)="onSearchChange()"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer>
+      <table
+        hlmTable
+        class="min-w-[860px] table-fixed"
+        aria-label="Listado de comunicados"
+      >
+        <colgroup>
+          <col class="w-36" />
+          <col class="w-44" />
+          <col />
+          <col class="w-24" />
+          <col class="w-28" />
+          <col class="w-28" />
+          <col class="w-12" />
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Tipo</th>
+            <th hlmTableHead scope="col">CITE</th>
+            <th hlmTableHead scope="col">Referencia</th>
+            <th hlmTableHead scope="col" class="text-center">Evento</th>
+            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">Adjunto</th>
+            <th hlmTableHead scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="7" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <hlm-spinner />
+                  Cargando comunicados…
+                </span>
+              </td>
+            </tr>
+          } @else if (communicationResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="7" class="py-10 text-center">
+                <div
+                  class="flex flex-col items-center gap-3 whitespace-normal"
+                  role="alert"
+                >
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">
+                      No se pudieron cargar los comunicados
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifica la conexión e intenta nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadCommunications()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (communication of dataSource(); track communication.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span
+                    class="block truncate"
+                    [hlmTooltip]="communication.type.name"
+                  >
+                    {{ communication.type.name }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span class="font-medium">{{ communication.code }}</span>
+                </td>
+                <td hlmTableCell>
+                  <span
+                    class="block truncate"
+                    [hlmTooltip]="communication.reference"
+                  >
+                    {{ communication.reference }}
+                  </span>
+                </td>
+                <td hlmTableCell class="text-center">
+                  {{ communication.eventId ? "Sí" : "No" }}
+                </td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="communication.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ communication.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <a
+                    hlmBtn
+                    variant="outline"
+                    size="sm"
+                    [href]="communication.file.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ng-icon
+                      name="lucideExternalLink"
+                      data-icon="inline-start"
+                    />
+                    Abrir
+                  </a>
+                </td>
+                <td hlmTableCell class="text-right">
+                  <button
+                    #actionsButton
+                    [id]="'communication-actions-' + communication.id"
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    [attr.aria-label]="'Acciones de ' + communication.reference"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                    align="end"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-56">
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openEditor(communication)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
+                        <a
+                          hlmDropdownMenuItem
+                          [href]="communication.file.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ng-icon name="lucideExternalLink" />
+                          Abrir PDF
+                        </a>
+                      </hlm-dropdown-menu-group>
+                      <hlm-dropdown-menu-separator />
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="
+                            openCalendarEditor(communication, actionsButton)
+                          "
+                        >
+                          <ng-icon
+                            [name]="
+                              communication.eventId
+                                ? 'lucideCalendarCog'
+                                : 'lucideCalendarPlus'
+                            "
+                          />
+                          {{
+                            communication.eventId
+                              ? "Editar evento"
+                              : "Crear evento"
+                          }}
+                        </button>
+                      </hlm-dropdown-menu-group>
+                      <hlm-dropdown-menu-separator />
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="
+                            selectCommunicationForDeletion(communication)
+                          "
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar comunicado
+                        </button>
+
+                        @if (communication.eventId) {
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            variant="destructive"
+                            [hlmAlertDialogTriggerFor]="deleteWithEventDialog"
+                            (click)="
+                              selectCommunicationForDeletion(communication)
+                            "
+                          >
+                            <ng-icon name="lucideCalendarX" />
+                            Eliminar comunicado y evento
+                          </button>
+                        }
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="7" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    @if (hasSearchTerm()) {
+                      <p class="font-medium">No se encontraron comunicados</p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otra referencia o CITE.
+                      </p>
+                    } @else {
+                      <p class="font-medium">No hay comunicados registrados</p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega un comunicado para comenzar.
+                      </p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isListLoading() && !communicationResource.error() && dataSize() > 0) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [pageSizes]="pageSizeOptions"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar comunicado</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ communicationPendingDelete()?.reference }}”. Esta
+        acción no se puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!communicationPendingDelete()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>
+
+<hlm-alert-dialog #deleteWithEventDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar comunicado y evento</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminarán “{{ communicationPendingDelete()?.reference }}” y su
+        evento asociado. Esta acción no se puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!communicationPendingDelete()?.eventId"
+        (click)="confirmRemoveWithEvent(deleteWithEventDialog)"
+      >
+        Eliminar ambos
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

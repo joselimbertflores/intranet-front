@@ -1,6 +1,5 @@
 import { DatePipe } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   debounced,
@@ -9,7 +8,8 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { form, FormField } from '@angular/forms/signals';
+import { FormsModule } from '@angular/forms';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideCircleAlert,
@@ -33,31 +33,16 @@ import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 
-import {
-  PermissionAction,
-  Resource,
-} from '../../../../../core/auth/auth.types';
-import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { PaginationControls } from '../../../../../shared';
-import {
-  CalendarEventEditor,
-  CalendarEventEditorContext,
-} from '../../dialogs';
-import {
-  CalendarEventResponse,
-  RecurrenceFrequency,
-} from '../../interfaces';
+import { CalendarEventEditor, CalendarEventEditorContext } from '../../dialogs';
+import { CalendarEventResponse } from '../../interfaces';
 import { CalendarDataSource } from '../../services';
-
-interface CalendarSearchModel {
-  term: string;
-}
 
 @Component({
   selector: 'app-calendar-admin',
   imports: [
     DatePipe,
-    FormField,
+    FormsModule,
     HlmAlertDialogImports,
     HlmBadge,
     HlmButtonImports,
@@ -81,11 +66,9 @@ interface CalendarSearchModel {
     }),
   ],
   templateUrl: './calendar-admin.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CalendarAdmin {
   private readonly calendarDataSource = inject(CalendarDataSource);
-  private readonly authDataSource = inject(AuthDataSource);
   private readonly dialogService = inject(HlmDialogService);
 
   readonly pageSize = signal(10);
@@ -93,28 +76,14 @@ export default class CalendarAdmin {
   readonly pageSizeOptions = [10, 25, 50];
   readonly offset = computed(() => this.pageSize() * (this.currentPage() - 1));
 
-  readonly searchModel = signal<CalendarSearchModel>({ term: '' });
-  readonly searchForm = form(this.searchModel);
-  readonly debouncedSearchModel = debounced(this.searchModel, 300);
-
-  readonly canCreate = computed(() =>
-    this.authDataSource.can(Resource.CALENDAR, PermissionAction.CREATE),
-  );
-  readonly canUpdate = computed(() =>
-    this.authDataSource.can(Resource.CALENDAR, PermissionAction.UPDATE),
-  );
-  readonly canDelete = computed(() =>
-    this.authDataSource.can(Resource.CALENDAR, PermissionAction.DELETE),
-  );
-  readonly hasRowActions = computed(
-    () => this.canUpdate() || this.canDelete(),
-  );
+  readonly searchTerm = signal('');
+  readonly debouncedSearchModel = debounced(this.searchTerm, 300);
 
   readonly eventResource = rxResource({
     params: () => ({
       offset: this.offset(),
       limit: this.pageSize(),
-      term: this.debouncedSearchModel.value().term.trim(),
+      term: this.debouncedSearchModel.value().trim(),
     }),
     stream: ({ params }) => this.calendarDataSource.findAll(params),
   });
@@ -127,24 +96,13 @@ export default class CalendarAdmin {
   );
   readonly isListLoading = computed(
     () =>
-      this.debouncedSearchModel.isLoading() ||
-      this.eventResource.isLoading(),
+      this.debouncedSearchModel.isLoading() || this.eventResource.isLoading(),
   );
   readonly hasSearchTerm = computed(
-    () => this.debouncedSearchModel.value().term.trim().length > 0,
+    () => this.debouncedSearchModel.value().trim().length > 0,
   );
 
   readonly eventPendingDelete = signal<CalendarEventResponse | null>(null);
-  private readonly deleteFocusTarget = signal<HTMLElement | null>(null);
-
-  private readonly recurrenceNames: Readonly<
-    Record<RecurrenceFrequency, string>
-  > = {
-    DAILY: 'Diaria',
-    WEEKLY: 'Semanal',
-    MONTHLY: 'Mensual',
-    YEARLY: 'Anual',
-  };
 
   onSearchChange(): void {
     this.currentPage.set(1);
@@ -154,10 +112,7 @@ export default class CalendarAdmin {
     this.eventResource.reload();
   }
 
-  openEventDialog(
-    event?: CalendarEventResponse,
-    focusTarget?: HTMLElement,
-  ): void {
+  openEventDialog(event?: CalendarEventResponse): void {
     const context: CalendarEventEditorContext = { event };
     const dialogRef = this.dialogService.open<
       CalendarEventResponse,
@@ -166,7 +121,6 @@ export default class CalendarAdmin {
       showCloseButton: false,
       disableClose: true,
       autoFocus: false,
-      restoreFocus: focusTarget ?? true,
       contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[760px]',
       context,
     });
@@ -176,12 +130,12 @@ export default class CalendarAdmin {
     });
   }
 
-  selectEventForDeletion(
-    event: CalendarEventResponse,
-    focusTarget: HTMLElement,
-  ): void {
+  selectEventForDeletion(event: CalendarEventResponse): void {
     this.eventPendingDelete.set(event);
-    this.deleteFocusTarget.set(focusTarget);
+  }
+
+  onDeleteDialogClosed(): void {
+    this.eventPendingDelete.set(null);
   }
 
   confirmRemove(deleteDialog: HlmAlertDialog): void {
@@ -192,29 +146,6 @@ export default class CalendarAdmin {
       this.removeItem(event.id);
       deleteDialog.close();
     });
-  }
-
-  onDeleteDialogClosed(): void {
-    const focusTarget = this.deleteFocusTarget();
-    this.eventPendingDelete.set(null);
-    this.deleteFocusTarget.set(null);
-    queueMicrotask(() => {
-      if (focusTarget?.isConnected) {
-        focusTarget.focus();
-        return;
-      }
-      document.getElementById('calendar-admin-search')?.focus();
-    });
-  }
-
-  recurrenceLabel(event: CalendarEventResponse): string {
-    const recurrence = event.recurrenceConfig;
-    if (!recurrence) return 'No';
-
-    const frequency = this.recurrenceNames[recurrence.frequency];
-    return recurrence.interval === 1
-      ? frequency
-      : `${frequency}, cada ${recurrence.interval}`;
   }
 
   private upsertItem(newItem: CalendarEventResponse): void {

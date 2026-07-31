@@ -1,17 +1,10 @@
 <header class="mb-2 flex flex-wrap items-center justify-between gap-3">
   <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Eventos</h1>
 
-  @if (canCreate()) {
-    <button
-      #addEventButton
-      hlmBtn
-      type="button"
-      (click)="openEventDialog(undefined, addEventButton)"
-    >
-      <ng-icon name="lucidePlus" data-icon="inline-start" />
-      Agregar
-    </button>
-  }
+  <button #addEventButton hlmBtn type="button" (click)="openEventDialog()">
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Agregar
+  </button>
 </header>
 
 <section class="flex flex-col gap-2" aria-label="Administración de eventos">
@@ -24,7 +17,7 @@
         autocomplete="off"
         aria-label="Buscar eventos por título"
         placeholder="Buscar por título…"
-        [formField]="searchForm.term"
+        [(ngModel)]="searchTerm"
         (input)="onSearchChange()"
       />
       <hlm-input-group-addon>
@@ -85,9 +78,7 @@
                 >
                   <ng-icon name="lucideCircleAlert" class="text-destructive" />
                   <div class="flex flex-col gap-1">
-                    <p class="font-medium">
-                      No se pudieron cargar los eventos
-                    </p>
+                    <p class="font-medium">No se pudieron cargar los eventos</p>
                     <p class="text-sm text-muted-foreground">
                       Verifica la conexión e intenta nuevamente.
                     </p>
@@ -129,20 +120,17 @@
                     {{
                       event.startDate
                         | date
-                          : event.allDay
-                            ? "dd/MM/yyyy"
-                            : "dd/MM/yyyy, HH:mm"
+                          : (event.allDay ? "dd/MM/yyyy" : "dd/MM/yyyy, HH:mm")
                           : "-0400"
                     }}
                   </span>
-                  @if (event.allDay) {
-                    <span class="text-xs text-muted-foreground">
-                      Todo el día
-                    </span>
-                  }
                 </td>
                 <td hlmTableCell>
-                  {{ recurrenceLabel(event) }}
+                  @if (event.recurrenceConfig) {
+                    <span>Si</span>
+                  } @else {
+                    <span>No</span>
+                  }
                 </td>
                 <td hlmTableCell>
                   <span
@@ -153,52 +141,44 @@
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
-                  @if (hasRowActions()) {
-                    <button
-                      #actionsButton
-                      hlmBtn
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      align="end"
-                      [attr.aria-label]="'Acciones de ' + event.title"
-                      [hlmDropdownMenuTrigger]="actionsMenu"
-                    >
-                      <ng-icon name="lucideEllipsisVertical" />
-                    </button>
+                  <button
+                    #actionsButton
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + event.title"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
 
-                    <ng-template #actionsMenu>
-                      <hlm-dropdown-menu class="w-36">
-                        <hlm-dropdown-menu-group>
-                          @if (canUpdate()) {
-                            <button
-                              hlmDropdownMenuItem
-                              type="button"
-                              (click)="openEventDialog(event, actionsButton)"
-                            >
-                              <ng-icon name="lucidePencil" />
-                              Editar
-                            </button>
-                          }
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openEventDialog(event)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
 
-                          @if (canDelete()) {
-                            <button
-                              hlmDropdownMenuItem
-                              type="button"
-                              variant="destructive"
-                              [hlmAlertDialogTriggerFor]="deleteDialog"
-                              (click)="
-                                selectEventForDeletion(event, actionsButton)
-                              "
-                            >
-                              <ng-icon name="lucideTrash2" />
-                              Eliminar
-                            </button>
-                          }
-                        </hlm-dropdown-menu-group>
-                      </hlm-dropdown-menu>
-                    </ng-template>
-                  }
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="selectEventForDeletion(event)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar
+                        </button>
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
                 </td>
               </tr>
             } @empty {

@@ -1,12 +1,5 @@
+import { Component, computed, inject, signal } from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import {
-  disabled,
   form,
   FormField,
   FormRoot,
@@ -36,10 +29,7 @@ import {
   RecurrenceFrequency,
   WeekDay,
 } from '../../interfaces';
-import {
-  CalendarDataSource,
-  SaveCalendarEventDto,
-} from '../../services';
+import { CalendarDataSource, SaveCalendarEventDto } from '../../services';
 
 export interface CalendarEventEditorInitialValues {
   title?: string;
@@ -91,7 +81,6 @@ interface CalendarEventFormModel {
   host: {
     class: 'flex max-h-[calc(100dvh-4rem)] min-h-0 flex-col',
   },
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarEventEditor {
   private readonly dialogRef =
@@ -101,7 +90,7 @@ export class CalendarEventEditor {
     injectBrnDialogContext<CalendarEventEditorContext>();
 
   readonly event = this.context.event;
-  readonly isEditing = this.event !== undefined;
+
   readonly communicationId =
     this.context.communicationId ?? this.event?.communicationId ?? null;
 
@@ -136,10 +125,6 @@ export class CalendarEventEditor {
   readonly calendarForm = form(
     this.formModel,
     (schemaPath) => {
-      disabled(schemaPath, {
-        when: ({ state }) => state.submitting(),
-      });
-
       validate(schemaPath.title, ({ value }) =>
         value().trim()
           ? null
@@ -166,6 +151,7 @@ export class CalendarEventEditor {
         const isValid = valueOf(schemaPath.allDay)
           ? endDate >= startDate
           : endDate > startDate;
+
         return isValid
           ? null
           : {
@@ -179,30 +165,25 @@ export class CalendarEventEditor {
       min(schemaPath.recurrenceConfig.interval, 1, {
         message: 'El intervalo debe ser al menos 1.',
       });
-      validate(
-        schemaPath.recurrenceConfig.byWeekDays,
-        ({ value, valueOf }) =>
-          valueOf(schemaPath.recurrenceConfig.frequency) === 'WEEKLY' &&
-          value().length === 0
-            ? {
-                kind: 'weeklyRequiresDays',
-                message: 'Selecciona al menos un día de la semana.',
-              }
-            : null,
+      validate(schemaPath.recurrenceConfig.byWeekDays, ({ value, valueOf }) =>
+        valueOf(schemaPath.recurrenceConfig.frequency) === 'WEEKLY' &&
+        value().length === 0
+          ? {
+              kind: 'weeklyRequiresDays',
+              message: 'Selecciona al menos un día de la semana.',
+            }
+          : null,
       );
-      validate(
-        schemaPath.recurrenceConfig.until,
-        ({ value, valueOf }) => {
-          const startDate = valueOf(schemaPath.startDate);
-          const until = value();
-          return startDate && until && until <= startDate
-            ? {
-                kind: 'invalidRecurrenceEnd',
-                message: 'La fecha límite debe ser posterior a la inicial.',
-              }
-            : null;
-        },
-      );
+      validate(schemaPath.recurrenceConfig.until, ({ value, valueOf }) => {
+        const startDate = valueOf(schemaPath.startDate);
+        const until = value();
+        return startDate && until && until <= startDate
+          ? {
+              kind: 'invalidRecurrenceEnd',
+              message: 'La fecha límite debe ser posterior a la inicial.',
+            }
+          : null;
+      });
     },
     {
       submission: {
@@ -223,8 +204,7 @@ export class CalendarEventEditor {
     () => this.calendarForm.recurrenceConfig.frequency().value() !== null,
   );
   readonly isWeekly = computed(
-    () =>
-      this.calendarForm.recurrenceConfig.frequency().value() === 'WEEKLY',
+    () => this.calendarForm.recurrenceConfig.frequency().value() === 'WEEKLY',
   );
 
   close(): void {
@@ -251,30 +231,17 @@ export class CalendarEventEditor {
   }
 
   onAllDayChange(allDay: boolean): void {
-    const { startDate, endDate } = this.formModel();
-    if (!startDate || !endDate) return;
-
-    if (allDay) {
-      this.formModel.update((value) => ({
-        ...value,
-        allDay: true,
-        startDate: this.startOfLocalDay(startDate),
-        endDate: this.startOfLocalDay(endDate),
-      }));
-      return;
-    }
-
-    const timedStart = this.withTime(startDate, 9);
-    let timedEnd = this.withTime(endDate, 10);
-    if (timedEnd <= timedStart) {
-      timedEnd = new Date(timedStart.getTime() + 60 * 60 * 1000);
-    }
-
     this.formModel.update((value) => ({
       ...value,
-      allDay: false,
-      startDate: timedStart,
-      endDate: timedEnd,
+      allDay,
+      startDate:
+        allDay && value.startDate
+          ? this.toLocalStartOfDay(value.startDate)
+          : null,
+      endDate:
+        allDay && value.endDate
+          ? this.toLocalStartOfDay(value.endDate)
+          : null,
     }));
   }
 
@@ -295,14 +262,11 @@ export class CalendarEventEditor {
     return localDate.toISOString().slice(0, 16);
   }
 
-  updateEventDate(
-    fieldName: 'startDate' | 'endDate',
-    event: Event,
-  ): void {
+  updateEventDate(fieldName: 'startDate' | 'endDate', event: Event): void {
     const inputValue = (event.target as HTMLInputElement).value;
     const value = inputValue
       ? this.formModel().allDay
-        ? this.parseLocalDate(inputValue)
+        ? this.parseDateInput(inputValue)
         : new Date(inputValue)
       : null;
 
@@ -312,14 +276,12 @@ export class CalendarEventEditor {
   updateRecurrenceUntil(event: Event): void {
     const inputValue = (event.target as HTMLInputElement).value;
     const value = inputValue
-      ? this.endOfLocalDay(this.parseLocalDate(inputValue))
+      ? this.toLocalEndOfDay(this.parseDateInput(inputValue))
       : null;
     this.calendarForm.recurrenceConfig.until().value.set(value);
   }
 
-  touchDate(
-    fieldName: 'startDate' | 'endDate' | 'until',
-  ): void {
+  touchDate(fieldName: 'startDate' | 'endDate' | 'until'): void {
     if (fieldName === 'until') {
       this.calendarForm.recurrenceConfig.until().markAsTouched();
       return;
@@ -327,9 +289,7 @@ export class CalendarEventEditor {
     this.calendarForm[fieldName]().markAsTouched();
   }
 
-  isFieldInvalid(
-    fieldName: 'title' | 'startDate' | 'endDate',
-  ): boolean {
+  isFieldInvalid(fieldName: 'title' | 'startDate' | 'endDate'): boolean {
     const field = this.calendarForm[fieldName]();
     return field.touched() && field.errors().length > 0;
   }
@@ -339,14 +299,13 @@ export class CalendarEventEditor {
     const allDay = this.event?.allDay ?? true;
 
     return {
-      title:
-        this.event?.title ?? this.context.initialValues?.title ?? '',
+      title: this.event?.title ?? this.context.initialValues?.title ?? '',
       description:
         this.event?.description ??
         this.context.initialValues?.description ??
         '',
-      startDate: allDay ? this.startOfLocalDay(startDate) : startDate,
-      endDate: this.initialEndDate(startDate, allDay),
+      startDate: allDay ? this.toLocalStartOfDay(startDate) : startDate,
+      endDate: this.initialEndDate(startDate),
       allDay,
       isActive: this.event?.isActive ?? true,
       recurrenceConfig: {
@@ -365,49 +324,28 @@ export class CalendarEventEditor {
       this.event?.startDate ??
       this.context.initialValues?.startDate ??
       new Date();
-    const parsed = value instanceof Date ? new Date(value) : new Date(value);
-    return Number.isFinite(parsed.getTime()) ? parsed : new Date();
+    return typeof value === 'string' ? new Date(value) : value;
   }
 
-  private initialEndDate(startDate: Date, allDay: boolean): Date {
-    if (!this.event?.endDate) {
-      return allDay
-        ? this.startOfLocalDay(startDate)
-        : new Date(startDate.getTime() + 60 * 60 * 1000);
-    }
+  private initialEndDate(startDate: Date): Date {
+    if (!this.event) return this.toLocalStartOfDay(startDate);
 
     const endDate = new Date(this.event.endDate);
-    if (!allDay) return endDate;
-
-    const inclusiveEndDate = this.addLocalDays(
-      this.startOfLocalDay(endDate),
-      -1,
-    );
-    return inclusiveEndDate < this.startOfLocalDay(startDate)
-      ? this.startOfLocalDay(startDate)
-      : inclusiveEndDate;
+    return this.event.allDay
+      ? this.addCalendarDays(this.toLocalStartOfDay(endDate), -1)
+      : endDate;
   }
 
-  private buildPayload(
-    value: CalendarEventFormModel,
-  ): SaveCalendarEventDto {
-    const startDate = new Date(value.startDate!);
-    let endDate = new Date(value.endDate!);
-
-    if (value.allDay) {
-      endDate = this.addLocalDays(this.startOfLocalDay(endDate), 1);
-    }
-
-    const { frequency, interval, byWeekDays, until } =
-      value.recurrenceConfig;
+  private buildPayload(value: CalendarEventFormModel): SaveCalendarEventDto {
+    const { frequency, interval, byWeekDays, until } = value.recurrenceConfig;
 
     return {
       title: value.title.trim(),
       description: value.description.trim() || null,
-      startDate: value.allDay
-        ? this.startOfLocalDay(startDate)
-        : startDate,
-      endDate,
+      startDate: value.startDate!,
+      endDate: value.allDay
+        ? this.addCalendarDays(value.endDate!, 1)
+        : value.endDate!,
       allDay: value.allDay,
       isActive: value.isActive,
       recurrence: frequency
@@ -424,20 +362,16 @@ export class CalendarEventEditor {
     };
   }
 
-  private parseLocalDate(value: string): Date {
+  private parseDateInput(value: string): Date {
     const [year, month, day] = value.split('-').map(Number);
     return new Date(year, month - 1, day);
   }
 
-  private startOfLocalDay(value: Date): Date {
-    return new Date(
-      value.getFullYear(),
-      value.getMonth(),
-      value.getDate(),
-    );
+  private toLocalStartOfDay(value: Date): Date {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 
-  private endOfLocalDay(value: Date): Date {
+  private toLocalEndOfDay(value: Date): Date {
     return new Date(
       value.getFullYear(),
       value.getMonth(),
@@ -449,18 +383,9 @@ export class CalendarEventEditor {
     );
   }
 
-  private addLocalDays(value: Date, days: number): Date {
+  private addCalendarDays(value: Date, days: number): Date {
     const result = new Date(value);
     result.setDate(result.getDate() + days);
     return result;
-  }
-
-  private withTime(value: Date, hour: number): Date {
-    return new Date(
-      value.getFullYear(),
-      value.getMonth(),
-      value.getDate(),
-      hour,
-    );
   }
 }

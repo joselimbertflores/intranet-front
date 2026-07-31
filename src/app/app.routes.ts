@@ -55,7 +55,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'admin',
+    path: 'administration',
     canActivate: [isAuthenticatedGuard],
     title: 'Administracion',
     loadComponent: () =>
@@ -170,11 +170,27 @@ export const routes: Routes = [
       },
       {
         path: 'directory',
-        title: 'Administracion - Directorio',
         data: { resource: Resource.DIRECTORY },
         canActivate: [resourceGuard],
-        loadComponent: () =>
-          import('./features/administration/directory/pages/directory-admin/directory-admin'),
+        children: [
+          {
+            path: '',
+            redirectTo: 'contacts',
+            pathMatch: 'full',
+          },
+          {
+            path: 'contacts',
+            title: 'Administración - Contactos del directorio',
+            loadComponent: () =>
+              import('./features/administration/directory/pages/directory-contacts-admin/directory-contacts-admin'),
+          },
+          {
+            path: 'sites',
+            title: 'Administración - Sedes del directorio',
+            loadComponent: () =>
+              import('./features/administration/directory/pages/directory-sites-admin/directory-sites-admin'),
+          },
+        ],
       },
       {
         path: 'users',
@@ -193,6 +209,10 @@ export const routes: Routes = [
           import('./features/administration/access/pages/roles-admin/roles-admin'),
       },
     ],
+  },
+  {
+    path: 'admin',
+    redirectTo: 'administration',
   },
   { path: '', redirectTo: '', pathMatch: 'full' },
   { path: '**', redirectTo: '' },

@@ -1,0 +1,338 @@
+<header class="mb-2 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Contactos</h1>
+
+  <button #addButton hlmBtn type="button" (click)="openEditor(addButton)">
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Agregar
+  </button>
+</header>
+
+<section class="flex flex-col gap-3" aria-label="Administración de contactos">
+  <div
+    class="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_16rem_13rem]"
+  >
+    <hlm-input-group>
+      <input
+        id="directory-contacts-search"
+        hlmInputGroupInput
+        type="search"
+        autocomplete="off"
+        aria-label="Buscar contactos"
+        placeholder="Buscar área, referencia o número…"
+        [formField]="filtersForm.term"
+        (input)="onFiltersChange()"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+
+    <hlm-select
+      [formField]="filtersForm.siteId"
+      (valueChange)="onFiltersChange()"
+    >
+      <hlm-select-trigger class="w-full" buttonId="directory-contacts-site">
+        <ng-template hlmSelectValueTemplate let-siteId>
+          {{ siteNames().get(siteId) ?? "Todas las sedes" }}
+        </ng-template>
+        <hlm-select-placeholder>Todas las sedes</hlm-select-placeholder>
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal class="max-h-72">
+        <hlm-select-group>
+          <hlm-select-item [value]="null">Todas las sedes</hlm-select-item>
+          @for (site of sites(); track site.id) {
+            <hlm-select-item [value]="site.id">
+              {{ site.name }}{{ site.isActive ? "" : " (inactiva)" }}
+            </hlm-select-item>
+          }
+        </hlm-select-group>
+      </hlm-select-content>
+    </hlm-select>
+
+    <hlm-select
+      [formField]="filtersForm.isActive"
+      (valueChange)="onFiltersChange()"
+    >
+      <hlm-select-trigger class="w-full" buttonId="directory-contacts-status">
+        <ng-template hlmSelectValueTemplate let-isActive>
+          {{
+            isActive === true
+              ? "Activos"
+              : isActive === false
+                ? "Inactivos"
+                : "Todos los estados"
+          }}
+        </ng-template>
+        <hlm-select-placeholder>Todos los estados</hlm-select-placeholder>
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        <hlm-select-group>
+          <hlm-select-item [value]="null">Todos los estados</hlm-select-item>
+          <hlm-select-item [value]="true">Activos</hlm-select-item>
+          <hlm-select-item [value]="false">Inactivos</hlm-select-item>
+        </hlm-select-group>
+      </hlm-select-content>
+    </hlm-select>
+  </div>
+
+  <div class="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer>
+      <table
+        hlmTable
+        class="min-w-[920px] table-fixed"
+        aria-label="Listado de contactos del directorio"
+      >
+        <colgroup>
+          <col class="w-[27%]" />
+          <col class="w-[18%]" />
+          <col class="w-[20%]" />
+          <col class="w-[20%]" />
+          <col class="w-28" />
+          <col class="w-12" />
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Área y referencia</th>
+            <th hlmTableHead scope="col">Internos</th>
+            <th hlmTableHead scope="col">Teléfonos</th>
+            <th hlmTableHead scope="col">Sede</th>
+            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <hlm-spinner />
+                  Cargando contactos…
+                </span>
+              </td>
+            </tr>
+          } @else if (entriesResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="6" class="py-10 text-center">
+                <div
+                  class="flex flex-col items-center gap-3 whitespace-normal"
+                  role="alert"
+                >
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">
+                      No se pudieron cargar los contactos
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifica la conexión e intenta nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadEntries()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (entry of entries(); track entry.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <div class="min-w-0">
+                    <p class="truncate font-medium" [title]="entry.areaName">
+                      {{ entry.areaName }}
+                    </p>
+                    @if (entry.contactLabel) {
+                      <p
+                        class="truncate text-xs text-muted-foreground"
+                        [title]="entry.contactLabel"
+                      >
+                        {{ entry.contactLabel }}
+                      </p>
+                    }
+                    @if (entry.email) {
+                      <p
+                        class="truncate text-xs text-muted-foreground"
+                        [title]="entry.email"
+                      >
+                        {{ entry.email }}
+                      </p>
+                    }
+                  </div>
+                </td>
+
+                <td hlmTableCell>
+                  <div class="flex max-w-full flex-wrap gap-1">
+                    @for (extension of entry.extensions; track extension) {
+                      <span
+                        hlmBadge
+                        variant="secondary"
+                        class="max-w-full truncate font-mono"
+                        [title]="extension"
+                      >
+                        {{ extension }}
+                      </span>
+                    } @empty {
+                      <span class="text-muted-foreground">—</span>
+                    }
+                  </div>
+                </td>
+
+                <td hlmTableCell>
+                  <div class="flex min-w-0 flex-col gap-1 font-mono text-xs">
+                    @for (phone of entry.phones; track phone) {
+                      <span class="truncate" [title]="phone">{{ phone }}</span>
+                    } @empty {
+                      <span class="text-muted-foreground">—</span>
+                    }
+                  </div>
+                </td>
+
+                <td hlmTableCell>
+                  @if (entry.site) {
+                    <div class="min-w-0">
+                      <p class="truncate" [title]="entry.site.name">
+                        {{ entry.site.name }}
+                      </p>
+                      @if (entry.siteDetails) {
+                        <p
+                          class="truncate text-xs text-muted-foreground"
+                          [title]="entry.siteDetails"
+                        >
+                          {{ entry.siteDetails }}
+                        </p>
+                      }
+                    </div>
+                  } @else if (entry.siteDetails) {
+                    <p
+                      class="truncate text-xs text-muted-foreground"
+                      [title]="entry.siteDetails"
+                    >
+                      {{ entry.siteDetails }}
+                    </p>
+                  } @else {
+                    <span class="text-muted-foreground">—</span>
+                  }
+                </td>
+
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="entry.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ entry.isActive ? "Activo" : "Inactivo" }}
+                  </span>
+                </td>
+
+                <td hlmTableCell class="text-right">
+                  <button
+                    #actionsButton
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + entry.areaName"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openEditor(actionsButton, entry)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
+
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="selectForDeletion(entry)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar
+                        </button>
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="6" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    @if (hasFilters()) {
+                      <p class="font-medium">No se encontraron contactos</p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otros términos o filtros.
+                      </p>
+                    } @else {
+                      <p class="font-medium">No hay contactos registrados</p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega un contacto para comenzar.
+                      </p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isListLoading() && !entriesResource.error() && total() > 0) {
+      <app-pagination-controls
+        [totalItems]="total()"
+        [pageSizes]="pageSizeOptions"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar contacto</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ entryPendingDelete()?.areaName }}”. Esta acción no se
+        puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!entryPendingDelete()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

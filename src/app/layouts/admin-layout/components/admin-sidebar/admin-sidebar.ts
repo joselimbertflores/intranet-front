@@ -95,7 +95,12 @@ const ADMIN_MENU = [
     links: [
       {
         label: 'Contactos',
-        route: 'directory',
+        route: 'directory/contacts',
+        resource: Resource.DIRECTORY,
+      },
+      {
+        label: 'Sedes',
+        route: 'directory/sites',
         resource: Resource.DIRECTORY,
       },
     ],
@@ -168,7 +173,7 @@ const ADMIN_MENU = [
               @for (link of group.links; track link.route) {
                 <a
                   class="block rounded-md px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-                  [routerLink]="'/admin/' + link.route"
+                  [routerLink]="'/administration/' + link.route"
                   routerLinkActive="bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                 >
                   {{ link.label }}

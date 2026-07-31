@@ -75,7 +75,7 @@ export default class OrganizationalUnitAdmin {
   );
 
   searchTerm = signal('');
-  readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
+  readonly debouncedSearchTerm = debounced(this.searchTerm, 250);
 
   readonly filteredRows = computed(() => {
     const term = this.normalizeSearch(this.debouncedSearchTerm.value());

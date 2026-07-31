@@ -1,0 +1,296 @@
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>
+    {{ entry ? "Editar contacto" : "Nuevo contacto" }}
+  </h3>
+</hlm-dialog-header>
+
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="directory-entry-editor-form"
+    class="flex flex-col gap-5"
+    [formRoot]="entryForm"
+  >
+    <section class="grid gap-4 sm:grid-cols-2" aria-label="Datos del contacto">
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="directory-entry-area">
+          Área o dependencia
+        </label>
+        <input
+          hlmInput
+          id="directory-entry-area"
+          type="text"
+          autocomplete="organization"
+          placeholder="Ej. Recursos Humanos"
+          [formField]="entryForm.areaName"
+        />
+        @if (entryForm.areaName().touched()) {
+          @for (error of entryForm.areaName().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="directory-entry-reference">
+          Referencia, cargo o persona
+        </label>
+        <input
+          hlmInput
+          id="directory-entry-reference"
+          type="text"
+          autocomplete="off"
+          placeholder="Ej. Ventanilla de atención"
+          [formField]="entryForm.contactLabel"
+        />
+        @if (entryForm.contactLabel().touched()) {
+          @for (error of entryForm.contactLabel().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="grid gap-4 border-t pt-5 sm:grid-cols-2">
+      <div class="flex min-w-0 flex-col gap-3">
+        <header class="flex items-center justify-between gap-3">
+          <div>
+            <h4 class="font-medium">Internos</h4>
+            <p class="text-xs text-muted-foreground">Uno por campo.</p>
+          </div>
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            (click)="addExtension()"
+          >
+            <ng-icon name="lucidePlus" data-icon="inline-start" />
+            Agregar
+          </button>
+        </header>
+
+        <div class="flex flex-col gap-2">
+          @for (
+            extensionField of entryForm.extensions;
+            track extensionField;
+            let i = $index
+          ) {
+            <div hlmField>
+              <div class="flex items-start gap-2">
+                <input
+                  hlmInput
+                  class="min-w-0 flex-1"
+                  type="text"
+                  inputmode="tel"
+                  autocomplete="off"
+                  [id]="'directory-entry-extension-' + i"
+                  [attr.aria-label]="'Interno ' + (i + 1)"
+                  placeholder="Ej. 124"
+                  [formField]="extensionField"
+                />
+                <button
+                  hlmBtn
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  [attr.aria-label]="'Quitar interno ' + (i + 1)"
+                  (click)="removeExtension(i)"
+                >
+                  <ng-icon name="lucideX" />
+                </button>
+              </div>
+              @if (extensionField().touched()) {
+                @for (error of extensionField().errors(); track error.kind) {
+                  <hlm-field-error [validator]="error.kind">
+                    {{ error.message }}
+                  </hlm-field-error>
+                }
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-muted-foreground">Sin internos.</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex min-w-0 flex-col gap-3">
+        <header class="flex items-center justify-between gap-3">
+          <div>
+            <h4 class="font-medium">Teléfonos</h4>
+            <p class="text-xs text-muted-foreground">Uno por campo.</p>
+          </div>
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            (click)="addPhone()"
+          >
+            <ng-icon name="lucidePlus" data-icon="inline-start" />
+            Agregar
+          </button>
+        </header>
+
+        <div class="flex flex-col gap-2">
+          @for (
+            phoneField of entryForm.phones;
+            track phoneField;
+            let i = $index
+          ) {
+            <div hlmField>
+              <div class="flex items-start gap-2">
+                <input
+                  hlmInput
+                  class="min-w-0 flex-1"
+                  type="tel"
+                  autocomplete="tel"
+                  [id]="'directory-entry-phone-' + i"
+                  [attr.aria-label]="'Teléfono ' + (i + 1)"
+                  placeholder="Ej. 4 6421234"
+                  [formField]="phoneField"
+                />
+                <button
+                  hlmBtn
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  [attr.aria-label]="'Quitar teléfono ' + (i + 1)"
+                  (click)="removePhone(i)"
+                >
+                  <ng-icon name="lucideX" />
+                </button>
+              </div>
+              @if (phoneField().touched()) {
+                @for (error of phoneField().errors(); track error.kind) {
+                  <hlm-field-error [validator]="error.kind">
+                    {{ error.message }}
+                  </hlm-field-error>
+                }
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-muted-foreground">Sin teléfonos.</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    @if (entryForm().touched()) {
+      @for (error of entryForm().errors(); track error.kind) {
+        @if (error.kind === "contactMethodRequired") {
+          <hlm-field-error forceShow [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    }
+
+    <section class="grid gap-4 border-t pt-5 sm:grid-cols-2">
+      <div hlmField>
+        <label hlmFieldLabel for="directory-entry-email">Correo</label>
+        <input
+          hlmInput
+          id="directory-entry-email"
+          type="email"
+          autocomplete="email"
+          placeholder="contacto@institucion.gob.bo"
+          [formField]="entryForm.email"
+        />
+        @if (entryForm.email().touched()) {
+          @for (error of entryForm.email().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField>
+        <label hlmFieldLabel for="directory-entry-site">Sede</label>
+        <hlm-select [formField]="entryForm.siteId">
+          <hlm-select-trigger class="w-full" buttonId="directory-entry-site">
+            <ng-template hlmSelectValueTemplate let-siteId>
+              {{ siteNames().get(siteId) ?? "Sin sede" }}
+            </ng-template>
+            <hlm-select-placeholder>Sin sede</hlm-select-placeholder>
+          </hlm-select-trigger>
+          <hlm-select-content *hlmSelectPortal class="max-h-72">
+            <hlm-select-group>
+              <hlm-select-item [value]="null">Sin sede</hlm-select-item>
+              @for (site of availableSites(); track site.id) {
+                <hlm-select-item [value]="site.id">
+                  {{ site.name }}{{ site.isActive ? "" : " (inactiva)" }}
+                </hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+      </div>
+
+      <div hlmField class="sm:col-span-2">
+        <label hlmFieldLabel for="directory-entry-location">
+          Detalle de ubicación
+        </label>
+        <input
+          hlmInput
+          id="directory-entry-location"
+          type="text"
+          autocomplete="off"
+          placeholder="Ej. Piso 2, oficina 204"
+          [formField]="entryForm.siteDetails"
+        />
+        @if (entryForm.siteDetails().touched()) {
+          @for (error of entryForm.siteDetails().errors(); track error.kind) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        }
+      </div>
+
+      <div hlmField orientation="horizontal" class="sm:col-span-2">
+        <hlm-checkbox
+          inputId="directory-entry-active"
+          [formField]="entryForm.isActive"
+        />
+        <div>
+          <label hlmFieldLabel for="directory-entry-active">
+            Contacto activo
+          </label>
+          <p hlmFieldDescription>
+            Los contactos inactivos no se muestran en el directorio público.
+          </p>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="entryForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="directory-entry-editor-form"
+    [disabled]="entryForm().submitting()"
+  >
+    @if (entryForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

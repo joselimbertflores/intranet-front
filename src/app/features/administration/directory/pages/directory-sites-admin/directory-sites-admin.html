@@ -1,0 +1,186 @@
+<header class="mb-2 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Sedes</h1>
+  <button #addButton hlmBtn type="button" (click)="openEditor(addButton)">
+    <ng-icon name="lucidePlus" data-icon="inline-start" />
+    Agregar
+  </button>
+</header>
+
+<section aria-label="Administración de sedes" class="flex flex-col gap-2">
+  <div class="flex sm:justify-end">
+    <hlm-input-group class="w-full sm:w-72">
+      <input
+        hlmInputGroupInput
+        type="search"
+        aria-label="Buscar tipos de documentos"
+        placeholder="Buscar por nombre"
+        [(ngModel)]="searchTerm"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+  <div class="rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer class="max-h-[calc(100dvh-14rem)] overflow-auto">
+      <table
+        hlmTable
+        class="min-w-[560px] table-fixed"
+        aria-label="Listado de sedes del directorio"
+      >
+        <colgroup>
+          <col />
+          <col class="w-32" />
+          <col class="w-12" />
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Nombre</th>
+            <th hlmTableHead scope="col">Estado</th>
+            <th hlmTableHead scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (sitesResource.isLoading() || debouncedSearchTerm.isLoading()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="3" class="py-10 text-center">
+                <span
+                  class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <hlm-spinner />
+                  Cargando sedes…
+                </span>
+              </td>
+            </tr>
+          } @else if (sitesResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="3" class="py-10 text-center">
+                <div
+                  class="flex flex-col items-center gap-3 whitespace-normal"
+                  role="alert"
+                >
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">No se pudieron cargar las sedes</p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifica la conexión e intenta nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadSites()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (site of filteredSites(); track site.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span class="block truncate font-medium" [title]="site.name">
+                    {{ site.name }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="site.isActive ? 'default' : 'secondary'"
+                  >
+                    {{ site.isActive ? "Activa" : "Inactiva" }}
+                  </span>
+                </td>
+                <td hlmTableCell class="text-right">
+                  <button
+                    #actionsButton
+                    hlmBtn
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + site.name"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          (click)="openEditor(actionsButton, site)"
+                        >
+                          <ng-icon name="lucidePencil" />
+                          Editar
+                        </button>
+
+                        <button
+                          hlmDropdownMenuItem
+                          type="button"
+                          variant="destructive"
+                          [hlmAlertDialogTriggerFor]="deleteDialog"
+                          (click)="selectForDeletion(site)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                          Eliminar
+                        </button>
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="3" class="py-10 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    <p class="font-medium">No hay sedes registradas</p>
+                    <p class="text-sm text-muted-foreground">
+                      Agrege una sede o cambie el termino de busqueda.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hlm-alert-dialog #deleteDialog (closed)="onDeleteDialogClosed()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar sede</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ sitePendingDelete()?.name }}”. Solo es posible eliminar
+        sedes que no tengan contactos asociados.
+      </p>
+    </hlm-alert-dialog-header>
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button">Cancelar</button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="!sitePendingDelete()"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        Eliminar
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

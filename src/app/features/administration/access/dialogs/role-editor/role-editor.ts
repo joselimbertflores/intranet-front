@@ -1,19 +1,29 @@
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import {
-  Component,
-  computed,
-  inject,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+  disabled,
+  form,
+  FormField,
+  FormRoot,
+  validate,
+} from '@angular/forms/signals';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
 import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormBuilder,
-  Validators,
-} from '@angular/forms';
-import { CommonModule } from '@angular/common';
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTextarea } from '@spartan-ng/helm/textarea';
+import { firstValueFrom } from 'rxjs';
 
-import { RoleApi } from '../../services';
-import { RoleResponse } from '../../interfaces';
+import { GroupedPermissionResponse, RoleResponse } from '../../interfaces';
+import { CreateRoleDto, RoleApi, UpdateRoleDto } from '../../services/role-api';
 
 const RESOURCE_LABELS: Record<string, string> = {
   users: 'Usuarios',
@@ -33,197 +43,179 @@ const ACTION_LABELS: Record<string, string> = {
   delete: 'Eliminar',
 };
 
-interface PermissionGroupView {
-  resource: string;
-  label: string;
-  permissions: PermissionView[];
+export interface RoleEditorContext {
+  role?: RoleResponse;
 }
 
-interface PermissionView {
-  id: number;
-  action: string;
-  label: string;
+interface RoleFormModel {
+  name: string;
+  description: string;
+  isAutoAssigned: boolean;
+  permissionIds: number[];
 }
+
 @Component({
   selector: 'app-role-editor',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form [formGroup]="roleForm" (ngSubmit)="save()">
-      <div class="space-y-4 pt-2">
-        <!-- <app-ui-floatlabel variant="on">
-          <input
-            id="name"
-            [fluid]="true"
-            appUiInput
-            autocomplete="off"
-            formControlName="name"
-          />
-          <label for="name">Nombre</label>
-        </app-ui-floatlabel>
-        <app-ui-floatlabel variant="on">
-          <input
-            id="description"
-            [fluid]="true"
-            appUiInput
-            autocomplete="off"
-            formControlName="description"
-          />
-          <label for="description">Descripcion</label>
-        </app-ui-floatlabel> -->
-        <label class="flex items-center gap-2 px-2 py-2">
-          <!-- <app-ui-checkbox formControlName="isAutoAssigned" [binary]="true" /> -->
-          <span>Autoasignar</span>
-        </label>
-
-        <div class="mt-6 space-y-2">
-          @for (group of permissions(); track group.resource) {
-            <section class="rounded-xl border border-surface-200 p-4">
-              <div class="mb-3 flex items-center justify-between gap-3">
-                <h3 class="font-semibold">
-                  {{ group.label }}
-                </h3>
-
-                <button
-                  type="button"
-                  class="text-sm text-primary"
-                  (click)="toggleResource(group)"
-                >
-                  {{
-                    isResourceFullySelected(group)
-                      ? 'Quitar todos'
-                      : 'Marcar todos'
-                  }}
-                </button>
-              </div>
-
-              <div class="flex flex-wrap gap-2">
-                @for (permission of group.permissions; track permission.id) {
-                  <label
-                    class="flex items-center gap-2 rounded-lg border border-surface-200 px-3 py-2 text-sm"
-                  >
-                    <!-- <app-ui-checkbox
-                      [binary]="true"
-                      [ngModel]="isPermissionSelected(permission.id)"
-                      (ngModelChange)="togglePermission(permission.id, $event)"
-                      [ngModelOptions]="{ standalone: true }"
-                    /> -->
-
-                    <span>{{ permission.label }}</span>
-                  </label>
-                }
-              </div>
-            </section>
-          }
-        </div>
-      </div>
-      <div class="app-dialog-actions">
-        <!-- <app-ui-button
-          label="Cancelar"
-          type="button"
-          severity="secondary"
-          (onClick)="close()"
-        />
-        <app-ui-button label="Guardar" type="submit" /> -->
-      </div>
-    </form>
-  `,
+  imports: [
+    FormField,
+    FormRoot,
+    HlmButtonImports,
+    HlmCheckbox,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInput,
+    HlmSkeleton,
+    HlmSpinner,
+    HlmTextarea,
+  ],
+  templateUrl: './role-editor.html',
+  host: {
+    class: 'flex max-h-[calc(100dvh-4rem)] min-h-0 flex-col',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RoleEditor {
-  private roleDataSource = inject(RoleApi);
-  // private dialogRef = inject(DynamicDialogRef);
-  private formBuilder = inject(FormBuilder);
+  private readonly dialogRef =
+    inject<BrnDialogRef<RoleResponse>>(BrnDialogRef);
+  private readonly roleApi = inject(RoleApi);
+  private readonly context = injectBrnDialogContext<RoleEditorContext>();
 
-  // readonly data?: RoleResponse = inject(DynamicDialogConfig).data;
-
-  permissions = computed<PermissionGroupView[]>(() =>
-    this.roleDataSource.permissions().map(({ resource, permissions }) => ({
-      resource: resource,
-      label: RESOURCE_LABELS[resource] ?? resource,
-      permissions: permissions.map((permission) => ({
-        id: permission.id,
-        action: permission.action,
-        label: ACTION_LABELS[permission.action] ?? permission.action,
-      })),
+  readonly role = this.context.role;
+  readonly isProtectedRole = this.role?.name === 'ADMIN';
+  readonly permissionsResource = rxResource({
+    stream: () => this.roleApi.getPermissions(),
+  });
+  readonly permissionGroups = computed(() =>
+    (this.permissionsResource.value() ?? []).map((group) => ({
+      ...group,
+      label: RESOURCE_LABELS[group.resource] ?? group.resource,
     })),
   );
 
-  roleForm = this.formBuilder.nonNullable.group({
-    name: ['', Validators.required],
-    description: [''],
-    permissionIds: this.formBuilder.nonNullable.control<number[]>(
-      [],
-      [Validators.required, Validators.minLength(1)],
-    ),
-    isAutoAssigned: [false],
+  readonly formModel = signal<RoleFormModel>({
+    name: this.role?.name ?? '',
+    description: this.role?.description ?? '',
+    isAutoAssigned: this.role?.isAutoAssigned ?? false,
+    permissionIds: this.role?.permissions.map(({ id }) => id) ?? [],
   });
 
-  ngOnInit() {
-    this.loadForm();
+  readonly roleForm = form(
+    this.formModel,
+    (schemaPath) => {
+      disabled(schemaPath, {
+        when: ({ state }) => state.submitting(),
+      });
+
+      if (this.isProtectedRole) {
+        disabled(schemaPath.name, {
+          when: 'El nombre del rol ADMIN está reservado.',
+        });
+        disabled(schemaPath.isAutoAssigned, {
+          when: 'El rol ADMIN no puede asignarse automáticamente.',
+        });
+        disabled(schemaPath.permissionIds, {
+          when: 'Los permisos de ADMIN son administrados por el backend.',
+        });
+      }
+
+      validate(schemaPath.name, ({ value }) =>
+        value().trim()
+          ? null
+          : {
+              kind: 'required',
+              message: 'El nombre del rol es obligatorio.',
+            },
+      );
+      validate(schemaPath.permissionIds, ({ value }) =>
+        value().length > 0
+          ? null
+          : {
+              kind: 'required',
+              message: 'Seleccione al menos un permiso.',
+            },
+      );
+    },
+    {
+      submission: {
+        action: async (formField) => {
+          const value = formField().value();
+          const request = this.role
+            ? this.roleApi.update(this.role.id, this.buildUpdateDto(value))
+            : this.roleApi.create(this.buildCreateDto(value));
+          const response = await firstValueFrom(request);
+          this.dialogRef.close(response);
+        },
+      },
+    },
+  );
+
+  close(): void {
+    if (this.roleForm().submitting()) return;
+    this.dialogRef.close();
   }
 
-  save() {
-    // if (this.roleForm.invalid) return this.roleForm.markAllAsTouched();
-    // const saveObservable = this.data
-    //   ? this.roleDataSource.update(this.data.id, this.roleForm.value)
-    //   : this.roleDataSource.create(this.roleForm.value);
-    // saveObservable.subscribe((resp) => {
-    //   this.dialogRef.close(resp);
-    // });
-  }
-
-  close() {
-    // this.dialogRef.close();
-  }
-
-  isResourceFullySelected(group: PermissionGroupView): boolean {
-    const selected = this.roleForm.controls.permissionIds.value;
-    return group.permissions.every((permission) =>
-      selected.includes(permission.id),
-    );
-  }
-
-  toggleResource(group: PermissionGroupView): void {
-    const control = this.roleForm.controls.permissionIds;
-    const current = control.value;
-    const groupIds = group.permissions.map((permission) => permission.id);
-
-    const shouldRemove = groupIds.every((id) => current.includes(id));
-
-    const next = shouldRemove
-      ? current.filter((id) => !groupIds.includes(id))
-      : [...new Set([...current, ...groupIds])];
-
-    control.setValue(next);
-    control.markAsDirty();
-    control.markAsTouched();
+  actionLabel(action: string): string {
+    return ACTION_LABELS[action] ?? action;
   }
 
   isPermissionSelected(id: number): boolean {
-    return this.roleForm.controls.permissionIds.value.includes(id);
+    return this.formModel().permissionIds.includes(id);
   }
 
   togglePermission(id: number, checked: boolean): void {
-    const control = this.roleForm.controls.permissionIds;
-    const current = control.value;
-
-    const next = checked
-      ? [...new Set([...current, id])]
-      : current.filter((item) => item !== id);
-
-    control.setValue(next);
-    control.markAsDirty();
-    control.markAsTouched();
+    if (this.isProtectedRole) return;
+    this.formModel.update((value) => ({
+      ...value,
+      permissionIds: checked
+        ? [...new Set([...value.permissionIds, id])]
+        : value.permissionIds.filter((permissionId) => permissionId !== id),
+    }));
+    this.roleForm.permissionIds().markAsTouched();
   }
 
-  private loadForm() {
-    // if (!this.data) return;
-    // const { permissions, ...props } = this.data;
-    // this.roleForm.patchValue({
-    //   name: props.name,
-    //   description: props.description ?? '',
-    //   permissionIds: permissions.map(({ id }) => id),
-    //   isAutoAssigned: props.isAutoAssigned,
-    // });
+  isResourceFullySelected(group: GroupedPermissionResponse): boolean {
+    return group.permissions.every(({ id }) =>
+      this.formModel().permissionIds.includes(id),
+    );
+  }
+
+  toggleResource(group: GroupedPermissionResponse): void {
+    if (this.isProtectedRole) return;
+    const groupIds = group.permissions.map(({ id }) => id);
+    const removeAll = groupIds.every((id) =>
+      this.formModel().permissionIds.includes(id),
+    );
+
+    this.formModel.update((value) => ({
+      ...value,
+      permissionIds: removeAll
+        ? value.permissionIds.filter((id) => !groupIds.includes(id))
+        : [...new Set([...value.permissionIds, ...groupIds])],
+    }));
+    this.roleForm.permissionIds().markAsTouched();
+  }
+
+  private buildCreateDto(value: RoleFormModel): CreateRoleDto {
+    const description = value.description.trim();
+    return {
+      name: value.name.trim(),
+      ...(description && { description }),
+      isAutoAssigned: value.isAutoAssigned,
+      permissionIds: value.permissionIds,
+    };
+  }
+
+  private buildUpdateDto(value: RoleFormModel): UpdateRoleDto {
+    if (this.isProtectedRole) {
+      return { description: value.description.trim() };
+    }
+    return {
+      name: value.name.trim(),
+      description: value.description.trim(),
+      isAutoAssigned: value.isAutoAssigned,
+      permissionIds: value.permissionIds,
+    };
   }
 }

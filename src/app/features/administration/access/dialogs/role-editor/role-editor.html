@@ -1,0 +1,179 @@
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>{{ role ? "Editar rol" : "Crear rol" }}</h3>
+</hlm-dialog-header>
+
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form id="role-editor-form" class="flex flex-col gap-5" [formRoot]="roleForm">
+    <div hlmField>
+      <label hlmFieldLabel for="role-name">Nombre</label>
+      <input
+        hlmInput
+        id="role-name"
+        type="text"
+        autocomplete="off"
+        placeholder="Ej. Editor de contenidos"
+        [formField]="roleForm.name"
+      />
+      @let nameState = roleForm.name();
+      @if (nameState.invalid() && nameState.touched()) {
+        @for (error of nameState.errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </div>
+
+    <div hlmField>
+      <label hlmFieldLabel for="role-description">Descripción</label>
+      <textarea
+        hlmTextarea
+        id="role-description"
+        rows="3"
+        placeholder="Describe el propósito del rol"
+        [formField]="roleForm.description"
+      ></textarea>
+    </div>
+
+    <div hlmField orientation="horizontal" class="items-start rounded-lg border p-3">
+      <hlm-checkbox
+        inputId="role-auto-assigned"
+        [formField]="roleForm.isAutoAssigned"
+      />
+      <div>
+        <label hlmFieldLabel for="role-auto-assigned">
+          Asignación automática
+        </label>
+        <p hlmFieldDescription>
+          Se asigna automáticamente cuando un usuario ingresa por primera vez y
+          todavía no tiene un usuario local.
+        </p>
+      </div>
+    </div>
+
+    @if (isProtectedRole) {
+      <p class="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+        El nombre y los permisos del rol ADMIN son administrados por el proceso
+        de inicialización del backend. Desde aquí solo puede modificarse su
+        descripción.
+      </p>
+    }
+
+    <fieldset hlmFieldSet>
+      <legend hlmFieldLegend>Permisos</legend>
+      <p hlmFieldDescription>
+        Los códigos mostrados corresponden directamente al contrato de permisos.
+      </p>
+
+      <div class="mt-3 flex flex-col gap-3">
+        @if (permissionsResource.isLoading()) {
+          @for (_ of [1, 2, 3, 4]; track $index) {
+            <hlm-skeleton class="h-24 w-full" />
+          }
+        } @else if (permissionsResource.error()) {
+          <div class="rounded-lg border border-dashed p-4 text-sm">
+            <p class="font-medium">No se pudieron cargar los permisos.</p>
+            <button
+              hlmBtn
+              type="button"
+              variant="link"
+              class="mt-1 px-0"
+              (click)="permissionsResource.reload()"
+            >
+              Reintentar
+            </button>
+          </div>
+        } @else {
+          @for (group of permissionGroups(); track group.resource) {
+            <section class="rounded-lg border p-3">
+              <header class="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <h4 class="font-medium">{{ group.label }}</h4>
+                  <p class="font-mono text-xs text-muted-foreground">
+                    {{ group.resource }}
+                  </p>
+                </div>
+                @if (!isProtectedRole) {
+                  <button
+                    hlmBtn
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    (click)="toggleResource(group)"
+                  >
+                    {{
+                      isResourceFullySelected(group)
+                        ? "Quitar todos"
+                        : "Marcar todos"
+                    }}
+                  </button>
+                }
+              </header>
+
+              <div class="grid gap-2 sm:grid-cols-2">
+                @for (permission of group.permissions; track permission.id) {
+                  <div hlmField orientation="horizontal" class="rounded-md border p-2">
+                    <hlm-checkbox
+                      [inputId]="'permission-' + permission.id"
+                      [checked]="isPermissionSelected(permission.id)"
+                      [disabled]="isProtectedRole || roleForm().submitting()"
+                      (checkedChange)="
+                        togglePermission(permission.id, $event)
+                      "
+                    />
+                    <label hlmFieldLabel [for]="'permission-' + permission.id">
+                      {{ actionLabel(permission.action) }}
+                      <span class="font-mono text-xs text-muted-foreground">
+                        ({{ permission.action }})
+                      </span>
+                    </label>
+                  </div>
+                }
+              </div>
+            </section>
+          } @empty {
+            <p class="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              No hay permisos disponibles.
+            </p>
+          }
+        }
+      </div>
+
+      @if (
+        roleForm.permissionIds().invalid() &&
+        roleForm.permissionIds().touched()
+      ) {
+        @for (error of roleForm.permissionIds().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </fieldset>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="roleForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="role-editor-form"
+    [disabled]="roleForm().submitting() || permissionsResource.isLoading()"
+  >
+    @if (roleForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

@@ -1,145 +1,180 @@
-import { TitleCasePipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectionStrategy,
   Component,
-  computed,
-  effect,
+  debounced,
   inject,
   signal,
-  ChangeDetectionStrategy,
 } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import {
-  FormGroup,
-  Validators,
-  FormControl,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  disabled,
+  form,
+  FormRoot,
+  validate,
+} from '@angular/forms/signals';
+import { BrnDialogRef } from '@spartan-ng/brain/dialog';
+import { HlmAutocompleteImports } from '@spartan-ng/helm/autocomplete';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import {
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom, of } from 'rxjs';
 
-import { finalize } from 'rxjs';
-
-import { IdentityCandidateResponse } from '../../interfaces';
-import { FormUtils } from '../../../../../helpers';
+import { IdentityCandidateResponse, UserResponse } from '../../interfaces';
 import { UserApi } from '../../services';
+
+interface UserImporterFormModel {
+  externalKey: string | null;
+  roleIds: string[];
+}
 
 @Component({
   selector: 'app-user-importer',
-  imports: [ReactiveFormsModule, TitleCasePipe],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [
+    FormRoot,
+    HlmAutocompleteImports,
+    HlmButtonImports,
+    HlmCheckbox,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmSkeleton,
+    HlmSpinner,
+  ],
   templateUrl: './user-importer.html',
+  host: {
+    class: 'flex max-h-[calc(100dvh-4rem)] min-h-0 flex-col',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserImporter {
-  // private readonly dialogRef = inject(DynamicDialogRef);
-  // private readonly messageService = inject(MessageService);
+  private readonly dialogRef =
+    inject<BrnDialogRef<UserResponse>>(BrnDialogRef);
   private readonly userApi = inject(UserApi);
 
   readonly minimumSearchLength = 3;
-  readonly formUtils = FormUtils;
-  readonly candidates = signal<IdentityCandidateResponse[]>([]);
-  readonly isSaving = signal(false);
-  readonly importError = signal<string | null>(null);
+  readonly searchTerm = signal('');
+  readonly debouncedSearchTerm = debounced(this.searchTerm, 350);
 
-  readonly form = new FormGroup({
-    candidate: new FormControl<IdentityCandidateResponse | null>(
-      null,
-      Validators.required,
-    ),
-    roleIds: new FormControl<string[]>([], {
-      validators: Validators.required,
-    }),
+  readonly candidatesResource = rxResource({
+    params: () => ({ term: this.debouncedSearchTerm.value().trim() }),
+    stream: ({ params }) =>
+      params.term.length >= this.minimumSearchLength
+        ? this.userApi.findIdentityCandidates(params.term)
+        : of([]),
   });
 
-  private readonly selectedCandidateSignal = toSignal(
-    this.form.controls.candidate.valueChanges,
+  readonly rolesResource = rxResource({
+    stream: () => this.userApi.getRoles(),
+  });
+
+  readonly selectedCandidate = signal<IdentityCandidateResponse | null>(null);
+
+  readonly formModel = signal<UserImporterFormModel>({
+    externalKey: null,
+    roleIds: [],
+  });
+
+  readonly importerForm = form(
+    this.formModel,
+    (schemaPath) => {
+      disabled(schemaPath, {
+        when: ({ state }) => state.submitting(),
+      });
+      validate(schemaPath.externalKey, ({ value }) =>
+        value()
+          ? null
+          : {
+              kind: 'required',
+              message: 'Seleccione un usuario de Identity Hub.',
+            },
+      );
+      validate(schemaPath.roleIds, ({ value }) =>
+        value().length > 0
+          ? null
+          : {
+              kind: 'required',
+              message: 'Seleccione al menos un rol local.',
+            },
+      );
+    },
     {
-      initialValue: this.form.controls.candidate.value,
+      submission: {
+        action: async (formField) => {
+          const { externalKey, roleIds } = formField().value();
+          if (!externalKey) return;
+
+          const response = await firstValueFrom(
+            this.userApi.importFromIdentity(externalKey, roleIds),
+          );
+          this.dialogRef.close(response);
+        },
+      },
     },
   );
 
-  roles = toSignal(this.userApi.getRoles(), { initialValue: [] });
-  selectedCandidate = computed(() => this.selectedCandidateSignal());
-
-  constructor() {
-    effect(() => {
-      this.setAutoAssignedRoles();
-    });
+  close(): void {
+    if (this.importerForm().submitting()) return;
+    this.dialogRef.close();
   }
 
-  searchCandidates(event: any): void {
-    const term = event.query.trim();
+  readonly candidateToString = (candidate: IdentityCandidateResponse): string =>
+    candidate.fullName;
 
-    this.candidates.set([]);
+  readonly isCandidateEqual = (
+    candidate: IdentityCandidateResponse,
+    selected: IdentityCandidateResponse | null | undefined,
+  ): boolean => candidate.externalKey === selected?.externalKey;
 
-    if (term.length < this.minimumSearchLength) return;
+  onSearchChange(term: string): void {
+    this.searchTerm.set(term);
 
-    this.userApi.findIdentityCandidates(term).subscribe((candidates) => {
-      this.candidates.set(candidates);
-    });
+    const selected = this.selectedCandidate();
+    if (selected && term !== this.candidateToString(selected)) {
+      this.clearCandidate();
+    }
   }
 
-  save(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  onCandidateSelected(
+    candidate: IdentityCandidateResponse | null | undefined,
+  ): void {
+    if (!candidate) {
+      this.clearCandidate();
       return;
     }
 
-    const { candidate, roleIds } = this.form.value;
-
-    if (!candidate || !roleIds) return;
-
-    this.isSaving.set(true);
-    this.importError.set(null);
-
-    // this.userApi
-    //   .importFromIdentity(candidate.externalKey, roleIds)
-    //   .pipe(finalize(() => this.isSaving.set(false)))
-    //   .subscribe({
-    //     next: (user) => {
-    //       this.messageService.add({
-    //         severity: 'success',
-    //         summary: 'Usuario importado',
-    //         detail: `${user.fullName} fue agregado correctamente.`,
-    //         life: 3000,
-    //       });
-    //       this.dialogRef.close(user);
-    //     },
-    //     error: (error: unknown) => {
-    //       this.importError.set(this.getImportErrorMessage(error));
-    //     },
-    //   });
+    this.selectedCandidate.set(candidate);
+    this.formModel.update((value) => ({
+      ...value,
+      externalKey: candidate.externalKey,
+    }));
+    this.importerForm.externalKey().markAsTouched();
   }
 
-  close(): void {
-    // this.dialogRef.close();
+  isRoleSelected(id: string): boolean {
+    return this.formModel().roleIds.includes(id);
   }
 
-  private getImportErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'No se pudo importar el usuario. Intente nuevamente.';
-    }
-
-    switch (error.status) {
-      case 400:
-        return 'Los datos de importacion o el rol seleccionado no son validos.';
-      case 401:
-      case 403:
-        return 'No tiene permisos para importar usuarios.';
-      case 404:
-        return 'El usuario ya no esta disponible en Identity Hub.';
-      case 409:
-        return 'El usuario ya existe en este cliente.';
-      default:
-        return 'No se pudo importar el usuario. Intente nuevamente.';
-    }
+  toggleRole(id: string, checked: boolean): void {
+    this.formModel.update((value) => ({
+      ...value,
+      roleIds: checked
+        ? [...new Set([...value.roleIds, id])]
+        : value.roleIds.filter((roleId) => roleId !== id),
+    }));
+    this.importerForm.roleIds().markAsTouched();
   }
 
-  private setAutoAssignedRoles() {
-    const roleIds = this.roles()
-      .filter(({ isAutoAssigned }) => isAutoAssigned)
-      .map(({ id }) => id);
-
-    if (roleIds.length > 0) {
-      this.form.get('roleIds')?.setValue(roleIds);
-    }
+  private clearCandidate(): void {
+    this.selectedCandidate.set(null);
+    this.formModel.update((value) => ({ ...value, externalKey: null }));
+    this.importerForm.externalKey().markAsTouched();
   }
 }

@@ -117,6 +117,9 @@
       ],
       "@spartan-ng/helm/alert": [
         "./libs/ui/alert/src/index.ts"
+      ],
+      "@spartan-ng/helm/autocomplete": [
+        "./libs/ui/autocomplete/src/index.ts"
       ]
     }
   },

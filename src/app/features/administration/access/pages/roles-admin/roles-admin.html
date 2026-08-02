@@ -1,53 +1,224 @@
-<!-- <div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Roles</h2>
-  <app-ui-button
-    label="Agregar"
-    icon="ui-icon ui-icon-plus"
-    iconPos="left"
-    size="small"
-    (onClick)="openRoleDialog()"
-  />
-</div>
+<header class="mb-4 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Roles</h1>
+    <p class="mt-1 text-sm text-muted-foreground">
+      Configure roles locales y sus permisos sobre los recursos de la Intranet.
+    </p>
+  </div>
 
-<app-ui-table
-  #table
-  size="small"
-  [value]="dataSource()"
-  [totalRecords]="dataSize()"
-  [rows]="limit()"
-  [paginator]="true"
-  [loading]="roleResource.isLoading()"
-  (onPage)="changePage($event)"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex sm:justify-end">
-      <div class="w-full sm:w-1/4">
-        <search-input (search)="searchRoles($event)" label="Buscar" />
-      </div>
+  @if (canCreateRoles()) {
+    <button
+      #createButton
+      hlmBtn
+      type="button"
+      (click)="openRoleDialog(createButton)"
+    >
+      <ng-icon name="lucidePlus" data-icon="inline-start" />
+      Crear rol
+    </button>
+  }
+</header>
+
+<section class="flex flex-col gap-3" aria-label="Administración de roles">
+  <div class="flex sm:justify-end">
+    <hlm-input-group class="w-full sm:w-80">
+      <input
+        hlmInputGroupInput
+        type="search"
+        aria-label="Buscar roles"
+        placeholder="Buscar por nombre"
+        [formField]="searchForm.term"
+        (input)="onSearchChange()"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer class="max-h-[calc(100dvh-15rem)] overflow-auto">
+      <table
+        hlmTable
+        class="min-w-[900px] table-fixed"
+        aria-label="Listado de roles administrativos"
+      >
+        <colgroup>
+          <col class="w-[18%]" />
+          <col class="w-[28%]" />
+          <col class="w-36" />
+          <col />
+          @if (canUpdateRoles()) {
+            <col class="w-12" />
+          }
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Nombre</th>
+            <th hlmTableHead scope="col">Descripción</th>
+            <th hlmTableHead scope="col">Autoasignado</th>
+            <th hlmTableHead scope="col">Permisos</th>
+            @if (canUpdateRoles()) {
+              <th hlmTableHead scope="col">
+                <span class="sr-only">Acciones</span>
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            @for (_ of [1, 2, 3, 4, 5]; track $index) {
+              <tr hlmTableRow>
+                <td hlmTableCell><hlm-skeleton class="h-4 w-3/4" /></td>
+                <td hlmTableCell><hlm-skeleton class="h-4 w-11/12" /></td>
+                <td hlmTableCell><hlm-skeleton class="h-6 w-16" /></td>
+                <td hlmTableCell><hlm-skeleton class="h-6 w-4/5" /></td>
+                @if (canUpdateRoles()) {
+                  <td hlmTableCell><hlm-skeleton class="size-8" /></td>
+                }
+              </tr>
+            }
+          } @else if (roleResource.error()) {
+            <tr hlmTableRow>
+              <td
+                hlmTableCell
+                [attr.colspan]="canUpdateRoles() ? 5 : 4"
+                class="py-10 text-center"
+              >
+                <div class="flex flex-col items-center gap-3 whitespace-normal" role="alert">
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">No se pudieron cargar los roles</p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifique la conexión e intente nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadRoles()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (role of dataSource(); track role.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span class="block truncate font-medium" [title]="role.name">
+                    {{ role.name }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span class="block truncate" [title]="role.description ?? ''">
+                    {{ role.description || "Sin descripción" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="role.isAutoAssigned ? 'default' : 'secondary'"
+                    title="Se asigna automáticamente cuando un usuario ingresa por primera vez y todavía no tiene un usuario local."
+                  >
+                    {{ role.isAutoAssigned ? "Sí" : "No" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <div class="flex flex-wrap gap-1">
+                    @for (
+                      permission of role.permissions.slice(0, 4);
+                      track permission.id
+                    ) {
+                      <span hlmBadge variant="outline" class="font-mono text-xs">
+                        {{ permission.resource }}:{{ permission.action }}
+                      </span>
+                    } @empty {
+                      <span class="text-sm text-muted-foreground">Sin permisos</span>
+                    }
+                    @if (role.permissions.length > 4) {
+                      <span hlmBadge variant="secondary">
+                        +{{ role.permissions.length - 4 }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                @if (canUpdateRoles()) {
+                  <td hlmTableCell class="text-right">
+                    <button
+                      #actionsButton
+                      hlmBtn
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      align="end"
+                      [attr.aria-label]="'Acciones de ' + role.name"
+                      [hlmDropdownMenuTrigger]="actionsMenu"
+                    >
+                      <ng-icon name="lucideEllipsisVertical" />
+                    </button>
+
+                    <ng-template #actionsMenu>
+                      <hlm-dropdown-menu class="w-40">
+                        <hlm-dropdown-menu-group>
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            (click)="openRoleDialog(actionsButton, role)"
+                          >
+                            <ng-icon name="lucidePencil" />
+                            Editar
+                          </button>
+                        </hlm-dropdown-menu-group>
+                      </hlm-dropdown-menu>
+                    </ng-template>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td
+                  hlmTableCell
+                  [attr.colspan]="canUpdateRoles() ? 5 : 4"
+                  class="py-10 text-center"
+                >
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    <p class="font-medium">
+                      {{
+                        hasSearchTerm()
+                          ? "No se encontraron roles"
+                          : "No hay roles registrados"
+                      }}
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      {{
+                        hasSearchTerm()
+                          ? "Pruebe con otro nombre."
+                          : "Cree un rol para comenzar."
+                      }}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th>Descripcion</th>
-      <th class="sm:w-[200px]">Nro. Permisos</th>
-      <th style="width: 2.5rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>{{ item.name }}</td>
-      <td>{{ item.description }}</td>
-      <td>{{ item.permissions.length }}</td>
-      <td>
-        <app-ui-button
-          [text]="true"
-          [rounded]="true"
-          icon="ui-icon ui-icon-pencil"
-          size="small"
-          (click)="openRoleDialog(item)"
-        />
-      </td>
-    </tr>
-  </ng-template>
-</app-ui-table> -->
+
+    @if (!isListLoading() && !roleResource.error() && dataSize() > 0) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [pageSizes]="pageSizeOptions"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>

@@ -1,53 +1,202 @@
-<!-- <div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Usuarios</h2>
-  <app-ui-button
-    size="small"
-    label="Importar"
-    icon="ui-icon ui-icon-arrow-circle-down"
-    (onClick)="openImportUserDialog()"
-  />
-</div>
-<div>
-  <app-ui-table
-    #table
-    size="small"
-    [rows]="limit()"
-    [paginator]="true"
-    [value]="dataSource()"
-    [totalRecords]="dataSize()"
-    [loading]="userResource.isLoading()"
-    (onPage)="changePage($event)"
-  >
-    <ng-template appUiTemplate="caption">
-      <div class="flex sm:justify-end">
-        <div class="w-full sm:w-1/4">
-          <search-input (search)="search($event)" label="Buscar" />
-        </div>
-      </div>
-    </ng-template>
-    <ng-template appUiTemplate="header">
-      <tr>
-        <th>Nombre</th>
-        <th>Roles</th>
-        <th style="width: 2rem"></th>
-      </tr>
-    </ng-template>
-    <ng-template appUiTemplate="body" let-item>
-      <tr>
-        <td>{{ item.fullName | titlecase }}</td>
-        <td>
-          {{ item.roles.length > 0 ? item.roles.length : "Sin asignar" }}
-        </td>
-        <td>
-          <app-ui-button
-            [text]="true"
-            [rounded]="true"
-            icon="ui-icon ui-icon-pencil"
-            size="small"
-            (click)="openUserDialog(item)"
-          />
-        </td>
-      </tr>
-    </ng-template>
-  </app-ui-table>
-</div> -->
+<header class="mb-4 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Usuarios</h1>
+    <p class="mt-1 text-sm text-muted-foreground">
+      Administre los roles locales de los usuarios shadow de la Intranet.
+    </p>
+  </div>
+
+  @if (canImportUsers()) {
+    <button
+      #importButton
+      hlmBtn
+      type="button"
+      (click)="openImportUserDialog(importButton)"
+    >
+      <ng-icon name="lucideUserPlus" data-icon="inline-start" />
+      Importar usuario
+    </button>
+  }
+</header>
+
+<section class="flex flex-col gap-3" aria-label="Administración de usuarios">
+  <div class="flex sm:justify-end">
+    <hlm-input-group class="w-full sm:w-80">
+      <input
+        hlmInputGroupInput
+        type="search"
+        aria-label="Buscar usuarios"
+        placeholder="Buscar por nombre completo"
+        [formField]="searchForm.term"
+        (input)="onSearchChange()"
+      />
+      <hlm-input-group-addon>
+        <ng-icon name="lucideSearch" />
+      </hlm-input-group-addon>
+    </hlm-input-group>
+  </div>
+
+  <div class="rounded-xl border bg-card p-3 sm:p-4">
+    <div hlmTableContainer class="max-h-[calc(100dvh-15rem)] overflow-auto">
+      <table
+        hlmTable
+        class="min-w-[760px] table-fixed"
+        aria-label="Listado de usuarios administrativos"
+      >
+        <colgroup>
+          <col class="w-[30%]" />
+          <col class="w-[34%]" />
+          <col />
+          @if (canUpdateUsers()) {
+            <col class="w-12" />
+          }
+        </colgroup>
+
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead scope="col">Nombre completo</th>
+            <th hlmTableHead scope="col">Clave externa</th>
+            <th hlmTableHead scope="col">Roles locales</th>
+            @if (canUpdateUsers()) {
+              <th hlmTableHead scope="col">
+                <span class="sr-only">Acciones</span>
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            @for (_ of [1, 2, 3, 4, 5]; track $index) {
+              <tr hlmTableRow>
+                <td hlmTableCell><hlm-skeleton class="h-4 w-4/5" /></td>
+                <td hlmTableCell><hlm-skeleton class="h-4 w-11/12" /></td>
+                <td hlmTableCell><hlm-skeleton class="h-6 w-2/3" /></td>
+                @if (canUpdateUsers()) {
+                  <td hlmTableCell><hlm-skeleton class="size-8" /></td>
+                }
+              </tr>
+            }
+          } @else if (userResource.error()) {
+            <tr hlmTableRow>
+              <td
+                hlmTableCell
+                [attr.colspan]="canUpdateUsers() ? 4 : 3"
+                class="py-10 text-center"
+              >
+                <div class="flex flex-col items-center gap-3 whitespace-normal" role="alert">
+                  <ng-icon name="lucideCircleAlert" class="text-destructive" />
+                  <div class="flex flex-col gap-1">
+                    <p class="font-medium">No se pudieron cargar los usuarios</p>
+                    <p class="text-sm text-muted-foreground">
+                      Verifique la conexión e intente nuevamente.
+                    </p>
+                  </div>
+                  <button
+                    hlmBtn
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    (click)="reloadUsers()"
+                  >
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (user of dataSource(); track user.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <span class="block truncate font-medium" [title]="user.fullName">
+                    {{ user.fullName }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span class="block truncate font-mono text-xs" [title]="user.externalKey">
+                    {{ user.externalKey }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <div class="flex flex-wrap gap-1">
+                    @for (role of user.roles; track role.id) {
+                      <span hlmBadge variant="secondary">{{ role.name }}</span>
+                    } @empty {
+                      <span class="text-sm text-muted-foreground">Sin roles</span>
+                    }
+                  </div>
+                </td>
+                @if (canUpdateUsers()) {
+                  <td hlmTableCell class="text-right">
+                    <button
+                      #actionsButton
+                      hlmBtn
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      align="end"
+                      [attr.aria-label]="'Acciones de ' + user.fullName"
+                      [hlmDropdownMenuTrigger]="actionsMenu"
+                    >
+                      <ng-icon name="lucideEllipsisVertical" />
+                    </button>
+
+                    <ng-template #actionsMenu>
+                      <hlm-dropdown-menu class="w-44">
+                        <hlm-dropdown-menu-group>
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            (click)="openUserDialog(actionsButton, user)"
+                          >
+                            <ng-icon name="lucidePencil" />
+                            Editar roles
+                          </button>
+                        </hlm-dropdown-menu-group>
+                      </hlm-dropdown-menu>
+                    </ng-template>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td
+                  hlmTableCell
+                  [attr.colspan]="canUpdateUsers() ? 4 : 3"
+                  class="py-10 text-center"
+                >
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    <p class="font-medium">
+                      {{
+                        hasSearchTerm()
+                          ? "No se encontraron usuarios"
+                          : "No hay usuarios importados"
+                      }}
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      {{
+                        hasSearchTerm()
+                          ? "Pruebe con otro nombre."
+                          : "Importe un usuario de Identity Hub para comenzar."
+                      }}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isListLoading() && !userResource.error() && dataSize() > 0) {
+      <app-pagination-controls
+        [totalItems]="dataSize()"
+        [pageSizes]="pageSizeOptions"
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+      />
+    }
+  </div>
+</section>

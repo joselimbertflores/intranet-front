@@ -22,21 +22,6 @@ export class AuthDataSource {
     return user.permissions;
   });
 
-  constructor() {}
-
-  login(login: string, password: string, remember: boolean = false) {
-    if (remember) {
-      localStorage.setItem('login', login);
-    } else {
-      localStorage.removeItem('login');
-    }
-    return this.http.post(
-      `${environment.baseUrl}/login`,
-      { login, password },
-      { withCredentials: true },
-    );
-  }
-
   logout() {
     return this.http
       .post(`${this.URL}/logout`, {}, { withCredentials: true })
@@ -54,6 +39,10 @@ export class AuthDataSource {
           return of(false);
         }),
       );
+  }
+
+  clearUser(): void {
+    this._user.set(null);
   }
 
   permissions(): string[] {

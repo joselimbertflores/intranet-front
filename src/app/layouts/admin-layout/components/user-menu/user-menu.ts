@@ -23,7 +23,7 @@ import { AuthDataSource } from '../../../../core/auth/auth-data-source';
             {{ user()?.fullName ?? 'Usuario' }}
           </p>
           <p class="mt-0.5 truncate font-normal text-muted-foreground">
-            {{ roleLabel() }}
+            Usuario administrativo
           </p>
         </div>
 
@@ -73,13 +73,6 @@ export class UserMenu {
       .map((part) => part[0])
       .join('')
       .toUpperCase();
-  });
-
-  readonly roleLabel = computed(() => {
-    const roles = this.user()?.roles;
-    return roles?.length
-      ? roles.map(({ name }) => name).join(', ')
-      : 'Usuario administrativo';
   });
 
   logout(): void {

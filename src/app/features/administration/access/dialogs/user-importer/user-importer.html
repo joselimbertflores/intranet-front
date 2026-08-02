@@ -1,133 +1,215 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6 pt-1">
-  <div class="flex flex-col gap-1">
-    <div>
-      <label for="identityCandidate" class="mb-2 block text-sm font-medium">
-        Usuario a importar *
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>Importar usuario de Identity Hub</h3>
+</hlm-dialog-header>
+
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="user-importer-form"
+    class="flex flex-col gap-5"
+    [formRoot]="importerForm"
+  >
+    <div hlmField>
+      <label hlmFieldLabel for="identity-candidate">
+        Usuario de Identity Hub
       </label>
-      <app-ui-autocomplete
-        inputId="identityCandidate"
-        formControlName="candidate"
-        [minLength]="minimumSearchLength"
-        [delay]="350"
-        optionLabel="fullName"
-        appendTo="body"
-        [forceSelection]="true"
-        [fluid]="true"
-        emptyMessage="Sin resultados"
-        placeholder="Buscar por nombre, usuario o correo"
-        [suggestions]="candidates()"
-        (completeMethod)="searchCandidates($event)"
-        [invalid]="formUtils.isInvalid(form.controls.candidate)"
+      <p hlmFieldDescription>
+        Busque por nombre, login o correo y seleccione un resultado.
+      </p>
+
+      <hlm-autocomplete
+        [search]="searchTerm()"
+        [value]="selectedCandidate()"
+        [itemToString]="candidateToString"
+        [isItemEqualToValue]="isCandidateEqual"
+        [disabled]="importerForm().submitting()"
+        (searchChange)="onSearchChange($event)"
+        (valueChange)="onCandidateSelected($event)"
       >
-        <ng-template appUiTemplate="item" let-option>
-          <div class="flex flex-col">
-            <span class="font-medium text-surface-900">
-              {{ option.fullName | titlecase }}
-            </span>
-            <div class="flex items-center gap-x-2 text-sm">
-              <span class="font-mono text-primary-600">
-                &#64;{{ option.login }}
-              </span>
-              @if (option.email) {
-                <span class="truncate">{{ option.email }}</span>
-              } @else {
-                <span class="text-surface-600">Sin correo</span>
+        <hlm-autocomplete-input
+          inputId="identity-candidate"
+          placeholder="Escriba al menos 3 caracteres"
+          showClear
+          [forceInvalid]="
+            importerForm.externalKey().invalid() &&
+            importerForm.externalKey().touched()
+          "
+        />
+
+        <hlm-autocomplete-content *hlmAutocompletePortal>
+          <hlm-autocomplete-status class="justify-start text-left">
+            @if (searchTerm().trim().length < minimumSearchLength) {
+              Ingrese al menos {{ minimumSearchLength }} caracteres para buscar.
+            } @else if (
+              debouncedSearchTerm.isLoading() ||
+              candidatesResource.isLoading()
+            ) {
+              <hlm-spinner />
+              Buscando usuarios...
+            } @else if (candidatesResource.error()) {
+              <span>No se pudieron buscar usuarios.</span>
+              <button
+                hlmBtn
+                type="button"
+                variant="link"
+                size="sm"
+                class="px-0"
+                (click)="candidatesResource.reload()"
+              >
+                Reintentar
+              </button>
+            } @else if (
+              candidatesResource.hasValue() &&
+              candidatesResource.value().length === 0
+            ) {
+              No se encontraron candidatos para ese término.
+            } @else if (candidatesResource.hasValue()) {
+              {{ candidatesResource.value().length }}
+              {{
+                candidatesResource.value().length === 1
+                  ? "resultado encontrado"
+                  : "resultados encontrados"
+              }}
+            }
+          </hlm-autocomplete-status>
+
+          <div hlmAutocompleteList>
+            @if (candidatesResource.hasValue()) {
+              @for (
+                candidate of candidatesResource.value();
+                track candidate.externalKey
+              ) {
+                <hlm-autocomplete-item [value]="candidate">
+                  <div class="min-w-0">
+                    <p class="truncate font-medium">
+                      {{ candidate.fullName }}
+                    </p>
+                    <p class="truncate text-xs text-muted-foreground">
+                      &#64;{{ candidate.login }}
+                      @if (candidate.email) {
+                        · {{ candidate.email }}
+                      }
+                    </p>
+                  </div>
+                </hlm-autocomplete-item>
               }
-            </div>
+            }
           </div>
-        </ng-template>
-      </app-ui-autocomplete>
+        </hlm-autocomplete-content>
+      </hlm-autocomplete>
+
+      @if (selectedCandidate(); as candidate) {
+        <p class="text-xs text-muted-foreground">
+          Seleccionado: &#64;{{ candidate.login }}
+          @if (candidate.email) {
+            · {{ candidate.email }}
+          }
+        </p>
+      }
+
+      @if (
+        importerForm.externalKey().invalid() &&
+        importerForm.externalKey().touched()
+      ) {
+        @for (error of importerForm.externalKey().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
     </div>
-    @if (formUtils.isInvalid(form.controls.candidate)) {
-      <app-ui-message severity="error" size="small" variant="simple">
-        Seleccione al menos un rol local para el usuario.
-      </app-ui-message>
-    }
-    <small id="identityCandidate">
-      Ingrese al menos 3 caracteres para buscar.
-    </small>
-  </div>
 
-  @if (selectedCandidate(); as candidate) {
-    <section class="rounded-lg border border-surface-300 p-3">
-      <div class="flex items-start gap-3">
-        <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600"
-        >
-          <i class="ui-icon ui-icon-user"></i>
-        </div>
-        <div class="min-w-0 flex-1">
-          <div class="min-w-0">
-            <h3 class="truncate text-sm font-semibold text-surface-900">
-              {{ candidate.fullName | titlecase }}
-            </h3>
-            <p class="font-mono text-xs text-primary-600">
-              &#64;{{ candidate.login }}
+    <fieldset hlmFieldSet>
+      <legend hlmFieldLegend>Roles locales</legend>
+      <p hlmFieldDescription>
+        Seleccione los roles que se asignarán al usuario importado.
+      </p>
+
+      <div hlmFieldGroup class="mt-2">
+        @if (rolesResource.isLoading()) {
+          @for (_ of [1, 2, 3]; track $index) {
+            <hlm-skeleton class="h-14 w-full" />
+          }
+        } @else if (rolesResource.error()) {
+          <div class="rounded-lg border border-dashed p-4 text-sm">
+            <p class="font-medium">No se pudieron cargar los roles.</p>
+            <button
+              hlmBtn
+              type="button"
+              variant="link"
+              class="mt-1 px-0"
+              (click)="rolesResource.reload()"
+            >
+              Reintentar
+            </button>
+          </div>
+        } @else {
+          @for (role of rolesResource.value() ?? []; track role.id) {
+            <div
+              hlmField
+              orientation="horizontal"
+              class="items-start rounded-lg border p-3"
+            >
+              <hlm-checkbox
+                [inputId]="'import-role-' + role.id"
+                [checked]="isRoleSelected(role.id)"
+                [disabled]="importerForm().submitting()"
+                (checkedChange)="toggleRole(role.id, $event)"
+              />
+              <div class="min-w-0">
+                <label hlmFieldLabel [for]="'import-role-' + role.id">
+                  {{ role.name }}
+                </label>
+                @if (role.description) {
+                  <p hlmFieldDescription>{{ role.description }}</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              No hay roles disponibles.
             </p>
-          </div>
-
-          <div class="mt-3 space-y-2 text-xs text-surface-600">
-            <div class="flex min-w-0 items-center gap-2">
-              <i class="ui-icon ui-icon-envelope shrink-0 text-surface-400"></i>
-              <span class="italic">
-                {{ candidate.email ?? "Sin correo electrónico" }}
-              </span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <i class="ui-icon ui-icon-key shrink-0 text-surface-400"></i>
-              <span class="font-mono">
-                {{ candidate.externalKey }}
-              </span>
-            </div>
-          </div>
-        </div>
+          }
+        }
       </div>
-    </section>
-  }
-  <div class="flex flex-col gap-1">
-    <app-ui-floatlabel class="w-full" variant="on">
-      <app-ui-multiselect
-        inputId="localRole"
-        formControlName="roleIds"
-        [options]="roles()"
-        optionLabel="name"
-        optionValue="id"
-        appendTo="body"
-        [fluid]="true"
-        filterPlaceHolder="Nombre rol"
-        [invalid]="formUtils.isInvalid(form.controls.roleIds)"
-      >
-        <ng-template appUiTemplate="item" let-option>
-          <div class="flex flex-col">
-            <span class="font-medium text-surface-900">{{ option.name }}</span>
-            <span class="text-xs text-surface-600">
-              {{ option.description }}
-            </span>
-          </div>
-        </ng-template>
-      </app-ui-multiselect>
-      <label for="localRole">Roles del usuario *</label>
-    </app-ui-floatlabel>
 
-    @if (formUtils.isInvalid(form.controls.roleIds)) {
-      <app-ui-message severity="error" size="small" variant="simple">
-        Seleccione al menos un rol local para el usuario.
-      </app-ui-message>
+      @if (
+        importerForm.roleIds().invalid() && importerForm.roleIds().touched()
+      ) {
+        @for (error of importerForm.roleIds().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </fieldset>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="importerForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="user-importer-form"
+    [disabled]="
+      importerForm().invalid() ||
+      importerForm().submitting() ||
+      rolesResource.isLoading()
+    "
+  >
+    @if (importerForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Importando...
+    } @else {
+      Importar usuario
     }
-  </div>
-
-  @if (importError()) {
-    <app-ui-message severity="error"> {{ importError() }} </app-ui-message>
-  }
-
-  <div class="app-dialog-actions">
-    <app-ui-button
-      label="Cancelar"
-      type="button"
-      severity="secondary"
-      (onClick)="close()"
-    />
-    <app-ui-button label="Importar" type="submit" [loading]="isSaving()" />
-  </div>
-</form> -->
+  </button>
+</hlm-dialog-footer>

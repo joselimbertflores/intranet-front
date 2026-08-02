@@ -1,84 +1,110 @@
-<form [formGroup]="userForm" (ngSubmit)="save()">
-  <div class="flex flex-col">
-    <div class="flow-root">
-      <dl class="-my-3 divide-y divide-surface-200">
-        <div class="grid grid-cols-1 gap-1 py-2 sm:grid-cols-4 sm:gap-4">
-          <dt class="font-medium text-surface-900">Nombre</dt>
-          <dd class="text-surface-700 sm:col-span-3">
-            <!-- {{ data.fullName | titlecase }} -->
-          </dd>
-        </div>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>Editar roles del usuario</h3>
+</hlm-dialog-header>
+
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form id="user-editor-form" class="flex flex-col gap-5" [formRoot]="userForm">
+    <section class="rounded-lg border bg-card p-4 text-card-foreground">
+      <dl class="grid gap-3 text-sm sm:grid-cols-[8rem_minmax(0,1fr)]">
+        <dt class="font-medium">Nombre completo</dt>
+        <dd class="min-w-0 break-words">{{ user.fullName }}</dd>
+        <dt class="font-medium">Clave externa</dt>
+        <dd class="min-w-0 break-all font-mono text-xs">
+          {{ user.externalKey }}
+        </dd>
       </dl>
-    </div>
+      <p class="mt-3 text-xs text-muted-foreground">
+        Los datos de identidad provienen de Identity Hub y no se editan desde
+        esta vista.
+      </p>
+    </section>
 
-    <div class="flex flex-col gap-1 mt-6">
-      <!-- <app-ui-floatlabel class="w-full" variant="on">
-        <app-ui-multiselect
-          inputId="localRole"
-          formControlName="roleIds"
-          [options]="roles()"
-          optionLabel="name"
-          optionValue="id"
-          appendTo="body"
-          [fluid]="true"
-          filterPlaceHolder="Nombre rol"
-          [invalid]="formUtils.isInvalid(userForm.get('roleIds'))"
-        >
-          <ng-template appUiTemplate="item" let-option>
-            <div class="flex flex-col">
-              <span class="font-medium text-surface-900">{{
-                option.name
-              }}</span>
-              <span class="text-xs text-surface-600">
-                {{ option.description }}
-              </span>
-            </div>
-          </ng-template>
-        </app-ui-multiselect>
-        <label for="localRole">Roles del usuario *</label>
-      </app-ui-floatlabel>
+    <fieldset hlmFieldSet>
+      <legend hlmFieldLegend>Roles locales</legend>
+      <p hlmFieldDescription>
+        Seleccione los roles que tendrá el usuario en la Intranet.
+      </p>
 
-      @if (formUtils.isInvalid(userForm.get("roleIds"))) {
-        <app-ui-message severity="error" size="small" variant="simple">
-          Seleccione al menos un rol local para el usuario.
-        </app-ui-message>
-      } -->
-    </div>
-
-    <!-- <div class="mt-6">
-      <app-ui-listbox
-        [options]="roles()"
-        [multiple]="true"
-        [checkbox]="true"
-        [filter]="true"
-        class="w-full"
-        optionValue="id"
-        optionLabel="name"
-        scrollHeight="600px"
-        filterPlaceHolder="Nombre del rol"
-        formControlName="roleIds"
-        emptyFilterMessage="Sin resultados"
-        emptyMessage="Sin registros"
-      >
-        <ng-template appUiTemplate="header">
-          <span class="racking-wide">Listado de roles</span>
-        </ng-template>
-        <ng-template appUiTemplate="item" let-option>
-          <div class="flex flex-col ml-2">
-            <p class="font-medium text-primary">{{ option.name }}</p>
-            <span class="text-sm">{{ option.description ?? "----" }}</span>
+      <div hlmFieldGroup class="mt-2">
+        @if (rolesResource.isLoading()) {
+          @for (_ of [1, 2, 3]; track $index) {
+            <hlm-skeleton class="h-14 w-full" />
+          }
+        } @else if (rolesResource.error()) {
+          <div class="rounded-lg border border-dashed p-4 text-sm">
+            <p class="font-medium">No se pudieron cargar los roles.</p>
+            <button
+              hlmBtn
+              type="button"
+              variant="link"
+              class="mt-1 px-0"
+              (click)="rolesResource.reload()"
+            >
+              Reintentar
+            </button>
           </div>
-        </ng-template>
-      </app-ui-listbox>
-    </div> -->
-  </div>
-  <div class="app-dialog-actions">
-    <!-- <app-ui-button
-      label="Cancelar"
-      type="button"
-      severity="secondary"
-      (onClick)="close()"
-    />
-    <app-ui-button label="Guardar" type="submit" [disabled]="userForm.invalid" /> -->
-  </div>
-</form>
+        } @else {
+          @for (role of rolesResource.value() ?? []; track role.id) {
+            <div
+              hlmField
+              orientation="horizontal"
+              class="items-start rounded-lg border p-3"
+            >
+              <hlm-checkbox
+                [inputId]="'user-role-' + role.id"
+                [checked]="isRoleSelected(role.id)"
+                [disabled]="userForm().submitting()"
+                (checkedChange)="toggleRole(role.id, $event)"
+              />
+              <div class="min-w-0">
+                <label hlmFieldLabel [for]="'user-role-' + role.id">
+                  {{ role.name }}
+                </label>
+                @if (role.description) {
+                  <p hlmFieldDescription>{{ role.description }}</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              No hay roles disponibles.
+            </p>
+          }
+        }
+      </div>
+
+      @if (userForm.roleIds().invalid() && userForm.roleIds().touched()) {
+        @for (error of userForm.roleIds().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </fieldset>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="userForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="user-editor-form"
+    [disabled]="userForm().submitting() || rolesResource.isLoading()"
+  >
+    @if (userForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      Guardando...
+    } @else {
+      Guardar roles
+    }
+  </button>
+</hlm-dialog-footer>

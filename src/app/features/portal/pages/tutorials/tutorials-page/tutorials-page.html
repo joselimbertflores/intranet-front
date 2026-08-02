@@ -1,100 +1,117 @@
-<public-section-header
-  title="Tutoriales"
-  description="Guías paso a paso para realizar procesos institucionales."
-/>
+<main class="pb-16">
+  <public-section-header
+    title="Tutoriales"
+    description="Guías paso a paso para realizar procesos y usar los sistemas institucionales."
+  />
 
-<section class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-  <div class="w-full flex flex-col gap-2 sm:flex-row justify-end mb-4">
-    <div class="w-full md:w-64">
-      <search-input [value]="term()" (search)="search($event)" />
-    </div>
-    <div class="w-full md:w-64">
-      <!-- <app-ui-select
-        [showClear]="true"
-        [options]="categories()"
-        optionLabel="name"
-        optionValue="id"
-        placeholder="Categoria"
-        class="w-full"
-        [ngModel]="category()"
-        (onChange)="filterByCategory($event.value)"
-      /> -->
-    </div>
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-2">
-    @for (tutorial of dataSource(); track tutorial.id) {
-      <a
-        class="group relative bg-surface-0 border border-surface-100 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full no-underline"
-        (click)="openDetail(tutorial)"
-      >
-        <div class="mb-4">
-          <!-- <app-ui-tag
-            [value]="tutorial.category || 'General'"
-            style="font-size: 12px"
-          /> -->
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 py-7 sm:px-6 lg:px-8">
+    <section class="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_18rem]" aria-label="Filtros de tutoriales">
+      <hlm-input-group>
+        <input
+          hlmInputGroupInput
+          type="search"
+          aria-label="Buscar tutoriales"
+          placeholder="Buscar por título"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        <hlm-input-group-addon><ng-icon name="lucideSearch" /></hlm-input-group-addon>
+      </hlm-input-group>
+
+      <div class="flex flex-col gap-1">
+        <hlm-select
+          [value]="listState().category || null"
+          (valueChange)="filterByCategory($event)"
+        >
+          <hlm-select-trigger class="w-full" buttonId="public-tutorial-category">
+            <hlm-select-value placeholder="Todas las categorías" />
+          </hlm-select-trigger>
+          <hlm-select-content *hlmSelectPortal>
+            <hlm-select-item [value]="null">Todas las categorías</hlm-select-item>
+            @for (category of categoriesResource.value() ?? []; track category.id) {
+              <hlm-select-item [value]="category.slug">{{ category.name }}</hlm-select-item>
+            }
+          </hlm-select-content>
+        </hlm-select>
+        @if (categoriesResource.error()) {
+          <p class="text-xs text-destructive">No se pudieron cargar las categorías.</p>
+        }
+      </div>
+    </section>
+
+    <section aria-label="Resultados de tutoriales">
+      @if (isLoading()) {
+        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3" aria-label="Cargando tutoriales">
+          @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+            <article class="flex min-h-64 flex-col gap-4 rounded-2xl border bg-card p-5">
+              <div hlmSkeleton class="h-5 w-28"></div>
+              <div hlmSkeleton class="h-7 w-4/5"></div>
+              <div hlmSkeleton class="h-4 w-full"></div>
+              <div hlmSkeleton class="h-4 w-2/3"></div>
+              <div hlmSkeleton class="mt-auto h-5 w-36"></div>
+            </article>
+          }
+        </div>
+      } @else if (tutorialsResource.error()) {
+        <div class="rounded-2xl border bg-card px-6 py-14 text-center" role="alert">
+          <h2 class="text-lg font-semibold">No se pudieron cargar los tutoriales</h2>
+          <p class="mt-1 text-sm text-muted-foreground">Intenta nuevamente en unos momentos.</p>
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="tutorialsResource.reload()">
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+          </button>
+        </div>
+      } @else if (tutorialsResource.value(); as response) {
+        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          @for (tutorial of response.tutorials; track tutorial.id) {
+            <a
+              class="group flex min-h-64 flex-col rounded-2xl border bg-card p-5 shadow-sm outline-none transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+              [routerLink]="['/tutorials', tutorial.slug]"
+            >
+              <div class="flex items-center justify-between gap-3">
+                @if (tutorial.category) {
+                  <span hlmBadge variant="secondary">{{ tutorial.category.name }}</span>
+                } @else {
+                  <span class="text-xs font-medium text-muted-foreground">General</span>
+                }
+                <time class="text-xs text-muted-foreground" [attr.datetime]="tutorial.createdAt">
+                  {{ tutorial.createdAt | date: "mediumDate" }}
+                </time>
+              </div>
+
+              <h2 class="mt-5 text-xl font-semibold leading-snug tracking-tight group-hover:text-primary">
+                {{ tutorial.title }}
+              </h2>
+              @if (tutorial.summary) {
+                <p class="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{{ tutorial.summary }}</p>
+              }
+
+              <span class="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
+                Ver tutorial
+                <ng-icon name="lucideArrowRight" class="transition-transform group-hover:translate-x-1" />
+              </span>
+            </a>
+          } @empty {
+            <div class="col-span-full rounded-2xl border border-dashed bg-card px-6 py-14 text-center">
+              <h2 class="text-lg font-semibold">No se encontraron tutoriales</h2>
+              <p class="mt-1 text-sm text-muted-foreground">
+                Ajusta la búsqueda o selecciona otra categoría.
+              </p>
+            </div>
+          }
         </div>
 
-        <h3
-          class="text-2xl font-bold text-surface-900 mb-3 group-hover:text-primary-600 transition-colors"
-        >
-          {{ tutorial.title }}
-        </h3>
-
-        <p class="text-surface-600 leading-relaxed mb-6 line-clamp-3">
-          {{ tutorial.summary }}
-        </p>
-
-        <div
-          class="mt-auto pt-6 border-t border-surface-50 flex items-center justify-between"
-        >
-          <span class="text-sm text-surface-400 font-medium">
-            {{ tutorial.createdAt | date: "longDate" }}
-          </span>
-
-          <span
-            class="flex items-center text-primary-600 font-semibold text-sm"
-          >
-            Ver tutorial
-            <i
-              class="ui-icon ui-icon-arrow-right ml-2 group-hover:translate-x-1 transition-transform"
-            ></i>
-          </span>
-        </div>
-      </a>
-    }
+        @if (response.total > 0) {
+          <app-pagination-controls
+            class="mt-7"
+            [totalItems]="response.total"
+            [currentPage]="currentPage()"
+            [pageSize]="listState().limit"
+            [pageSizes]="pageSizeOptions"
+            (currentPageChange)="changePage($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      }
+    </section>
   </div>
-
-  @if (isLoading() && !dataSource().length) {
-    <div class="flex flex-col items-center justify-center py-16">
-      <i
-        class="ui-icon ui-icon-spin ui-icon-spinner text-4xl mb-4"
-        style="font-size: 2rem"
-      ></i>
-      <p class="font-medium text-surface-500 animate-pulse">
-        Cargando tutoriales...
-      </p>
-    </div>
-  }
-
-  @if (!isLoading() && !dataSource().length) {
-    <div class="flex flex-col items-center justify-center py-16 text-center">
-      <h3 class="text-lg font-semibold text-surface-900 mb-1">
-        Sin resultados
-      </h3>
-      <p class="text-sm text-surface-500 max-w-sm">
-        Intente ajustar los filtros o busca con términos más generales.
-      </p>
-    </div>
-  }
-
-  @if (hasMore()) {
-    <div class="flex justify-center pt-4">
-      <!-- <app-ui-button
-        [rounded]="true"
-        [loading]="isLoading()"
-        [label]="isLoading() ? ' Cargando....' : '  Cargar más'"
-        (onClick)="fetchMore()"
-      /> -->
-    </div>
-  }
-</section>
+</main>

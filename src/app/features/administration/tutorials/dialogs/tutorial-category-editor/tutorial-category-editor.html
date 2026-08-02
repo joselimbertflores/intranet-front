@@ -1,27 +1,42 @@
-<!-- <form [formGroup]="form" (ngSubmit)="save()">
-  <div class="flex flex-col gap-1 pt-1">
-    <app-ui-floatlabel variant="on">
-      <label>Nombre</label>
-      <input
-        appUiInput
-        class="w-full"
-        formControlName="name"
-        [invalid]="formUtils.isInvalid(form.get('name'))"
-      />
-    </app-ui-floatlabel>
-    @if (formUtils.isInvalid(form.get("name"))) {
-      <app-ui-message severity="error" size="small" variant="simple">
-        {{ formUtils.getErrorMessage(form.get("name")) }}
-      </app-ui-message>
+<hlm-dialog-header>
+  <h3 hlmDialogTitle>{{ category ? "Editar categoría" : "Nueva categoría" }}</h3>
+</hlm-dialog-header>
+
+<form id="tutorial-category-form" class="flex flex-col gap-5 py-2" [formRoot]="categoryForm">
+  <div hlmField>
+    <label hlmFieldLabel for="tutorial-category-name">Nombre</label>
+    <input
+      hlmInput
+      id="tutorial-category-name"
+      type="text"
+      autocomplete="off"
+      placeholder="Ej. Sistemas institucionales"
+      [formField]="categoryForm.name"
+    />
+    @if (categoryForm.name().touched()) {
+      @for (error of categoryForm.name().errors(); track error.kind) {
+        <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error>
+      }
     }
   </div>
-  <div class="app-dialog-actions">
-    <app-ui-button
-      type="button"
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="close()"
-    />
-    <app-ui-button type="submit" label="Guardar" />
-  </div>
-</form> -->
+
+  @if (category?.slug) {
+    <p class="text-sm text-muted-foreground">
+      Slug actual: <code class="rounded bg-muted px-1.5 py-0.5">{{ category?.slug }}</code>
+    </p>
+  }
+
+</form>
+
+<hlm-dialog-footer>
+  <button hlmBtn type="button" variant="outline" [disabled]="categoryForm().submitting()" (click)="close()">
+    Cancelar
+  </button>
+  <button hlmBtn type="submit" form="tutorial-category-form" [disabled]="categoryForm().submitting()">
+    @if (categoryForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" /> Guardando...
+    } @else {
+      Guardar
+    }
+  </button>
+</hlm-dialog-footer>

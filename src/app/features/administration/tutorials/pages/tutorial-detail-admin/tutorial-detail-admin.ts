@@ -1,225 +1,307 @@
-import {
-  ChangeDetectionStrategy,
-  linkedSignal,
-  ElementRef,
-  computed,
-  viewChild,
-  Component,
-  inject,
-  signal,
-  input,
-} from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
 import {
-  moveItemInArray,
-  CdkDragDrop,
-  CdkDropList,
-} from '@angular/cdk/drag-drop';
-
-// import { ConfirmDialogModule } from '@app/shared/ui-compat';
-// import { ButtonGroupModule } from '@app/shared/ui-compat';
-// import { TieredMenuModule } from '@app/shared/ui-compat';
-// import { DialogService } from '@app/shared/ui-compat';
-// import { ConfirmationService } from '@app/shared/ui-compat';
-// import { DividerModule } from '@app/shared/ui-compat';
-// import { ButtonModule } from '@app/shared/ui-compat';
-// import { MenuModule } from '@app/shared/ui-compat';
-// import { TagModule } from '@app/shared/ui-compat';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+} from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideFile,
+  lucideFileVideo,
+  lucideGripVertical,
+  lucideImage,
+  lucidePencil,
+  lucidePlus,
+  lucideText,
+  lucideTrash2,
+  lucideYoutube,
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import {
+  HlmAlertDialog,
+  HlmAlertDialogImports,
+} from '@spartan-ng/helm/alert-dialog';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
+import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom } from 'rxjs';
 
 import { AuthDataSource } from '../../../../../core/auth/auth-data-source';
 import { PermissionAction, Resource } from '../../../../../core/auth/auth.types';
 import {
+  TutorialBlockInlineEditor,
+  TutorialBlockPreviewEditor,
+} from '../../components';
+import { TutorialEditor, TutorialEditorContext } from '../../dialogs';
+import { tutorialHttpErrorMessage } from '../../helpers';
+import {
   TutorialBlockResponse,
   TutorialBlockType,
-  TutorialResponse,
+  TutorialDetailResponse,
 } from '../../interfaces';
-import {
-  TutorialBLockDialogData,
-  TutorialBlockEditor,
-  TutorialEditor,
-} from '../../dialogs';
-import { TutorialBlockPreviewEditor } from '../../components';
 import { TutorialDataSource } from '../../services';
+
+interface ActiveBlockEditor {
+  type: TutorialBlockType;
+  blockId: string | null;
+}
 
 @Component({
   selector: 'app-tutorial-detail-admin',
   imports: [
-    CommonModule,
-   
-    FormsModule,
+    CdkDrag,
+    CdkDragHandle,
     CdkDropList,
- 
+    HlmAlertDialogImports,
+    HlmAlertImports,
+    HlmBadge,
+    HlmButtonImports,
+    HlmDropdownMenuImports,
+    HlmSkeleton,
+    HlmSpinner,
+    NgIcon,
+    TutorialBlockInlineEditor,
     TutorialBlockPreviewEditor,
+  ],
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideFile,
+      lucideFileVideo,
+      lucideGripVertical,
+      lucideImage,
+      lucidePencil,
+      lucidePlus,
+      lucideText,
+      lucideTrash2,
+      lucideYoutube,
+    }),
   ],
   templateUrl: './tutorial-detail-admin.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TutorialDetailAdmin {
-  private location: Location = inject(Location);
-  // private dialogService = inject(DialogService);
-  // private confirmationService = inject(ConfirmationService);
-  private tutorialDataSource = inject(TutorialDataSource);
-  private authDataSource = inject(AuthDataSource);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+  private readonly dataSource = inject(TutorialDataSource);
+  private readonly authDataSource = inject(AuthDataSource);
+  private readonly dialogService = inject(HlmDialogService);
+  private readonly hasPreviousNavigation = Boolean(
+    this.router.currentNavigation()?.previousNavigation ??
+      this.router.lastSuccessfulNavigation()?.previousNavigation,
+  );
 
-  id = input.required<string>();
-  canCreate = computed(() =>
+  readonly id = input.required<string>();
+  readonly blockTypes = [
+    { type: TutorialBlockType.TEXT, label: 'Texto', icon: 'lucideText' },
+    { type: TutorialBlockType.IMAGE, label: 'Imagen', icon: 'lucideImage' },
+    { type: TutorialBlockType.YOUTUBE, label: 'YouTube', icon: 'lucideYoutube' },
+    {
+      type: TutorialBlockType.VIDEO_FILE,
+      label: 'Video subido',
+      icon: 'lucideFileVideo',
+    },
+    { type: TutorialBlockType.FILE, label: 'Archivo', icon: 'lucideFile' },
+  ] as const;
+
+  readonly tutorialResource = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) => this.dataSource.getOne(params.id),
+  });
+  readonly tutorial = linkedSignal<TutorialDetailResponse | null>(
+    () => this.tutorialResource.value() ?? null,
+  );
+  readonly blocks = linkedSignal<TutorialBlockResponse[]>(
+    () => this.tutorialResource.value()?.blocks ?? [],
+  );
+
+  readonly publicationError = signal<string | null>(null);
+  readonly publicationPending = signal(false);
+  readonly reorderError = signal<string | null>(null);
+  readonly reordering = signal(false);
+  readonly activeEditor = signal<ActiveBlockEditor | null>(null);
+
+  readonly pendingBlockDelete = signal<TutorialBlockResponse | null>(null);
+  readonly blockDeleteError = signal<string | null>(null);
+  readonly blockDeleting = signal(false);
+  readonly tutorialDeleteError = signal<string | null>(null);
+  readonly tutorialDeleting = signal(false);
+
+  readonly canCreate = computed(() =>
     this.authDataSource.can(Resource.TUTORIALS, PermissionAction.CREATE),
   );
-  canUpdate = computed(() =>
+  readonly canUpdate = computed(() =>
     this.authDataSource.can(Resource.TUTORIALS, PermissionAction.UPDATE),
   );
-  canDelete = computed(() =>
+  readonly canDelete = computed(() =>
     this.authDataSource.can(Resource.TUTORIALS, PermissionAction.DELETE),
   );
 
-  tutorial = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => this.tutorialDataSource.getOne(params.id),
-  });
-
-  blocks = linkedSignal(() => this.tutorial.value()?.blocks ?? []);
-  isReordered = signal(false);
-  endOfBlocks = viewChild.required<ElementRef<HTMLDivElement>>('endOfBlocks');
-
-  readonly menuItems = [
-    {
-      label: 'Texto',
-      icon: 'ui-icon ui-icon-align-left',
-      command: () => this.openBlockDialog('TEXT'),
-    },
-    {
-      label: 'Imagen',
-      icon: 'ui-icon ui-icon-image',
-      command: () => this.openBlockDialog('IMAGE'),
-    },
-    {
-      label: 'Video externo',
-      icon: 'ui-icon ui-icon-youtube',
-      command: () => this.openBlockDialog('VIDEO_URL'),
-    },
-    {
-      label: 'Video subido',
-      icon: 'ui-icon ui-icon-video',
-      command: () => this.openBlockDialog('VIDEO_FILE'),
-    },
-    {
-      label: 'Archivo',
-      icon: 'ui-icon ui-icon-paperclip',
-      command: () => this.openBlockDialog('FILE'),
-    },
-  ];
-
-  openTutorialEditDialog(): void {
-    // const dialogRef = this.dialogService.open(TutorialEditor, {
-    //   header: 'Editar tutorial',
-    //   draggable: false,
-    //   closable: true,
-    //   width: '30vw',
-    //   data: this.tutorial.value(),
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    // });
-
-    // dialogRef?.onClose.subscribe((result?: TutorialResponse) => {
-    //   if (!result) return;
-    //   this.tutorial.update((value) => {
-    //     if (!value) return;
-    //     return { ...value, ...result };
-    //   });
-    // });
+  goBack(): void {
+    if (this.hasPreviousNavigation) {
+      this.location.back();
+      return;
+    }
+    void this.router.navigate(['/administration/tutorials']);
   }
 
-  openBlockDialog(type: TutorialBlockType, block?: TutorialBlockResponse) {
-    const data: TutorialBLockDialogData = {
-      tutorialId: this.id(),
-      type,
-      block,
-    };
-    // const dialogRef = this.dialogService.open(TutorialBlockEditor, {
-    //   header: block ? 'Editar bloque' : 'Agregar bloque',
-    //   contentStyle: { overflow: 'visible' },
-    //   closable: true,
-    //   width: '40vw',
-    //   breakpoints: {
-    //     '960px': '75vw',
-    //     '640px': '90vw',
-    //   },
-    //   data,
-    // });
-    // dialogRef?.onClose.subscribe((result?: TutorialBlockResponse) => {
-    //   if (!result) return;
-    //   this.upsertBlock(result);
-    // });
+  openTutorialDialog(): void {
+    const tutorial = this.tutorial();
+    if (!tutorial) return;
+
+    const dialogRef = this.dialogService.open<
+      TutorialDetailResponse,
+      TutorialEditorContext
+    >(TutorialEditor, {
+      showCloseButton: false,
+      autoFocus: 'input',
+      contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-lg',
+      context: { tutorial },
+    });
+
+    dialogRef.closed$.subscribe((updated) => {
+      if (!updated) return;
+      this.tutorial.set({ ...updated, blocks: this.blocks() });
+    });
   }
 
-  deleteBlock(id: string) {
-    // this.confirmationService.confirm({
-    //   message: `¿Esta seguro que desea eliminar el bloque?`,
-    //   header: 'Eliminar bloque',
-    //   rejectButtonProps: {
-    //     label: 'Cancelar',
-    //     severity: 'secondary',
-    //     outlined: true,
-    //   },
-    //   acceptButtonProps: {
-    //     label: 'Aceptar',
-    //   },
-    //   accept: () => {
-    //     this.tutorialDataSource.removeBlock(id).subscribe(() => {
-    //       this.blocks.update((blocks) =>
-    //         blocks.filter((block) => block.id !== id),
-    //       );
-    //     });
-    //   },
-    // });
+  startCreateBlock(type: TutorialBlockType): void {
+    this.activeEditor.set({ type, blockId: null });
   }
 
-  reoderBlocks() {
-    if (!this.isReordered()) return;
-    const orders = this.blocks().map(({ id }, index) => ({
-      id,
+  startEditBlock(block: TutorialBlockResponse): void {
+    this.activeEditor.set({ type: block.type, blockId: block.id });
+  }
+
+  onBlockSaved(block: TutorialBlockResponse): void {
+    const exists = this.blocks().some(({ id }) => id === block.id);
+    this.blocks.update((blocks) =>
+      exists
+        ? blocks.map((current) => (current.id === block.id ? block : current))
+        : [...blocks, block],
+    );
+    this.activeEditor.set(null);
+    this.syncTutorialBlocks();
+  }
+
+  async onDrop(event: CdkDragDrop<TutorialBlockResponse[]>): Promise<void> {
+    if (event.previousIndex === event.currentIndex || this.reordering()) return;
+
+    const previous = [...this.blocks()];
+    const reordered = [...previous];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    const withOrder = reordered.map((block, index) => ({
+      ...block,
       order: index + 1,
     }));
-    this.tutorialDataSource
-      .updateBlockOrder(this.id(), orders)
-      .subscribe(() => {
-        this.isReordered.set(false);
-      });
-  }
-
-  onDrop(event: CdkDragDrop<TutorialBlockResponse[]>) {
-    moveItemInArray(this.blocks(), event.previousIndex, event.currentIndex);
-    this.isReordered.set(true);
-  }
-
-  goBack() {
-    this.location.back();
-  }
-
-  private upsertBlock(block: TutorialBlockResponse) {
-    const index = this.blocks().findIndex((b) => b.id === block.id);
-    if (index === -1) {
-      this.blocks.update((blocks) => [...blocks, block]);
-      this.scrollToEnd();
-    } else {
-      this.blocks.update((blocks) => {
-        blocks[index] = block;
-        return [...blocks];
-      });
+    this.blocks.set(withOrder);
+    this.reordering.set(true);
+    this.reorderError.set(null);
+    try {
+      await firstValueFrom(
+        this.dataSource.updateBlockOrder(this.id(), {
+          blockIds: withOrder.map(({ id }) => id),
+        }),
+      );
+      this.syncTutorialBlocks();
+    } catch (error) {
+      this.blocks.set(previous);
+      this.reorderError.set(
+        tutorialHttpErrorMessage(error, 'No se pudo guardar el nuevo orden'),
+      );
+    } finally {
+      this.reordering.set(false);
     }
   }
 
-  private scrollToEnd() {
-    setTimeout(() => {
-      this.endOfBlocks().nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
-    }, 100);
+  prepareBlockDelete(block: TutorialBlockResponse): void {
+    this.blockDeleteError.set(null);
+    this.pendingBlockDelete.set(block);
+  }
+
+  async confirmBlockDelete(dialog: HlmAlertDialog): Promise<void> {
+    const block = this.pendingBlockDelete();
+    if (!block || this.blockDeleting()) return;
+    this.blockDeleting.set(true);
+    this.blockDeleteError.set(null);
+    try {
+      await firstValueFrom(this.dataSource.removeBlock(block.id));
+      this.blocks.update((blocks) =>
+        blocks.filter(({ id }) => id !== block.id),
+      );
+      if (this.activeEditor()?.blockId === block.id) {
+        this.activeEditor.set(null);
+      }
+      this.syncTutorialBlocks();
+      dialog.close();
+    } catch (error) {
+      this.blockDeleteError.set(
+        tutorialHttpErrorMessage(error, 'No se pudo eliminar el bloque'),
+      );
+    } finally {
+      this.blockDeleting.set(false);
+    }
+  }
+
+  resetBlockDelete(): void {
+    this.pendingBlockDelete.set(null);
+    this.blockDeleteError.set(null);
+  }
+
+  async togglePublication(): Promise<void> {
+    const tutorial = this.tutorial();
+    if (!tutorial || this.publicationPending()) return;
+    if (!tutorial.isPublished && this.blocks().length === 0) return;
+
+    this.publicationPending.set(true);
+    this.publicationError.set(null);
+    try {
+      const updated = await firstValueFrom(
+        this.dataSource.updatePublication(tutorial.id, {
+          isPublished: !tutorial.isPublished,
+        }),
+      );
+      this.tutorial.set({ ...updated, blocks: this.blocks() });
+    } catch (error) {
+      this.publicationError.set(
+        tutorialHttpErrorMessage(error, 'No se pudo cambiar la publicación'),
+      );
+    } finally {
+      this.publicationPending.set(false);
+    }
+  }
+
+  async confirmTutorialDelete(dialog: HlmAlertDialog): Promise<void> {
+    const tutorial = this.tutorial();
+    if (!tutorial || this.tutorialDeleting()) return;
+    this.tutorialDeleting.set(true);
+    this.tutorialDeleteError.set(null);
+    try {
+      await firstValueFrom(this.dataSource.remove(tutorial.id));
+      dialog.close();
+      this.goBack();
+    } catch (error) {
+      this.tutorialDeleteError.set(
+        tutorialHttpErrorMessage(error, 'No se pudo eliminar el tutorial'),
+      );
+    } finally {
+      this.tutorialDeleting.set(false);
+    }
+  }
+
+  private syncTutorialBlocks(): void {
+    const tutorial = this.tutorial();
+    if (tutorial) this.tutorial.set({ ...tutorial, blocks: this.blocks() });
   }
 }

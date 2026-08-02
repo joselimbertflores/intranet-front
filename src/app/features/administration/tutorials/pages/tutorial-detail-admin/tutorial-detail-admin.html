@@ -1,127 +1,345 @@
-<div class="max-w-4xl mx-auto w-full flex flex-col gap-6 relative">
-  <div
-    class="sticky top-0 sm:top-2 z-30 flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-0/80 backdrop-blur-lg p-2 rounded-xl border border-surface-200 shadow-sm transition-all"
-  >
-    <div class="flex items-center gap-2 w-full sm:w-auto">
-      <!-- <app-ui-button
-        icon="ui-icon ui-icon-arrow-left"
-        label="Volver"
-        [text]="true"
-        size="small"
-        (onClick)="goBack()"
-      /> -->
+<main class="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-8">
+  @if (tutorialResource.isLoading()) {
+    <div class="flex flex-col gap-5" aria-label="Cargando tutorial">
+      <div hlmSkeleton class="h-10 w-40"></div>
+      <div hlmSkeleton class="h-48 w-full"></div>
+      <div hlmSkeleton class="h-72 w-full"></div>
     </div>
-    <div class="flex items-center gap-2 w-full sm:w-auto">
-      <!-- @if (canUpdate()) {
-        <app-ui-button
-          icon="ui-icon ui-icon-sort"
-          aria-label="sort"
-          severity="secondary"
-          size="small"
-          label="Guardar orden"
-          [disabled]="!isReordered()"
-          (onClick)="reoderBlocks()"
-        />
-        <app-ui-button
-          icon="ui-icon ui-icon-pencil"
-          aria-label="edit"
-          [outlined]="true"
-          severity="secondary"
-          size="small"
-          label="Editar"
-          (onClick)="openTutorialEditDialog()"
-        />
+  } @else if (tutorialResource.error()) {
+    <section class="rounded-xl border bg-card p-8 text-center">
+      <h1 class="text-xl font-semibold">No se pudo cargar el tutorial</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Verifica que el tutorial exista e intenta nuevamente.
+      </p>
+      <div class="mt-5 flex justify-center gap-2">
+        <button hlmBtn type="button" variant="outline" (click)="goBack()">
+          Volver
+        </button>
+        <button hlmBtn type="button" (click)="tutorialResource.reload()">
+          Reintentar
+        </button>
+      </div>
+    </section>
+  } @else if (tutorial(); as currentTutorial) {
+    <header class="flex flex-col gap-5 rounded-xl border bg-card p-5 shadow-sm sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button hlmBtn type="button" variant="ghost" (click)="goBack()">
+          <ng-icon name="lucideArrowLeft" data-icon="inline-start" />
+          Volver
+        </button>
+
+        <span
+          hlmBadge
+          [variant]="currentTutorial.isPublished ? 'default' : 'secondary'"
+        >
+          {{ currentTutorial.isPublished ? "Publicado" : "No publicado" }}
+        </span>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-primary">Contenido del tutorial</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+          {{ currentTutorial.title }}
+        </h1>
+        @if (currentTutorial.summary) {
+          <p class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
+            {{ currentTutorial.summary }}
+          </p>
+        }
+        @if (currentTutorial.category) {
+          <p class="mt-3 text-sm text-muted-foreground">
+            Categoría:
+            <span class="font-medium text-foreground">
+              {{ currentTutorial.category.name }}
+            </span>
+          </p>
+        }
+      </div>
+
+      <div class="flex flex-wrap gap-2 border-t pt-4">
+        @if (canUpdate()) {
+          <button
+            hlmBtn
+            type="button"
+            variant="outline"
+            (click)="openTutorialDialog()"
+          >
+            <ng-icon name="lucidePencil" data-icon="inline-start" />
+            Editar información
+          </button>
+
+          <button
+            hlmBtn
+            type="button"
+            [variant]="currentTutorial.isPublished ? 'outline' : 'default'"
+            [disabled]="
+              publicationPending() ||
+              (!currentTutorial.isPublished && blocks().length === 0)
+            "
+            (click)="togglePublication()"
+          >
+            @if (publicationPending()) {
+              <hlm-spinner data-icon="inline-start" />
+              Guardando...
+            } @else {
+              {{
+                currentTutorial.isPublished
+                  ? "Despublicar tutorial"
+                  : "Publicar tutorial"
+              }}
+            }
+          </button>
+        }
+
+        @if (canDelete()) {
+          <button
+            hlmBtn
+            type="button"
+            variant="ghost"
+            class="text-destructive hover:text-destructive"
+            [hlmAlertDialogTriggerFor]="tutorialDeleteDialog"
+            (click)="tutorialDeleteError.set(null)"
+          >
+            <ng-icon name="lucideTrash2" data-icon="inline-start" />
+            Eliminar
+          </button>
+        }
+      </div>
+
+      @if (!currentTutorial.isPublished && blocks().length === 0) {
+        <p class="text-sm text-muted-foreground">
+          Agrega al menos un bloque antes de publicar.
+        </p>
+      }
+      @if (publicationError()) {
+        <p class="text-sm text-destructive" role="alert">
+          {{ publicationError() }}
+        </p>
+      }
+    </header>
+
+    <section
+      class="flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm sm:p-6"
+      aria-labelledby="tutorial-content-title"
+    >
+      <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 id="tutorial-content-title" class="text-lg font-semibold">
+            Bloques de contenido
+          </h2>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Los bloques se muestran públicamente en este mismo orden.
+          </p>
+        </div>
+
+        @if (canCreate()) {
+          <button
+            hlmBtn
+            type="button"
+            [disabled]="activeEditor() !== null"
+            [hlmDropdownMenuTrigger]="blockTypeMenu"
+          >
+            <ng-icon name="lucidePlus" data-icon="inline-start" />
+            Agregar bloque
+          </button>
+          <ng-template #blockTypeMenu>
+            <hlm-dropdown-menu class="w-52">
+              <hlm-dropdown-menu-group>
+                @for (option of blockTypes; track option.type) {
+                  <button
+                    hlmDropdownMenuItem
+                    type="button"
+                    (click)="startCreateBlock(option.type)"
+                  >
+                    <ng-icon [name]="option.icon" />
+                    {{ option.label }}
+                  </button>
+                }
+              </hlm-dropdown-menu-group>
+            </hlm-dropdown-menu>
+          </ng-template>
+        }
+      </header>
+
+      @if (reorderError()) {
+        <div hlmAlert variant="destructive" role="alert">
+          <h3 hlmAlertTitle>No se guardó el orden</h3>
+          <p hlmAlertDescription>
+            {{ reorderError() }}. Se restauró el orden anterior.
+          </p>
+        </div>
       }
 
-      @if (canCreate()) {
-        <app-ui-button
-          icon="ui-icon ui-icon-plus"
-          aria-label="add"
-          [outlined]="true"
-          label="Agregar"
-          size="small"
-          (click)="menuBloques.toggle($event)"
-        />
-      } -->
-    </div>
-  </div>
-
-  <div class="px-2 sm:px-4 pb-4 sm:pb-6">
-    <div class="flex flex-wrap items-center gap-3 mb-4">
-      @let isPublished =
-        $safeNavigationMigration(tutorial.value()?.isPublished);
-      <!-- <app-ui-tag
-        [severity]="isPublished ? 'success' : 'warn'"
-        [value]="isPublished ? 'Publicado' : 'Borrador'"
-      /> -->
-      <span
-        class="text-xs sm:text-sm font-semibold text-primary-600 tracking-wider"
+      <div
+        cdkDropList
+        class="flex flex-col gap-3"
+        [cdkDropListData]="blocks()"
+        [cdkDropListDisabled]="
+          activeEditor() !== null || !canUpdate() || reordering()
+        "
+        (cdkDropListDropped)="onDrop($event)"
       >
-        {{ tutorial.value()?.category?.name || "Sin categoría" | uppercase }}
-      </span>
-    </div>
+        @for (block of blocks(); track block.id; let index = $index) {
+          <article
+            cdkDrag
+            class="flex min-w-0 rounded-xl border bg-background shadow-xs"
+          >
+            <div
+              class="flex w-12 shrink-0 flex-col items-center gap-2 border-r bg-muted/35 py-4"
+            >
+              <button
+                hlmBtn
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                cdkDragHandle
+                aria-label="Arrastrar bloque para reordenar"
+                title="Arrastrar para reordenar"
+                [disabled]="
+                  activeEditor() !== null || !canUpdate() || reordering()
+                "
+              >
+                <ng-icon name="lucideGripVertical" />
+              </button>
+              <span class="text-xs font-semibold text-muted-foreground">
+                {{ index + 1 }}
+              </span>
+            </div>
 
-    <h1 class="text-2xl md:text-3xl font-bold text-surface-900 leading-tight">
-      {{ tutorial.value()?.title }}
-    </h1>
+            <div class="min-w-0 flex-1">
+              @if (activeEditor()?.blockId === block.id) {
+                <app-tutorial-block-inline-editor
+                  class="m-3"
+                  [tutorialId]="id()"
+                  [type]="block.type"
+                  [block]="block"
+                  (saved)="onBlockSaved($event)"
+                  (cancelled)="activeEditor.set(null)"
+                />
+              } @else {
+                <app-tutorial-block-preview-editor
+                  [block]="block"
+                  [canEdit]="canUpdate()"
+                  [canDelete]="canDelete()"
+                  (edit)="startEditBlock(block)"
+                  (remove)="prepareBlockDelete(block); blockDeleteDialog.open()"
+                />
+              }
+            </div>
+          </article>
+        } @empty {
+          @if (activeEditor() === null) {
+            <div class="rounded-xl border border-dashed px-5 py-12 text-center">
+              <p class="font-medium">
+                Este tutorial todavía no tiene contenido
+              </p>
+              <p class="mt-1 text-sm text-muted-foreground">
+                Agrega el primer bloque para poder publicarlo.
+              </p>
+            </div>
+          }
+        }
+      </div>
 
-    @if (tutorial.value()?.summary) {
-      <p class="text-base sm:text-lg text-surface-600 mt-2 leading-relaxed">
-        {{ tutorial.value()?.summary }}
+      @if (activeEditor(); as editor) {
+        @if (editor.blockId === null) {
+          <app-tutorial-block-inline-editor
+            [tutorialId]="id()"
+            [type]="editor.type"
+            (saved)="onBlockSaved($event)"
+            (cancelled)="activeEditor.set(null)"
+          />
+        }
+      }
+
+      @if (reordering()) {
+        <p
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+          aria-live="polite"
+        >
+          <hlm-spinner /> Guardando orden...
+        </p>
+      }
+    </section>
+  }
+</main>
+
+<hlm-alert-dialog #blockDeleteDialog (closed)="resetBlockDelete()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar bloque</h3>
+      <p hlmAlertDialogDescription>
+        El bloque se quitará definitivamente del tutorial.
+      </p>
+    </hlm-alert-dialog-header>
+    @if (blockDeleteError()) {
+      <p class="text-sm text-destructive" role="alert">
+        {{ blockDeleteError() }}
       </p>
     }
-    <div
-      class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-surface-400 mt-6 font-medium"
-    >
-      <span class="flex items-center gap-1">
-        Creado:
-        {{
-          $safeNavigationMigration(tutorial.value()?.createdAt) | date: "short"
-        }}
-      </span>
-    </div>
-  </div>
-  <div
-    cdkDropList
-    [cdkDropListDisabled]="!canUpdate()"
-    (cdkDropListDropped)="onDrop($event)"
-    class="flex flex-col gap-4 mt-2"
-  >
-    @for (block of blocks(); track $index) {
-      <tutorial-block-preview-editor
-        [data]="block"
-        [canEdit]="canUpdate()"
-        [canRemove]="canDelete()"
-        (edit)="openBlockDialog(block.type, block)"
-        (remove)="deleteBlock(block.id)"
-      />
-    } @empty {
-      <div class="text-center">
-        <h3 class="font-medium text-lg text-surface-800">
-          El tutorial no tiene contenido.
-        </h3>
-      </div>
-    }
-  </div>
-  @if (canCreate()) {
-    <div class="mt-6 mb-4 flex justify-center">
-      <!-- <button
-        appUiButton
-        [outlined]="true"
-        (click)="menuBloques.toggle($event)"
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        [disabled]="blockDeleting()"
       >
-        <i class="ui-icon ui-icon-plus text-xl"></i>
-        <span class="font-medium text-lg">Agregar bloque</span>
-      </button> -->
-    </div>
-  }
-  <!-- <app-ui-tieredmenu
-    #menuBloques
-    [model]="menuItems"
-    [popup]="true"
-    appendTo="body"
-    styleClass="mt-2 w-56"
-  ></app-ui-tieredmenu> -->
-  <div #endOfBlocks></div>
-</div>
-<!-- <app-ui-confirmdialog /> -->
+        Cancelar
+      </button>
+      <button
+        hlmBtn
+        type="button"
+        variant="destructive"
+        [disabled]="blockDeleting()"
+        (click)="confirmBlockDelete(blockDeleteDialog)"
+      >
+        @if (blockDeleting()) {
+          <hlm-spinner data-icon="inline-start" /> Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>
+
+<hlm-alert-dialog
+  #tutorialDeleteDialog
+  (closed)="tutorialDeleteError.set(null)"
+>
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar tutorial</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ tutorial()?.title }}” junto con todos sus bloques
+        asociados. Esta acción no se puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+    @if (tutorialDeleteError()) {
+      <p class="text-sm text-destructive" role="alert">
+        {{ tutorialDeleteError() }}
+      </p>
+    }
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        [disabled]="tutorialDeleting()"
+      >
+        Cancelar
+      </button>
+      <button
+        hlmBtn
+        type="button"
+        variant="destructive"
+        [disabled]="tutorialDeleting()"
+        (click)="confirmTutorialDelete(tutorialDeleteDialog)"
+      >
+        @if (tutorialDeleting()) {
+          <hlm-spinner data-icon="inline-start" /> Eliminando...
+        } @else {
+          Eliminar tutorial
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

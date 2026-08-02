@@ -1,80 +1,124 @@
-<div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Categorias tutoriales</h2>
-  <!-- @if (canCreate()) {
-    <app-ui-button
-      label="Agregar"
-      icon="ui-icon ui-icon-plus"
-      iconPos="left"
-      size="small"
-      (onClick)="openEditorDialog()"
-    />
-  } -->
-</div>
-
-<!-- <app-ui-table
-  #table
-  size="small"
-  [value]="dataSource()"
-  [globalFilterFields]="['name']"
-  [rowsPerPageOptions]="[10, 25, 50]"
-  [paginator]="true"
-  [rows]="10"
-  [globalFilterFields]="['name']"
->
-  <ng-template appUiTemplate="caption">
-    <div class="flex">
-      <app-ui-iconfield iconPosition="left" class="ml-auto">
-        <app-ui-inputicon>
-          <i class="ui-icon ui-icon-search"></i>
-        </app-ui-inputicon>
-        <input
-          appUiInput
-          type="text"
-          (input)="table.filterGlobal($event.target.value, 'contains')"
-          placeholder="Buscar"
-        />
-      </app-ui-iconfield>
+<main class="flex flex-col gap-5">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <button hlmBtn type="button" variant="ghost" class="mb-2 -ml-3" (click)="goBack()">
+        <ng-icon name="lucideArrowLeft" data-icon="inline-start" /> Volver a tutoriales
+      </button>
+      <h1 class="text-2xl font-semibold tracking-tight">Categorías de tutoriales</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Organiza el catálogo público sin editar manualmente los slugs.
+      </p>
     </div>
-  </ng-template>
-  <ng-template appUiTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th style="width: 6rem"></th>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="body" let-item>
-    <tr>
-      <td>{{ item.name }}</td>
-      <td>
-        <div class="flex gap-x-2">
-          @if (canUpdate()) {
-            <app-ui-button
-              icon="ui-icon ui-icon-pencil"
-              size="small"
-              (click)="openEditorDialog(item)"
-              severity="secondary"
-              rounded
-            />
+    @if (canCreate()) {
+      <button hlmBtn type="button" (click)="openEditor()">
+        <ng-icon name="lucidePlus" data-icon="inline-start" /> Nueva categoría
+      </button>
+    }
+  </header>
+
+  <section class="rounded-xl border bg-card p-4 shadow-sm">
+    <div hlmTableContainer>
+      <table hlmTable class="min-w-[560px] table-fixed">
+        <colgroup><col /><col class="w-[42%]" /><col class="w-16" /></colgroup>
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead>Nombre</th>
+            <th hlmTableHead>Slug</th>
+            <th hlmTableHead><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @if (categoriesResource.isLoading()) {
+            @for (_ of [1, 2, 3]; track $index) {
+              <tr hlmTableRow>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-40"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-36"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="ml-auto size-8"></div></td>
+              </tr>
+            }
+          } @else if (categoriesResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="3" class="py-12 text-center">
+                <p class="font-medium">No se pudieron cargar las categorías</p>
+                <button hlmBtn type="button" size="sm" variant="outline" class="mt-3" (click)="categoriesResource.reload()">Reintentar</button>
+              </td>
+            </tr>
+          } @else {
+            @for (category of categories(); track category.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell class="font-medium">{{ category.name }}</td>
+                <td hlmTableCell><code class="text-sm text-muted-foreground">{{ category.slug }}</code></td>
+                <td hlmTableCell class="text-right">
+                  <button
+                    hlmBtn
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + category.name"
+                    [hlmDropdownMenuTrigger]="categoryMenu"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+                  <ng-template #categoryMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        @if (canUpdate()) {
+                          <button hlmDropdownMenuItem type="button" (click)="openEditor(category)">
+                            <ng-icon name="lucidePencil" /> Editar
+                          </button>
+                        }
+                        @if (canDelete()) {
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            variant="destructive"
+                            [hlmAlertDialogTriggerFor]="deleteDialog"
+                            (click)="prepareDelete(category)"
+                          >
+                            <ng-icon name="lucideTrash2" /> Eliminar
+                          </button>
+                        }
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="3" class="py-12 text-center">
+                  <p class="font-medium">Todavía no hay categorías</p>
+                  <p class="mt-1 text-sm text-muted-foreground">Crea la primera para organizar los tutoriales.</p>
+                </td>
+              </tr>
+            }
           }
-          @if (canDelete()) {
-            <app-ui-button
-              icon="ui-icon ui-icon-trash"
-              size="small"
-              (click)="remove(item)"
-              severity="secondary"
-              rounded
-            />
-          }
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template appUiTemplate="emptymessage">
-    <tr>
-      <td colspan="2">
-        <div>Sin categorias registradas.</div>
-      </td>
-    </tr>
-  </ng-template>
-</app-ui-table>
-<app-ui-confirmdialog /> -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<hlm-alert-dialog #deleteDialog (closed)="resetDelete()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar categoría</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ pendingDelete()?.name }}”. Si está en uso, el servidor impedirá la operación.
+      </p>
+    </hlm-alert-dialog-header>
+    @if (deleteError()) {
+      <p class="text-sm text-destructive" role="alert">{{ deleteError() }}</p>
+    }
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button" [disabled]="deleting()">Cancelar</button>
+      <button hlmBtn type="button" variant="destructive" [disabled]="deleting()" (click)="confirmRemove(deleteDialog)">
+        @if (deleting()) {
+          <hlm-spinner data-icon="inline-start" /> Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

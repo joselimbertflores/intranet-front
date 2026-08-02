@@ -12,8 +12,6 @@ export * from "./components/inputs/hierarchical-combobox/hierarchical-combobox"
 export * from "./pipes/primeng-file-icon"
 export * from "./pipes/form-error-messages"
 export * from "./pipes/file-size-pipe"
-export * from "./pipes/safe-url-pipe"
-
 export * from "./services/file-upload.service"
 export * from "./services/window-scroll-store"
 export * from "./services/ui-breakpoint-observer"

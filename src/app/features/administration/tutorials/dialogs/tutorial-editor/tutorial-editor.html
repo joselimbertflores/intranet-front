@@ -1,67 +1,92 @@
-<!-- <form [formGroup]="tutorialForm" (ngSubmit)="save()">
-  <div class="flex flex-col gap-y-4 mt-1">
-    <div class="flex flex-col gap-1">
-      <app-ui-floatlabel variant="on">
-        <input
-          id="titleTxt"
-          appUiInput
-          type="text"
-          formControlName="title"
-          placeholder="Titulo"
-          class="w-full"
-          [invalid]="formUtils.isInvalid(tutorialForm.get('title'))"
-        />
-        <label for="titleTxt">Titulo</label>
-      </app-ui-floatlabel>
-      @if (formUtils.isInvalid(tutorialForm.get('title'))) {
-        <app-ui-message severity="error" size="small" variant="simple">
-          {{ formUtils.getErrorMessage(tutorialForm.get("title")) }}
-        </app-ui-message>
+<hlm-dialog-header>
+  <h3 hlmDialogTitle>{{ tutorial ? "Editar información" : "Nuevo tutorial" }}</h3>
+  <p hlmDialogDescription>
+    {{
+      tutorial
+        ? "Actualiza los datos básicos del tutorial."
+        : "Registra los datos básicos para continuar con el contenido."
+    }}
+  </p>
+</hlm-dialog-header>
+
+<form
+  id="tutorial-editor-form"
+  class="flex flex-col gap-5 py-2"
+  [formRoot]="tutorialForm"
+>
+  <div hlmField>
+    <label hlmFieldLabel for="tutorial-editor-title">Título</label>
+    <input
+      hlmInput
+      id="tutorial-editor-title"
+      type="text"
+      autocomplete="off"
+      placeholder="Ej. Cómo registrar una solicitud"
+      [formField]="tutorialForm.title"
+    />
+    @if (tutorialForm.title().touched()) {
+      @for (error of tutorialForm.title().errors(); track error.kind) {
+        <hlm-field-error [validator]="error.kind">
+          {{ error.message }}
+        </hlm-field-error>
       }
-    </div>
-
-    <app-ui-floatlabel variant="on">
-      <textarea
-        id="summaryTxt"
-        rows="2"
-        appUiTextarea
-        formControlName="summary"
-        placeholder="Descripcion"
-        class="w-full"
-      ></textarea>
-      <label for="summaryTxt">Resumen</label>
-    </app-ui-floatlabel>
-
-    <app-ui-floatlabel variant="on">
-      <app-ui-select
-        inputId="category_txt"
-        [options]="categories()"
-        optionLabel="name"
-        optionValue="id"
-        class="w-full"
-        appendTo="body"
-        [filter]="true"
-        formControlName="categoryId"
-      />
-      <label for="category_txt">Categoria</label>
-    </app-ui-floatlabel>
-
-    <div class="flex items-center">
-      <app-ui-checkbox
-        inputId="published_check"
-        name="pizza"
-        [binary]="true"
-        formControlName="isPublished"
-      />
-      <label for="published_check" class="ml-2"> Publicado </label>
-    </div>
+    }
   </div>
-  <div class="app-dialog-actions">
-    <button appUiButton severity="secondary" type="button" (click)="close()">
-      <span pButtonLabel>Cancelar</span>
-    </button>
-    <button appUiButton type="submit">
-      <span pButtonLabel>Guardar</span>
-    </button>
+
+  <div hlmField>
+    <label hlmFieldLabel for="tutorial-editor-summary">
+      Resumen (opcional)
+    </label>
+    <textarea
+      hlmTextarea
+      id="tutorial-editor-summary"
+      rows="4"
+      placeholder="Describe brevemente qué aprenderá la persona."
+      [formField]="tutorialForm.summary"
+    ></textarea>
   </div>
-</form> -->
+
+  <div hlmField>
+    <label hlmFieldLabel for="tutorial-editor-category">
+      Categoría (opcional)
+    </label>
+    <hlm-select [formField]="tutorialForm.categoryId">
+      <hlm-select-trigger class="w-full" buttonId="tutorial-editor-category">
+        <hlm-select-value />
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        <hlm-select-item [value]="null">Sin categoría</hlm-select-item>
+        @for (category of categoriesResource.value() ?? []; track category.id) {
+          <hlm-select-item [value]="category.id">
+            {{ category.name }}
+          </hlm-select-item>
+        }
+      </hlm-select-content>
+    </hlm-select>
+  </div>
+</form>
+
+<hlm-dialog-footer>
+  <button
+    hlmBtn
+    type="button"
+    variant="outline"
+    [disabled]="tutorialForm().submitting()"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+  <button
+    hlmBtn
+    type="submit"
+    form="tutorial-editor-form"
+    [disabled]="tutorialForm().submitting()"
+  >
+    @if (tutorialForm().submitting()) {
+      <hlm-spinner data-icon="inline-start" />
+      {{ tutorial ? "Guardando..." : "Creando..." }}
+    } @else {
+      {{ tutorial ? "Guardar cambios" : "Crear y continuar" }}
+    }
+  </button>
+</hlm-dialog-footer>

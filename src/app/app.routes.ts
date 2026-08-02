@@ -122,8 +122,8 @@ export const routes: Routes = [
           import('./features/administration/tutorials/pages/tutorials-admin/tutorials-admin'),
       },
       {
-        path: 'tutorials/:id',
-        title: 'Administracion - Detalle tutorial',
+        path: 'tutorials/:id/edit',
+        title: 'Administracion - Editar tutorial',
         data: { resource: Resource.TUTORIALS },
         canActivate: [resourceGuard],
         loadComponent: () =>

@@ -1,68 +1,84 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { form, FormField, FormRoot, maxLength, validate } from '@angular/forms/signals';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
 import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { firstValueFrom } from 'rxjs';
 
-
-
-import { FormUtils } from '../../../../../helpers';
-import { TutorialCategoryDataSource } from '../../services';
 import { TutorialCategoryResponse } from '../../interfaces';
+import { TutorialCategoryDataSource } from '../../services';
+
+interface TutorialCategoryEditorContext {
+  category?: TutorialCategoryResponse;
+}
+
+interface TutorialCategoryFormModel {
+  name: string;
+}
 
 @Component({
   selector: 'app-tutorial-category-editor',
   imports: [
-    ReactiveFormsModule,
-   
+    FormField,
+    FormRoot,
+    HlmButtonImports,
+    HlmDialogFooter,
+    HlmDialogHeader,
+    HlmDialogTitle,
+    HlmFieldImports,
+    HlmInput,
+    HlmSpinner,
   ],
   templateUrl: './tutorial-category-editor.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TutorialCategoryEditor {
-  // private dialogRef = inject(DynamicDialogRef);
-  private formBuilder = inject(FormBuilder);
-  private tutorialCategoryDataSource = inject(TutorialCategoryDataSource);
+  private readonly dialogRef =
+    inject<BrnDialogRef<TutorialCategoryResponse>>(BrnDialogRef);
+  private readonly dataSource = inject(TutorialCategoryDataSource);
+  private readonly context =
+    injectBrnDialogContext<TutorialCategoryEditorContext>();
 
-  // readonly data?: TutorialCategoryResponse = inject(DynamicDialogConfig).data;
-  readonly formUtils = FormUtils;
-
-  form: FormGroup = this.formBuilder.nonNullable.group({
-    name: [
-      '',
-      [Validators.required, Validators.minLength(2), Validators.maxLength(120)],
-    ],
+  readonly category = this.context.category;
+  readonly model = signal<TutorialCategoryFormModel>({
+    name: this.category?.name ?? '',
   });
 
-  ngOnInit() {
-    this.loadForm();
-  }
+  readonly categoryForm = form(
+    this.model,
+    (path) => {
+      validate(path.name, ({ value }) =>
+        value().trim()
+          ? null
+          : { kind: 'required', message: 'El nombre es obligatorio' },
+      );
+      maxLength(path.name, 120, {
+        message: 'El nombre admite hasta 120 caracteres',
+      });
+    },
+    {
+      submission: {
+        action: async (field) => {
+          const payload = { name: field().value().name.trim() };
+          const response = await firstValueFrom(
+            this.category
+              ? this.dataSource.update(this.category.id, payload)
+              : this.dataSource.create(payload),
+          );
+          this.dialogRef.close(response);
+        },
+      },
+    },
+  );
 
-  save() {
-    if (this.form.invalid) {
-      return this.form.markAllAsTouched();
-    }
-
-    // const subscription = this.data
-    //   ? this.tutorialCategoryDataSource.update(
-    //       this.data.id,
-    //       this.form.getRawValue(),
-    //     )
-    //   : this.tutorialCategoryDataSource.create(this.form.getRawValue());
-
-    // subscription.subscribe((result) => {
-    //   this.dialogRef.close(result);
-    // });
-  }
-
-  close() {
-    // this.dialogRef.close();
-  }
-
-  private loadForm() {
-    // if (!this.data) return;
-    // this.form.patchValue({ name: this.data.name });
+  close(): void {
+    this.dialogRef.close();
   }
 }

@@ -1,0 +1,127 @@
+<form class="flex flex-col gap-5 p-4 sm:p-5" [formRoot]="blockForm">
+  <header>
+    <p class="text-xs font-semibold tracking-wide text-primary uppercase">
+      {{ block() ? "Editar" : "Nuevo" }} bloque
+    </p>
+    <h3 class="mt-1 text-lg font-semibold">{{ typeLabel() }}</h3>
+  </header>
+
+  @if (type() === "TEXT") {
+    <div hlmField [forceInvalid]="blockForm.content().touched() && blockForm.content().invalid()">
+      <label hlmFieldLabel>Contenido</label>
+      <quill-editor-field
+        class="block"
+        theme="snow"
+        format="html"
+        bounds="self"
+        defaultEmptyValue=""
+        placeholder="Escribe el contenido del tutorial"
+        [formats]="editorFormats"
+        [modules]="editorModules"
+        [styles]="{ height: '240px' }"
+        [formField]="blockForm.content"
+      />
+      @if (blockForm.content().touched()) {
+        @for (error of blockForm.content().errors(); track error.kind) {
+          <hlm-field-error forceShow>{{ error.message }}</hlm-field-error>
+        }
+      }
+    </div>
+  } @else if (type() === "YOUTUBE") {
+    <div hlmField>
+      <label hlmFieldLabel for="tutorial-youtube-content">URL o ID de YouTube</label>
+      <input
+        hlmInput
+        id="tutorial-youtube-content"
+        type="text"
+        autocomplete="off"
+        placeholder="https://www.youtube.com/watch?v=..."
+        [formField]="blockForm.content"
+      />
+      <p hlmFieldDescription>
+        Se aceptan enlaces de youtube.com, youtu.be o el ID de 11 caracteres.
+      </p>
+      @if (blockForm.content().touched()) {
+        @for (error of blockForm.content().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error>
+        }
+      }
+    </div>
+  } @else {
+    <div class="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/30 p-4">
+      @if (block()?.file; as currentFile) {
+        <div>
+          <p class="text-sm font-medium">Archivo actual</p>
+          <p class="truncate text-sm text-muted-foreground" [title]="currentFile.originalName">
+            {{ currentFile.originalName }} · {{ currentFile.size | fileSize }}
+          </p>
+        </div>
+      }
+
+      <label
+        class="inline-flex w-fit cursor-pointer items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium outline-none hover:bg-accent focus-within:ring-2 focus-within:ring-ring"
+      >
+        <ng-icon name="lucideFileUp" />
+        {{ block()?.file ? "Seleccionar reemplazo" : "Seleccionar archivo" }}
+        <input
+          class="sr-only"
+          type="file"
+          [accept]="accept()"
+          [disabled]="blockForm().submitting()"
+          (change)="onFileSelected($event)"
+        />
+      </label>
+
+      @if (selectedFile(); as file) {
+        <p class="text-sm">
+          <span class="font-medium">{{ file.name }}</span>
+          <span class="text-muted-foreground"> · {{ file.size | fileSize }}</span>
+        </p>
+      }
+      @if (pendingFileId()) {
+        <p class="inline-flex items-center gap-2 text-sm text-primary">
+          <ng-icon name="lucideRefreshCw" />
+          Archivo subido. Un reintento reutilizará este archivo.
+        </p>
+      }
+      @if (fileError()) {
+        <p class="text-sm text-destructive" role="alert">{{ fileError() }}</p>
+      }
+      <p class="text-xs text-muted-foreground">
+        Tamaño máximo: 50 MiB.
+        @switch (type()) {
+          @case ("IMAGE") { JPEG, PNG o WebP. }
+          @case ("VIDEO_FILE") { MP4. }
+          @case ("FILE") { PDF o PPTX. }
+        }
+      </p>
+    </div>
+  }
+
+  @if (requestError()) {
+    <div hlmAlert variant="destructive" role="alert">
+      <h4 hlmAlertTitle>No se pudo guardar</h4>
+      <p hlmAlertDescription>{{ requestError() }}</p>
+    </div>
+  }
+
+  <footer class="flex flex-wrap justify-end gap-2 border-t pt-4">
+    <button
+      hlmBtn
+      type="button"
+      variant="outline"
+      [disabled]="blockForm().submitting()"
+      (click)="cancel()"
+    >
+      Cancelar
+    </button>
+    <button hlmBtn type="submit" [disabled]="blockForm().submitting()">
+      @if (blockForm().submitting()) {
+        <hlm-spinner data-icon="inline-start" />
+        {{ uploading() ? "Subiendo..." : "Guardando..." }}
+      } @else {
+        Guardar
+      }
+    </button>
+  </footer>
+</form>

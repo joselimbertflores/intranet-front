@@ -1,174 +1,154 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  output,
   input,
+  output,
 } from '@angular/core';
-import { CdkDragHandle, CdkDrag } from '@angular/cdk/drag-drop';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideExternalLink,
+  lucideFileText,
+  lucidePencil,
+  lucideTrash2,
+} from '@ng-icons/lucide';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
 
-import { FileIcon, SafeUrlPipe } from '../../../../../shared';
-import { TutorialBlockResponse } from '../../interfaces';
+import { FileSizePipe } from '../../../../../shared';
+import { TutorialBlockResponse, TutorialBlockType } from '../../interfaces';
 
 @Component({
-  selector: 'tutorial-block-preview-editor',
-  imports: [CdkDrag, CdkDragHandle, FileIcon, SafeUrlPipe],
+  selector: 'app-tutorial-block-preview-editor',
+  imports: [FileSizePipe, HlmButtonImports, NgIcon],
+  providers: [
+    provideIcons({
+      lucideExternalLink,
+      lucideFileText,
+      lucidePencil,
+      lucideTrash2,
+    }),
+  ],
   template: `
-    <div
-      cdkDrag
-      class="group relative bg-surface-0 rounded-xl border border-surface-200 p-5 shadow-sm hover:border-primary-300 transition-colors"
-    >
-      <div class="flex items-center justify-between mb-4 select-none">
-        <div class="flex items-center gap-3">
+    <div class="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:p-5">
+      <header class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            {{ typeLabel(block().type) }}
+          </p>
+          @if (block().file; as file) {
+            <p class="mt-1 truncate font-medium" [title]="file.originalName">
+              {{ file.originalName }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              {{ file.mimeType }} · {{ file.size | fileSize }}
+            </p>
+          }
+        </div>
+
+        <div class="flex items-center gap-1">
+          @if (canEdit()) {
+          <button
+            hlmBtn
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            aria-label="Editar bloque"
+            title="Editar bloque"
+            (click)="edit.emit()"
+          >
+            <ng-icon name="lucidePencil" />
+          </button>
+          }
+          @if (canDelete()) {
+          <button
+            hlmBtn
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            class="text-destructive hover:text-destructive"
+            aria-label="Eliminar bloque"
+            title="Eliminar bloque"
+            (click)="remove.emit()"
+          >
+            <ng-icon name="lucideTrash2" />
+          </button>
+          }
+        </div>
+      </header>
+
+      @switch (block().type) {
+        @case (blockType.TEXT) {
           <div
-            cdkDragHandle
-            class="cursor-grab active:cursor-grabbing p-1 text-surface-400 hover:text-surface-700 transition-colors"
-            title="Arrastrar para reordenar"
-          >
-            <i class="ui-icon ui-icon-bars text-lg"></i>
-          </div>
-          <span
-            class="text-[10px] font-bold uppercase tracking-wider text-surface-600 bg-surface-100 px-2 py-1 rounded border border-surface-200"
-          >
-            {{ data().type }}
-          </span>
-        </div>
-
-        <div
-          class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        >
-          <!-- @if (canEdit()) {
-            <button
-              appUiButton
-              icon="ui-icon ui-icon-pencil"
-              [rounded]="true"
-              [text]="true"
-              size="small"
-              title="Editar bloque"
-              (click)="edit.emit()"
-            ></button>
-          }
-          @if (canRemove()) {
-            <button
-              appUiButton
-              icon="ui-icon ui-icon-trash"
-              [rounded]="true"
-              [text]="true"
-              size="small"
-              severity="danger"
-              title="Eliminar bloque"
-              (click)="remove.emit()"
-            ></button>
-          } -->
-        </div>
-      </div>
-
-      <div class="pl-2 sm:pl-8">
-        @switch (data().type) {
-          @case ('TEXT') {
-            <div
-              class="prose prose-sm max-w-none text-surface-700 wrap-break-word overflow-hidden"
-              [innerHTML]="data().content"
-            ></div>
-          }
-
-          @case ('IMAGE') {
-            <figure class="flex flex-col items-center gap-2 m-0">
-              <div
-                class="rounded-lg border border-surface-100 overflow-hidden bg-surface-50 w-full flex justify-center"
-              >
-                <img
-                  [src]="$safeNavigationMigration(data().file?.url)"
-                  [alt]="data().content || 'Imagen del tutorial'"
-                  loading="lazy"
-                  class="max-h-[350px] w-auto object-contain"
-                />
-              </div>
-              @if (data().content) {
-                <figcaption class="text-sm text-surface-500 italic mt-1">
-                  {{ data().content }}
-                </figcaption>
-              }
-            </figure>
-          }
-
-          @case ('VIDEO_URL') {
-            @let url = data().content;
-            @if (url) {
-              <div class="aspect-video w-full overflow-hidden bg-black">
-                <iframe
-                  class="w-full h-full border-none"
-                  [src]="url | safeUrl"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  title="Video tutorial"
-                  allowfullscreen
-                  loading="lazy"
-                ></iframe>
-              </div>
-            }
-          }
-
-          @case ('VIDEO_FILE') {
-            <div class="flex flex-col items-center gap-2">
-              <video
-                controls
-                preload="metadata"
-                class="w-full max-h-[400px] rounded-lg border border-surface-200 bg-black shadow-inner"
-              >
-                <source
-                  [src]="$safeNavigationMigration(data().file?.url)"
-                  type="video/mp4"
-                />
-                Tu navegador no soporta el elemento de video.
-              </video>
-              @if (data().content) {
-                <p class="text-xs text-surface-500 m-0">
-                  {{ data().content }}
-                </p>
-              }
-            </div>
-          }
-
-          @case ('FILE') {
-            <div class="flex flex-col gap-2">
-              @if (data().file) {
-                <a
-                  [href]="$safeNavigationMigration(data().file?.url)"
-                  target="_blank"
-                  class="flex items-center gap-4 p-4 border border-surface-200 rounded-lg hover:bg-surface-50 hover:border-primary-200 no-underline group/file w-full"
-                >
-                  <!-- <file-icon [fileName]="data().file?.originalName ?? ''" /> -->
-                  <div class="flex flex-col">
-                    <span
-                      class="text-sm font-semibold text-surface-800 group-hover/file:text-primary-700 transition-colors line-clamp-1"
-                    >
-                      {{ data().file?.originalName }}
-                    </span>
-                    <span
-                      class="text-xs text-surface-500 mt-0.5 uppercase tracking-wide"
-                    >
-                      ARCHIVO ADJUNTO
-                    </span>
-                  </div>
-                </a>
-              }
-              @if (data().content) {
-                <div class="text-surface-700 text-sm">
-                  {{ data().content }}
-                </div>
-              }
-            </div>
+            class="prose prose-sm max-w-none wrap-break-word text-foreground"
+            [innerHTML]="block().content"
+          ></div>
+        }
+        @case (blockType.IMAGE) {
+          @if (block().file; as file) {
+            <img
+              class="max-h-96 w-full rounded-lg bg-muted object-contain"
+              [src]="file.url"
+              [alt]="file.originalName"
+              loading="lazy"
+            />
           }
         }
-      </div>
+        @case (blockType.YOUTUBE) {
+          @if (block().content; as url) {
+            <a
+              class="inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+              [href]="url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ng-icon name="lucideExternalLink" />
+              Abrir video de YouTube
+            </a>
+          }
+        }
+        @case (blockType.VIDEO_FILE) {
+          @if (block().file; as file) {
+            <video class="max-h-[28rem] w-full rounded-lg bg-black" controls preload="metadata">
+              <source [src]="file.url" [type]="file.mimeType" />
+            </video>
+          }
+        }
+        @case (blockType.FILE) {
+          @if (block().file; as file) {
+            <a
+              class="flex items-center gap-3 rounded-lg border bg-muted/40 p-4 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              [href]="file.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ng-icon name="lucideFileText" class="shrink-0 text-xl text-primary" />
+              <span class="min-w-0 flex-1">
+                <span class="block truncate font-medium">{{ file.originalName }}</span>
+                <span class="text-sm text-muted-foreground">Abrir archivo</span>
+              </span>
+            </a>
+          }
+        }
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TutorialBlockPreviewEditor {
-  readonly data = input.required<TutorialBlockResponse>();
+  readonly block = input.required<TutorialBlockResponse>();
+  readonly canEdit = input(true);
+  readonly canDelete = input(true);
+  readonly edit = output<void>();
+  readonly remove = output<void>();
+  readonly blockType = TutorialBlockType;
 
-  edit = output<void>();
-  remove = output<void>();
-  canEdit = input(true);
-  canRemove = input(true);
+  typeLabel(type: TutorialBlockType): string {
+    const labels: Record<TutorialBlockType, string> = {
+      [TutorialBlockType.TEXT]: 'Texto',
+      [TutorialBlockType.IMAGE]: 'Imagen',
+      [TutorialBlockType.YOUTUBE]: 'YouTube',
+      [TutorialBlockType.VIDEO_FILE]: 'Video subido',
+      [TutorialBlockType.FILE]: 'Archivo',
+    };
+    return labels[type];
+  }
 }

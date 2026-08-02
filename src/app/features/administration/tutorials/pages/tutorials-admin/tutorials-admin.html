@@ -1,80 +1,214 @@
-<div class="flex items-center justify-between mb-4">
-  <h2 class="text-2xl font-semibold">Tutoriales</h2>
-  @if (canCreate()) {
-    <!-- <app-ui-button
-      label="Agregar"
-      icon="ui-icon ui-icon-plus"
-      iconPos="left"
-      size="small"
-      (onClick)="openEditorDialog()"
-    /> -->
-  }
-</div>
-<div class="card">
-  <!-- <app-ui-table
-    #table
-    [value]="dataSource()"
-    [totalRecords]="dataSize()"
-    [globalFilterFields]="['name']"
-    [paginator]="true"
-    [rows]="10"
-    size="small"
-  >
-    <ng-template appUiTemplate="caption">
-      <div class="flex sm:justify-end">
-        <div class="w-full sm:w-1/4">
-          <search-input (search)="onSearch($event)" label="Buscar" />
-        </div>
-      </div>
-    </ng-template>
-    <ng-template appUiTemplate="header">
-      <tr>
-        <th>Titulo</th>
-        <th>Resumen</th>
-        <th>Categoria</th>
-        <th>Estado</th>
-        <th style="width: 5rem"></th>
-      </tr>
-    </ng-template>
-    <ng-template appUiTemplate="body" let-item>
-      <tr>
-        <td>{{ item.title }}</td>
-        <td>{{ item.summary }}</td>
-        <td>{{ item.category.name }}</td>
-        <td>
-          @if (item.isPublished) {
-            <app-ui-tag severity="success" value="Publicado" />
-          } @else {
-            <app-ui-tag severity="warn" value="No publicado" />
-          }
-        </td>
+<main class="flex flex-col gap-5">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">Tutoriales</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Crea y publica guías paso a paso para el portal institucional.
+      </p>
+    </div>
 
-        <td>
-          <div class="flex gap-x-2">
-            <app-ui-button
-              icon="ui-icon ui-icon-cog"
-              size="small"
-              [routerLink]="['/admin/tutorials', item.id]"
-              severity="secondary"
-              rounded
-            />
-            @if (canUpdate()) {
-              <app-ui-button
-                icon="ui-icon ui-icon-pencil"
-                size="small"
-                (click)="openEditorDialog(item)"
-                severity="secondary"
-                rounded
-              />
+    <div class="flex flex-wrap gap-2">
+      <a hlmBtn variant="outline" routerLink="/administration/tutorial-categories">
+        <ng-icon name="lucideFolderCog" data-icon="inline-start" />
+        Administrar categorías
+      </a>
+      @if (canCreate()) {
+        <button hlmBtn type="button" (click)="openTutorialDialog()">
+          <ng-icon name="lucidePlus" data-icon="inline-start" />
+          Nuevo tutorial
+        </button>
+      }
+    </div>
+  </header>
+
+  <section class="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm">
+    <div class="flex sm:justify-end">
+      <hlm-input-group class="w-full sm:w-80">
+        <input
+          hlmInputGroupInput
+          type="search"
+          aria-label="Buscar tutoriales"
+          placeholder="Buscar por título"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        <hlm-input-group-addon>
+          <ng-icon name="lucideSearch" />
+        </hlm-input-group-addon>
+      </hlm-input-group>
+    </div>
+
+    <div hlmTableContainer>
+      <table hlmTable class="min-w-[760px] table-fixed">
+        <colgroup>
+          <col />
+          <col class="w-52" />
+          <col class="w-36" />
+          <col class="w-48" />
+          <col class="w-16" />
+        </colgroup>
+        <thead hlmTableHeader>
+          <tr hlmTableRow>
+            <th hlmTableHead>Título</th>
+            <th hlmTableHead>Categoría</th>
+            <th hlmTableHead>Estado</th>
+            <th hlmTableHead>Actualizado</th>
+            <th hlmTableHead><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @if (isListLoading()) {
+            @for (_ of [1, 2, 3, 4, 5]; track $index) {
+              <tr hlmTableRow>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-3/4"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-28"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-20"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="h-5 w-32"></div></td>
+                <td hlmTableCell><div hlmSkeleton class="ml-auto size-8"></div></td>
+              </tr>
             }
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template appUiTemplate="emptymessage">
-      <tr>
-        <td colspan="5">Sin resultados.</td>
-      </tr>
-    </ng-template>
-  </app-ui-table> -->
-</div>
+          } @else if (tutorialsResource.error()) {
+            <tr hlmTableRow>
+              <td hlmTableCell colspan="5" class="py-12 text-center">
+                <div class="flex flex-col items-center gap-3 whitespace-normal">
+                  <div>
+                    <p class="font-medium">No se pudieron cargar los tutoriales</p>
+                    <p class="text-sm text-muted-foreground">Intenta nuevamente.</p>
+                  </div>
+                  <button hlmBtn type="button" size="sm" variant="outline" (click)="tutorialsResource.reload()">
+                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (tutorial of tutorials(); track tutorial.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell>
+                  <div class="min-w-0">
+                    <p class="truncate font-medium" [title]="tutorial.title">{{ tutorial.title }}</p>
+                    @if (tutorial.summary) {
+                      <p class="mt-0.5 truncate text-sm text-muted-foreground">{{ tutorial.summary }}</p>
+                    }
+                  </div>
+                </td>
+                <td hlmTableCell>
+                  <span class="block truncate text-muted-foreground">
+                    {{ tutorial.category?.name ?? "Sin categoría" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <span hlmBadge [variant]="tutorial.isPublished ? 'default' : 'secondary'">
+                    {{ tutorial.isPublished ? "Publicado" : "No publicado" }}
+                  </span>
+                </td>
+                <td hlmTableCell>
+                  <time class="text-sm text-muted-foreground" [attr.datetime]="tutorial.updatedAt">
+                    {{ tutorial.updatedAt | date: "medium" }}
+                  </time>
+                </td>
+                <td hlmTableCell class="text-right">
+                  <button
+                    hlmBtn
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    align="end"
+                    [attr.aria-label]="'Acciones de ' + tutorial.title"
+                    [hlmDropdownMenuTrigger]="actionsMenu"
+                  >
+                    <ng-icon name="lucideEllipsisVertical" />
+                  </button>
+                  <ng-template #actionsMenu>
+                    <hlm-dropdown-menu class="w-36">
+                      <hlm-dropdown-menu-group>
+                        @if (canUpdate()) {
+                          <a hlmDropdownMenuItem [routerLink]="['/administration/tutorials', tutorial.id, 'edit']">
+                            <ng-icon name="lucideListTree" />
+                            Administrar contenido
+                          </a>
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            (click)="openTutorialDialog(tutorial)"
+                          >
+                            <ng-icon name="lucidePencil" />
+                            Editar información
+                          </button>
+                        }
+                        @if (canDelete()) {
+                          <button
+                            hlmDropdownMenuItem
+                            type="button"
+                            variant="destructive"
+                            [hlmAlertDialogTriggerFor]="deleteDialog"
+                            (click)="prepareDelete(tutorial)"
+                          >
+                            <ng-icon name="lucideTrash2" />
+                            Eliminar
+                          </button>
+                        }
+                      </hlm-dropdown-menu-group>
+                    </hlm-dropdown-menu>
+                  </ng-template>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="5" class="py-12 text-center">
+                  <div class="flex flex-col gap-1 whitespace-normal">
+                    <p class="font-medium">
+                      {{ listState().term ? "No se encontraron tutoriales" : "Todavía no hay tutoriales" }}
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      {{ listState().term ? "Prueba con otro término de búsqueda." : "Crea el primer tutorial para comenzar." }}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isListLoading() && !tutorialsResource.error() && total() > 0) {
+      <app-pagination-controls
+        [totalItems]="total()"
+        [currentPage]="currentPage()"
+        [pageSize]="listState().limit"
+        [pageSizes]="pageSizeOptions"
+        (currentPageChange)="changePage($event)"
+        (pageSizeChange)="changePageSize($event)"
+      />
+    }
+  </section>
+</main>
+
+<hlm-alert-dialog #deleteDialog (closed)="resetDeleteState()">
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar tutorial</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ pendingDelete()?.title }}” junto con todos sus bloques asociados. Esta acción no se puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+
+    @if (deleteError()) {
+      <p class="text-sm text-destructive" role="alert">{{ deleteError() }}</p>
+    }
+
+    <hlm-alert-dialog-footer>
+      <button hlmAlertDialogCancel type="button" [disabled]="deleting()">Cancelar</button>
+      <button hlmBtn type="button" variant="destructive" [disabled]="deleting()" (click)="confirmRemove(deleteDialog)">
+        @if (deleting()) {
+          <hlm-spinner data-icon="inline-start" />
+          Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

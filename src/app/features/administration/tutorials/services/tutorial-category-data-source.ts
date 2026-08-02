@@ -1,34 +1,36 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import { environment } from '../../../../../environments/environment';
-import { TutorialCategoryResponse } from '../interfaces';
+import {
+  TutorialCategoryDeleteResponse,
+  TutorialCategoryPayload,
+  TutorialCategoryResponse,
+} from '../interfaces';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class TutorialCategoryDataSource {
-  private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/api/tutorial-categories`;
+  private readonly http = inject(HttpClient);
+  private readonly url = `${environment.baseUrl}/api/tutorial-categories`;
 
-  categories = toSignal(this.findAll(), { initialValue: [] });
-
-  private findAll() {
-    return this.http.get<TutorialCategoryResponse[]>(`${this.URL}`);
+  findAll() {
+    return this.http.get<TutorialCategoryResponse[]>(this.url);
   }
 
-  create(dto: object) {
-    return this.http.post<TutorialCategoryResponse>(`${this.URL}`, dto);
+  create(payload: TutorialCategoryPayload) {
+    return this.http.post<TutorialCategoryResponse>(this.url, payload);
   }
 
-  update(id: number, dto: object) {
-    return this.http.patch<TutorialCategoryResponse>(`${this.URL}/${id}`, dto);
+  update(id: number, payload: TutorialCategoryPayload) {
+    return this.http.patch<TutorialCategoryResponse>(
+      `${this.url}/${id}`,
+      payload,
+    );
   }
 
   remove(id: number) {
-    return this.http.delete<{ ok: boolean; message: string }>(
-      `${this.URL}/${id}`,
+    return this.http.delete<TutorialCategoryDeleteResponse>(
+      `${this.url}/${id}`,
     );
   }
 }

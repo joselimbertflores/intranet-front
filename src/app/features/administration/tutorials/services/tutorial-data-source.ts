@@ -1,100 +1,84 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { Observable, of, switchMap } from 'rxjs';
-
 import { environment } from '../../../../../environments/environment';
-import { FileUploadService, UploadResult } from '../../../../shared';
+import { FileUploadService } from '../../../../shared';
 import {
-  TutorialBlockFileResponse,
-  TutorialCategoryResponse,
+  TutorialBlockCreatePayload,
+  TutorialBlockReorderPayload,
+  TutorialBlockReorderResponse,
+  TutorialBlockResponse,
+  TutorialBlockUpdatePayload,
+  TutorialCreatePayload,
   TutorialDetailResponse,
+  TutorialGeneralUpdatePayload,
+  TutorialListParams,
+  TutorialListResponse,
+  TutorialPublicationPayload,
 } from '../interfaces';
 
-interface PaginatioParams {
-  term: string;
-  limit: number;
-  offset: number;
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class TutorialDataSource {
-  private http = inject(HttpClient);
-  private readonly URL = `${environment.baseUrl}/api/tutorials`;
-  private fileUploadService = inject(FileUploadService);
+  private readonly http = inject(HttpClient);
+  private readonly fileUploadService = inject(FileUploadService);
+  private readonly url = `${environment.baseUrl}/api/tutorials`;
 
-  findAll({ limit, offset, term }: PaginatioParams) {
+  findAll({ limit, offset, term }: TutorialListParams) {
     const params = new HttpParams({
       fromObject: { limit, offset, ...(term && { term }) },
     });
-    return this.http.get<{ tutorials: TutorialDetailResponse[]; total: number }>(
-      `${this.URL}`,
-      { params },
-    );
-  }
-
-  create(dto: object) {
-    return this.http.post(`${this.URL}`, dto);
-  }
-
-  update(id: string, dto: object) {
-    return this.http.patch(`${this.URL}/${id}`, dto);
-  }
-
-  getCategories() {
-    return this.http.get<TutorialCategoryResponse[]>(`${this.URL}/categories`);
+    return this.http.get<TutorialListResponse>(this.url, { params });
   }
 
   getOne(id: string) {
-    return this.http.get<TutorialDetailResponse>(`${this.URL}/${id}`);
+    return this.http.get<TutorialDetailResponse>(`${this.url}/${id}`);
   }
 
-  createBlock(tutorialId: string, dto: object, file: File | null) {
-    const task: Observable<UploadResult | null> = file
-      ? this.fileUploadService.upload(file, 'tutorials')
-      : of(null);
-    return task.pipe(
-      switchMap((result) =>
-        this.http.post<TutorialBlockFileResponse>(
-          `${this.URL}/${tutorialId}/block`,
-          {
-            ...dto,
-            ...(result && { fileId: result.id }),
-          },
-        ),
-      ),
+  create(payload: TutorialCreatePayload) {
+    return this.http.post<TutorialDetailResponse>(this.url, payload);
+  }
+
+  update(id: string, payload: TutorialGeneralUpdatePayload) {
+    return this.http.patch<TutorialDetailResponse>(`${this.url}/${id}`, payload);
+  }
+
+  updatePublication(id: string, payload: TutorialPublicationPayload) {
+    return this.http.patch<TutorialDetailResponse>(`${this.url}/${id}`, payload);
+  }
+
+  remove(id: string) {
+    return this.http.delete<void>(`${this.url}/${id}`);
+  }
+
+  createBlock(tutorialId: string, payload: TutorialBlockCreatePayload) {
+    return this.http.post<TutorialBlockResponse>(
+      `${this.url}/${tutorialId}/block`,
+      payload,
     );
   }
 
-  updateBlock(blockId: string, dto: object, file: File | null) {
-    const task: Observable<UploadResult | null> = file
-      ? this.fileUploadService.upload(file, 'tutorials')
-      : of(null);
-    return task.pipe(
-      switchMap((result) =>
-        this.http.patch<TutorialBlockFileResponse>(
-          `${this.URL}/block/${blockId}`,
-          {
-            ...dto,
-            ...(result && { fileId: result.id }),
-          },
-        ),
-      ),
+  updateBlock(blockId: string, payload: TutorialBlockUpdatePayload) {
+    return this.http.patch<TutorialBlockResponse>(
+      `${this.url}/block/${blockId}`,
+      payload,
     );
   }
 
   removeBlock(blockId: string) {
-    return this.http.delete<{ ok: boolean; message: string }>(
-      `${this.URL}/block/${blockId}`,
+    return this.http.delete<void>(`${this.url}/block/${blockId}`);
+  }
+
+  updateBlockOrder(
+    tutorialId: string,
+    payload: TutorialBlockReorderPayload,
+  ) {
+    return this.http.put<TutorialBlockReorderResponse>(
+      `${this.url}/${tutorialId}/blocks/order`,
+      payload,
     );
   }
 
-  updateBlockOrder(tutorialId: string, items: { id: string; order: number }[]) {
-    return this.http.put<{ ok: true; message: string }>(
-      `${this.URL}/${tutorialId}/blocks/order`,
-      { items },
-    );
+  uploadTutorialFile(file: File) {
+    return this.fileUploadService.upload(file, 'tutorials');
   }
 }

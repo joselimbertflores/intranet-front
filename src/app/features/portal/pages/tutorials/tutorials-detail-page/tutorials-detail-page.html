@@ -1,105 +1,109 @@
-<main class="pb-16">
-  <div class="mx-auto w-full max-w-4xl px-4 py-7 sm:px-6 lg:px-8">
+<main class="min-h-[55vh] bg-muted/30 pb-16">
+  <div class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <button hlmBtn type="button" variant="ghost" class="mb-5 -ml-3" (click)="goBack()">
       <ng-icon name="lucideArrowLeft" data-icon="inline-start" /> Volver a tutoriales
     </button>
 
-    @if (tutorial.isLoading()) {
-      <div class="flex flex-col gap-5" aria-label="Cargando tutorial">
-        <div hlmSkeleton class="h-6 w-32"></div>
-        <div hlmSkeleton class="h-12 w-4/5"></div>
-        <div hlmSkeleton class="h-6 w-full"></div>
-        <div hlmSkeleton class="h-80 w-full"></div>
-      </div>
+    @if (tutorial.isLoading() && !tutorial.hasValue()) {
+      <article class="overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-8" aria-label="Cargando tutorial">
+        <div class="flex flex-col gap-5">
+          <div hlmSkeleton class="h-5 w-32"></div>
+          <div hlmSkeleton class="h-12 w-4/5"></div>
+          <div hlmSkeleton class="h-5 w-full"></div>
+          <div hlmSkeleton class="h-px w-full"></div>
+          <div hlmSkeleton class="h-72 w-full"></div>
+        </div>
+      </article>
     } @else if (tutorial.error()) {
-      <section class="rounded-2xl border bg-card px-6 py-14 text-center" role="alert">
-        <h1 class="text-xl font-semibold">No se pudo abrir el tutorial</h1>
-        <p class="mt-1 text-sm text-muted-foreground">El enlace puede no existir o el tutorial ya no está publicado.</p>
-        <button hlmBtn type="button" variant="outline" class="mt-5" (click)="tutorial.reload()">Reintentar</button>
+      <section class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+        <ng-icon name="lucideFileText" class="text-3xl text-muted-foreground" />
+        <h1 class="mt-4 text-xl font-semibold">{{ notFound() ? "Tutorial no encontrado" : "No se pudo abrir el tutorial" }}</h1>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">
+          {{ notFound() ? "El enlace no existe o el tutorial ya no está publicado." : "Verifica la conexión e intenta nuevamente." }}
+        </p>
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+          @if (!notFound()) {
+            <button hlmBtn type="button" variant="outline" (click)="tutorial.reload()">
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+            </button>
+          }
+          <button hlmBtn type="button" (click)="goBack()">Ir a tutoriales</button>
+        </div>
       </section>
     } @else if (tutorial.value(); as item) {
-      <article>
-        <header class="border-b pb-8">
+      <article class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <header class="border-b border-border p-5 sm:p-8">
           <div class="flex flex-wrap items-center gap-3">
             @if (item.category) {
               <span hlmBadge variant="secondary">{{ item.category.name }}</span>
+            } @else {
+              <span hlmBadge variant="outline">General</span>
             }
             <time class="text-sm text-muted-foreground" [attr.datetime]="item.createdAt">
-              {{ item.createdAt | date: "longDate" }}
+              {{ item.createdAt | date: "d 'de' MMMM 'de' y":undefined:"es" }}
             </time>
           </div>
-          <h1 class="mt-5 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{{ item.title }}</h1>
+          <h1 class="mt-5 max-w-3xl wrap-break-word text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl">{{ item.title }}</h1>
           @if (item.summary) {
-            <p class="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">{{ item.summary }}</p>
+            <p class="mt-4 max-w-3xl wrap-break-word text-base leading-7 text-muted-foreground sm:text-lg">{{ item.summary }}</p>
           }
         </header>
 
-        <div class="flex flex-col gap-10 pt-10">
-          @for (block of item.blocks; track block.id) {
-            @switch (block.type) {
-              @case (blockType.TEXT) {
-                @if (block.content) {
-                  <div class="prose max-w-none wrap-break-word" [innerHTML]="block.content"></div>
+        @if (item.blocks.length) {
+          <div class="flex flex-col gap-8 p-5 sm:gap-10 sm:p-8">
+            @for (block of item.blocks; track block.id) {
+              @switch (block.type) {
+                @case (blockType.TEXT) {
+                  @if (block.content) {
+                    <div class="prose max-w-none wrap-break-word overflow-hidden" [innerHTML]="block.content"></div>
+                  }
                 }
-              }
-              @case (blockType.IMAGE) {
-                @if (block.file; as file) {
-                  <img
-                    class="max-h-[42rem] w-full rounded-2xl bg-muted object-contain shadow-sm"
-                    [src]="file.url"
-                    [alt]="file.name || 'Imagen del tutorial'"
-                    loading="lazy"
-                  />
+                @case (blockType.IMAGE) {
+                  @if (block.file; as file) {
+                    <figure class="overflow-hidden rounded-xl border border-border bg-muted/40">
+                      <img class="max-h-[42rem] w-full object-contain" [src]="file.url" [alt]="file.name || 'Imagen del tutorial'" loading="lazy" />
+                    </figure>
+                  }
                 }
-              }
-              @case (blockType.YOUTUBE) {
-                @if (block.content | tutorialYoutubeUrl; as safeUrl) {
-                  <div class="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-sm">
-                    <iframe
-                      class="size-full border-0"
-                      [src]="safeUrl"
-                      title="Video de YouTube del tutorial"
-                      loading="lazy"
-                      allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                    ></iframe>
-                  </div>
+                @case (blockType.YOUTUBE) {
+                  @if (block.content | tutorialYoutubeUrl; as safeUrl) {
+                    <div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-foreground">
+                      <iframe class="size-full border-0" [src]="safeUrl" title="Video del tutorial" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                  }
                 }
-              }
-              @case (blockType.VIDEO_FILE) {
-                @if (block.file; as file) {
-                  <video class="max-h-[42rem] w-full rounded-2xl bg-black shadow-sm" controls preload="metadata">
-                    <source [src]="file.url" [type]="file.mimeType" />
-                    Tu navegador no soporta video HTML5.
-                  </video>
+                @case (blockType.VIDEO_FILE) {
+                  @if (block.file; as file) {
+                    <video class="max-h-[42rem] w-full rounded-xl border border-border bg-foreground" controls preload="metadata">
+                      <source [src]="file.url" [type]="file.mimeType" />
+                      Tu navegador no soporta este video.
+                    </video>
+                  }
                 }
-              }
-              @case (blockType.FILE) {
-                @if (block.file; as file) {
-                  <a
-                    class="group flex items-center gap-4 rounded-2xl border bg-card p-5 shadow-sm outline-none hover:border-primary/40 hover:bg-accent/30 focus-visible:ring-2 focus-visible:ring-ring"
-                    [href]="file.url + '?download=true'"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
-                      <ng-icon name="lucideFileText" class="text-xl" />
-                    </span>
-                    <span class="min-w-0 flex-1">
-                      <span class="block truncate font-semibold" [title]="file.name">{{ file.name }}</span>
-                      <span class="mt-1 block text-sm text-muted-foreground">
-                        {{ file.mimeType }} · {{ file.size | fileSize }}
-                      </span>
-                    </span>
-                    <span class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                      <ng-icon name="lucideDownload" /> Descargar
-                    </span>
-                  </a>
+                @case (blockType.FILE) {
+                  @if (block.file; as file) {
+                    <div class="flex min-w-0 flex-col gap-4 rounded-xl border border-border bg-muted/25 p-4 sm:flex-row sm:items-center">
+                      <span class="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><ng-icon name="lucideFileText" /></span>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate font-semibold" [title]="file.name">{{ file.name }}</p>
+                        <p class="mt-1 wrap-break-word text-sm text-muted-foreground">{{ file.mimeType }} <span aria-hidden="true">·</span> {{ file.size | fileSize }}</p>
+                      </div>
+                      <a hlmBtn variant="outline" class="w-full shrink-0 sm:w-auto" [href]="file.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir archivo ' + file.name">
+                        Abrir archivo <ng-icon name="lucideExternalLink" data-icon="inline-end" />
+                      </a>
+                    </div>
+                  }
                 }
               }
             }
-          }
-        </div>
+          </div>
+        } @else {
+          <section class="flex min-h-56 flex-col items-center justify-center p-8 text-center">
+            <ng-icon name="lucideFileText" class="text-3xl text-muted-foreground" />
+            <h2 class="mt-4 text-lg font-semibold">Este tutorial aún no tiene contenido</h2>
+            <p class="mt-1 text-sm text-muted-foreground">Vuelve a consultarlo más adelante.</p>
+          </section>
+        }
       </article>
     }
   </div>

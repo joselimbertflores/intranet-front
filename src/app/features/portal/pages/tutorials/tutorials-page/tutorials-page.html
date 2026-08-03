@@ -1,117 +1,172 @@
-<div class="bg-muted/30 pb-16">
+<div class="min-h-[55vh] bg-muted/30 pb-16">
   <public-page-header
     title="Tutoriales"
-    description="Guías paso a paso para realizar procesos y usar los sistemas institucionales."
+    description="Guías paso a paso para procesos y sistemas institucionales."
   />
 
-  <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-  >
-    <section class="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_18rem]" aria-label="Filtros de tutoriales">
-      <hlm-input-group>
-        <input
-          hlmInputGroupInput
-          type="search"
-          aria-label="Buscar tutoriales"
-          placeholder="Buscar por título"
-          [ngModel]="searchTerm()"
-          (ngModelChange)="searchTerm.set($event)"
-        />
-        <hlm-input-group-addon><ng-icon name="lucideSearch" /></hlm-input-group-addon>
-      </hlm-input-group>
-
-      <div class="flex flex-col gap-1">
-        <hlm-select
-          [value]="listState().category || null"
-          (valueChange)="filterByCategory($event)"
-        >
-          <hlm-select-trigger class="w-full" buttonId="public-tutorial-category">
-            <hlm-select-value placeholder="Todas las categorías" />
-          </hlm-select-trigger>
-          <hlm-select-content *hlmSelectPortal>
-            <hlm-select-item [value]="null">Todas las categorías</hlm-select-item>
-            @for (category of categoriesResource.value() ?? []; track category.id) {
-              <hlm-select-item [value]="category.slug">{{ category.name }}</hlm-select-item>
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <section class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5" aria-label="Búsqueda y filtros de tutoriales">
+      <form class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end" [formRoot]="filtersForm" (submit)="$event.preventDefault()">
+        <div hlmField>
+          <label hlmFieldLabel for="tutorial-search">Buscar tutoriales</label>
+          <hlm-input-group class="w-full">
+            <hlm-input-group-addon><ng-icon name="lucideSearch" /></hlm-input-group-addon>
+            <input
+              id="tutorial-search"
+              hlmInputGroupInput
+              type="search"
+              autocomplete="off"
+              maxlength="255"
+              placeholder="Buscar por título…"
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
+            />
+            @if (searchTerm()) {
+              <hlm-input-group-addon align="inline-end">
+                <button hlmInputGroupButton type="button" size="icon-xs" aria-label="Limpiar búsqueda" (click)="clearSearch()"><ng-icon name="lucideX" /></button>
+              </hlm-input-group-addon>
             }
-          </hlm-select-content>
-        </hlm-select>
-        @if (categoriesResource.error()) {
-          <p class="text-xs text-destructive">No se pudieron cargar las categorías.</p>
-        }
-      </div>
+          </hlm-input-group>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="tutorial-category">Categoría</label>
+          @if (categoriesResource.error()) {
+            <button hlmBtn type="button" variant="outline" class="w-full justify-start text-destructive" (click)="reloadCategories()">
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar categorías
+            </button>
+          } @else if (!categoriesResource.hasValue()) {
+            <div hlmSkeleton class="h-9 w-full"></div>
+          } @else {
+            <hlm-select [formField]="filtersForm.category" (valueChange)="filterByCategory($event)">
+              <hlm-select-trigger class="w-full" buttonId="tutorial-category">
+                <ng-template hlmSelectValueTemplate let-category>
+                  {{ category === null ? "Todas las categorías" : categoryNames().get(category) }}
+                </ng-template>
+                <hlm-select-placeholder>Todas las categorías</hlm-select-placeholder>
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  <hlm-select-item [value]="null">Todas las categorías</hlm-select-item>
+                  @for (category of categories(); track category.id) {
+                    <hlm-select-item [value]="category.slug">{{ category.name }}</hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          }
+        </div>
+
+        <button hlmBtn type="button" variant="ghost" class="w-full md:w-auto" [disabled]="!hasActiveFilters()" (click)="resetFilters()">
+          <ng-icon name="lucideX" data-icon="inline-start" /> Limpiar
+        </button>
+      </form>
     </section>
 
-    <section aria-label="Resultados de tutoriales">
-      @if (isLoading()) {
-        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3" aria-label="Cargando tutoriales">
-          @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
-            <article class="flex min-h-64 flex-col gap-4 rounded-2xl border bg-card p-5">
-              <div hlmSkeleton class="h-5 w-28"></div>
-              <div hlmSkeleton class="h-7 w-4/5"></div>
-              <div hlmSkeleton class="h-4 w-full"></div>
-              <div hlmSkeleton class="h-4 w-2/3"></div>
-              <div hlmSkeleton class="mt-auto h-5 w-36"></div>
+    <section class="flex flex-col gap-4" aria-labelledby="tutorial-results-title">
+      <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
+        <h2 id="tutorial-results-title" class="sr-only">Listado de tutoriales</h2>
+        @if (tutorialsResource.value(); as response) {
+          <p class="text-sm font-medium text-muted-foreground" aria-live="polite">
+            <span class="font-semibold text-foreground">{{ response.total }}</span>
+            {{ response.total === 1 ? "tutorial encontrado" : "tutoriales encontrados" }}
+          </p>
+        } @else { <span></span> }
+        @if (isUpdating()) {
+          <span class="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status"><hlm-spinner /> Actualizando…</span>
+        }
+      </div>
+
+      @if (categoriesResource.error()) {
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+          <h2 class="mt-4 text-lg font-semibold">No se pudieron preparar los tutoriales</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">No fue posible cargar las categorías necesarias para realizar la consulta.</p>
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="reloadCategories()">
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+          </button>
+        </div>
+      } @else if (isInitialLoading()) {
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-label="Cargando tutoriales">
+          @for (_ of skeletonCards; track $index) {
+            <article class="overflow-hidden rounded-xl border border-border bg-card">
+              <div hlmSkeleton class="h-32 w-full rounded-none"></div>
+              <div class="flex flex-col gap-4 p-5">
+                <div class="flex justify-between gap-3"><div hlmSkeleton class="h-5 w-28"></div><div hlmSkeleton class="h-4 w-20"></div></div>
+                <div hlmSkeleton class="h-7 w-4/5"></div>
+                <div class="flex flex-col gap-2"><div hlmSkeleton class="h-4 w-full"></div><div hlmSkeleton class="h-4 w-2/3"></div></div>
+                <div hlmSkeleton class="mt-3 h-5 w-32"></div>
+              </div>
             </article>
           }
         </div>
       } @else if (tutorialsResource.error()) {
-        <div class="rounded-2xl border bg-card px-6 py-14 text-center" role="alert">
-          <h2 class="text-lg font-semibold">No se pudieron cargar los tutoriales</h2>
-          <p class="mt-1 text-sm text-muted-foreground">Intenta nuevamente en unos momentos.</p>
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+          <h2 class="mt-4 text-lg font-semibold">No se pudieron cargar los tutoriales</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">Verifica la conexión e intenta nuevamente.</p>
           <button hlmBtn type="button" variant="outline" class="mt-5" (click)="tutorialsResource.reload()">
             <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
           </button>
         </div>
       } @else if (tutorialsResource.value(); as response) {
-        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          @for (tutorial of response.tutorials; track tutorial.id) {
-            <a
-              class="group flex min-h-64 flex-col rounded-2xl border bg-card p-5 shadow-sm outline-none transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
-              [routerLink]="['/tutorials', tutorial.slug]"
-            >
-              <div class="flex items-center justify-between gap-3">
-                @if (tutorial.category) {
-                  <span hlmBadge variant="secondary">{{ tutorial.category.name }}</span>
-                } @else {
-                  <span class="text-xs font-medium text-muted-foreground">General</span>
-                }
-                <time class="text-xs text-muted-foreground" [attr.datetime]="tutorial.createdAt">
-                  {{ tutorial.createdAt | date: "mediumDate" }}
-                </time>
-              </div>
+        @if (response.tutorials.length) {
+          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            @for (tutorial of response.tutorials; track tutorial.id) {
+              <a
+                class="group flex min-h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-colors hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                [routerLink]="['/tutorials', tutorial.slug]"
+                [attr.aria-label]="'Abrir tutorial: ' + tutorial.title"
+              >
+                <div class="relative grid h-32 place-items-center overflow-hidden border-b border-border bg-primary/8 text-primary">
+                  <div class="absolute -right-8 -top-10 size-28 rounded-full border border-primary/15"></div>
+                  <div class="absolute -bottom-12 -left-8 size-32 rounded-full bg-primary/8"></div>
+                  <ng-icon name="lucideGraduationCap" class="relative text-4xl" aria-hidden="true" />
+                </div>
 
-              <h2 class="mt-5 text-xl font-semibold leading-snug tracking-tight group-hover:text-primary">
-                {{ tutorial.title }}
-              </h2>
-              @if (tutorial.summary) {
-                <p class="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{{ tutorial.summary }}</p>
-              }
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    @if (tutorial.category) {
+                      <span hlmBadge variant="secondary">{{ tutorial.category.name }}</span>
+                    } @else {
+                      <span hlmBadge variant="outline">General</span>
+                    }
+                    <time class="text-xs text-muted-foreground" [attr.datetime]="tutorial.createdAt">
+                      {{ tutorial.createdAt | date: "dd MMM y":undefined:"es" }}
+                    </time>
+                  </div>
+                  <h3 class="mt-4 wrap-break-word text-xl font-semibold leading-snug tracking-tight transition-colors group-hover:text-primary">{{ tutorial.title }}</h3>
+                  @if (tutorial.summary) {
+                    <p class="mt-3 line-clamp-3 wrap-break-word text-sm leading-6 text-muted-foreground">{{ tutorial.summary }}</p>
+                  } @else {
+                    <p class="mt-3 text-sm leading-6 text-muted-foreground">Consulta la guía completa y sus recursos.</p>
+                  }
+                  <span class="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
+                    Ver tutorial <ng-icon name="lucideArrowRight" data-icon="inline-end" />
+                  </span>
+                </div>
+              </a>
+            }
+          </div>
 
-              <span class="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
-                Ver tutorial
-                <ng-icon name="lucideArrowRight" class="transition-transform group-hover:translate-x-1" />
-              </span>
-            </a>
-          } @empty {
-            <div class="col-span-full rounded-2xl border border-dashed bg-card px-6 py-14 text-center">
-              <h2 class="text-lg font-semibold">No se encontraron tutoriales</h2>
-              <p class="mt-1 text-sm text-muted-foreground">
-                Ajusta la búsqueda o selecciona otra categoría.
-              </p>
-            </div>
-          }
-        </div>
-
-        @if (response.total > 0) {
           <app-pagination-controls
-            class="mt-7"
             [totalItems]="response.total"
             [currentPage]="currentPage()"
-            [pageSize]="listState().limit"
-            [pageSizes]="pageSizeOptions"
+            [pageSize]="pageSize"
+            [showPageSize]="false"
             (currentPageChange)="changePage($event)"
-            (pageSizeChange)="changePageSize($event)"
           />
+        } @else {
+          <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center">
+            <ng-icon [name]="hasActiveFilters() ? 'lucideBookOpen' : 'lucideGraduationCap'" class="text-3xl text-muted-foreground" />
+            <h2 class="mt-4 text-lg font-semibold">{{ hasActiveFilters() ? "No hay coincidencias" : "No hay tutoriales publicados" }}</h2>
+            <p class="mt-1 max-w-md text-sm text-muted-foreground">
+              {{ hasActiveFilters() ? "Prueba con otra búsqueda o categoría." : "Las guías aparecerán aquí cuando se publiquen." }}
+            </p>
+            @if (hasActiveFilters()) {
+              <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">Limpiar filtros</button>
+            }
+          </div>
         }
       }
     </section>

@@ -1,32 +1,35 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 
-import {
-  DirectoryEntryResponse,
-  DirectorySite,
-} from '../../administration/directory/interfaces';
 import { environment } from '../../../../environments/environment';
-
-export interface PortalDirectoryFilters {
-  term: string;
-  siteId: number | null;
-}
+import {
+  PortalDirectoryEntryResponse,
+  PortalDirectorySiteResponse,
+} from '../interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class PortalDirectoryDataSource {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.baseUrl}/api/portal-directory`;
 
-  readonly sites = toSignal(
-    this.http.get<DirectorySite[]>(`${this.url}/sites`),
-    { initialValue: [] },
-  );
+  readonly entriesResource = rxResource({ stream: () => this.findAll() });
+  readonly sitesResource = rxResource({ stream: () => this.findSites() });
 
-  findAll({ term, siteId }: PortalDirectoryFilters) {
-    let params = new HttpParams();
-    if (term.trim()) params = params.set('term', term.trim());
-    if (siteId) params = params.set('siteId', siteId);
-    return this.http.get<DirectoryEntryResponse[]>(this.url, { params });
+  reload(): void {
+    this.entriesResource.reload();
+    this.sitesResource.reload();
+  }
+
+  reloadSites(): void {
+    this.sitesResource.reload();
+  }
+
+  private findAll() {
+    return this.http.get<PortalDirectoryEntryResponse[]>(this.url);
+  }
+
+  private findSites() {
+    return this.http.get<PortalDirectorySiteResponse[]>(`${this.url}/sites`);
   }
 }

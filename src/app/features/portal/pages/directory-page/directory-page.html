@@ -1,256 +1,184 @@
 <div class="min-h-[55vh] bg-muted/30 pb-16">
   <public-page-header
-    title="Directorio telefónico"
-    description="Encuentra un área o función y copia el número que necesitas."
+    title="Directorio institucional"
+    description="Consulta teléfonos, internos y contactos de las áreas municipales."
   />
 
-  <section
-    class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-    aria-labelledby="directory-results-title"
-  >
-    <div class="mx-auto max-w-3xl">
-      <div
-        class="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4"
-        role="search"
-        aria-label="Buscar en el directorio"
-      >
-        <div class="flex flex-col gap-3 sm:flex-row">
-          <div class="min-w-0 flex-1">
-            <search-input
-              label="Área, función, interno o teléfono"
-              [value]="term()"
-              (search)="search($event)"
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <section class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5" aria-label="Búsqueda y filtros del directorio">
+      <form class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end" [formRoot]="filtersForm" (submit)="$event.preventDefault()">
+        <div hlmField>
+          <label hlmFieldLabel for="directory-search">Buscar en el directorio</label>
+          <hlm-input-group class="w-full">
+            <hlm-input-group-addon><ng-icon name="lucideSearch" /></hlm-input-group-addon>
+            <input
+              id="directory-search"
+              hlmInputGroupInput
+              type="search"
+              autocomplete="off"
+              maxlength="255"
+              placeholder="Área, contacto, teléfono o interno…"
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
             />
-          </div>
-          <div class="w-full sm:w-64">
-            <!-- <app-ui-select
-              class="w-full"
-              placeholder="Todas las sedes"
-              optionLabel="name"
-              optionValue="id"
-              [fluid]="true"
-              [showClear]="true"
-              [options]="sites()"
-              [ngModel]="selectedSiteId()"
-              (ngModelChange)="selectSite($event)"
-            /> -->
-          </div>
+            @if (searchTerm()) {
+              <hlm-input-group-addon align="inline-end">
+                <button hlmInputGroupButton type="button" size="icon-xs" aria-label="Limpiar búsqueda" (click)="clearSearch()">
+                  <ng-icon name="lucideX" />
+                </button>
+              </hlm-input-group-addon>
+            }
+          </hlm-input-group>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="directory-site">Sede</label>
+          @if (sitesResource.error()) {
+            <button hlmBtn type="button" variant="outline" class="w-full justify-start text-destructive" (click)="reloadSites()">
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar sedes
+            </button>
+          } @else if (!sitesResource.hasValue()) {
+            <div hlmSkeleton class="h-9 w-full"></div>
+          } @else {
+            <hlm-select [formField]="filtersForm.siteId" (valueChange)="selectSite($event)">
+              <hlm-select-trigger class="w-full" buttonId="directory-site">
+                <ng-template hlmSelectValueTemplate let-siteId>
+                  {{ siteId === null ? "Todas las sedes" : siteNames().get(siteId) }}
+                </ng-template>
+                <hlm-select-placeholder>Todas las sedes</hlm-select-placeholder>
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  <hlm-select-item [value]="null">Todas las sedes</hlm-select-item>
+                  @for (site of sites(); track site.id) {
+                    <hlm-select-item [value]="site.id">{{ site.name }}</hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          }
+        </div>
+
+        <button hlmBtn type="button" variant="ghost" class="w-full md:w-auto" [disabled]="!hasActiveFilters()" (click)="resetFilters()">
+          <ng-icon name="lucideX" data-icon="inline-start" /> Limpiar
+        </button>
+      </form>
+    </section>
+
+    <section class="flex flex-col gap-4" aria-labelledby="directory-results-title">
+      <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
+        <h2 id="directory-results-title" class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Contactos institucionales</h2>
+        <div class="flex items-center gap-4">
+          @if (entriesResource.hasValue()) {
+            <span class="text-sm text-muted-foreground" aria-live="polite">
+              <span class="font-semibold text-foreground">{{ filteredEntries().length }}</span>
+              {{ filteredEntries().length === 1 ? "contacto" : "contactos" }}
+            </span>
+          }
+          @if (isUpdating()) {
+            <span class="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status"><hlm-spinner /> Actualizando…</span>
+          }
         </div>
       </div>
-    </div>
 
-    <div class="flex flex-col gap-3">
-      <div class="flex items-center justify-between gap-4">
-        <h2
-          id="directory-results-title"
-          class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-        >
-          Destinos telefónicos
-        </h2>
-        @if (!directoryResource.isLoading() && !directoryResource.error()) {
-          <span class="text-sm tabular-nums text-muted-foreground">
-            {{ entries().length }}
-            {{ entries().length === 1 ? "resultado" : "resultados" }}
-          </span>
-        }
-      </div>
-
-      <div
-        class="directory-list overflow-hidden rounded-2xl border border-border bg-card"
-      >
-      @if (directoryResource.error()) {
-        <div
-          class="flex min-h-56 flex-col items-center justify-center px-6 py-12 text-center"
-          role="alert"
-        >
-          <div
-            class="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive"
-          >
-            <i class="ui-icon ui-icon-exclamation-circle"></i>
-          </div>
-          <p class="mt-3 font-semibold text-foreground">
-            No pudimos cargar el directorio
-          </p>
-          <p class="mt-1 text-sm text-muted-foreground">
-            Intenta nuevamente en unos momentos.
-          </p>
-          <!-- <app-ui-button
-            styleClass="mt-4"
-            label="Reintentar"
-            icon="ui-icon ui-icon-refresh"
-            size="small"
-            (onClick)="directoryResource.reload()"
-          /> -->
-        </div>
-      } @else if (directoryResource.isLoading()) {
-        <div role="status" aria-live="polite">
-          <span class="sr-only">Cargando directorio</span>
-          @for (placeholder of skeletonItems; track placeholder) {
-            <div
-              class="border-b border-border p-5 last:border-b-0 sm:px-6"
-            >
-              <!-- <app-ui-skeleton width="min(72%, 24rem)" height="1.1rem" />
-              <app-ui-skeleton
-                class="mt-3"
-                width="min(45%, 15rem)"
-                height="0.8rem"
-              /> -->
+      @if (isInitialLoading()) {
+        <div class="overflow-hidden rounded-xl border border-border bg-card" aria-label="Cargando directorio">
+          @for (_ of skeletonRows; track $index) {
+            <div class="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center">
+              <div class="flex flex-col gap-2"><div hlmSkeleton class="h-5 w-52"></div><div hlmSkeleton class="h-4 w-36"></div></div>
+              <div hlmSkeleton class="h-8 w-full"></div>
             </div>
           }
         </div>
-      } @else if (!entries().length) {
-        <div
-          class="flex min-h-56 flex-col items-center justify-center px-6 py-12 text-center"
-        >
-          <div
-            class="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground"
-          >
-            <i class="ui-icon ui-icon-search"></i>
-          </div>
-          <p class="mt-3 font-semibold text-foreground">
-            No encontramos coincidencias
-          </p>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">
-            Prueba con otra área, función, número o sede.
-          </p>
+      } @else if (entriesResource.error()) {
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+          <h2 class="mt-4 text-lg font-semibold">No se pudo cargar el directorio</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">Verifica la conexión e intenta nuevamente.</p>
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="reloadDirectory()">
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+          </button>
+        </div>
+      } @else if (filteredEntries().length) {
+        <div class="flex flex-col gap-5">
+          @for (siteGroup of groupedEntries(); track siteGroup.key) {
+            <section class="overflow-hidden rounded-xl border border-border bg-card shadow-sm" [attr.aria-labelledby]="'directory-site-' + siteGroup.key">
+              <header class="flex items-center gap-3 border-b border-border bg-muted/45 px-4 py-3 sm:px-5">
+                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><ng-icon name="lucideMapPin" /></span>
+                <h3 [id]="'directory-site-' + siteGroup.key" class="min-w-0 font-semibold">{{ siteGroup.name }}</h3>
+              </header>
+
+              @for (area of siteGroup.areas; track area.areaName) {
+                <section class="border-b border-border last:border-b-0" [attr.aria-labelledby]="'directory-area-' + siteGroup.key + '-' + $index">
+                  <div class="border-b border-border/70 bg-muted/20 px-4 py-2.5 sm:px-5">
+                    <h4 [id]="'directory-area-' + siteGroup.key + '-' + $index" class="text-sm font-semibold text-primary">{{ area.areaName }}</h4>
+                  </div>
+
+                  @for (entry of area.entries; track entry.id) {
+                    <article class="grid min-w-0 gap-4 border-b border-border/70 px-4 py-4 last:border-b-0 sm:px-5 lg:grid-cols-[minmax(12rem,1fr)_minmax(0,1.6fr)] lg:items-center">
+                      <div class="min-w-0">
+                        <p class="font-medium">{{ entry.contactLabel || "Contacto institucional" }}</p>
+                        @if (entry.siteDetails) {
+                          <p class="mt-1 wrap-break-word text-sm text-muted-foreground">{{ entry.siteDetails }}</p>
+                        }
+                        @if (entry.email) {
+                          <a class="mt-2 inline-flex max-w-full items-center gap-2 text-sm text-muted-foreground outline-none hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring" [href]="'mailto:' + entry.email">
+                            <ng-icon name="lucideMail" class="shrink-0" />
+                            <span class="truncate">{{ entry.email }}</span>
+                          </a>
+                        }
+                      </div>
+
+                      <div class="flex min-w-0 flex-col gap-3 lg:items-end">
+                        @if (entry.extensions.length) {
+                          <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+                            <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Internos</span>
+                            @for (extension of entry.extensions; track extension) {
+                              @let token = copyToken(entry.id, "extension", extension);
+                              <button hlmBtn type="button" size="sm" variant="secondary" class="font-mono" [title]="copiedValue() === token ? 'Interno copiado' : 'Copiar interno'" [attr.aria-label]="'Copiar interno ' + extension" (click)="copyValue(token, extension)">
+                                {{ extension }}
+                                <ng-icon [name]="copiedValue() === token ? 'lucideCheck' : 'lucideCopy'" data-icon="inline-end" />
+                              </button>
+                            }
+                          </div>
+                        }
+
+                        @if (entry.phones.length) {
+                          <div class="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
+                            @for (phone of entry.phones; track phone) {
+                              @let token = copyToken(entry.id, "phone", phone);
+                              <div class="inline-flex max-w-full items-center rounded-lg border border-border bg-background">
+                                <a hlmBtn size="sm" variant="ghost" class="min-w-0 font-mono" [href]="phoneHref(phone)" [attr.aria-label]="'Llamar al ' + phone">
+                                  <ng-icon name="lucidePhone" data-icon="inline-start" />
+                                  <span class="truncate">{{ phone }}</span>
+                                </a>
+                                <button hlmBtn type="button" size="icon-sm" variant="ghost" [title]="copiedValue() === token ? 'Teléfono copiado' : 'Copiar teléfono'" [attr.aria-label]="'Copiar teléfono ' + phone" (click)="copyValue(token, phone)">
+                                  <ng-icon [name]="copiedValue() === token ? 'lucideCheck' : 'lucideCopy'" />
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </article>
+                  }
+                </section>
+              }
+            </section>
+          }
         </div>
       } @else {
-        @for (entry of entries(); track entry.id) {
-          <article
-            animate.enter="animate-fadein motion-reduce:animate-none"
-            class="group relative border-b border-border p-5 last:border-b-0 hover:bg-muted/50 sm:px-6 sm:py-5"
-          >
-            <div
-              class="absolute inset-y-4 left-0 w-0.5 rounded-r bg-primary opacity-0 transition-opacity group-hover:opacity-100"
-            ></div>
-
-            <div
-              class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(16rem,auto)] md:items-center md:gap-8"
-            >
-              <div class="min-w-0">
-                <h3
-                  class="text-base font-bold leading-tight text-foreground sm:text-lg"
-                >
-                  {{ entry.areaName }}
-                </h3>
-                @if (entry.contactLabel) {
-                  <p class="mt-1 text-sm font-medium text-primary">
-                    {{ entry.contactLabel }}
-                  </p>
-                }
-
-                @if (entry.site || entry.siteDetails || entry.email) {
-                  <div
-                    class="mt-3 flex flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-4"
-                  >
-                    @if (entry.site || entry.siteDetails) {
-                      <span class="flex min-w-0 items-center gap-2">
-                        <i
-                          class="ui-icon ui-icon-map-marker shrink-0 text-xs text-muted-foreground"
-                        ></i>
-                        <span class="min-w-0">
-                          @if (entry.site) {
-                            {{ entry.site.name }}
-                          }
-                          @if (entry.site && entry.siteDetails) {
-                            <span aria-hidden="true"> · </span>
-                          }
-                          @if (entry.siteDetails) {
-                            {{ entry.siteDetails }}
-                          }
-                        </span>
-                      </span>
-                    }
-                    @if (entry.email) {
-                      <a
-                        class="flex min-w-0 items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
-                        [href]="'mailto:' + entry.email"
-                      >
-                        <i
-                          class="ui-icon ui-icon-envelope shrink-0 text-xs text-muted-foreground"
-                        ></i>
-                        <span class="truncate">{{ entry.email }}</span>
-                      </a>
-                    }
-                  </div>
-                }
-              </div>
-
-              @if (entry.extensions.length || entry.phones.length) {
-                <div class="flex flex-col items-start gap-3 md:items-end">
-                  @if (entry.extensions.length) {
-                    <div
-                      class="flex flex-wrap items-center gap-2 md:justify-end"
-                    >
-                      <span
-                        class="mr-1 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
-                        >Interno</span
-                      >
-                      @for (extension of entry.extensions; track extension) {
-                        <!-- <button
-                          type="button"
-                          class="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 font-mono text-sm font-semibold text-primary ring-1 ring-inset ring-primary/20 transition hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                          [appUiTooltip]="
-                            copiedNumber() === extension
-                              ? 'Copiado'
-                              : 'Copiar interno'
-                          "
-                          [attr.aria-label]="'Copiar interno ' + extension"
-                          (click)="copyNumber(extension)"
-                        >
-                          {{ extension }}
-                          <i
-                            [class]="
-                              copiedNumber() === extension
-                                ? 'ui-icon ui-icon-check'
-                                : 'ui-icon ui-icon-copy'
-                            "
-                            class="text-[0.65rem]"
-                          ></i>
-                        </button> -->
-                      }
-                    </div>
-                  }
-
-                  @if (entry.phones.length) {
-                    <div
-                      class="flex flex-wrap items-center gap-x-4 gap-y-2 md:justify-end"
-                    >
-                      @for (phone of entry.phones; track phone) {
-                        <!-- <button
-                          type="button"
-                          class="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-primary focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                          [appUiTooltip]="
-                            copiedNumber() === phone
-                              ? 'Copiado'
-                              : 'Copiar teléfono'
-                          "
-                          [attr.aria-label]="'Copiar teléfono ' + phone"
-                          (click)="copyNumber(phone)"
-                        >
-                          <i
-                            class="ui-icon ui-icon-phone text-xs text-muted-foreground"
-                          ></i>
-                          {{ phone }}
-                          <i
-                            [class]="
-                              copiedNumber() === phone
-                                ? 'ui-icon ui-icon-check'
-                                : 'ui-icon ui-icon-copy'
-                            "
-                            class="text-[0.65rem] text-muted-foreground"
-                          ></i>
-                        </button> -->
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          </article>
-        }
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center">
+          <ng-icon name="lucideContactRound" class="text-3xl text-muted-foreground" />
+          <h2 class="mt-4 text-lg font-semibold">{{ hasActiveFilters() ? "No hay coincidencias" : "El directorio está vacío" }}</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">
+            {{ hasActiveFilters() ? "Prueba con otra área, contacto, teléfono, interno o sede." : "Los contactos aparecerán aquí cuando estén disponibles." }}
+          </p>
+          @if (hasActiveFilters()) {
+            <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">Limpiar filtros</button>
+          }
+        </div>
       }
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </div>

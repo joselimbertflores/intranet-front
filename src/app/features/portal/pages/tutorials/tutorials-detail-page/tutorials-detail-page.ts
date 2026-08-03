@@ -1,16 +1,28 @@
 import { DatePipe, Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideArrowLeft, lucideDownload, lucideFileText } from '@ng-icons/lucide';
-import { HlmBadge } from '@spartan-ng/helm/badge';
+import {
+  lucideArrowLeft,
+  lucideExternalLink,
+  lucideFileText,
+  lucideRefreshCw,
+} from '@ng-icons/lucide';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
+import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
 import { FileSizePipe } from '../../../../../shared';
-import { PortalTutorialDataSource } from '../../../services';
 import { TutorialBlockType } from '../../../interfaces';
+import { PortalTutorialDataSource } from '../../../services';
 import { TutorialYoutubeUrlPipe } from '../tutorial-youtube-url.pipe';
 
 @Component({
@@ -18,13 +30,20 @@ import { TutorialYoutubeUrlPipe } from '../tutorial-youtube-url.pipe';
   imports: [
     DatePipe,
     FileSizePipe,
-    HlmBadge,
+    HlmBadgeImports,
     HlmButtonImports,
-    HlmSkeleton,
+    HlmSkeletonImports,
     NgIcon,
     TutorialYoutubeUrlPipe,
   ],
-  providers: [provideIcons({ lucideArrowLeft, lucideDownload, lucideFileText })],
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideExternalLink,
+      lucideFileText,
+      lucideRefreshCw,
+    }),
+  ],
   templateUrl: './tutorials-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -32,10 +51,13 @@ export default class TutorialsDetailPage {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly dataSource = inject(PortalTutorialDataSource);
-  private readonly hasPreviousNavigation = Boolean(
-    this.router.currentNavigation()?.previousNavigation ??
-      this.router.lastSuccessfulNavigation()?.previousNavigation,
-  );
+  private readonly previousUrl =
+    this.router.currentNavigation()?.previousNavigation?.finalUrl?.toString() ??
+    this.router.lastSuccessfulNavigation()?.previousNavigation?.finalUrl?.toString() ??
+    null;
+  private readonly canReturnToTutorialList =
+    this.previousUrl === '/tutorials' ||
+    Boolean(this.previousUrl?.startsWith('/tutorials?'));
 
   readonly slug = input.required<string>();
   readonly blockType = TutorialBlockType;
@@ -43,9 +65,13 @@ export default class TutorialsDetailPage {
     params: () => ({ slug: this.slug() }),
     stream: ({ params }) => this.dataSource.findBySlug(params.slug),
   });
+  readonly notFound = computed(() => {
+    const error = this.tutorial.error();
+    return error instanceof HttpErrorResponse && error.status === 404;
+  });
 
   goBack(): void {
-    if (this.hasPreviousNavigation) {
+    if (this.canReturnToTutorialList) {
       this.location.back();
       return;
     }

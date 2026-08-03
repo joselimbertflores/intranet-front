@@ -31,7 +31,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .public-page-header {
       width: 100%;
       border-bottom: 1px solid var(--border);
-      background-color: red;
       background-image: linear-gradient(
         105deg,
         color-mix(in oklch, var(--primary) 11%, var(--background)) 0%,

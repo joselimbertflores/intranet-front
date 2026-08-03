@@ -2,10 +2,9 @@ export interface PortalCalendarResponse {
   id: string;
   title: string;
   start: string;
-  end: string;
+  end?: string;
   allDay: boolean;
-  description?: string;
-  location?: string;
+  description?: string | null;
   communication?: {
     id: string;
     reference: string;

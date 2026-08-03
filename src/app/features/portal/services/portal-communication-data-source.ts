@@ -1,12 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { inject, Injectable } from '@angular/core';
 
-import { CommunicationTypeResponse } from '../../administration/communications/interfaces';
 import { environment } from '../../../../environments/environment';
-import { PortalCommunicationResponse } from '../interfaces';
+import {
+  PortalCommunicationResponse,
+  PortalCommunicationTypeResponse,
+} from '../interfaces';
 
-interface LoadCommunicationsParams {
+export interface LoadCommunicationsParams {
   limit: number;
   offset: number;
   term?: string | null;
@@ -17,10 +19,10 @@ interface LoadCommunicationsParams {
   providedIn: 'root',
 })
 export class PortalCommunicationDataSource {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly URL = `${environment.baseUrl}/api/portal/communications`;
 
-  types = toSignal(this.getTypes(), { initialValue: [] });
+  readonly typesResource = rxResource({ stream: () => this.getTypes() });
 
   getData(queryParams: LoadCommunicationsParams) {
     const { term, typeId, limit, offset } = queryParams;
@@ -41,7 +43,13 @@ export class PortalCommunicationDataSource {
     });
   }
 
+  reloadTypes(): void {
+    this.typesResource.reload();
+  }
+
   private getTypes() {
-    return this.http.get<CommunicationTypeResponse[]>(`${this.URL}/types`);
+    return this.http.get<PortalCommunicationTypeResponse[]>(
+      `${this.URL}/types`,
+    );
   }
 }

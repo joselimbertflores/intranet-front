@@ -1,169 +1,246 @@
-<div class="bg-muted/30 pb-16">
+<div class="min-h-[55vh] bg-muted/30 pb-16">
   <public-page-header
     title="Comunicados"
-    description="Avisos y comunicados oficiales de la institución."
+    description="Avisos y documentos oficiales publicados por la institución."
   />
 
-  <section
-    #resultsTop
-    class="mx-auto flex w-full max-w-7xl scroll-mt-24 flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-    aria-labelledby="communications-list-title"
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <h2 id="communications-list-title" class="sr-only">
-      Listado de comunicados
-    </h2>
-
-    <div
-      class="flex w-full flex-col gap-3 sm:flex-row sm:justify-end"
-      aria-label="Filtros de comunicados"
+    <section
+      class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      aria-label="Búsqueda y filtros de comunicados"
     >
-      <div class="w-full sm:w-72">
-        <search-input
-          label="Buscar"
-          [value]="term()"
-          (search)="search($event)"
-        />
-      </div>
-
-      <div class="w-full sm:w-64">
-        <!-- <app-ui-select
-          class="w-full"
-          placeholder="Tipo"
-          optionLabel="name"
-          optionValue="id"
-          [fluid]="true"
-          [showClear]="true"
-          [options]="types()"
-          [(ngModel)]="selectedTypeId"
-        /> -->
-      </div>
-    </div>
-
-    <div
-      class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-    >
-      @if (communicationResource.error()) {
-        <div
-          class="flex min-h-64 flex-col items-center justify-center bg-destructive/10 px-6 py-12 text-center"
-          role="alert"
-        >
-          <span class="font-semibold text-destructive">
-            No pudimos cargar los comunicados
-          </span>
-          <p class="mt-1 max-w-md text-sm text-destructive/80">
-            Ocurrió un problema al obtener la información. Intenta nuevamente.
-          </p>
-          <!-- <app-ui-button
-            styleClass="mt-5"
-            label="Reintentar"
-            icon="ui-icon ui-icon-refresh"
-            (onClick)="communicationResource.reload()"
-          /> -->
+      <form
+        class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end"
+        [formRoot]="filtersForm"
+        (submit)="$event.preventDefault()"
+      >
+        <div hlmField>
+          <label hlmFieldLabel for="communication-search">Buscar</label>
+          <hlm-input-group class="w-full">
+            <hlm-input-group-addon>
+              <ng-icon name="lucideSearch" />
+            </hlm-input-group-addon>
+            <input
+              id="communication-search"
+              hlmInputGroupInput
+              type="search"
+              autocomplete="off"
+              maxlength="255"
+              placeholder="Referencia o resumen del comunicado…"
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
+            />
+            @if (searchTerm()) {
+              <hlm-input-group-addon align="inline-end">
+                <button
+                  hlmInputGroupButton
+                  type="button"
+                  size="icon-xs"
+                  aria-label="Limpiar búsqueda"
+                  (click)="clearSearch()"
+                >
+                  <ng-icon name="lucideX" />
+                </button>
+              </hlm-input-group-addon>
+            }
+          </hlm-input-group>
         </div>
-      } @else if (communicationResource.isLoading()) {
-        <div
-          animate.enter="animate-fadein motion-reduce:animate-none"
-          role="status"
-          aria-live="polite"
-        >
-          <span class="sr-only">Cargando comunicados</span>
 
-          @for (placeholder of skeletonItems; track placeholder) {
-            <div
-              class="flex flex-col gap-4 border-t border-border p-4 first:border-t-0 sm:flex-row sm:items-center sm:gap-6 sm:px-5 sm:py-4"
+        <div hlmField>
+          <label hlmFieldLabel for="communication-type">Tipo</label>
+          @if (typesResource.error()) {
+            <button
+              hlmBtn
+              type="button"
+              variant="outline"
+              class="w-full justify-start text-destructive"
+              (click)="reloadTypes()"
             >
-              <div class="min-w-0 flex-1">
-                <!-- <app-ui-skeleton width="min(100%, 34rem)" height="1.125rem" />
-                <app-ui-skeleton
-                  width="min(78%, 23rem)"
-                  class="mt-3"
-                  height="0.75rem"
-                /> -->
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+              Reintentar tipos
+            </button>
+          } @else if (!typesResource.hasValue()) {
+            <div hlmSkeleton class="h-9 w-full"></div>
+          } @else {
+            <hlm-select
+              [formField]="filtersForm.typeId"
+              (valueChange)="changeType($event)"
+            >
+              <hlm-select-trigger
+                class="w-full"
+                buttonId="communication-type"
+              >
+                <ng-template hlmSelectValueTemplate let-typeId>
+                  {{
+                    typeId === null
+                      ? "Todos los tipos"
+                      : typeNames().get(typeId)
+                  }}
+                </ng-template>
+                <hlm-select-placeholder>Todos los tipos</hlm-select-placeholder>
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  <hlm-select-item [value]="null">Todos los tipos</hlm-select-item>
+                  @for (type of types(); track type.id) {
+                    <hlm-select-item [value]="type.id">{{ type.name }}</hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
+          }
+        </div>
+
+        <button
+          hlmBtn
+          type="button"
+          variant="ghost"
+          class="w-full md:w-auto"
+          [disabled]="!hasActiveFilters()"
+          (click)="resetFilters()"
+        >
+          <ng-icon name="lucideX" data-icon="inline-start" />
+          Limpiar
+        </button>
+      </form>
+    </section>
+
+    <section class="flex flex-col gap-4" aria-labelledby="communications-title">
+      <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
+        <h2 id="communications-title" class="sr-only">Listado de comunicados</h2>
+        @if (communicationResource.value(); as response) {
+          <p class="text-sm font-medium text-muted-foreground" aria-live="polite">
+            <span class="font-semibold text-foreground">{{ response.total }}</span>
+            {{ response.total === 1 ? "comunicado encontrado" : "comunicados encontrados" }}
+          </p>
+        } @else {
+          <span></span>
+        }
+        @if (isUpdating()) {
+          <span class="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status">
+            <hlm-spinner /> Actualizando…
+          </span>
+        }
+      </div>
+
+      @if (typesResource.error()) {
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+          <h2 class="mt-4 text-lg font-semibold">No se pudieron preparar los comunicados</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">No fue posible cargar los tipos necesarios para realizar la consulta.</p>
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="reloadTypes()">
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+          </button>
+        </div>
+      } @else if (isInitialLoading()) {
+        <div class="overflow-hidden rounded-xl border border-border bg-card" aria-label="Cargando comunicados">
+          @for (_ of skeletonRows; track $index) {
+            <div class="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[8rem_10rem_minmax(0,1fr)_7rem] md:items-center">
+              <div hlmSkeleton class="h-4 w-24"></div>
+              <div hlmSkeleton class="h-5 w-28"></div>
+              <div class="flex flex-col gap-2">
+                <div hlmSkeleton class="h-4 w-4/5"></div>
+                <div hlmSkeleton class="h-4 w-36"></div>
               </div>
-              <div class="w-full shrink-0 sm:w-32">
-                <!-- <app-ui-skeleton class="w-full" height="2.5rem" /> -->
-              </div>
+              <div hlmSkeleton class="h-9 w-full"></div>
             </div>
           }
         </div>
-      } @else if (!communications().length) {
-        <div
-          class="flex min-h-52 items-center justify-center px-6 py-12 text-center"
-        >
-          <p class="font-medium text-muted-foreground">
-            No hay comunicados disponibles.
-          </p>
+      } @else if (communicationResource.error()) {
+        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+          <h2 class="mt-4 text-lg font-semibold">No se pudieron cargar los comunicados</h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">Verifica la conexión e intenta nuevamente.</p>
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="communicationResource.reload()">
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+            Reintentar
+          </button>
         </div>
-      } @else {
-        @for (communication of communications(); track communication.id) {
-          <article
-            animate.enter="animate-fadein motion-reduce:animate-none"
-            class="group flex min-w-0 flex-col gap-4 border-b border-border p-5 transition-colors last:border-b-0 hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div class="min-w-0 flex-1">
-              <h3
-                class="wrap-break-word text-base font-bold leading-tight text-foreground sm:text-lg"
-              >
-                {{ communication.reference }}
-              </h3>
-
-              <div
-                class="mt-3 flex min-w-0 flex-wrap items-center gap-2 text-sm"
-              >
-                @if (communication.typeName) {
-                  <span
-                    class="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20"
-                  >
-                    {{ communication.typeName }}
-                  </span>
-                }
-                @if (communication.code?.trim()) {
-                  <span
-                    class="rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border"
-                  >
-                    {{ communication.code }}
-                  </span>
-                }
-                <span class="ml-2 flex items-center text-muted-foreground">
-                  <i class="ui-icon ui-icon-clock mr-1.5 text-xs"></i>
-                  <time [attr.datetime]="communication.createdAt">{{
-                    communication.createdAt | date: "longDate"
-                  }}</time>
-                </span>
-              </div>
+      } @else if (communicationResource.value(); as response) {
+        @if (response.communications.length) {
+          <div class="hidden overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block">
+            <div hlmTableContainer>
+              <table hlmTable>
+                <thead hlmTHead>
+                  <tr hlmTr class="bg-muted/40 hover:bg-muted/40">
+                    <th hlmTh class="w-36 px-4">Fecha</th>
+                    <th hlmTh class="w-44">Tipo</th>
+                    <th hlmTh class="w-48">Cite</th>
+                    <th hlmTh>Referencia / resumen</th>
+                    <th hlmTh class="w-36 px-4 text-right">Documento</th>
+                  </tr>
+                </thead>
+                <tbody hlmTBody>
+                  @for (communication of response.communications; track communication.id) {
+                    <tr hlmTr>
+                      <td hlmTd class="px-4 tabular-nums text-muted-foreground">
+                        <time [attr.datetime]="communication.createdAt">{{ communication.createdAt | date: "dd/MM/yyyy" }}</time>
+                      </td>
+                      <td hlmTd>
+                        <span hlmBadge variant="secondary">{{ communication.typeName }}</span>
+                      </td>
+                      <td hlmTd class="font-medium">{{ communication.code || "—" }}</td>
+                      <td hlmTd class="max-w-xl whitespace-normal py-4 leading-6">{{ communication.reference }}</td>
+                      <td hlmTd class="px-4 text-right">
+                        <a hlmBtn size="sm" variant="outline" [href]="communication.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir PDF de ' + communication.reference">
+                          Abrir PDF
+                          <ng-icon name="lucideExternalLink" data-icon="inline-end" />
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
-            <a
-              size="small"
-              [href]="communication.url"
-              appUiButton
-              target="_blank"
-              rel="noopener noreferrer"
-              label="Ver comunicado"
-              icon="ui-icon ui-icon-external-link"
-              severity="secondary"
-            >
-            </a>
-          </article>
+          </div>
+
+          <div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm md:hidden">
+            @for (communication of response.communications; track communication.id) {
+              <article class="flex min-w-0 flex-col gap-4 border-b border-border p-4 last:border-b-0">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span hlmBadge variant="secondary">{{ communication.typeName }}</span>
+                  <time class="text-sm tabular-nums text-muted-foreground" [attr.datetime]="communication.createdAt">
+                    {{ communication.createdAt | date: "dd/MM/yyyy" }}
+                  </time>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="wrap-break-word font-semibold leading-6">{{ communication.reference }}</h3>
+                  @if (communication.code) {
+                    <p class="mt-2 text-sm text-muted-foreground"><span class="font-medium text-foreground/80">Cite:</span> {{ communication.code }}</p>
+                  }
+                </div>
+                <a hlmBtn variant="outline" class="w-full" [href]="communication.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir PDF de ' + communication.reference">
+                  Abrir PDF
+                  <ng-icon name="lucideExternalLink" data-icon="inline-end" />
+                </a>
+              </article>
+            }
+          </div>
+
+          <app-pagination-controls
+            [totalItems]="response.total"
+            [currentPage]="currentPage()"
+            [pageSize]="pageSize"
+            [showPageSize]="false"
+            (currentPageChange)="changePage($event)"
+          />
+        } @else {
+          <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center">
+            <ng-icon name="lucideFileSearch" class="text-3xl text-muted-foreground" />
+            <h2 class="mt-4 text-lg font-semibold">
+              {{ hasActiveFilters() ? "No hay coincidencias" : "No hay comunicados publicados" }}
+            </h2>
+            <p class="mt-1 max-w-md text-sm text-muted-foreground">
+              {{ hasActiveFilters() ? "Prueba con otra búsqueda o tipo de comunicado." : "Los comunicados aparecerán aquí cuando se publiquen." }}
+            </p>
+            @if (hasActiveFilters()) {
+              <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">Limpiar filtros</button>
+            }
+          </div>
         }
       }
-    </div>
-
-    @if (
-      !communicationResource.error() &&
-      !communicationResource.isLoading() &&
-      communications().length
-    ) {
-      <!-- <app-ui-paginator
-        class="mt-4 block"
-        [first]="offset()"
-        [rows]="limit()"
-        [totalRecords]="dataSize()"
-        [pageLinkSize]="3"
-        [showFirstLastIcon]="false"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="{first} - {last} de {totalRecords}"
-        (onPageChange)="changePage($event)"
-      /> -->
-    }
-  </section>
+    </section>
+  </div>
 </div>

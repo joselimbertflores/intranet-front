@@ -7,40 +7,74 @@ import {
   effect,
   inject,
   linkedSignal,
+  untracked,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormField, FormRoot, form } from '@angular/forms/signals';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Params, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideArrowRight, lucideRefreshCw, lucideSearch } from '@ng-icons/lucide';
-import { HlmBadge } from '@spartan-ng/helm/badge';
+import {
+  lucideArrowRight,
+  lucideBookOpen,
+  lucideCircleAlert,
+  lucideGraduationCap,
+  lucideRefreshCw,
+  lucideSearch,
+  lucideX,
+} from '@ng-icons/lucide';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
-import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
+import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
 
 import { PaginationControls } from '../../../../../shared';
 import { PublicPageHeader } from '../../../components';
 import { PortalTutorialDataSource } from '../../../services';
 
-const PAGE_SIZES = [12, 24, 48] as const;
+interface TutorialFiltersModel {
+  category: string | null;
+}
+
+interface TutorialQueryState {
+  term: string;
+  category: string | null;
+  page: number;
+}
+
+const PAGE_SIZE = 12;
 
 @Component({
   selector: 'app-tutorials-page',
   imports: [
     DatePipe,
-    FormsModule,
-    HlmBadge,
+    FormField,
+    FormRoot,
+    HlmBadgeImports,
     HlmButtonImports,
+    HlmFieldImports,
     HlmInputGroupImports,
     HlmSelectImports,
-    HlmSkeleton,
+    HlmSkeletonImports,
+    HlmSpinner,
     NgIcon,
     PaginationControls,
     PublicPageHeader,
     RouterLink,
   ],
-  providers: [provideIcons({ lucideArrowRight, lucideRefreshCw, lucideSearch })],
+  providers: [
+    provideIcons({
+      lucideArrowRight,
+      lucideBookOpen,
+      lucideCircleAlert,
+      lucideGraduationCap,
+      lucideRefreshCw,
+      lucideSearch,
+      lucideX,
+    }),
+  ],
   templateUrl: './tutorials-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,94 +86,173 @@ export default class TutorialsPage {
     initialValue: this.route.snapshot.queryParamMap,
   });
 
-  readonly pageSizeOptions = [...PAGE_SIZES];
-  readonly listState = computed(() => {
-    const params = this.queryParamMap();
-    const requestedLimit = Number(params.get('limit'));
-    const requestedOffset = Number(params.get('offset'));
-    const limit = PAGE_SIZES.includes(requestedLimit as (typeof PAGE_SIZES)[number])
-      ? requestedLimit
-      : 12;
-    const offset =
-      Number.isInteger(requestedOffset) && requestedOffset >= 0
-        ? requestedOffset
-        : 0;
-    return {
-      term: params.get('term')?.trim() ?? '',
-      category: params.get('category')?.trim() ?? '',
-      limit,
-      offset,
-    };
-  });
-
-  readonly searchTerm = linkedSignal(() => this.listState().term);
-  readonly debouncedSearchTerm = debounced(this.searchTerm, 300);
-  readonly currentPage = computed(
-    () => Math.floor(this.listState().offset / this.listState().limit) + 1,
-  );
-
+  readonly pageSize = PAGE_SIZE;
+  readonly skeletonCards = Array.from({ length: 6 });
   readonly categoriesResource = rxResource({
     stream: () => this.dataSource.getCategories(),
   });
-  readonly tutorialsResource = rxResource({
-    params: () => this.listState(),
-    stream: ({ params }) =>
-      this.dataSource.findAll({
-        limit: params.limit,
-        offset: params.offset,
-        ...(params.term && { term: params.term }),
-        ...(params.category && { category: params.category }),
-      }),
+  readonly categories = computed(() => this.categoriesResource.value() ?? []);
+  readonly categoryNames = computed(
+    () => new Map(this.categories().map(({ slug, name }) => [slug, name])),
+  );
+
+  private readonly rawQueryState = computed(() =>
+    this.parseQueryState(this.queryParamMap()),
+  );
+  readonly queryState = computed<TutorialQueryState>(() => {
+    const state = this.rawQueryState();
+    const category = this.categories().some(
+      ({ slug }) => slug === state.category,
+    )
+      ? state.category
+      : null;
+    return { ...state, category };
   });
-  readonly isLoading = computed(
-    () => this.debouncedSearchTerm.isLoading() || this.tutorialsResource.isLoading(),
+  readonly searchTerm = linkedSignal(() => this.rawQueryState().term);
+  private readonly debouncedSearchTerm = debounced(this.searchTerm, 350);
+  readonly filtersModel = linkedSignal<TutorialFiltersModel>(() => ({
+    category: this.queryState().category,
+  }));
+  readonly filtersForm = form(this.filtersModel);
+  readonly currentPage = computed(() => this.queryState().page);
+  readonly hasActiveFilters = computed(
+    () => Boolean(this.queryState().term) || this.queryState().category !== null,
+  );
+
+  readonly tutorialsResource = rxResource({
+    params: () => {
+      if (!this.categoriesResource.hasValue()) return undefined;
+      const state = this.queryState();
+      return {
+        limit: PAGE_SIZE,
+        offset: (state.page - 1) * PAGE_SIZE,
+        ...(state.term && { term: state.term }),
+        ...(state.category && { category: state.category }),
+      };
+    },
+    stream: ({ params }) => this.dataSource.findAll(params),
+  });
+  readonly isInitialLoading = computed(
+    () =>
+      (!this.categoriesResource.hasValue() &&
+        !this.categoriesResource.error()) ||
+      (this.tutorialsResource.isLoading() &&
+        !this.tutorialsResource.hasValue()),
+  );
+  readonly isUpdating = computed(
+    () =>
+      this.tutorialsResource.isLoading() && this.tutorialsResource.hasValue(),
   );
 
   constructor() {
     effect(() => {
-      const params = this.queryParamMap();
-      const state = this.listState();
-      if (
-        params.get('limit') !== String(state.limit) ||
-        params.get('offset') !== String(state.offset)
-      ) {
-        this.updateQuery({ limit: state.limit, offset: state.offset });
-      }
+      const term = this.normalizeTerm(this.debouncedSearchTerm.value());
+      const state = this.queryState();
+      if (term === state.term) return;
+      untracked(() =>
+        this.navigateToState({ ...state, term, page: 1 }, true),
+      );
     });
 
     effect(() => {
-      const term = this.debouncedSearchTerm.value().trim();
-      if (term === this.listState().term) return;
-      this.updateQuery({
-        term: term || null,
-        limit: this.listState().limit,
-        offset: 0,
-      });
+      const paramMap = this.queryParamMap();
+      if (!this.categoriesResource.hasValue()) return;
+      const state = this.queryState();
+      const params = this.toQueryParams(state);
+      if (this.queryParamsMatch(paramMap, params)) return;
+      untracked(() => this.navigateToState(state, true));
     });
+
+    effect(() => {
+      const response = this.tutorialsResource.value();
+      const currentPage = this.currentPage();
+      if (!response || this.tutorialsResource.isLoading()) return;
+
+      const lastPage = Math.max(1, Math.ceil(response.total / PAGE_SIZE));
+      if (currentPage <= lastPage) return;
+      untracked(() =>
+        this.navigateToState(
+          { ...this.queryState(), page: lastPage },
+          true,
+        ),
+      );
+    });
+  }
+
+  onSearchInput(event: Event): void {
+    const input = event.target;
+    if (input instanceof HTMLInputElement) this.searchTerm.set(input.value);
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
+    this.navigateToState({ ...this.queryState(), term: '', page: 1 }, true);
   }
 
   filterByCategory(category: string | null | undefined): void {
-    this.updateQuery({
-      category: category || null,
-      limit: this.listState().limit,
-      offset: 0,
-    });
+    this.navigateToState(
+      { ...this.queryState(), category: category ?? null, page: 1 },
+      true,
+    );
   }
 
   changePage(page: number): void {
-    this.updateQuery({ offset: (page - 1) * this.listState().limit });
+    if (!Number.isInteger(page) || page < 1 || page === this.currentPage()) {
+      return;
+    }
+    this.navigateToState({ ...this.queryState(), page }, false);
   }
 
-  changePageSize(limit: number): void {
-    this.updateQuery({ limit, offset: 0 });
+  resetFilters(): void {
+    this.searchTerm.set('');
+    this.navigateToState({ term: '', category: null, page: 1 }, true);
   }
 
-  private updateQuery(queryParams: Record<string, string | number | null>): void {
+  reloadCategories(): void {
+    this.categoriesResource.reload();
+  }
+
+  private parseQueryState(paramMap: ParamMap): TutorialQueryState {
+    const page = Number(paramMap.get('page'));
+    const category = paramMap.get('category')?.trim().toLowerCase() || null;
+    return {
+      term: this.normalizeTerm(paramMap.get('q')).slice(0, 255),
+      category:
+        category && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(category)
+          ? category
+          : null,
+      page: Number.isInteger(page) && page > 0 ? page : 1,
+    };
+  }
+
+  private normalizeTerm(value: string | null | undefined): string {
+    return value?.replace(/\s+/g, ' ').trim() ?? '';
+  }
+
+  private toQueryParams(state: TutorialQueryState): Params {
+    const params: Params = {};
+    if (state.term) params['q'] = state.term;
+    if (state.category) params['category'] = state.category;
+    if (state.page > 1) params['page'] = state.page;
+    return params;
+  }
+
+  private queryParamsMatch(paramMap: ParamMap, params: Params): boolean {
+    const currentKeys = paramMap.keys.filter(
+      (key) => paramMap.get(key) !== null && paramMap.get(key) !== '',
+    );
+    const nextKeys = Object.keys(params);
+    return (
+      currentKeys.length === nextKeys.length &&
+      nextKeys.every((key) => paramMap.get(key) === String(params[key]))
+    );
+  }
+
+  private navigateToState(state: TutorialQueryState, replaceUrl: boolean): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
+      queryParams: this.toQueryParams(state),
+      replaceUrl,
       scroll: 'manual',
     });
   }

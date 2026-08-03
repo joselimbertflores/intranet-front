@@ -1,3 +1,8 @@
+export interface PortalCommunicationTypeResponse {
+  id: number;
+  name: string;
+}
+
 export interface PortalCommunicationResponse {
   id: string;
   reference: string;
@@ -5,5 +10,5 @@ export interface PortalCommunicationResponse {
   createdAt: string;
   code: string | null;
   url: string;
-  previewUrl: string | null;
+  previewUrl?: string | null;
 }

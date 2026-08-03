@@ -72,6 +72,25 @@
     @case ('ready') {
       @if (heroSlides().length) {
         <landing-hero-carousel [slides]="heroSlides()" />
+      } @else {
+        <section
+          class="landing-hero-fallback relative overflow-hidden text-white"
+          aria-labelledby="landing-hero-fallback-title"
+        >
+          <div class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14">
+            <div class="max-w-3xl">
+              <h1
+                id="landing-hero-fallback-title"
+                class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]"
+              >
+                Intranet institucional
+              </h1>
+              <p class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg">
+                Acceda a información, documentos y recursos institucionales del Gobierno Autónomo Municipal de Sacaba.
+              </p>
+            </div>
+          </div>
+        </section>
       }
 
       @if (quickAccesses().length) {
@@ -230,9 +249,9 @@
       @if (!hasContent()) {
         <section class="grid min-h-[28rem] place-items-center bg-[var(--landing-paper)] px-5 py-20 text-center">
           <div class="max-w-xl">
-            <h1 class="section-title text-[var(--landing-forest)]">
+            <h2 class="section-title text-[var(--landing-forest)]">
               No hay contenido publicado por el momento
-            </h1>
+            </h2>
           </div>
         </section>
       }

@@ -27,13 +27,6 @@
   letter-spacing: -0.03em;
 }
 
-.section-description {
-  max-width: 46rem;
-  color: var(--landing-muted);
-  font-size: clamp(0.925rem, 1.25vw, 1rem);
-  line-height: 1.65;
-}
-
 .landing-hero-skeleton {
   height: clamp(28rem, 54svh, 35rem);
   background:

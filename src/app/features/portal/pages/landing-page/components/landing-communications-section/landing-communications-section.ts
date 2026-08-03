@@ -32,7 +32,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
   template: `
     <hlm-carousel
       #communicationsCarousel
-      class="mt-9 w-full sm:mt-10"
+      class="w-full"
       [options]="carouselOptions"
     >
       <hlm-carousel-content>

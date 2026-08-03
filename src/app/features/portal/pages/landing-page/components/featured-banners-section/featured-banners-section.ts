@@ -1,4 +1,3 @@
-import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,7 +24,6 @@ import { FeaturedBanner } from '../../../../models';
     HlmButtonImports,
     HlmCarouselImports,
     NgIcon,
-    NgOptimizedImage,
     RouterLink,
   ],
   providers: [
@@ -39,21 +37,21 @@ import { FeaturedBanner } from '../../../../models';
   template: `
     <hlm-carousel
       #bannerCarousel
-      class="mt-9 w-full sm:mt-10"
+      class="w-full"
       [options]="carouselOptions()"
     >
-      <hlm-carousel-content class="-ml-0">
+      <hlm-carousel-content class="ml-0 gap-4 sm:gap-6">
         @for (banner of items(); track banner.id) {
-          <hlm-carousel-item class="pl-0">
+          <hlm-carousel-item class="basis-full pl-0">
             <article
-              class="featured-banner group relative min-h-[21rem] overflow-hidden rounded-3xl bg-[var(--landing-forest)] text-white sm:min-h-[23rem] lg:min-h-[25rem]"
+              class="featured-banner group relative h-[22rem] overflow-hidden rounded-3xl bg-[var(--landing-forest)] text-white sm:h-[24rem] lg:h-[26rem]"
             >
               @if (!failedImages().has(banner.id)) {
                 <img
-                  [ngSrc]="banner.imageUrl"
-                  fill
-                  sizes="(max-width: 1280px) 100vw, 1280px"
-                  class="featured-banner-photo object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:transform-none"
+                  [src]="banner.imageUrl"
+                  loading="lazy"
+                  decoding="async"
+                  class="featured-banner-photo absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:transform-none"
                   [alt]="banner.title"
                   (error)="markImageAsFailed(banner.id)"
                 />
@@ -64,7 +62,7 @@ import { FeaturedBanner } from '../../../../models';
               }
 
               <div class="featured-wash absolute inset-0" aria-hidden="true"></div>
-              <div class="relative flex min-h-[21rem] max-w-2xl flex-col justify-end p-6 sm:min-h-[23rem] sm:p-8 lg:min-h-[25rem] lg:p-10">
+              <div class="relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10">
                 <h3 class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-black tracking-[-0.025em] sm:text-4xl">
                   {{ banner.title }}
                 </h3>
@@ -149,8 +147,15 @@ import { FeaturedBanner } from '../../../../models';
 
     .featured-wash {
       background:
-        linear-gradient(90deg, rgb(5 39 52 / 0.62) 0%, rgb(5 45 57 / 0.38) 36%, rgb(5 45 57 / 0.08) 68%, transparent 100%),
-        linear-gradient(0deg, rgb(4 29 39 / 0.2), transparent 52%);
+        linear-gradient(
+          90deg,
+          rgb(3 54 36 / 0.8) 0%,
+          rgb(4 63 42 / 0.66) 30%,
+          rgb(4 63 42 / 0.3) 52%,
+          rgb(4 63 42 / 0.07) 72%,
+          transparent 88%
+        ),
+        linear-gradient(0deg, rgb(3 42 29 / 0.16), transparent 55%);
     }
 
     .image-fallback {

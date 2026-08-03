@@ -77,18 +77,20 @@
       @if (quickAccesses().length) {
         <section class="bg-white py-14 sm:py-16 lg:py-20" aria-labelledby="quick-access-title">
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <h2
-              id="quick-access-title"
-              class="section-title text-center text-[var(--landing-forest)]"
-            >
-              Accesos rápidos
-            </h2>
-            <p class="section-description mx-auto mt-2 text-center">
-              Accede a los sistemas y recursos institucionales de uso frecuente.
-            </p>
+            <div class="mb-8 text-center sm:mb-10">
+              <h2
+                id="quick-access-title"
+                class="section-title text-[var(--landing-forest)]"
+              >
+                Accesos rápidos
+              </h2>
+              <p class="mx-auto mt-2 max-w-3xl text-base leading-relaxed font-medium text-emerald-950/65 sm:text-lg">
+                Accede a los sistemas y recursos institucionales de uso frecuente.
+              </p>
+            </div>
 
             <nav
-              class="mt-9 flex flex-wrap justify-center gap-3 sm:mt-10 sm:gap-4"
+              class="flex flex-wrap justify-center gap-3 sm:gap-4"
               aria-label="Accesos rápidos"
             >
               @for (item of quickAccesses(); track item.id) {
@@ -100,7 +102,7 @@
                   [style.--quick-access-color]="item.backgroundColor"
                   [attr.aria-label]="'Abrir ' + item.title + ' en una nueva pestaña'"
                 >
-                  <span class="quick-access-icon grid size-11 place-items-center text-3xl" aria-hidden="true">
+                  <span class="quick-access-icon grid size-12 place-items-center text-6xl" aria-hidden="true">
                     <ng-icon [name]="quickAccessIcon(item.iconKey)" />
                   </span>
                   <span class="line-clamp-2 text-sm leading-snug font-extrabold sm:text-base">
@@ -119,12 +121,14 @@
           aria-labelledby="featured-banners-title"
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <h2 id="featured-banners-title" class="section-title text-[var(--landing-forest)]">
-              Banners destacados
-            </h2>
-            <p class="section-description mt-2">
-              Conoce información y recursos relevantes para el trabajo municipal.
-            </p>
+            <div class="mb-8 sm:mb-10">
+              <h2 id="featured-banners-title" class="section-title text-[var(--landing-forest)]">
+                Banners destacados
+              </h2>
+              <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-emerald-950/65 sm:text-lg">
+                Conoce información y recursos relevantes para el trabajo municipal.
+              </p>
+            </div>
 
             <featured-banners-section [items]="featuredBanners()" />
           </div>
@@ -134,12 +138,12 @@
       @if (communications().length) {
         <section class="bg-white py-14 sm:py-16 lg:py-20" aria-labelledby="communications-title">
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 id="communications-title" class="section-title text-[var(--landing-forest)]">
                   Comunicados recientes
                 </h2>
-                <p class="section-description mt-2">
+                <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-emerald-950/65 sm:text-lg">
                   Mantente informado con las últimas comunicaciones institucionales.
                 </p>
               </div>
@@ -160,12 +164,12 @@
           aria-labelledby="documents-title"
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 id="documents-title" class="section-title text-[var(--landing-forest)]">
                   Documentos más descargados
                 </h2>
-                <p class="section-description mt-2">
+                <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-emerald-950/65 sm:text-lg">
                   Consulta y descarga los documentos más utilizados por los funcionarios municipales.
                 </p>
               </div>
@@ -175,7 +179,7 @@
               </a>
             </div>
 
-            <div class="mt-9 overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-white/90 shadow-sm sm:mt-10">
+            <div class="overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-white/90 shadow-sm">
               @for (document of visibleDocuments(); track document.id) {
                 <article class="document-row grid gap-4 border-b border-[var(--landing-line)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
                   <div class="flex min-w-0 items-center gap-4">

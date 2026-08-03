@@ -52,6 +52,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/portal/pages/directory-page/directory-page'),
       },
+      {
+        path: 'accesos',
+        title: 'Accesos rápidos',
+        loadComponent: () =>
+          import('./features/portal/pages/quick-accesses-page/quick-accesses-page'),
+      },
     ],
   },
   {
@@ -155,6 +161,14 @@ export const routes: Routes = [
             canActivate: [resourceGuard],
             loadComponent: () =>
               import('./features/administration/content-settings/pages/landing-notices-admin/landing-notices-admin'),
+          },
+          {
+            path: 'quick-accesses',
+            title: 'Administración - Accesos rápidos',
+            data: { resource: Resource.CONTENT },
+            canActivate: [resourceGuard],
+            loadComponent: () =>
+              import('./features/administration/content-settings/pages/quick-accesses-admin/quick-accesses-admin'),
           },
         ],
       },

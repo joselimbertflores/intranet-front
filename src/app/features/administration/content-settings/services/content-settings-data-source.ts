@@ -8,7 +8,7 @@ import {
   LandingNoticeResponse,
   LandingNoticeToSave,
   FeaturedBannerResponse,
-  QuickAccessBatchItem,
+  QuickAccessToSave,
   QuickAccessResponse,
   HeroSlideResponse,
 } from '../interfaces';
@@ -54,22 +54,35 @@ export class ContentSettingsDataSource {
   private readonly FEATURED_BANNERS_URL = `${this.HERO_SLIDES_URL}/featured-banners`;
   private readonly LANDING_NOTICES_URL = `${this.HERO_SLIDES_URL}/landing-notices`;
 
-  getQuickAccess() {
+  getQuickAccesses() {
     return this.http.get<QuickAccessResponse[]>(this.QUICK_ACCESS_URL);
   }
 
-  saveQuickAccessItems(items: QuickAccessBatchItem[], deletedIds: number[]) {
+  createQuickAccess(quickAccess: QuickAccessToSave) {
+    return this.http.post<QuickAccessResponse>(
+      this.QUICK_ACCESS_URL,
+      quickAccess,
+    );
+  }
+
+  updateQuickAccess(id: number, quickAccess: QuickAccessToSave) {
+    return this.http.patch<QuickAccessResponse>(
+      `${this.QUICK_ACCESS_URL}/${id}`,
+      quickAccess,
+    );
+  }
+
+  reorderQuickAccesses(ids: number[]) {
     return this.http.put<QuickAccessResponse[]>(
-      `${this.QUICK_ACCESS_URL}/batch`,
-      {
-        items,
-        ...(deletedIds.length > 0 && { deletedIds }),
-      },
+      `${this.QUICK_ACCESS_URL}/reorder`,
+      { ids },
     );
   }
 
   removeQuickAccess(id: number) {
-    return this.http.delete(`${this.QUICK_ACCESS_URL}/${id}`);
+    return this.http.delete<{ ok: true; message: string }>(
+      `${this.QUICK_ACCESS_URL}/${id}`,
+    );
   }
 
   getHeroSlides() {

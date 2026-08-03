@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -48,6 +53,11 @@ const ADMIN_MENU = [
       {
         label: 'Avisos emergentes',
         route: 'portal/notices',
+        resource: Resource.CONTENT,
+      },
+      {
+        label: 'Accesos rápidos',
+        route: 'portal/quick-accesses',
         resource: Resource.CONTENT,
       },
     ],
@@ -155,7 +165,11 @@ const ADMIN_MENU = [
         aria-label="Navegación de administración"
       >
         @for (group of visibleMenu(); track group.label) {
-          <section hlmCollapsible [expanded]="true" class="group/collapsible mb-1">
+          <section
+            hlmCollapsible
+            [expanded]="true"
+            class="group/collapsible mb-1"
+          >
             <button
               hlmCollapsibleTrigger
               class="flex h-9 w-full items-center gap-3 rounded-md px-2 text-left text-sm font-medium outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"

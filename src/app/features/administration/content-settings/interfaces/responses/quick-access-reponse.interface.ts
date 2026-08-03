@@ -11,10 +11,9 @@ export interface QuickAccessResponse {
   isActive: boolean;
 }
 
-export interface QuickAccessBatchItem {
-  id?: number;
+export interface QuickAccessToSave {
   title: string;
-  description?: string;
+  description: string | null;
   iconKey: QuickAccessIconKey;
   backgroundColor: string;
   url: string;

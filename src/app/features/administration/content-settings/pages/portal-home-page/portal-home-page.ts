@@ -1,4 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideGalleryHorizontal,
@@ -13,15 +14,11 @@ import {
   PermissionAction,
   Resource,
 } from '../../../../../core/auth/auth.types';
-import {
-  HeroSlideEditor,
-  FeaturedBannerEditor,
-  QuickAccessEditor,
-} from '../../dialogs';
+import { HeroSlideEditor, FeaturedBannerEditor } from '../../dialogs';
 
 @Component({
   selector: 'app-portal-home-page',
-  imports: [NgIcon, HlmButton],
+  imports: [NgIcon, HlmButton, RouterLink],
   providers: [
     provideIcons({
       lucideGalleryHorizontal,
@@ -50,13 +47,6 @@ export default class PortalHomePage {
     this.dialogService.open(FeaturedBannerEditor, {
       showCloseButton: false,
       contentClass: 'w-[calc(100vw-2rem)] sm:!max-w-[1200px]',
-    });
-  }
-
-  showQuickAccessDialog(): void {
-    this.dialogService.open(QuickAccessEditor, {
-      showCloseButton: false,
-      contentClass: 'sm:w-[90vw] sm:max-w-[800px]',
     });
   }
 }

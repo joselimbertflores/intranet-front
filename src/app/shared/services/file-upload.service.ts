@@ -8,7 +8,6 @@ type FileContext =
   | 'featured-banners'
   | 'landing-notices'
   | 'documents'
-  | 'quick-access'
   | 'communications'
   | 'tutorials';
 

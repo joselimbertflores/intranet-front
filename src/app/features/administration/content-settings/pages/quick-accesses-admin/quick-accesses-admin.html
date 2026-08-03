@@ -1,0 +1,332 @@
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <header
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <div class="max-w-2xl">
+      <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+        Accesos rápidos
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+        Administra los enlaces y define el orden en que aparecen en el portal.
+      </p>
+    </div>
+    @if (canCreate()) {
+      <button
+        hlmBtn
+        type="button"
+        class="w-full sm:w-auto"
+        [disabled]="isBusy()"
+        (click)="openEditor()"
+      >
+        <ng-icon name="lucidePlus" data-icon="inline-start" />
+        Nuevo acceso
+      </button>
+    }
+  </header>
+
+  @if (hasOrderChanges()) {
+    <section
+      class="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+      aria-live="polite"
+    >
+      <p class="text-sm font-medium">Hay cambios de orden sin guardar.</p>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row">
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          [disabled]="isBusy()"
+          (click)="discardOrder()"
+        >
+          Descartar cambios
+        </button>
+        <button
+          hlmBtn
+          type="button"
+          [disabled]="isBusy()"
+          (click)="saveOrder()"
+        >
+          @if (isSavingOrder()) {
+            <hlm-spinner data-icon="inline-start" />
+            Guardando...
+          } @else {
+            Guardar orden
+          }
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (actionError()) {
+    <div hlmAlert variant="destructive" role="alert">
+      <ng-icon name="lucideCircleAlert" />
+      <h2 hlmAlertTitle>No se completó la acción</h2>
+      <p hlmAlertDescription>{{ actionError() }}</p>
+    </div>
+  }
+
+  <section
+    class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+    aria-labelledby="quick-access-list-title"
+  >
+    <h2 id="quick-access-list-title" class="sr-only">
+      Listado ordenable de accesos rápidos
+    </h2>
+
+    <div
+      class="hidden grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_6rem_3rem] items-center gap-3 border-b border-border bg-muted/45 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid"
+      aria-hidden="true"
+    >
+      <span></span>
+      <span>Icono</span>
+      <span>Acceso</span>
+      <span>Estado</span>
+      <span class="text-center">Posición</span>
+      <span></span>
+    </div>
+
+    @if (isLoading()) {
+      <div aria-label="Cargando accesos rápidos">
+        @for (_ of skeletonItems; track $index) {
+          <div
+            class="grid grid-cols-[2.5rem_2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_6rem_3rem]"
+          >
+            <div hlmSkeleton class="size-8"></div>
+            <div hlmSkeleton class="size-10 rounded-lg"></div>
+            <div class="flex flex-col gap-2">
+              <div hlmSkeleton class="h-4 w-40"></div>
+              <div hlmSkeleton class="h-3 w-56 max-w-full"></div>
+            </div>
+            <div hlmSkeleton class="size-8 md:hidden"></div>
+            <div hlmSkeleton class="hidden h-5 w-16 md:block"></div>
+            <div hlmSkeleton class="hidden h-5 w-8 md:block"></div>
+            <div hlmSkeleton class="hidden size-8 md:block"></div>
+          </div>
+        }
+      </div>
+    } @else if (loadError()) {
+      <div
+        class="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center"
+        role="alert"
+      >
+        <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+        <h2 class="mt-4 text-lg font-semibold">
+          No se pudieron cargar los accesos
+        </h2>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">
+          Verifica la conexión e intenta nuevamente.
+        </p>
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          class="mt-5"
+          (click)="loadQuickAccesses()"
+        >
+          <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+          Reintentar
+        </button>
+      </div>
+    } @else if (items().length) {
+      <ul
+        cdkDropList
+        class="quick-access-list"
+        [cdkDropListData]="items()"
+        [cdkDropListDisabled]="!canUpdate() || isBusy()"
+        (cdkDropListDropped)="drop($event)"
+      >
+        @for (item of items(); track item.id; let index = $index) {
+          <li
+            cdkDrag
+            class="quick-access-row grid grid-cols-[2.5rem_2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_6rem_3rem]"
+            [cdkDragData]="item"
+            [cdkDragDisabled]="!canUpdate() || isBusy()"
+          >
+            <button
+              hlmBtn
+              cdkDragHandle
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              [disabled]="!canUpdate() || isBusy()"
+              [attr.aria-label]="'Arrastrar ' + item.title + ' para reordenar'"
+              title="Arrastrar para reordenar"
+            >
+              <ng-icon name="lucideGripVertical" />
+            </button>
+
+            <span
+              class="grid size-10 place-items-center rounded-lg border"
+              [style.border-color]="
+                'color-mix(in srgb, ' +
+                item.backgroundColor +
+                ' 35%, transparent)'
+              "
+              [style.background]="
+                'color-mix(in srgb, ' +
+                item.backgroundColor +
+                ' 16%, transparent)'
+              "
+              [style.color]="item.backgroundColor"
+              aria-hidden="true"
+            >
+              <ng-icon [name]="iconConfig(item.iconKey).icon" />
+            </span>
+
+            <div class="min-w-0">
+              <p class="line-clamp-2 font-medium leading-5">{{ item.title }}</p>
+              <a
+                class="mt-0.5 inline-flex max-w-full items-center gap-1 text-sm text-muted-foreground outline-none hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring"
+                [href]="item.url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="truncate">{{ item.url }}</span>
+                <ng-icon name="lucideExternalLink" class="shrink-0" />
+              </a>
+              <div class="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+                <span
+                  hlmBadge
+                  [variant]="item.isActive ? 'default' : 'secondary'"
+                >
+                  {{ item.isActive ? "Activo" : "Inactivo" }}
+                </span>
+                <span class="text-xs text-muted-foreground"
+                  >Posición {{ index + 1 }}</span
+                >
+              </div>
+            </div>
+
+            <div class="hidden md:block">
+              <span
+                hlmBadge
+                [variant]="item.isActive ? 'default' : 'secondary'"
+              >
+                {{ item.isActive ? "Activo" : "Inactivo" }}
+              </span>
+            </div>
+
+            <span
+              class="hidden text-center text-sm font-medium tabular-nums md:block"
+              >{{ index + 1 }}</span
+            >
+
+            <button
+              hlmBtn
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              align="end"
+              [hlmDropdownMenuTrigger]="actionsMenu"
+              [hlmDropdownMenuTriggerData]="{ item: item, index: index }"
+              [attr.aria-label]="'Acciones para ' + item.title"
+              [disabled]="isBusy()"
+            >
+              <ng-icon name="lucideMoreHorizontal" />
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div
+        class="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center"
+      >
+        <ng-icon
+          name="lucideExternalLink"
+          class="text-3xl text-muted-foreground"
+        />
+        <h2 class="mt-4 text-lg font-semibold">No hay accesos rápidos</h2>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">
+          Crea el primer acceso para mostrarlo en el portal.
+        </p>
+        @if (canCreate()) {
+          <button hlmBtn type="button" class="mt-5" (click)="openEditor()">
+            <ng-icon name="lucidePlus" data-icon="inline-start" />
+            Nuevo acceso
+          </button>
+        }
+      </div>
+    }
+  </section>
+</div>
+
+<ng-template #actionsMenu let-item="item" let-index="index">
+  <hlm-dropdown-menu>
+    <hlm-dropdown-menu-group>
+      <hlm-dropdown-menu-label>Acciones</hlm-dropdown-menu-label>
+      @if (canUpdate()) {
+        <button
+          type="button"
+          hlmDropdownMenuItem
+          [disabled]="index === 0"
+          (click)="moveUp(index)"
+        >
+          <ng-icon name="lucideArrowUp" />
+          Mover arriba
+        </button>
+        <button
+          type="button"
+          hlmDropdownMenuItem
+          [disabled]="index === items().length - 1"
+          (click)="moveDown(index)"
+        >
+          <ng-icon name="lucideArrowDown" />
+          Mover abajo
+        </button>
+        <hlm-dropdown-menu-separator />
+        <button type="button" hlmDropdownMenuItem (click)="openEditor(item)">
+          <ng-icon name="lucidePencil" />
+          Editar
+        </button>
+      }
+      @if (canDelete()) {
+        <button
+          type="button"
+          hlmDropdownMenuItem
+          variant="destructive"
+          [hlmAlertDialogTriggerFor]="deleteDialog"
+          (click)="quickAccessToDelete.set(item)"
+        >
+          <ng-icon name="lucideTrash2" />
+          Eliminar
+        </button>
+      }
+    </hlm-dropdown-menu-group>
+  </hlm-dropdown-menu>
+</ng-template>
+
+<hlm-alert-dialog #deleteDialog>
+  <hlm-alert-dialog-content *hlmAlertDialogPortal>
+    <hlm-alert-dialog-header>
+      <h3 hlmAlertDialogTitle>Eliminar acceso</h3>
+      <p hlmAlertDialogDescription>
+        Se eliminará “{{ quickAccessToDelete()?.title }}”. Esta acción no se
+        puede deshacer.
+      </p>
+    </hlm-alert-dialog-header>
+    <hlm-alert-dialog-footer>
+      <button
+        hlmAlertDialogCancel
+        type="button"
+        [disabled]="deletingId() !== null"
+        (click)="quickAccessToDelete.set(null)"
+      >
+        Cancelar
+      </button>
+      <button
+        hlmAlertDialogAction
+        type="button"
+        variant="destructive"
+        [disabled]="deletingId() !== null"
+        (click)="confirmRemove(deleteDialog)"
+      >
+        @if (deletingId() !== null) {
+          <hlm-spinner data-icon="inline-start" />
+          Eliminando...
+        } @else {
+          Eliminar
+        }
+      </button>
+    </hlm-alert-dialog-footer>
+  </hlm-alert-dialog-content>
+</hlm-alert-dialog>

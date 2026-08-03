@@ -1,9 +1,14 @@
 <div class="landing-surface">
   @switch (state()) {
-    @case ('loading') {
+    @case ("loading") {
       <div aria-label="Cargando contenido de la intranet" aria-busy="true">
-        <section class="landing-hero-skeleton px-5 py-12 sm:px-8" aria-hidden="true">
-          <div class="mx-auto flex h-full w-full max-w-7xl items-end sm:items-center">
+        <section
+          class="landing-hero-skeleton px-5 py-12 sm:px-8"
+          aria-hidden="true"
+        >
+          <div
+            class="mx-auto flex h-full w-full max-w-7xl items-end sm:items-center"
+          >
             <div class="w-full max-w-2xl">
               <div hlmSkeleton class="h-12 w-4/5 sm:h-16"></div>
               <div hlmSkeleton class="mt-5 h-5 w-3/5"></div>
@@ -13,23 +18,34 @@
           </div>
         </section>
 
-        <section class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8" aria-hidden="true">
+        <section
+          class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8"
+          aria-hidden="true"
+        >
           <div hlmSkeleton class="mx-auto h-9 w-64"></div>
-          <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <div
+            class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
+          >
             @for (item of [1, 2, 3, 4, 5]; track item) {
               <div hlmSkeleton class="h-28 rounded-2xl"></div>
             }
           </div>
         </section>
 
-        <section class="bg-[var(--landing-mint)] px-5 py-14 sm:px-8" aria-hidden="true">
+        <section
+          class="bg-[var(--landing-mint)] px-5 py-14 sm:px-8"
+          aria-hidden="true"
+        >
           <div class="mx-auto w-full max-w-7xl">
             <div hlmSkeleton class="h-9 w-56"></div>
             <div hlmSkeleton class="mt-7 h-72 w-full rounded-3xl"></div>
           </div>
         </section>
 
-        <section class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8" aria-hidden="true">
+        <section
+          class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8"
+          aria-hidden="true"
+        >
           <div hlmSkeleton class="h-9 w-72"></div>
           <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @for (item of [1, 2, 3, 4]; track item) {
@@ -38,7 +54,10 @@
           </div>
         </section>
 
-        <section class="bg-[var(--landing-warm)] px-5 py-14 sm:px-8" aria-hidden="true">
+        <section
+          class="bg-[var(--landing-warm)] px-5 py-14 sm:px-8"
+          aria-hidden="true"
+        >
           <div class="mx-auto w-full max-w-7xl">
             <div hlmSkeleton class="h-9 w-80"></div>
             <div class="mt-7 grid gap-2">
@@ -51,16 +70,19 @@
       </div>
     }
 
-    @case ('error') {
+    @case ("error") {
       <section class="grid min-h-[30rem] place-items-center px-5 py-20">
         <div hlmAlert variant="destructive" class="max-w-xl">
           <ng-icon name="lucideRefreshCw" />
           <h1 hlmAlertTitle>No pudimos cargar la intranet</h1>
-          <p hlmAlertDescription>
-            Verifica tu conexión e intenta nuevamente.
-          </p>
+          <p hlmAlertDescription>Verifica tu conexión e intenta nuevamente.</p>
           <div class="mt-4">
-            <button hlmBtn type="button" variant="outline" (click)="loadLanding()">
+            <button
+              hlmBtn
+              type="button"
+              variant="outline"
+              (click)="loadLanding()"
+            >
               <ng-icon name="lucideRefreshCw" />
               Intentar de nuevo
             </button>
@@ -69,7 +91,7 @@
       </section>
     }
 
-    @case ('ready') {
+    @case ("ready") {
       @if (heroSlides().length) {
         <landing-hero-carousel [slides]="heroSlides()" />
       } @else {
@@ -77,7 +99,9 @@
           class="landing-hero-fallback relative overflow-hidden text-white"
           aria-labelledby="landing-hero-fallback-title"
         >
-          <div class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14">
+          <div
+            class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14"
+          >
             <div class="max-w-3xl">
               <h1
                 id="landing-hero-fallback-title"
@@ -85,8 +109,11 @@
               >
                 Intranet institucional
               </h1>
-              <p class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg">
-                Acceda a información, documentos y recursos institucionales del Gobierno Autónomo Municipal de Sacaba.
+              <p
+                class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg"
+              >
+                Acceda a información, documentos y recursos institucionales del
+                Gobierno Autónomo Municipal de Sacaba.
               </p>
             </div>
           </div>
@@ -94,7 +121,10 @@
       }
 
       @if (quickAccesses().length) {
-        <section class="bg-card py-14 sm:py-16 lg:py-20" aria-labelledby="quick-access-title">
+        <section
+          class="bg-card py-14 sm:py-16 lg:py-20"
+          aria-labelledby="quick-access-title"
+        >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <div class="mb-8 text-center sm:mb-10">
               <h2
@@ -103,8 +133,11 @@
               >
                 Accesos rápidos
               </h2>
-              <p class="mx-auto mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg">
-                Accede a los sistemas y recursos institucionales de uso frecuente.
+              <p
+                class="mx-auto mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg"
+              >
+                Accede a los sistemas y recursos institucionales de uso
+                frecuente.
               </p>
             </div>
 
@@ -119,17 +152,33 @@
                   rel="noopener noreferrer"
                   class="quick-access-card group flex min-h-28 flex-col items-center justify-center gap-3 rounded-2xl border px-3 py-5 text-center no-underline outline-none sm:min-h-32"
                   [style.--quick-access-color]="item.backgroundColor"
-                  [attr.aria-label]="'Abrir ' + item.title + ' en una nueva pestaña'"
+                  [attr.aria-label]="
+                    'Abrir ' + item.title + ' en una nueva pestaña'
+                  "
                 >
-                  <span class="quick-access-icon grid size-12 place-items-center text-6xl" aria-hidden="true">
+                  <span
+                    class="quick-access-icon grid size-12 place-items-center text-6xl"
+                    aria-hidden="true"
+                  >
                     <ng-icon [name]="quickAccessIcon(item.iconKey)" />
                   </span>
-                  <span class="line-clamp-2 text-sm leading-snug font-extrabold sm:text-base">
+                  <span
+                    class="line-clamp-2 text-sm leading-snug font-extrabold sm:text-base"
+                  >
                     {{ item.title }}
                   </span>
                 </a>
               }
             </nav>
+
+            @if (hasMoreQuickAccesses()) {
+              <div class="mt-8 text-center">
+                <a hlmBtn variant="outline" routerLink="/accesos">
+                  Ver todos los accesos
+                  <ng-icon name="lucideArrowRight" data-icon="inline-end" />
+                </a>
+              </div>
+            }
           </div>
         </section>
       }
@@ -141,11 +190,17 @@
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <div class="mb-8 sm:mb-10">
-              <h2 id="featured-banners-title" class="section-title text-[var(--landing-forest)]">
+              <h2
+                id="featured-banners-title"
+                class="section-title text-[var(--landing-forest)]"
+              >
                 Banners destacados
               </h2>
-              <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg">
-                Conoce información y recursos relevantes para el trabajo municipal.
+              <p
+                class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg"
+              >
+                Conoce información y recursos relevantes para el trabajo
+                municipal.
               </p>
             </div>
 
@@ -155,18 +210,34 @@
       }
 
       @if (communications().length) {
-        <section class="bg-card py-14 sm:py-16 lg:py-20" aria-labelledby="communications-title">
+        <section
+          class="bg-card py-14 sm:py-16 lg:py-20"
+          aria-labelledby="communications-title"
+        >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+            <div
+              class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between"
+            >
               <div>
-                <h2 id="communications-title" class="section-title text-[var(--landing-forest)]">
+                <h2
+                  id="communications-title"
+                  class="section-title text-[var(--landing-forest)]"
+                >
                   Comunicados recientes
                 </h2>
-                <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg">
-                  Mantente informado con las últimas comunicaciones institucionales.
+                <p
+                  class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg"
+                >
+                  Mantente informado con las últimas comunicaciones
+                  institucionales.
                 </p>
               </div>
-              <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
+              <a
+                hlmBtn
+                variant="link"
+                routerLink="/communications"
+                class="w-fit"
+              >
                 Ver todos los comunicados
                 <ng-icon name="lucideArrowRight" />
               </a>
@@ -183,13 +254,21 @@
           aria-labelledby="documents-title"
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+            <div
+              class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between"
+            >
               <div>
-                <h2 id="documents-title" class="section-title text-[var(--landing-forest)]">
+                <h2
+                  id="documents-title"
+                  class="section-title text-[var(--landing-forest)]"
+                >
                   Documentos más descargados
                 </h2>
-                <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg">
-                  Consulta y descarga los documentos más utilizados por los funcionarios municipales.
+                <p
+                  class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-[var(--landing-muted)] sm:text-lg"
+                >
+                  Consulta y descarga los documentos más utilizados por los
+                  funcionarios municipales.
                 </p>
               </div>
               <a hlmBtn variant="link" routerLink="/documents" class="w-fit">
@@ -198,19 +277,36 @@
               </a>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-card/90 shadow-sm">
+            <div
+              class="overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-card/90 shadow-sm"
+            >
               @for (document of visibleDocuments(); track document.id) {
-                <article class="document-row grid gap-4 border-b border-[var(--landing-line)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                <article
+                  class="document-row grid gap-4 border-b border-[var(--landing-line)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+                >
                   <div class="flex min-w-0 items-center gap-4">
-                    <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--landing-mint)] text-[var(--landing-green)]" aria-hidden="true">
-                      <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
+                    <span
+                      class="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--landing-mint)] text-[var(--landing-green)]"
+                      aria-hidden="true"
+                    >
+                      <file-icon
+                        [fileName]="document.file.name"
+                        [mimeType]="document.file.mimeType"
+                      />
                     </span>
                     <div class="min-w-0">
-                      <h3 class="line-clamp-2 text-sm leading-snug font-bold text-[var(--landing-forest)] sm:text-base">
+                      <h3
+                        class="line-clamp-2 text-sm leading-snug font-bold text-[var(--landing-forest)] sm:text-base"
+                      >
                         {{ document.title }}
                       </h3>
-                      <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--landing-muted)]">
-                        <span class="font-semibold text-[var(--landing-green)]">{{ documentCategory(document) }}</span>
+                      <div
+                        class="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--landing-muted)]"
+                      >
+                        <span
+                          class="font-semibold text-[var(--landing-green)]"
+                          >{{ documentCategory(document) }}</span
+                        >
                         @if (document.organizationalUnit) {
                           <span>{{ document.organizationalUnit }}</span>
                         }
@@ -247,7 +343,9 @@
       }
 
       @if (!hasContent()) {
-        <section class="grid min-h-[28rem] place-items-center bg-[var(--landing-paper)] px-5 py-20 text-center">
+        <section
+          class="grid min-h-[28rem] place-items-center bg-[var(--landing-paper)] px-5 py-20 text-center"
+        >
           <div class="max-w-xl">
             <h2 class="section-title text-[var(--landing-forest)]">
               No hay contenido publicado por el momento

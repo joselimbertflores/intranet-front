@@ -58,9 +58,3 @@ export const QUICK_ACCESS_ICON_OPTIONS = QUICK_ACCESS_ICON_KEYS.map((key) => ({
   key,
   ...QUICK_ACCESS_ICON_CATALOG[key],
 }));
-
-export function isQuickAccessIconKey(
-  value: string,
-): value is QuickAccessIconKey {
-  return (QUICK_ACCESS_ICON_KEYS as readonly string[]).includes(value);
-}

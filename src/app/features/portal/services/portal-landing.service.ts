@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../../environments/environment';
-import { PortalLandingResponse } from '../models';
+import { PortalLandingResponse, QuickAccess } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class PortalLandingService {
@@ -11,5 +11,11 @@ export class PortalLandingService {
 
   getLanding() {
     return this.http.get<PortalLandingResponse>(this.url);
+  }
+
+  getQuickAccesses() {
+    return this.http.get<QuickAccess[]>(
+      `${environment.baseUrl}/api/portal/quick-accesses`,
+    );
   }
 }

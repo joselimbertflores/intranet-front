@@ -38,29 +38,31 @@ let paginationControlsId = 0;
         {{ firstItem() }}–{{ lastItem() }} de {{ totalItems() }} resultados
       </p>
 
-      <div class="flex items-center gap-2">
-        <label hlmLabel class="text-muted-foreground" [for]="pageSizeControlId">
-          Por página
-        </label>
+      @if (showPageSize()) {
+        <div class="flex items-center gap-2">
+          <label hlmLabel class="text-muted-foreground" [for]="pageSizeControlId">
+            Por página
+          </label>
 
-        <hlm-select [value]="pageSize()" (valueChange)="changePageSize($event)">
-          <hlm-select-trigger
-            class="w-20"
-            size="sm"
-            [buttonId]="pageSizeControlId"
-          >
-            <hlm-select-value />
-          </hlm-select-trigger>
+          <hlm-select [value]="pageSize()" (valueChange)="changePageSize($event)">
+            <hlm-select-trigger
+              class="w-20"
+              size="sm"
+              [buttonId]="pageSizeControlId"
+            >
+              <hlm-select-value />
+            </hlm-select-trigger>
 
-          <hlm-select-content *hlmSelectPortal>
-            @for (size of pageSizes(); track size) {
-              <hlm-select-item [value]="size">
-                {{ size }}
-              </hlm-select-item>
-            }
-          </hlm-select-content>
-        </hlm-select>
-      </div>
+            <hlm-select-content *hlmSelectPortal>
+              @for (size of pageSizes(); track size) {
+                <hlm-select-item [value]="size">
+                  {{ size }}
+                </hlm-select-item>
+              }
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+      }
 
       <span class="text-sm text-muted-foreground">
         Página {{ currentPage() }} de {{ totalPages() }}
@@ -132,6 +134,7 @@ export class PaginationControls {
   readonly pageSize = model.required<number>();
   
   readonly pageSizes = input<number[]>([10, 20, 30, 50]);
+  readonly showPageSize = input(true);
   readonly showFirstLastButtons = input(true);
 
   protected readonly pageSizeControlId = `pagination-page-size-${paginationControlsId++}`;

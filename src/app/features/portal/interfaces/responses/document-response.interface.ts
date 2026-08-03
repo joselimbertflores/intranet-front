@@ -21,10 +21,10 @@ export interface DocumentFiltersResponse {
 }
 
 export interface DocSectionFilterResponse {
-  id: string;
+  id: number;
   name: string;
   slug: string;
-  parentId: null | string;
+  parentId: number | null;
   children: DocSectionFilterResponse[];
 }
 
@@ -32,11 +32,16 @@ export interface DocTypeFilterResponse {
   id: number;
   name: string;
   slug: string;
-  subtypes?: DocSubtypeFilterResponse[];
+  subtypes: DocSubtypeFilterResponse[];
 }
 
 export interface DocSubtypeFilterResponse {
   id: number;
   name: string;
   slug: string;
+}
+
+export interface PortalDocumentSearchResponse {
+  documents: PortalDocumentResponse[];
+  total: number;
 }

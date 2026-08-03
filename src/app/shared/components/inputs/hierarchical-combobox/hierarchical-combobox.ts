@@ -13,12 +13,16 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 export interface HierarchicalComboboxItem {
   readonly id: number;
   readonly name: string;
-  readonly children: readonly HierarchicalComboboxItem[];
+  readonly depth?: number;
+  readonly parentPath?: string;
+  readonly searchText?: string;
+  readonly children?: readonly HierarchicalComboboxItem[];
 }
 
 interface HierarchicalComboboxOption {
   readonly id: number;
   readonly name: string;
+  readonly depth: number;
   readonly parentPath: string;
   readonly searchText: string;
 }
@@ -50,7 +54,10 @@ interface HierarchicalComboboxOption {
           <div hlmComboboxList>
             @for (option of options(); track option.id) {
               <hlm-combobox-item [value]="option">
-                <span class="block min-w-0">
+                <span
+                  class="block min-w-0"
+                  [style.padding-inline-start.rem]="option.depth * 0.75"
+                >
                   <span class="block truncate">{{ option.name }}</span>
                   @if (option.parentPath) {
                     <span class="block truncate text-xs text-muted-foreground">
@@ -118,14 +125,19 @@ export class HierarchicalCombobox implements FormValueControl<number | null> {
   ): HierarchicalComboboxOption[] {
     return items.flatMap((item) => {
       const path = [...ancestorNames, item.name];
+      const parentPath = item.parentPath ?? ancestorNames.join(' / ');
+      const depth = item.depth ?? ancestorNames.length;
       return [
         {
           id: item.id,
           name: item.name,
-          parentPath: ancestorNames.join(' / '),
-          searchText: this.normalizeSearchText(path.join(' / ')),
+          depth,
+          parentPath,
+          searchText: this.normalizeSearchText(
+            item.searchText ?? path.join(' / '),
+          ),
         },
-        ...this.flattenItems(item.children, path),
+        ...this.flattenItems(item.children ?? [], path),
       ];
     });
   }

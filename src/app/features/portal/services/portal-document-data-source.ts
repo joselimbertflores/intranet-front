@@ -1,18 +1,21 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 
-import { DocumentFiltersResponse, PortalDocumentResponse } from '../interfaces';
+import {
+  DocumentFiltersResponse,
+  PortalDocumentSearchResponse,
+} from '../interfaces';
 import { environment } from '../../../../environments/environment';
 
 export interface SearchPublicDocumentsParams {
   organizationalUnit?: string | null;
-  documentType?: string | null;
-  documentSubtype?: string | null;
+  type?: string | null;
+  subtype?: string | null;
   year?: number | null;
   term?: string | null;
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
 }
 
 @Injectable({
@@ -20,33 +23,41 @@ export interface SearchPublicDocumentsParams {
 })
 export class PortalDocumentDataSource {
   private readonly URL = `${environment.baseUrl}/api/portal-documents`;
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  documentFilters = toSignal(this.getDocumentFilters(), {
-    initialValue: { organizationalUnits: [], types: [] },
+  /**
+   * Recurso compartido por toda la aplicación. Al vivir en este servicio root,
+   * conserva el catálogo al navegar fuera de Documentos y volver.
+   */
+  readonly documentFiltersResource = rxResource({
+    stream: () => this.getDocumentFilters(),
   });
-
-  constructor() {}
 
   searchDocuments(filterParams: SearchPublicDocumentsParams) {
     const params = new HttpParams({
       fromObject: this.removeEmptyProperties(filterParams),
     });
-    return this.http.get<{
-      documents: PortalDocumentResponse[];
-      total: number;
-    }>(`${this.URL}`, { params });
+    return this.http.get<PortalDocumentSearchResponse>(this.URL, { params });
   }
 
-  private getDocumentFilters() {
+  getDocumentFilters() {
     return this.http.get<DocumentFiltersResponse>(`${this.URL}/filters`);
   }
 
-  private removeEmptyProperties(obj: object) {
+  reloadDocumentFilters(): void {
+    this.documentFiltersResource.reload();
+  }
+
+  private removeEmptyProperties(
+    obj: SearchPublicDocumentsParams,
+  ): Record<string, string | number> {
     return Object.fromEntries(
-      Object.entries(obj).filter(([_, value]) => {
-        return value !== null && value !== undefined && value !== '';
-      }),
+      Object.entries(obj).filter(
+        (entry): entry is [string, string | number] => {
+          const value = entry[1];
+          return value !== null && value !== undefined && value !== '';
+        },
+      ),
     );
   }
 }

@@ -1,392 +1,402 @@
-<div class="bg-muted/30 pb-16">
+<div class="min-h-full bg-muted/30 pb-16">
   <public-page-header
     title="Documentos institucionales"
     description="Consulta, filtra y descarga documentos institucionales de manera ordenada."
   />
 
   <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
     <section
       #filtersTop
-      class="scroll-mt-24 rounded-xl border border-border bg-card p-2 shadow-sm sm:p-4"
-      aria-label="Filtros de documentos"
+      class="scroll-mt-24 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      aria-label="Búsqueda y filtros de documentos"
     >
-      <form [formRoot]="filterForm">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <div class="lg:col-span-4">
-            <!-- <app-ui-iconfield class="block w-full">
-              <app-ui-inputicon class="ui-icon ui-icon-search" />
-              <input
-                id="term"
-                appUiInput
-                class="w-full"
-                type="search"
-                autocomplete="off"
-                placeholder="Buscar por nombre"
-                [formField]="$any(filterForm.term)"
-              />
-            </app-ui-iconfield> -->
-          </div>
-
-          <div class="flex items-center justify-between gap-2 lg:hidden">
-            <!-- <app-ui-button
-              [label]="
-                activeAdvancedFiltersCount()
-                  ? 'Filtros (' + activeAdvancedFiltersCount() + ')'
-                  : 'Filtros'
-              "
-              [icon]="
-                advancedFiltersOpen()
-                  ? 'ui-icon ui-icon-chevron-up'
-                  : 'ui-icon ui-icon-sliders-h'
-              "
-              size="small"
-              variant="outlined"
-              [attr.aria-expanded]="advancedFiltersOpen()"
-              aria-controls="advanced-document-filters"
-              (onClick)="toggleAdvancedFilters()"
+      <form
+        class="flex flex-col gap-4"
+        [formRoot]="filtersForm"
+        (submit)="$event.preventDefault()"
+      >
+        <div hlmField>
+          <label class="sr-only" for="portal-document-search">
+            Buscar documentos por título
+          </label>
+          <hlm-input-group class="w-full">
+            <hlm-input-group-addon>
+              <ng-icon name="lucideSearch" />
+            </hlm-input-group-addon>
+            <input
+              id="portal-document-search"
+              hlmInputGroupInput
+              type="search"
+              name="document-search"
+              autocomplete="off"
+              maxlength="255"
+              placeholder="Buscar documentos por título…"
+              [disabled]="!catalogResource.hasValue()"
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
             />
-            <app-ui-button
-              type="button"
-              label="Limpiar"
-              size="small"
-              variant="outlined"
-              severity="secondary"
-              icon="ui-icon ui-icon-filter-slash"
-              [disabled]="!hasActiveFilters()"
-              (onClick)="resetFilters()"
-            /> -->
-          </div>
-
-          <div
-            id="advanced-document-filters"
-            class="grid-cols-1 gap-4 lg:contents"
-            [ngClass]="advancedFiltersOpen() ? 'grid' : 'hidden'"
-          >
-            <div class="lg:col-span-4">
-              <!-- <app-ui-floatlabel class="block w-full" variant="on">
-                <app-ui-select
-                  inputId="doctype"
-                  optionLabel="name"
-                  optionValue="slug"
-                  [fluid]="true"
-                  [showClear]="true"
-                  [filter]="true"
-                  [resetFilterOnHide]="true"
-                  filterPlaceholder="Buscar tipo"
-                  emptyFilterMessage="Sin resultados"
-                  emptyMessage="Sin opciones"
-                  [options]="types()"
-                  [formField]="$any(filterForm.documentType)"
-                  (onChange)="filterForm.documentSubtype().value.set(null)"
-                />
-                <label for="doctype">Tipo de documento</label>
-              </app-ui-floatlabel> -->
-            </div>
-
-            <div class="lg:col-span-4">
-              <!-- <app-ui-floatlabel class="block w-full" variant="on">
-                <app-ui-select
-                  inputId="docsubtype"
-                  optionLabel="name"
-                  optionValue="slug"
-                  [fluid]="true"
-                  [showClear]="true"
-                  [filter]="true"
-                  [resetFilterOnHide]="true"
-                  filterPlaceholder="Buscar subtipo"
-                  emptyFilterMessage="Sin resultados"
-                  emptyMessage="Sin opciones"
-                  [options]="subtypes()"
-                  [formField]="$any(filterForm.documentSubtype)"
-                />
-                <label for="docsubtype">Subtipo</label>
-              </app-ui-floatlabel> -->
-            </div>
-
-            <div class="lg:col-span-8">
-              <hierarchical-combobox
-                emptyText="Sin unidades coincidentes."
-                inputId="portal-document-organizational-unit"
-                label="Unidad organizacional"
-                placeholder="Todas las unidades"
-                [formField]="filterForm.organizationalUnitId"
-                [items]="organizationalUnitData().items"
-              />
-            </div>
-
-            <div class="lg:col-span-2">
-              <year-selector [formField]="filterForm.year" />
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="mt-4 hidden justify-end border-t border-border pt-3 lg:flex"
-        >
-          <!-- <app-ui-button
-            type="button"
-            label="Limpiar filtros"
-            icon="ui-icon ui-icon-filter-slash"
-            severity="secondary"
-            [outlined]="true"
-            [disabled]="!hasActiveFilters()"
-            (onClick)="resetFilters()"
-          /> -->
-        </div>
-      </form>
-    </section>
-
-    <section aria-label="Resultados de documentos">
-      @if (dataResource.error()) {
-        <div
-          class="fade-in flex min-h-80 flex-col items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/10 px-6 py-12 text-center shadow-sm"
-          role="alert"
-        >
-          <span
-            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/15 text-destructive"
-          >
-            <i
-              class="ui-icon ui-icon-exclamation-triangle text-xl"
-              aria-hidden="true"
-            ></i>
-          </span>
-          <h3 class="mt-4 text-base font-semibold text-destructive">
-            No pudimos cargar los documentos
-          </h3>
-          <p class="mx-auto mt-1 max-w-md text-sm text-destructive/80">
-            Ocurrió un problema al obtener la información. Intenta nuevamente.
-          </p>
-          <!-- <app-ui-button
-            type="button"
-            label="Reintentar"
-            icon="ui-icon ui-icon-refresh"
-            styleClass="mt-5"
-            (onClick)="dataResource.reload()"
-          /> -->
-        </div>
-      } @else if (dataResource.isLoading()) {
-        @if (layout() === "list") {
-          <div
-            class="fade-in flex min-h-[320px] flex-col gap-2.5"
-            aria-label="Cargando documentos"
-          >
-            @for (_ of listSkeletonRows; track $index) {
-              <article
-                class="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-border bg-card p-3 shadow-sm sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4"
-              >
-                <div class="flex w-16 flex-col items-center gap-1">
-                  <!-- <app-ui-skeleton
-                    width="2.5rem"
-                    height="2.5rem"
-                    borderRadius="0.75rem"
-                  />
-                  <app-ui-skeleton width="2.5rem" height="0.625rem" /> -->
-                </div>
-
-                <div class="min-w-0">
-                  <!-- <app-ui-skeleton width="min(100%, 28rem)" height="1rem" />
-                  <app-ui-skeleton
-                    styleClass="mt-2"
-                    width="min(90%, 20rem)"
-                    height="0.75rem"
-                  />
-                  <div class="mt-3 flex flex-wrap gap-2">
-                    <app-ui-skeleton width="5rem" height="0.75rem" />
-                    <app-ui-skeleton width="6rem" height="0.75rem" />
-                    <app-ui-skeleton width="4rem" height="0.75rem" />
-                  </div> -->
-                </div>
-
-                <div class="col-span-2 md:col-span-1">
-                  <!-- <app-ui-skeleton
-                    width="8rem"
-                    height="2.25rem"
-                    borderRadius="0.5rem"
-                  /> -->
-                </div>
-              </article>
+            @if (searchTerm()) {
+              <hlm-input-group-addon align="inline-end">
+                <button
+                  hlmInputGroupButton
+                  type="button"
+                  size="icon-xs"
+                  aria-label="Limpiar búsqueda"
+                  (click)="clearSearch()"
+                >
+                  <ng-icon name="lucideX" />
+                </button>
+              </hlm-input-group-addon>
             }
+          </hlm-input-group>
+        </div>
+
+        @if (catalogResource.error()) {
+          <div hlmAlert variant="destructive">
+            <ng-icon name="lucideCircleAlert" />
+            <h2 hlmAlertTitle>No se pudieron cargar los filtros</h2>
+            <p hlmAlertDescription>
+              Verifica la conexión e intenta nuevamente para consultar los
+              documentos.
+            </p>
+            <div class="col-span-full mt-2">
+              <button
+                hlmBtn
+                type="button"
+                size="sm"
+                variant="outline"
+                (click)="reloadCatalogs()"
+              >
+                <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+                Reintentar
+              </button>
+            </div>
+          </div>
+        } @else if (!catalogResource.hasValue()) {
+          <div
+            class="grid gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:grid-cols-12"
+            aria-label="Cargando filtros"
+          >
+            <div hlmSkeleton class="h-9 sm:col-span-2 lg:col-span-4"></div>
+            <div hlmSkeleton class="h-9 lg:col-span-3"></div>
+            <div hlmSkeleton class="h-9 lg:col-span-3"></div>
+            <div hlmSkeleton class="h-9 lg:col-span-2"></div>
           </div>
         } @else {
           <div
-            class="fade-in grid min-h-[320px] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-            aria-label="Cargando documentos"
+            hlmCollapsible
+            [expanded]="advancedFiltersOpen()"
+            (expandedChange)="advancedFiltersOpen.set($event)"
           >
-            @for (_ of gridSkeletonCards; track $index) {
-              <article
-                class="flex h-full flex-col rounded-2xl border border-border bg-card p-3.5 shadow-sm sm:p-4"
+            <div class="flex items-center justify-between gap-3 lg:hidden">
+              <button
+                hlmBtn
+                hlmCollapsibleTrigger
+                type="button"
+                variant="outline"
+                [attr.aria-controls]="'portal-document-secondary-filters'"
               >
-                <div class="flex w-16 flex-col items-center gap-1">
-                  <!-- <app-ui-skeleton
-                    width="2.5rem"
-                    height="2.5rem"
-                    borderRadius="0.75rem"
-                  />
-                  <app-ui-skeleton width="2.5rem" height="0.625rem" /> -->
+                <ng-icon name="lucideFilter" data-icon="inline-start" />
+                Filtros
+                @if (activeSecondaryFiltersCount() > 0) {
+                  <span hlmBadge variant="secondary">
+                    {{ activeSecondaryFiltersCount() }}
+                  </span>
+                }
+                <ng-icon
+                  [name]="
+                    advancedFiltersOpen()
+                      ? 'lucideChevronUp'
+                      : 'lucideChevronDown'
+                  "
+                  data-icon="inline-end"
+                />
+              </button>
+            </div>
+
+            <div
+              id="portal-document-secondary-filters"
+              hlmCollapsibleContent
+              class="lg:data-[state=closed]:block"
+            >
+              <div
+                class="mt-4 grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:mt-0 lg:grid-cols-12 lg:border-t-0 lg:pt-0"
+              >
+                <hierarchical-combobox
+                  class="sm:col-span-2 lg:col-span-4"
+                  emptyText="Sin unidades coincidentes."
+                  inputId="portal-document-organizational-unit"
+                  label="Unidad organizacional"
+                  placeholder="Todas las unidades"
+                  [formField]="filtersForm.organizationalUnitId"
+                  [items]="organizationalUnitData().items"
+                  (valueChange)="changeOrganizationalUnit($event)"
+                />
+
+                <div hlmField class="lg:col-span-3">
+                  <label hlmFieldLabel for="portal-document-type">Tipo</label>
+                  <hlm-select
+                    [formField]="filtersForm.documentType"
+                    (valueChange)="changeDocumentType($event)"
+                  >
+                    <hlm-select-trigger
+                      class="w-full"
+                      buttonId="portal-document-type"
+                    >
+                      <ng-template hlmSelectValueTemplate let-type>
+                        {{ typeNames().get(type) }}
+                      </ng-template>
+                      <hlm-select-placeholder>
+                        Todos los tipos
+                      </hlm-select-placeholder>
+                    </hlm-select-trigger>
+                    <hlm-select-content *hlmSelectPortal class="max-h-72">
+                      <hlm-select-group>
+                        <hlm-select-item [value]="null">
+                          Todos los tipos
+                        </hlm-select-item>
+                        @for (type of types(); track type.id) {
+                          <hlm-select-item [value]="type.slug">
+                            {{ type.name }}
+                          </hlm-select-item>
+                        }
+                      </hlm-select-group>
+                    </hlm-select-content>
+                  </hlm-select>
                 </div>
 
-                <!-- <app-ui-skeleton
-                  styleClass="mt-4"
-                  width="min(100%, 18rem)"
-                  height="1rem"
-                />
-                <app-ui-skeleton
-                  styleClass="mt-2"
-                  width="min(90%, 15rem)"
-                  height="0.75rem"
-                />
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <app-ui-skeleton width="5rem" height="0.75rem" />
-                  <app-ui-skeleton width="6rem" height="0.75rem" />
-                  <app-ui-skeleton width="4rem" height="0.75rem" />
+                <div hlmField class="lg:col-span-3">
+                  <label hlmFieldLabel for="portal-document-subtype">
+                    Subtipo
+                  </label>
+                  <hlm-select
+                    [formField]="filtersForm.documentSubtype"
+                    (valueChange)="changeDocumentSubtype($event)"
+                  >
+                    <hlm-select-trigger
+                      class="w-full"
+                      buttonId="portal-document-subtype"
+                    >
+                      <ng-template hlmSelectValueTemplate let-subtype>
+                        {{ subtypeNames().get(subtype) }}
+                      </ng-template>
+                      <hlm-select-placeholder>
+                        @if (!filtersModel().documentType) {
+                          Selecciona un tipo primero
+                        } @else if (!subtypes().length) {
+                          Sin subtipos disponibles
+                        } @else {
+                          Todos los subtipos
+                        }
+                      </hlm-select-placeholder>
+                    </hlm-select-trigger>
+                    <hlm-select-content *hlmSelectPortal class="max-h-72">
+                      <hlm-select-group>
+                        <hlm-select-item [value]="null">
+                          Todos los subtipos
+                        </hlm-select-item>
+                        @for (subtype of subtypes(); track subtype.id) {
+                          <hlm-select-item [value]="subtype.slug">
+                            {{ subtype.name }}
+                          </hlm-select-item>
+                        }
+                      </hlm-select-group>
+                    </hlm-select-content>
+                  </hlm-select>
                 </div>
-                <app-ui-skeleton
-                  styleClass="mt-6"
-                  width="100%"
-                  height="2.25rem"
-                  borderRadius="0.5rem"
-                /> -->
-              </article>
+
+                <year-selector
+                  class="lg:col-span-2"
+                  inputId="portal-document-year"
+                  label="Gestión"
+                  placeholder="Todas"
+                  [minYear]="minYear"
+                  [maxYear]="maxYear"
+                  [formField]="filtersForm.year"
+                  (yearSelected)="changeYear($event)"
+                />
+
+                <div
+                  class="flex justify-end border-t border-border pt-3 sm:col-span-2 lg:hidden"
+                >
+                  <button
+                    hlmBtn
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    (click)="advancedFiltersOpen.set(false)"
+                  >
+                    Cerrar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeFilterChips().length) {
+          <div
+            class="flex flex-wrap items-center gap-2 border-t border-border pt-4"
+            aria-label="Filtros activos"
+          >
+            <span class="mr-1 text-sm font-medium text-muted-foreground">
+              Filtros activos:
+            </span>
+            @for (chip of activeFilterChips(); track chip.key) {
+              <button
+                hlmBtn
+                type="button"
+                size="xs"
+                variant="secondary"
+                class="max-w-full"
+                [title]="chip.label"
+                [attr.aria-label]="'Quitar filtro ' + chip.label"
+                (click)="removeActiveFilter(chip.key)"
+              >
+                <span class="max-w-64 truncate">{{ chip.label }}</span>
+                <ng-icon name="lucideX" data-icon="inline-end" />
+              </button>
+            }
+            <button
+              hlmBtn
+              type="button"
+              size="xs"
+              variant="ghost"
+              (click)="resetFilters()"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        }
+      </form>
+    </section>
+
+    <section class="flex flex-col gap-4" aria-label="Resultados de documentos">
+      @if (isInitialLoading()) {
+        <div class="flex flex-col gap-3" aria-label="Cargando documentos">
+          <div class="flex items-center justify-between gap-4">
+            <div hlmSkeleton class="h-5 w-44"></div>
+            <div hlmSkeleton class="h-5 w-24"></div>
+          </div>
+          <div class="overflow-hidden rounded-xl border border-border bg-card">
+            @for (_ of skeletonRows; track $index) {
+              <div
+                class="flex gap-4 border-b border-border p-4 last:border-b-0 sm:p-5"
+              >
+                <div hlmSkeleton class="size-12 shrink-0 rounded-xl"></div>
+                <div class="flex min-w-0 flex-1 flex-col gap-3">
+                  <div hlmSkeleton class="h-5 w-3/4 max-w-xl"></div>
+                  <div hlmSkeleton class="h-4 w-1/2 max-w-sm"></div>
+                  <div class="flex gap-2">
+                    <div hlmSkeleton class="h-5 w-20"></div>
+                    <div hlmSkeleton class="h-5 w-24"></div>
+                  </div>
+                </div>
+                <div hlmSkeleton class="hidden h-9 w-28 md:block"></div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else if (documentsResource.error()) {
+        <div
+          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          role="alert"
+        >
+          <ng-icon
+            name="lucideCircleAlert"
+            class="text-3xl text-destructive"
+          />
+          <h2 class="mt-4 text-lg font-semibold">
+            No se pudieron cargar los documentos
+          </h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">
+            Verifica la conexión e intenta nuevamente.
+          </p>
+          <button
+            hlmBtn
+            type="button"
+            variant="outline"
+            class="mt-5"
+            (click)="documentsResource.reload()"
+          >
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+            Reintentar
+          </button>
+        </div>
+      } @else if (documentsResource.value(); as response) {
+        <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
+          <p
+            class="text-sm font-medium text-muted-foreground"
+            aria-live="polite"
+          >
+            <span class="font-semibold text-foreground">{{ response.total }}</span>
+            {{ response.total === 1 ? "documento encontrado" : "documentos encontrados" }}
+          </p>
+
+          @if (isUpdating()) {
+            <span
+              class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+              role="status"
+            >
+              <hlm-spinner />
+              Actualizando…
+            </span>
+          }
+        </div>
+
+        @if (response.documents.length) {
+          <div
+            class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+          >
+            @for (document of response.documents; track document.id) {
+              <portal-document-list-item [document]="document" />
+            }
+          </div>
+
+          <app-pagination-controls
+            [totalItems]="response.total"
+            [currentPage]="page()"
+            [pageSize]="pageSize"
+            [showPageSize]="false"
+            (currentPageChange)="changePage($event)"
+          />
+        } @else {
+          <div
+            class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center"
+          >
+            <ng-icon
+              name="lucideFileSearch"
+              class="text-4xl text-muted-foreground"
+            />
+            @if (hasActiveFilters()) {
+              <h2 class="mt-4 text-lg font-semibold">
+                No se encontraron documentos
+              </h2>
+              <p class="mt-1 max-w-md text-sm text-muted-foreground">
+                No hay coincidencias con la búsqueda o los filtros
+                seleccionados.
+              </p>
+              <button
+                hlmBtn
+                type="button"
+                variant="outline"
+                class="mt-5"
+                (click)="resetFilters()"
+              >
+                Limpiar filtros
+              </button>
+            } @else {
+              <h2 class="mt-4 text-lg font-semibold">
+                No hay documentos disponibles
+              </h2>
+              <p class="mt-1 max-w-md text-sm text-muted-foreground">
+                Cuando se publiquen documentos institucionales aparecerán aquí.
+              </p>
             }
           </div>
         }
-      } @else if (
-        dataResource.hasValue() && dataResource.value().documents.length === 0
-      ) {
-        <div
-          class="fade-in flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center shadow-sm"
-        >
-          <span
-            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground"
-          >
-            <i
-              class="ui-icon ui-icon-folder-open text-xl"
-              aria-hidden="true"
-            ></i>
-          </span>
-
-          @if (hasActiveFilters()) {
-            <h3 class="mt-4 text-base font-semibold text-foreground">
-              No se encontraron documentos
-            </h3>
-            <p class="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Intenta ajustar los filtros o limpiar la búsqueda.
-            </p>
-            <!-- <app-ui-button
-              type="button"
-              label="Limpiar filtros"
-              icon="ui-icon ui-icon-filter-slash"
-              severity="secondary"
-              [outlined]="true"
-              styleClass="mt-5"
-              (onClick)="resetFilters()"
-            /> -->
-          } @else {
-            <h3 class="mt-4 text-base font-semibold text-foreground">
-              Aún no hay documentos disponibles
-            </h3>
-            <p class="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Cuando se publiquen documentos institucionales aparecerán aquí.
-            </p>
-          }
-        </div>
-      } @else if (
-        dataResource.hasValue() && dataResource.value().documents.length > 0
-      ) {
-        <div class="fade-in">
-          <!-- <app-ui-dataview
-            [value]="dataResource.value().documents"
-            [totalRecords]="dataResource.value().total"
-            [rows]="limit()"
-            [layout]="layout()"
-            [first]="offset()"
-            [lazy]="true"
-            [pageLinks]="4"
-            [paginator]="true"
-            [rowsPerPageOptions]="rowsPerPageOptions"
-            (onPage)="changePage($event, true)"
-            currentPageReportTemplate="{first} - {last} de {totalRecords}"
-            paginatorDropdownAppendTo="body"
-          >
-            <ng-template appUiTemplate="header">
-              <div
-                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-center"
-              >
-                <p
-                  id="document-results-count"
-                  class="text-sm font-medium text-muted-foreground"
-                  aria-live="polite"
-                >
-                  <span class="font-semibold text-foreground">
-                    {{ dataResource.value().total }}
-                  </span>
-                  {{
-                    dataResource.value().total === 1
-                      ? "documento encontrado"
-                      : "documentos encontrados"
-                  }}
-                </p>
-
-                <div
-                  class="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3"
-                >
-                  <app-ui-paginator
-                    class="compact-paginator"
-                    [first]="offset()"
-                    [rows]="limit()"
-                    [totalRecords]="dataResource.value().total"
-                    [showPageLinks]="false"
-                    [showFirstLastIcon]="false"
-                    [showCurrentPageReport]="true"
-                    currentPageReportTemplate="Página {currentPage} / {totalPages}"
-                    (onPageChange)="changePage($event)"
-                  />
-
-                  <div class="ml-auto flex items-center gap-2">
-                    <span class="sr-only">Vista</span>
-                    <app-ui-selectbutton
-                      [(ngModel)]="layout"
-                      [options]="layoutOptions"
-                      [allowEmpty]="false"
-                      aria-label="Cambiar presentación de resultados"
-                    >
-                      <ng-template appUiTemplate="item" let-item>
-                        <i
-                          class="pi"
-                          [ngClass]="{
-                            'ui-icon-bars': item === 'list',
-                            'ui-icon-th-large': item === 'grid',
-                          }"
-                          [attr.aria-label]="
-                            item === 'list' ? 'Lista' : 'Cuadrícula'
-                          "
-                        ></i>
-                      </ng-template>
-                    </app-ui-selectbutton>
-                  </div>
-                </div>
-              </div>
-            </ng-template>
-
-            <ng-template appUiTemplate="list" let-items>
-              <div class="flex flex-col gap-2.5">
-                @for (doc of items; track doc.id) {
-                  <portal-document-list-item [document]="doc" />
-                }
-              </div>
-            </ng-template>
-
-            <ng-template appUiTemplate="grid" let-items>
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                @for (doc of items; track doc.id) {
-                  <portal-document-grid-card [document]="doc" />
-                }
-              </div>
-            </ng-template>
-          </app-ui-dataview> -->
-        </div>
       }
     </section>
   </div>

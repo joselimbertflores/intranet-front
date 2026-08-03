@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.hero-stage,
+.hero-slide {
+  height: clamp(28rem, 54svh, 35rem);
+}
+
+.hero-photo-wash {
+  background:
+    linear-gradient(90deg, rgb(3 35 55 / 0.96) 0%, rgb(4 43 64 / 0.82) 34%, rgb(4 43 64 / 0.28) 68%, transparent 100%),
+    linear-gradient(0deg, rgb(2 24 39 / 0.36), transparent 48%);
+}
+
+.hero-image-fallback {
+  background:
+    radial-gradient(circle at 76% 28%, rgb(255 255 255 / 0.12), transparent 22%),
+    linear-gradient(135deg, #075a47, #06334a 68%);
+}
+
+.hero-side-control {
+  z-index: 1;
+  border: 1px solid rgb(255 255 255 / 0.24);
+  background: rgb(4 27 43 / 0.38);
+  color: rgb(255 255 255 / 0.92);
+  box-shadow: 0 5px 16px rgb(2 15 25 / 0.14);
+  backdrop-filter: blur(5px);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.hero-side-control:hover {
+  border-color: rgb(255 255 255 / 0.45);
+  background: rgb(4 27 43 / 0.62);
+}
+
+.hero-side-control:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.hero-indicator {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid rgb(255 255 255 / 0.82);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.3);
+  transition: background-color 160ms ease;
+}
+
+.hero-indicator-active {
+  background: white;
+}
+
+@media (max-width: 639px) {
+  .hero-photo-wash {
+    background:
+      linear-gradient(0deg, rgb(3 31 49 / 0.95) 0%, rgb(3 38 57 / 0.72) 56%, rgb(3 38 57 / 0.18) 100%),
+      linear-gradient(90deg, rgb(3 35 55 / 0.66), transparent 88%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-side-control,
+  .hero-indicator {
+    transition: none;
+  }
+}

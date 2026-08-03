@@ -1,24 +1,48 @@
+import { DatePipe, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  LOCALE_ID,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
+import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  FeaturedBannersSection,
-  LandingCommunicationsSection,
-  LandingDocumentsSection,
-  LandingHeroSection,
-  LandingNotices,
-  LandingQuickAccessSection,
-  LandingSkeleton,
-} from './components';
+  lucideAppWindow,
+  lucideArrowRight,
+  lucideArrowUpRight,
+  lucideBookOpen,
+  lucideCalendarDays,
+  lucideCarFront,
+  lucideChartNoAxesColumn,
+  lucideCircleHelp,
+  lucideClipboardList,
+  lucideDownload,
+  lucideExternalLink,
+  lucideFileText,
+  lucideImageOff,
+  lucideLandmark,
+  lucideMail,
+  lucideMegaphone,
+  lucideRefreshCw,
+  lucideUserRound,
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
+
+import { FileIcon, FileSizePipe } from '../../../../shared';
+import { PortalDocumentResponse } from '../../interfaces';
 import { PortalLandingResponse } from '../../models';
 import { PortalLandingService } from '../../services';
+import {
+  LandingHeroCarousel,
+  LandingNoticesDialog,
+} from './components';
 
 type LandingState = 'loading' | 'ready' | 'error';
 
@@ -27,34 +51,62 @@ const EMPTY_LANDING_RESPONSE: PortalLandingResponse = {
   quickAccesses: [],
   featuredBanners: [],
   landingNotices: [],
-  mostConsultedDocuments: [],
-  communications: [],
+  latestCommunications: [],
+  mostDownloadedDocuments: [],
 };
 
 @Component({
   selector: 'landing-page',
   imports: [
-    LandingHeroSection,
-    LandingQuickAccessSection,
-    FeaturedBannersSection,
-    LandingNotices,
-    LandingDocumentsSection,
-    LandingCommunicationsSection,
-    LandingSkeleton,
+    DatePipe,
+    FileIcon,
+    FileSizePipe,
+    HlmAlertImports,
+    HlmButtonImports,
+    HlmSkeletonImports,
+    LandingHeroCarousel,
+    LandingNoticesDialog,
+    NgIcon,
+    NgOptimizedImage,
+    RouterLink,
+  ],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'es' },
+    provideIcons({
+      lucideAppWindow,
+      lucideArrowRight,
+      lucideArrowUpRight,
+      lucideBookOpen,
+      lucideCalendarDays,
+      lucideCarFront,
+      lucideChartNoAxesColumn,
+      lucideCircleHelp,
+      lucideClipboardList,
+      lucideDownload,
+      lucideExternalLink,
+      lucideFileText,
+      lucideImageOff,
+      lucideLandmark,
+      lucideMail,
+      lucideMegaphone,
+      lucideRefreshCw,
+      lucideUserRound,
+    }),
   ],
   templateUrl: './landing-page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './landing-page.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LandingPage {
   private readonly portalLandingService = inject(PortalLandingService);
   private readonly destroyRef = inject(DestroyRef);
-
   private readonly landingResponse = signal<PortalLandingResponse>(
     EMPTY_LANDING_RESPONSE,
   );
 
   readonly state = signal<LandingState>('loading');
+  readonly failedBannerImages = signal<ReadonlySet<number>>(new Set());
+  readonly failedCommunicationImages = signal<ReadonlySet<string>>(new Set());
 
   readonly heroSlides = computed(() => this.landingResponse().heroSlides);
   readonly quickAccesses = computed(() => this.landingResponse().quickAccesses);
@@ -64,11 +116,17 @@ export default class LandingPage {
   readonly landingNotices = computed(
     () => this.landingResponse().landingNotices,
   );
-  readonly mostConsultedDocuments = computed(
-    () => this.landingResponse().mostConsultedDocuments,
-  );
   readonly communications = computed(
-    () => this.landingResponse().communications,
+    () => this.landingResponse().latestCommunications,
+  );
+  readonly mostDownloadedDocuments = computed(
+    () => this.landingResponse().mostDownloadedDocuments,
+  );
+  readonly visibleCommunications = computed(() =>
+    this.communications().slice(0, 4),
+  );
+  readonly visibleDocuments = computed(() =>
+    this.mostDownloadedDocuments().slice(0, 6),
   );
 
   readonly hasContent = computed(() => {
@@ -78,8 +136,9 @@ export default class LandingPage {
       response.heroSlides.length ||
         response.quickAccesses.length ||
         response.featuredBanners.length ||
-        response.communications.length ||
-        response.mostConsultedDocuments.length,
+        response.landingNotices.length ||
+        response.latestCommunications.length ||
+        response.mostDownloadedDocuments.length,
     );
   });
 
@@ -103,5 +162,47 @@ export default class LandingPage {
           this.state.set('error');
         },
       });
+  }
+
+  quickAccessIcon(iconKey: string): string {
+    const icons: Readonly<Record<string, string>> = {
+      email: 'lucideMail',
+      application: 'lucideAppWindow',
+      document: 'lucideFileText',
+      book: 'lucideBookOpen',
+      form: 'lucideClipboardList',
+      report: 'lucideChartNoAxesColumn',
+      calendar: 'lucideCalendarDays',
+      user: 'lucideUserRound',
+      support: 'lucideCircleHelp',
+      finance: 'lucideLandmark',
+      vehicle: 'lucideCarFront',
+      'external-link': 'lucideExternalLink',
+    };
+
+    return icons[iconKey] ?? 'lucideExternalLink';
+  }
+
+  isInternalUrl(url: string | null): boolean {
+    return Boolean(url?.startsWith('/'));
+  }
+
+  validUrl(url: string | null): string | null {
+    if (!url) return null;
+    return this.isInternalUrl(url) || /^https?:\/\//i.test(url) ? url : null;
+  }
+
+  documentCategory(document: PortalDocumentResponse): string {
+    return [document.type, document.subtype].filter(Boolean).join(' / ');
+  }
+
+  markBannerImageAsFailed(id: number): void {
+    this.failedBannerImages.update((failed) => new Set(failed).add(id));
+  }
+
+  markCommunicationImageAsFailed(id: string): void {
+    this.failedCommunicationImages.update(
+      (failed) => new Set(failed).add(id),
+    );
   }
 }

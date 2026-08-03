@@ -5,6 +5,18 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideCalendarDays,
+  lucideContactRound,
+  lucideFileText,
+  lucideGraduationCap,
+  lucideHome,
+  lucideMegaphone,
+  lucideMenu,
+  lucideX,
+} from '@ng-icons/lucide';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
 
 import { InstitutionalLogo } from '../../../../shared/components/institutional-logo/institutional-logo';
 
@@ -17,29 +29,49 @@ interface NavItem {
 
 @Component({
   selector: 'portal-navbar',
-  imports: [RouterLink, RouterLinkActive, InstitutionalLogo],
+  imports: [
+    HlmButtonImports,
+    InstitutionalLogo,
+    NgIcon,
+    RouterLink,
+    RouterLinkActive,
+  ],
+  providers: [
+    provideIcons({
+      lucideCalendarDays,
+      lucideContactRound,
+      lucideFileText,
+      lucideGraduationCap,
+      lucideHome,
+      lucideMegaphone,
+      lucideMenu,
+      lucideX,
+    }),
+  ],
   template: `
     <nav
-      class="relative border-b border-white/10 bg-primary-900 text-white shadow-lg shadow-primary-950/15"
+      class="relative border-b border-white/10 bg-[var(--portal-forest)] text-white shadow-[0_14px_30px_-24px_rgb(3_29_19/0.8)]"
       aria-label="Navegación principal"
     >
       <div
-        class="mx-auto flex min-h-19 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+        class="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
       >
         <a
           routerLink="/"
           (click)="closeMobileMenu()"
-          class="flex min-w-0 shrink-0 items-center gap-3 rounded-xl text-white no-underline outline-none focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
+          class="flex min-w-0 shrink-0 items-center gap-3 rounded-xl text-white no-underline outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--portal-forest)]"
           aria-label="Ir al inicio de la Intranet"
         >
-          <institutional-logo />
+          <institutional-logo
+            class="grid size-14 shrink-0 place-items-center [&>div]:!size-14 [&>div]:!border-white/90 [&>div>div]:!bg-transparent [&_svg]:!size-10"
+          />
 
           <span class="min-w-0 leading-tight">
-            <span class="block truncate text-xl font-extrabold tracking-tight">
+            <span class="block truncate text-[1.65rem] font-black tracking-tight">
               Intranet
             </span>
             <span
-              class="mt-0.5 hidden text-[0.7rem] font-medium tracking-wide text-primary-100 sm:block"
+              class="mt-0.5 hidden text-[0.78rem] font-semibold tracking-wide text-white/82 sm:block"
             >
               Gobierno Autónomo Municipal de Sacaba
             </span>
@@ -53,7 +85,7 @@ interface NavItem {
               routerLinkActive="bg-white/12 !text-white"
               [routerLinkActiveOptions]="{ exact: item.exact }"
               ariaCurrentWhenActive="page"
-              class="relative rounded-lg px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap text-primary-100 no-underline outline-none transition-colors hover:bg-white/8 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
+              class="relative rounded-lg px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap text-white/80 no-underline outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--portal-forest)]"
             >
               {{ item.label }}
             </a>
@@ -62,21 +94,16 @@ interface NavItem {
 
         <button
           type="button"
-          class="grid size-11 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/8 text-white outline-none transition-colors hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-primary-200 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900 xl:hidden"
+          hlmBtn
+          variant="secondary"
+          size="icon"
+          class="shrink-0 xl:hidden"
           aria-label="Abrir o cerrar el menú de navegación"
           aria-controls="mobile-navigation"
           [attr.aria-expanded]="isMobileMenuOpen()"
           (click)="toggleMobileMenu()"
         >
-          <i
-            [class]="
-              isMobileMenuOpen()
-                ? 'ui-icon ui-icon-times'
-                : 'ui-icon ui-icon-bars'
-            "
-            class="text-xl"
-            aria-hidden="true"
-          ></i>
+          <ng-icon [name]="isMobileMenuOpen() ? 'lucideX' : 'lucideMenu'" />
         </button>
       </div>
 
@@ -85,7 +112,7 @@ interface NavItem {
           id="mobile-navigation"
           animate.enter="portal-mobile-menu-enter"
           animate.leave="portal-mobile-menu-leave"
-          class="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-primary-950 px-4 py-3 shadow-2xl shadow-primary-950/30 xl:hidden"
+          class="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-[var(--portal-forest)] px-4 py-3 shadow-[0_24px_40px_-24px_rgb(3_29_19/0.9)] xl:hidden"
         >
           <div class="mx-auto grid w-full max-w-7xl gap-1 sm:grid-cols-2">
             @for (item of navItems; track item.route) {
@@ -95,9 +122,9 @@ interface NavItem {
                 [routerLinkActiveOptions]="{ exact: item.exact }"
                 ariaCurrentWhenActive="page"
                 (click)="closeMobileMenu()"
-                class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-primary-100 no-underline outline-none transition-colors hover:bg-white/8 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-200"
+                class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white/80 no-underline outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
               >
-                <i [class]="item.icon + ' text-base'" aria-hidden="true"></i>
+                <ng-icon [name]="item.icon" aria-hidden="true" />
                 <span>{{ item.label }}</span>
               </a>
             }
@@ -109,6 +136,7 @@ interface NavItem {
   styles: `
     :host {
       display: block;
+      --portal-forest: #073d2a;
     }
 
     .portal-mobile-menu-enter {
@@ -150,36 +178,36 @@ export class PortalNavbar {
   readonly isMobileMenuOpen = signal(false);
 
   readonly navItems: readonly NavItem[] = [
-    { label: 'Inicio', route: '/', exact: true, icon: 'ui-icon ui-icon-home' },
+    { label: 'Inicio', route: '/', exact: true, icon: 'lucideHome' },
     {
       label: 'Documentos',
       route: '/documents',
       exact: false,
-      icon: 'ui-icon ui-icon-file',
+      icon: 'lucideFileText',
     },
     {
       label: 'Comunicados',
       route: '/communications',
       exact: false,
-      icon: 'ui-icon ui-icon-megaphone',
+      icon: 'lucideMegaphone',
     },
     {
       label: 'Directorio',
       route: '/directory',
       exact: false,
-      icon: 'ui-icon ui-icon-address-book',
+      icon: 'lucideContactRound',
     },
     {
       label: 'Tutoriales',
       route: '/tutorials',
       exact: false,
-      icon: 'ui-icon ui-icon-graduation-cap',
+      icon: 'lucideGraduationCap',
     },
     {
       label: 'Calendario',
       route: '/calendar',
       exact: false,
-      icon: 'ui-icon ui-icon-calendar',
+      icon: 'lucideCalendarDays',
     },
   ];
 

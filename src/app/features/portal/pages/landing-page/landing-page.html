@@ -1,61 +1,314 @@
-@switch (state()) {
-  @case ('loading') {
-    <landing-skeleton />
-  }
+<div class="landing-surface">
+  @switch (state()) {
+    @case ('loading') {
+      <div aria-label="Cargando contenido de la intranet" aria-busy="true">
+        <section class="landing-hero-skeleton px-5 py-12 sm:px-8" aria-hidden="true">
+          <div class="mx-auto flex h-full w-full max-w-7xl items-end sm:items-center">
+            <div class="w-full max-w-2xl">
+              <div hlmSkeleton class="h-12 w-4/5 sm:h-16"></div>
+              <div hlmSkeleton class="mt-5 h-5 w-3/5"></div>
+              <div hlmSkeleton class="mt-3 h-5 w-2/5"></div>
+              <div hlmSkeleton class="mt-7 h-10 w-36"></div>
+            </div>
+          </div>
+        </section>
 
-  @case ('error') {
-    <section
-      class="grid min-h-[32rem] place-items-center bg-linear-to-br from-primary-950 via-primary-900 to-primary-800 px-4 py-20 text-white"
-      aria-labelledby="landing-error-title"
-    >
-      <div class="max-w-lg text-center">
-        <h1 id="landing-error-title" class="text-3xl font-bold tracking-tight sm:text-4xl">
-          No pudimos cargar la Intranet
-        </h1>
-        <p class="mx-auto mt-4 max-w-md text-base leading-7 text-primary-100">
-          Verifica tu conexión e intenta cargar nuevamente el contenido institucional.
-        </p>
-        <button
-          type="button"
-          class="mt-7 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-primary-800 shadow-lg shadow-primary-950/20 outline-none transition-colors hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-primary-900"
-          (click)="loadLanding()"
-        >
-          <i class="ui-icon ui-icon-refresh text-sm" aria-hidden="true"></i>
-          Intentar de nuevo
-        </button>
+        <section class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8" aria-hidden="true">
+          <div hlmSkeleton class="mx-auto h-9 w-64"></div>
+          <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            @for (item of [1, 2, 3, 4, 5]; track item) {
+              <div hlmSkeleton class="h-28 rounded-2xl"></div>
+            }
+          </div>
+        </section>
+
+        <section class="bg-muted/45 px-5 py-14 sm:px-8" aria-hidden="true">
+          <div class="mx-auto w-full max-w-7xl">
+            <div hlmSkeleton class="h-9 w-56"></div>
+            <div hlmSkeleton class="mt-7 h-72 w-full rounded-3xl"></div>
+          </div>
+        </section>
+
+        <section class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8" aria-hidden="true">
+          <div hlmSkeleton class="h-9 w-72"></div>
+          <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @for (item of [1, 2, 3, 4]; track item) {
+              <div hlmSkeleton class="h-80 rounded-2xl"></div>
+            }
+          </div>
+        </section>
+
+        <section class="bg-muted/45 px-5 py-14 sm:px-8" aria-hidden="true">
+          <div class="mx-auto w-full max-w-7xl">
+            <div hlmSkeleton class="h-9 w-80"></div>
+            <div class="mt-7 grid gap-2">
+              @for (item of [1, 2, 3, 4]; track item) {
+                <div hlmSkeleton class="h-16 rounded-xl"></div>
+              }
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
-  }
-
-  @case ('ready') {
-    <landing-hero-section [heroSlides]="heroSlides()" />
-
-    <!-- @if (landingNotices().length) {
-      <landing-notices [items]="landingNotices()" />
-    } -->
-
-    @if (quickAccesses().length) {
-      <landing-quick-access-section [items]="quickAccesses()" />
     }
 
-    @if (featuredBanners().length) {
-      <featured-banners-section [items]="featuredBanners()" />
-    }
-
-    @if (communications().length) {
-      <landing-communications-section [items]="communications()" />
-    }
-
-    @if (mostConsultedDocuments().length) {
-      <landing-documents-section [documents]="mostConsultedDocuments()" />
-    }
-
-    @if (!hasContent()) {
-      <section class="bg-surface-0 px-4 py-10 text-center">
-        <p class="text-sm font-medium text-surface-600">
-          No hay contenido adicional disponible en este momento.
-        </p>
+    @case ('error') {
+      <section class="grid min-h-[30rem] place-items-center px-5 py-20">
+        <div hlmAlert variant="destructive" class="max-w-xl">
+          <ng-icon name="lucideRefreshCw" />
+          <h1 hlmAlertTitle>No pudimos cargar la intranet</h1>
+          <p hlmAlertDescription>
+            Verifica tu conexión e intenta nuevamente.
+          </p>
+          <div class="mt-4">
+            <button hlmBtn type="button" variant="outline" (click)="loadLanding()">
+              <ng-icon name="lucideRefreshCw" />
+              Intentar de nuevo
+            </button>
+          </div>
+        </div>
       </section>
     }
+
+    @case ('ready') {
+      @if (heroSlides().length) {
+        <landing-hero-carousel [slides]="heroSlides()" />
+      }
+
+      @if (quickAccesses().length) {
+        <section class="bg-white py-12 sm:py-14 lg:py-16" aria-labelledby="quick-access-title">
+          <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+            <h2
+              id="quick-access-title"
+              class="section-title text-center text-[var(--landing-forest)]"
+            >
+              Accesos rápidos
+            </h2>
+
+            <nav
+              class="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4"
+              aria-label="Accesos rápidos"
+            >
+              @for (item of quickAccesses(); track item.id) {
+                <a
+                  [href]="item.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="quick-access-card group flex min-h-28 flex-col items-center justify-center gap-3 rounded-2xl border px-3 py-5 text-center no-underline outline-none sm:min-h-32"
+                  [attr.aria-label]="'Abrir ' + item.title + ' en una nueva pestaña'"
+                >
+                  <span class="quick-access-icon grid size-11 place-items-center text-3xl" aria-hidden="true">
+                    <ng-icon [name]="quickAccessIcon(item.iconKey)" />
+                  </span>
+                  <span class="line-clamp-2 text-sm leading-snug font-extrabold sm:text-base">
+                    {{ item.title }}
+                  </span>
+                </a>
+              }
+            </nav>
+          </div>
+        </section>
+      }
+
+      @if (featuredBanners().length) {
+        <section
+          class="bg-[var(--landing-mint)] py-12 sm:py-14 lg:py-16"
+          aria-labelledby="featured-banners-title"
+        >
+          <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+            <h2 id="featured-banners-title" class="section-title text-[var(--landing-forest)]">
+              Banners destacados
+            </h2>
+
+            <div class="featured-grid mt-7 grid gap-5 lg:grid-cols-12">
+              @for (banner of featuredBanners(); track banner.id; let index = $index) {
+                <article
+                  class="featured-banner group relative min-h-72 overflow-hidden rounded-3xl bg-[var(--landing-forest)] text-white"
+                  [class.featured-banner-primary]="index === 0"
+                >
+                  @if (!failedBannerImages().has(banner.id)) {
+                    <img
+                      [ngSrc]="banner.imageUrl"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 75vw"
+                      class="object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:transform-none"
+                      [alt]="banner.title"
+                      (error)="markBannerImageAsFailed(banner.id)"
+                    />
+                  } @else {
+                    <div class="image-fallback absolute inset-0 grid place-items-center" aria-hidden="true">
+                      <ng-icon name="lucideImageOff" class="text-5xl text-white/60" />
+                    </div>
+                  }
+
+                  <div class="featured-wash absolute inset-0" aria-hidden="true"></div>
+                  <div class="relative flex min-h-72 max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10">
+                    <h3 class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-black tracking-[-0.025em] sm:text-4xl">
+                      {{ banner.title }}
+                    </h3>
+                    @if (banner.description) {
+                      <p class="mt-3 max-w-[58ch] text-sm leading-6 text-white/85 sm:text-base">
+                        {{ banner.description }}
+                      </p>
+                    }
+                    @if (banner.linkLabel && validUrl(banner.linkUrl); as url) {
+                      <div class="mt-5">
+                        @if (isInternalUrl(url)) {
+                          <a hlmBtn variant="secondary" [routerLink]="url" class="w-fit">
+                            {{ banner.linkLabel }}
+                            <ng-icon name="lucideArrowRight" />
+                          </a>
+                        } @else {
+                          <a hlmBtn variant="secondary" [href]="url" target="_blank" rel="noopener noreferrer" class="w-fit">
+                            {{ banner.linkLabel }}
+                            <ng-icon name="lucideArrowUpRight" />
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (communications().length) {
+        <section class="bg-white py-12 sm:py-14 lg:py-16" aria-labelledby="communications-title">
+          <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <h2 id="communications-title" class="section-title text-[var(--landing-forest)]">
+                Comunicados recientes
+              </h2>
+              <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
+                Ver todos los comunicados
+                <ng-icon name="lucideArrowRight" />
+              </a>
+            </div>
+
+            <div class="mt-7 flex flex-wrap justify-center gap-4">
+              @for (communication of visibleCommunications(); track communication.id; let index = $index) {
+                <article class="communication-card flex min-h-96 flex-col overflow-hidden rounded-2xl border">
+                  <div class="relative aspect-[4/3] overflow-hidden bg-white/65">
+                    @if (communication.previewUrl && !failedCommunicationImages().has(communication.id)) {
+                      <img
+                        [ngSrc]="communication.previewUrl"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        class="object-contain p-4 transition-transform duration-300 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
+                        [alt]="'Vista previa de ' + communication.reference"
+                        (error)="markCommunicationImageAsFailed(communication.id)"
+                      />
+                    } @else {
+                      <div class="grid h-full place-items-center text-5xl text-[var(--landing-green)]" aria-hidden="true">
+                        <ng-icon name="lucideMegaphone" />
+                      </div>
+                    }
+                  </div>
+
+                  <div class="flex flex-1 flex-col p-5">
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--landing-green)]">
+                      <span>{{ communication.typeName }}</span>
+                      @if (communication.code) {
+                        <span class="font-medium text-[var(--landing-muted)]">{{ communication.code }}</span>
+                      }
+                    </div>
+                    <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-extrabold text-[var(--landing-forest)]">
+                      {{ communication.reference }}
+                    </h3>
+                    <time class="mt-3 text-sm text-[var(--landing-muted)]" [attr.datetime]="communication.createdAt">
+                      {{ communication.createdAt | date: 'dd MMM yyyy' }}
+                    </time>
+                    <a
+                      [href]="communication.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[var(--landing-green)] underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[var(--landing-green)]"
+                    >
+                      Leer comunicado
+                      <ng-icon name="lucideArrowUpRight" />
+                    </a>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (mostDownloadedDocuments().length) {
+        <section
+          class="bg-[var(--landing-warm)] py-12 sm:py-14 lg:py-16"
+          aria-labelledby="documents-title"
+        >
+          <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <h2 id="documents-title" class="section-title text-[var(--landing-forest)]">
+                Documentos más descargados
+              </h2>
+              <a hlmBtn variant="link" routerLink="/documents" class="w-fit">
+                Ver más documentos
+                <ng-icon name="lucideArrowRight" />
+              </a>
+            </div>
+
+            <div class="mt-7 overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-white/90 shadow-sm">
+              @for (document of visibleDocuments(); track document.id) {
+                <article class="document-row grid gap-4 border-b border-[var(--landing-line)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                  <div class="flex min-w-0 items-center gap-4">
+                    <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--landing-mint)] text-[var(--landing-green)]" aria-hidden="true">
+                      <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="line-clamp-2 text-sm leading-snug font-bold text-[var(--landing-forest)] sm:text-base">
+                        {{ document.title }}
+                      </h3>
+                      <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--landing-muted)]">
+                        <span class="font-semibold text-[var(--landing-green)]">{{ documentCategory(document) }}</span>
+                        @if (document.organizationalUnit) {
+                          <span>{{ document.organizationalUnit }}</span>
+                        }
+                        @if (document.year) {
+                          <span>{{ document.year }}</span>
+                        }
+                        <span>{{ document.file.size | fileSize }}</span>
+                        <span>{{ document.downloadCount }} descargas</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <a
+                    hlmBtn
+                    variant="outline"
+                    [href]="document.file.downloadUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="ml-15 w-fit md:ml-0"
+                    [attr.aria-label]="'Descargar ' + document.title"
+                  >
+                    Descargar
+                    <ng-icon name="lucideDownload" />
+                  </a>
+                </article>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (landingNotices().length) {
+        <landing-notices-dialog [items]="landingNotices()" />
+      }
+
+      @if (!hasContent()) {
+        <section class="grid min-h-[28rem] place-items-center bg-[var(--landing-paper)] px-5 py-20 text-center">
+          <div class="max-w-xl">
+            <h1 class="section-title text-[var(--landing-forest)]">
+              No hay contenido publicado por el momento
+            </h1>
+          </div>
+        </section>
+      }
+    }
   }
-}
+</div>

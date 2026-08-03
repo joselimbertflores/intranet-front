@@ -26,26 +26,28 @@
       {{ document().title }}
     </h3>
 
-    <p
-      class="mt-0.5 line-clamp-1 text-xs leading-5 text-surface-500 sm:text-[0.8125rem]"
-      [title]="document().organizationalUnit"
-    >
-      <span class="font-medium text-surface-600">Unidad:</span>
-      {{ document().organizationalUnit }}
-    </p>
+    @if (document().organizationalUnit) {
+      <p
+        class="mt-0.5 line-clamp-1 text-xs leading-5 text-surface-500 sm:text-[0.8125rem]"
+        [title]="document().organizationalUnit"
+      >
+        <span class="font-medium text-surface-600">Unidad:</span>
+        {{ document().organizationalUnit }}
+      </p>
+    }
 
     <div
       class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-surface-500 sm:text-xs"
     >
       <span>
         <span class="font-medium text-surface-600">Tipo:</span>
-        {{ document().documentType }}
+        {{ document().type }}
       </span>
-      @if (document().documentSubtype) {
+      @if (document().subtype) {
         <span aria-hidden="true">·</span>
         <span>
           <span class="font-medium text-surface-600">Subtipo:</span>
-          {{ document().documentSubtype }}
+          {{ document().subtype }}
         </span>
       }
       @if (document().year) {

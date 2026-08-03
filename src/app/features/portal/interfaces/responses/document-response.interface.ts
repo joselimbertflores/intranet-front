@@ -2,9 +2,9 @@ export interface PortalDocumentResponse {
   id: string;
   title: string;
   year: number | null;
-  organizationalUnit: string;
-  documentType: string;
-  documentSubtype: string | null;
+  organizationalUnit: string | null;
+  type: string;
+  subtype?: string;
   downloadCount: number;
   file: PortalFileResponse;
 }

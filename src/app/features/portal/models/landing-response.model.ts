@@ -9,18 +9,29 @@ export interface HeroSlide {
   description: string | null;
   linkLabel: string | null;
   linkUrl: string | null;
-  imageFileId: string;
   imageUrl: string;
-  sortOrder: number;
 }
+
+export type QuickAccessIconKey =
+  | 'email'
+  | 'application'
+  | 'document'
+  | 'book'
+  | 'form'
+  | 'report'
+  | 'calendar'
+  | 'user'
+  | 'support'
+  | 'finance'
+  | 'vehicle'
+  | 'external-link';
 
 export interface QuickAccess {
   id: number;
   title: string;
   description: string | null;
-  iconKey: string;
+  iconKey: QuickAccessIconKey;
   url: string;
-  sortOrder: number;
 }
 
 export interface FeaturedBanner {
@@ -28,10 +39,8 @@ export interface FeaturedBanner {
   title: string;
   description: string | null;
   linkLabel: string | null;
-  url: string | null;
-  imageFileId: string;
+  linkUrl: string | null;
   imageUrl: string;
-  sortOrder: number;
 }
 
 export interface LandingNotice {
@@ -39,7 +48,6 @@ export interface LandingNotice {
   title: string;
   contentHtml: string | null;
   imageUrl: string | null;
-  imageAlt: string | null;
   imageLinkUrl: string | null;
   updatedAt: string;
 }
@@ -49,6 +57,6 @@ export interface PortalLandingResponse {
   quickAccesses: QuickAccess[];
   featuredBanners: FeaturedBanner[];
   landingNotices: LandingNotice[];
-  communications: PortalCommunicationResponse[];
-  mostConsultedDocuments: PortalDocumentResponse[];
+  latestCommunications: PortalCommunicationResponse[];
+  mostDownloadedDocuments: PortalDocumentResponse[];
 }

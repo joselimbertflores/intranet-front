@@ -63,11 +63,11 @@ import { FeaturedBanner } from '../../../../models';
 
               <div class="featured-wash absolute inset-0" aria-hidden="true"></div>
               <div class="relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10">
-                <h3 class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-black tracking-[-0.025em] sm:text-4xl">
+                <h3 class="font-display max-w-[20ch] text-balance text-3xl leading-[1.06] tracking-[-0.025em] text-white sm:text-4xl">
                   {{ banner.title }}
                 </h3>
                 @if (banner.description) {
-                  <p class="mt-3 max-w-[58ch] text-sm leading-6 text-white/85 sm:text-base">
+                  <p class="mt-3 max-w-[58ch] text-sm leading-6 font-medium text-white/85 sm:text-base">
                     {{ banner.description }}
                   </p>
                 }

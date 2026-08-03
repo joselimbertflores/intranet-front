@@ -16,15 +16,16 @@
   --landing-line: #dce5df;
   --landing-muted: #596a61;
 
+  min-height: 100%;
   background: var(--landing-paper);
   color: var(--landing-forest);
 }
 
 .section-title {
   font-family: "Archivo Black", Aptos, "Segoe UI Variable", sans-serif;
-  font-size: clamp(1.65rem, 2.6vw, 2.3rem);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
 }
 
 .landing-hero-skeleton {

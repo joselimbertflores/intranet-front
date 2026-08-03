@@ -44,8 +44,8 @@ import { LandingNotice } from '../../../../models';
         class="max-h-[calc(100dvh-2rem)] overflow-hidden sm:max-w-3xl"
       >
         <hlm-dialog-header>
-          <h2 hlmDialogTitle class="text-xl font-bold">Avisos institucionales</h2>
-          <p hlmDialogDescription>
+          <h2 hlmDialogTitle class="font-display text-xl tracking-[-0.02em] text-primary-950">Avisos institucionales</h2>
+          <p hlmDialogDescription class="text-surface-600">
             Información vigente publicada para el personal municipal.
           </p>
         </hlm-dialog-header>
@@ -60,7 +60,7 @@ import { LandingNotice } from '../../../../models';
               <hlm-carousel-item class="pl-0">
                 <article class="max-h-[65dvh] overflow-y-auto px-1 pb-1">
                   <h3
-                    class="max-w-[28ch] text-balance text-2xl leading-tight font-extrabold tracking-[-0.02em] text-[var(--landing-forest)]"
+                    class="font-display max-w-[28ch] text-balance text-2xl leading-tight tracking-[-0.02em] text-primary-950"
                   >
                     {{ notice.title }}
                   </h3>
@@ -115,8 +115,8 @@ import { LandingNotice } from '../../../../models';
           </hlm-carousel-content>
 
           @if (hasMultipleItems()) {
-            <div class="mt-4 flex items-center justify-between border-t pt-4">
-              <p class="text-sm font-medium text-muted-foreground">
+            <div class="mt-4 flex items-center justify-between border-t border-surface-200 pt-4">
+              <p class="text-sm font-medium text-surface-500">
                 Aviso {{ noticeCarousel.currentSlide() + 1 }} de {{ items().length }}
               </p>
               <div class="flex gap-2">

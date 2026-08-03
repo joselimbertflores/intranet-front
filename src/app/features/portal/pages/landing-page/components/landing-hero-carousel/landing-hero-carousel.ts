@@ -83,17 +83,17 @@ import { HeroSlide } from '../../../../models';
                 <div class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14">
                   <div class="max-w-3xl">
                     @if (index === 0) {
-                      <h1 class="font-display max-w-[18ch] text-balance text-4xl leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+                      <h1 class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]">
                         {{ slide.title }}
                       </h1>
                     } @else {
-                      <h2 class="font-display max-w-[18ch] text-balance text-4xl leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+                      <h2 class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]">
                         {{ slide.title }}
                       </h2>
                     }
 
                     @if (slide.description) {
-                      <p class="mt-4 max-w-[58ch] text-pretty text-base leading-7 text-white/88 sm:text-lg">
+                      <p class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg">
                         {{ slide.description }}
                       </p>
                     }

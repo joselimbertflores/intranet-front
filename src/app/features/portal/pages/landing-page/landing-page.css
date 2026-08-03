@@ -22,9 +22,16 @@
 
 .section-title {
   font-family: "Archivo Black", Aptos, "Segoe UI Variable", sans-serif;
-  font-size: clamp(1.75rem, 3vw, 2.45rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
+  font-size: clamp(1.65rem, 2.6vw, 2.3rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.section-description {
+  max-width: 46rem;
+  color: var(--landing-muted);
+  font-size: clamp(0.925rem, 1.25vw, 1rem);
+  line-height: 1.65;
 }
 
 .landing-hero-skeleton {
@@ -35,100 +42,33 @@
 }
 
 .quick-access-card {
+  --quick-access-color: var(--landing-green);
+
   flex: 0 1 13.25rem;
-  border-color: rgb(6 63 43 / 0.08);
-  color: var(--landing-forest);
-  box-shadow: 0 12px 30px -28px rgb(6 63 43 / 0.55);
+  border-color: color-mix(in srgb, var(--quick-access-color) 26%, white);
+  background: color-mix(in srgb, var(--quick-access-color) 12%, white);
+  color: color-mix(in srgb, var(--quick-access-color) 82%, black);
+  box-shadow: 0 12px 30px -28px color-mix(in srgb, var(--quick-access-color) 65%, transparent);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
 }
 
-.quick-access-card:nth-child(5n + 1) {
-  background: var(--landing-mint);
-  color: #236b37;
-}
-
-.quick-access-card:nth-child(5n + 2) {
-  background: var(--landing-sky);
-  color: #155aa3;
-}
-
-.quick-access-card:nth-child(5n + 3) {
-  background: var(--landing-lilac);
-  color: #7026a5;
-}
-
-.quick-access-card:nth-child(5n + 4) {
-  background: var(--landing-peach);
-  color: #c25d0a;
-}
-
-.quick-access-card:nth-child(5n) {
-  background: #e6f5f2;
-  color: #078172;
-}
-
 .quick-access-card:hover {
-  border-color: currentColor;
-  box-shadow: 0 18px 36px -28px currentColor;
+  border-color: color-mix(in srgb, var(--quick-access-color) 48%, white);
+  background: color-mix(in srgb, var(--quick-access-color) 16%, white);
+  box-shadow: 0 18px 36px -28px color-mix(in srgb, var(--quick-access-color) 78%, transparent);
   transform: translateY(-0.2rem);
 }
 
 .quick-access-card:focus-visible {
-  outline: 3px solid var(--landing-green);
+  outline: 3px solid color-mix(in srgb, var(--quick-access-color) 72%, black);
   outline-offset: 3px;
 }
 
-.featured-banner {
-  grid-column: span 12 / span 12;
-  box-shadow: 0 24px 56px -38px rgb(6 63 43 / 0.58);
-}
-
-.featured-wash {
-  background:
-    linear-gradient(90deg, rgb(4 65 38 / 0.96) 0%, rgb(4 71 41 / 0.83) 35%, rgb(4 71 41 / 0.22) 72%, transparent 100%),
-    linear-gradient(0deg, rgb(3 38 27 / 0.28), transparent 58%);
-}
-
-.image-fallback {
-  background:
-    radial-gradient(circle at 78% 25%, rgb(255 255 255 / 0.13), transparent 24%),
-    linear-gradient(135deg, var(--landing-green), var(--landing-navy));
-}
-
-.communication-card {
-  flex: 1 1 17rem;
-  max-width: 19rem;
-  border-color: rgb(6 63 43 / 0.12);
-  background: var(--landing-mint);
-  box-shadow: 0 18px 45px -38px rgb(6 63 43 / 0.62);
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
-}
-
-.communication-card:nth-child(4n + 2) {
-  background: var(--landing-sky);
-  border-color: rgb(21 90 163 / 0.18);
-}
-
-.communication-card:nth-child(4n + 3) {
-  background: var(--landing-peach);
-  border-color: rgb(194 93 10 / 0.18);
-}
-
-.communication-card:nth-child(4n) {
-  background: var(--landing-lilac);
-  border-color: rgb(112 38 165 / 0.16);
-}
-
-.communication-card:hover {
-  border-color: rgb(8 122 67 / 0.42);
-  box-shadow: 0 24px 52px -36px rgb(6 63 43 / 0.48);
-  transform: translateY(-0.2rem);
+.quick-access-icon {
+  color: color-mix(in srgb, var(--quick-access-color) 88%, black);
 }
 
 .document-row {
@@ -139,41 +79,19 @@
   background: rgb(233 244 236 / 0.66);
 }
 
-@media (min-width: 1024px) {
-  .featured-banner:not(.featured-banner-primary) {
-    grid-column: span 6 / span 6;
-  }
-
-  .featured-banner-primary {
-    grid-column: span 12 / span 12;
-    min-height: 20rem;
-  }
-
-  .featured-grid:has(.featured-banner:nth-child(2):last-child)
-    .featured-banner:nth-child(2) {
-    grid-column: span 12 / span 12;
-  }
-}
-
 @media (max-width: 479px) {
   .quick-access-card {
     flex-basis: calc(50% - 0.375rem);
-  }
-
-  .communication-card {
-    max-width: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .quick-access-card,
-  .communication-card,
   .document-row {
     transition: none;
   }
 
-  .quick-access-card:hover,
-  .communication-card:hover {
+  .quick-access-card:hover {
     transform: none;
   }
 }

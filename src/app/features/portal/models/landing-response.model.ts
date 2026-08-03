@@ -31,6 +31,7 @@ export interface QuickAccess {
   title: string;
   description: string | null;
   iconKey: QuickAccessIconKey;
+  backgroundColor: string;
   url: string;
 }
 

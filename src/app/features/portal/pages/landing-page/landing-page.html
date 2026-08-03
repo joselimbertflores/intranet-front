@@ -75,7 +75,7 @@
       }
 
       @if (quickAccesses().length) {
-        <section class="bg-white py-12 sm:py-14 lg:py-16" aria-labelledby="quick-access-title">
+        <section class="bg-white py-14 sm:py-16 lg:py-20" aria-labelledby="quick-access-title">
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <h2
               id="quick-access-title"
@@ -83,9 +83,12 @@
             >
               Accesos rápidos
             </h2>
+            <p class="section-description mx-auto mt-2 text-center">
+              Accede a los sistemas y recursos institucionales de uso frecuente.
+            </p>
 
             <nav
-              class="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4"
+              class="mt-9 flex flex-wrap justify-center gap-3 sm:mt-10 sm:gap-4"
               aria-label="Accesos rápidos"
             >
               @for (item of quickAccesses(); track item.id) {
@@ -94,6 +97,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   class="quick-access-card group flex min-h-28 flex-col items-center justify-center gap-3 rounded-2xl border px-3 py-5 text-center no-underline outline-none sm:min-h-32"
+                  [style.--quick-access-color]="item.backgroundColor"
                   [attr.aria-label]="'Abrir ' + item.title + ' en una nueva pestaña'"
                 >
                   <span class="quick-access-icon grid size-11 place-items-center text-3xl" aria-hidden="true">
@@ -111,148 +115,67 @@
 
       @if (featuredBanners().length) {
         <section
-          class="bg-[var(--landing-mint)] py-12 sm:py-14 lg:py-16"
+          class="bg-[var(--landing-mint)] py-14 sm:py-16 lg:py-20"
           aria-labelledby="featured-banners-title"
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <h2 id="featured-banners-title" class="section-title text-[var(--landing-forest)]">
               Banners destacados
             </h2>
+            <p class="section-description mt-2">
+              Conoce información y recursos relevantes para el trabajo municipal.
+            </p>
 
-            <div class="featured-grid mt-7 grid gap-5 lg:grid-cols-12">
-              @for (banner of featuredBanners(); track banner.id; let index = $index) {
-                <article
-                  class="featured-banner group relative min-h-72 overflow-hidden rounded-3xl bg-[var(--landing-forest)] text-white"
-                  [class.featured-banner-primary]="index === 0"
-                >
-                  @if (!failedBannerImages().has(banner.id)) {
-                    <img
-                      [ngSrc]="banner.imageUrl"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 75vw"
-                      class="object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:transform-none"
-                      [alt]="banner.title"
-                      (error)="markBannerImageAsFailed(banner.id)"
-                    />
-                  } @else {
-                    <div class="image-fallback absolute inset-0 grid place-items-center" aria-hidden="true">
-                      <ng-icon name="lucideImageOff" class="text-5xl text-white/60" />
-                    </div>
-                  }
-
-                  <div class="featured-wash absolute inset-0" aria-hidden="true"></div>
-                  <div class="relative flex min-h-72 max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10">
-                    <h3 class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-black tracking-[-0.025em] sm:text-4xl">
-                      {{ banner.title }}
-                    </h3>
-                    @if (banner.description) {
-                      <p class="mt-3 max-w-[58ch] text-sm leading-6 text-white/85 sm:text-base">
-                        {{ banner.description }}
-                      </p>
-                    }
-                    @if (banner.linkLabel && validUrl(banner.linkUrl); as url) {
-                      <div class="mt-5">
-                        @if (isInternalUrl(url)) {
-                          <a hlmBtn variant="secondary" [routerLink]="url" class="w-fit">
-                            {{ banner.linkLabel }}
-                            <ng-icon name="lucideArrowRight" />
-                          </a>
-                        } @else {
-                          <a hlmBtn variant="secondary" [href]="url" target="_blank" rel="noopener noreferrer" class="w-fit">
-                            {{ banner.linkLabel }}
-                            <ng-icon name="lucideArrowUpRight" />
-                          </a>
-                        }
-                      </div>
-                    }
-                  </div>
-                </article>
-              }
-            </div>
+            <featured-banners-section [items]="featuredBanners()" />
           </div>
         </section>
       }
 
       @if (communications().length) {
-        <section class="bg-white py-12 sm:py-14 lg:py-16" aria-labelledby="communications-title">
+        <section class="bg-white py-14 sm:py-16 lg:py-20" aria-labelledby="communications-title">
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <h2 id="communications-title" class="section-title text-[var(--landing-forest)]">
-                Comunicados recientes
-              </h2>
+              <div>
+                <h2 id="communications-title" class="section-title text-[var(--landing-forest)]">
+                  Comunicados recientes
+                </h2>
+                <p class="section-description mt-2">
+                  Mantente informado con las últimas comunicaciones institucionales.
+                </p>
+              </div>
               <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
                 Ver todos los comunicados
                 <ng-icon name="lucideArrowRight" />
               </a>
             </div>
 
-            <div class="mt-7 flex flex-wrap justify-center gap-4">
-              @for (communication of visibleCommunications(); track communication.id; let index = $index) {
-                <article class="communication-card flex min-h-96 flex-col overflow-hidden rounded-2xl border">
-                  <div class="relative aspect-[4/3] overflow-hidden bg-white/65">
-                    @if (communication.previewUrl && !failedCommunicationImages().has(communication.id)) {
-                      <img
-                        [ngSrc]="communication.previewUrl"
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        class="object-contain p-4 transition-transform duration-300 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
-                        [alt]="'Vista previa de ' + communication.reference"
-                        (error)="markCommunicationImageAsFailed(communication.id)"
-                      />
-                    } @else {
-                      <div class="grid h-full place-items-center text-5xl text-[var(--landing-green)]" aria-hidden="true">
-                        <ng-icon name="lucideMegaphone" />
-                      </div>
-                    }
-                  </div>
-
-                  <div class="flex flex-1 flex-col p-5">
-                    <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--landing-green)]">
-                      <span>{{ communication.typeName }}</span>
-                      @if (communication.code) {
-                        <span class="font-medium text-[var(--landing-muted)]">{{ communication.code }}</span>
-                      }
-                    </div>
-                    <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-extrabold text-[var(--landing-forest)]">
-                      {{ communication.reference }}
-                    </h3>
-                    <time class="mt-3 text-sm text-[var(--landing-muted)]" [attr.datetime]="communication.createdAt">
-                      {{ communication.createdAt | date: 'dd MMM yyyy' }}
-                    </time>
-                    <a
-                      [href]="communication.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[var(--landing-green)] underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[var(--landing-green)]"
-                    >
-                      Leer comunicado
-                      <ng-icon name="lucideArrowUpRight" />
-                    </a>
-                  </div>
-                </article>
-              }
-            </div>
+            <landing-communications-section [items]="communications()" />
           </div>
         </section>
       }
 
       @if (mostDownloadedDocuments().length) {
         <section
-          class="bg-[var(--landing-warm)] py-12 sm:py-14 lg:py-16"
+          class="bg-[var(--landing-warm)] py-14 sm:py-16 lg:py-20"
           aria-labelledby="documents-title"
         >
           <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <h2 id="documents-title" class="section-title text-[var(--landing-forest)]">
-                Documentos más descargados
-              </h2>
+              <div>
+                <h2 id="documents-title" class="section-title text-[var(--landing-forest)]">
+                  Documentos más descargados
+                </h2>
+                <p class="section-description mt-2">
+                  Consulta y descarga los documentos más utilizados por los funcionarios municipales.
+                </p>
+              </div>
               <a hlmBtn variant="link" routerLink="/documents" class="w-fit">
                 Ver más documentos
                 <ng-icon name="lucideArrowRight" />
               </a>
             </div>
 
-            <div class="mt-7 overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-white/90 shadow-sm">
+            <div class="mt-9 overflow-hidden rounded-2xl border border-[var(--landing-line)] bg-white/90 shadow-sm sm:mt-10">
               @for (document of visibleDocuments(); track document.id) {
                 <article class="document-row grid gap-4 border-b border-[var(--landing-line)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
                   <div class="flex min-w-0 items-center gap-4">

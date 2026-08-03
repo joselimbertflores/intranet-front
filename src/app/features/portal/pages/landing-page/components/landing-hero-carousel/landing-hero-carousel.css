@@ -1,5 +1,7 @@
 :host {
   display: block;
+  --hero-petrol-950: #062d3c;
+  --hero-navy-950: #071d33;
 }
 
 .hero-stage,
@@ -7,10 +9,32 @@
   height: clamp(28rem, 54svh, 35rem);
 }
 
-.hero-photo-wash {
-  background:
-    linear-gradient(90deg, rgb(3 35 55 / 0.96) 0%, rgb(4 43 64 / 0.82) 34%, rgb(4 43 64 / 0.28) 68%, transparent 100%),
-    linear-gradient(0deg, rgb(2 24 39 / 0.36), transparent 48%);
+.hero-photo {
+  opacity: 0.95;
+  filter: saturate(0.86) contrast(1.03) brightness(0.97);
+}
+
+.hero-photo-veil {
+  background: color-mix(in srgb, var(--hero-petrol-950) 10%, transparent);
+}
+
+.hero-photo-vertical {
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--hero-navy-950) 52%, transparent) 0%,
+    color-mix(in srgb, var(--hero-petrol-950) 16%, transparent) 48%,
+    color-mix(in srgb, var(--hero-petrol-950) 5%, transparent) 100%
+  );
+}
+
+.hero-photo-horizontal {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--hero-navy-950) 78%, transparent) 0%,
+    color-mix(in srgb, var(--hero-petrol-950) 58%, transparent) 34%,
+    color-mix(in srgb, var(--hero-petrol-950) 20%, transparent) 68%,
+    transparent 100%
+  );
 }
 
 .hero-image-fallback {
@@ -56,10 +80,26 @@
 }
 
 @media (max-width: 639px) {
-  .hero-photo-wash {
-    background:
-      linear-gradient(0deg, rgb(3 31 49 / 0.95) 0%, rgb(3 38 57 / 0.72) 56%, rgb(3 38 57 / 0.18) 100%),
-      linear-gradient(90deg, rgb(3 35 55 / 0.66), transparent 88%);
+  .hero-photo {
+    opacity: 0.92;
+  }
+
+  .hero-photo-vertical {
+    background: linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--hero-navy-950) 74%, transparent) 0%,
+      color-mix(in srgb, var(--hero-petrol-950) 34%, transparent) 58%,
+      color-mix(in srgb, var(--hero-petrol-950) 8%, transparent) 100%
+    );
+  }
+
+  .hero-photo-horizontal {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--hero-navy-950) 62%, transparent),
+      color-mix(in srgb, var(--hero-petrol-950) 18%, transparent) 80%,
+      transparent 100%
+    );
   }
 }
 

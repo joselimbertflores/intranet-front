@@ -67,7 +67,7 @@ import { HeroSlide } from '../../../../models';
                     fill
                     sizes="100vw"
                     [priority]="index === 0"
-                    class="object-cover"
+                    class="hero-photo object-cover"
                     alt=""
                     (error)="markImageAsFailed(slide.id)"
                   />
@@ -77,7 +77,9 @@ import { HeroSlide } from '../../../../models';
                   </div>
                 }
 
-                <div class="hero-photo-wash absolute inset-0" aria-hidden="true"></div>
+                <div class="hero-photo-veil absolute inset-0" aria-hidden="true"></div>
+                <div class="hero-photo-vertical absolute inset-0" aria-hidden="true"></div>
+                <div class="hero-photo-horizontal absolute inset-0" aria-hidden="true"></div>
                 <div class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14">
                   <div class="max-w-3xl">
                     @if (index === 0) {

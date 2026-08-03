@@ -3,15 +3,15 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 @Component({
   selector: 'institutional-logo',
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: {
+    class: 'inline-grid shrink-0',
+  },
   template: `
     <div
-      class="grid size-12 place-items-center rounded-full border-2 border-primary p-0.5"
+      class="grid size-full place-items-center rounded-full border-2 border-white/90 bg-transparent p-0.5 text-white"
       aria-hidden="true"
     >
-      <div
-        class="grid size-full place-items-center rounded-full bg-primary text-primary-foreground"
-      >
-        <svg viewBox="0 0 886 893" class="h-8 w-8 fill-current">
+        <svg viewBox="0 0 886 893" class="size-3/4 fill-current">
           <path
             fill-rule="evenodd"
             clip-rule="evenodd"
@@ -43,7 +43,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
             "
           />
         </svg>
-      </div>
     </div>
   `,
 })

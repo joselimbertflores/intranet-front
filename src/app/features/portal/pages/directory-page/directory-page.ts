@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 
 import { DirectoryEntryResponse } from '../../../administration/directory/interfaces';
 import { SearchInput } from '../../../../shared';
-import { PublicSectionHeader } from '../../components';
+import { PublicPageHeader } from '../../components';
 import { PortalDirectoryDataSource } from '../../services';
 
 @Component({
@@ -14,7 +14,7 @@ import { PortalDirectoryDataSource } from '../../services';
     FormsModule,
    
     SearchInput,
-    PublicSectionHeader,
+    PublicPageHeader,
   ],
   templateUrl: './directory-page.html',
   styles: `

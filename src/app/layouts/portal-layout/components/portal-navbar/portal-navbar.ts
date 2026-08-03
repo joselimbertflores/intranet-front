@@ -64,9 +64,7 @@ interface NavItem {
           class="flex min-w-0 shrink-0 items-center gap-3 rounded-xl text-white no-underline outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--portal-forest)]"
           aria-label="Ir al inicio de la Intranet"
         >
-          <institutional-logo
-            class="grid size-14 shrink-0 place-items-center [&>div]:!size-14 [&>div]:!border-white/90 [&>div>div]:!bg-transparent [&_svg]:!size-10"
-          />
+          <institutional-logo class="size-14" />
 
           <span class="min-w-0 leading-tight">
             <span class="block truncate text-[1.65rem] font-black tracking-tight">

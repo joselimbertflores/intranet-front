@@ -1,10 +1,12 @@
-<main class="bg-muted/30 pb-16">
-  <public-section-header
+<div class="bg-muted/30 pb-16">
+  <public-page-header
     title="Documentos institucionales"
     description="Consulta, filtra y descarga documentos institucionales de manera ordenada."
   />
 
-  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+  >
     <section
       #filtersTop
       class="scroll-mt-24 rounded-xl border border-border bg-card p-2 shadow-sm sm:p-4"
@@ -136,7 +138,7 @@
       </form>
     </section>
 
-    <section class="mt-8" aria-label="Resultados de documentos">
+    <section aria-label="Resultados de documentos">
       @if (dataResource.error()) {
         <div
           class="fade-in flex min-h-80 flex-col items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/10 px-6 py-12 text-center shadow-sm"
@@ -388,4 +390,4 @@
       }
     </section>
   </div>
-</main>
+</div>

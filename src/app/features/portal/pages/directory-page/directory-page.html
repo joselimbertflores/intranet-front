@@ -1,11 +1,11 @@
-<public-section-header
-  title="Directorio telefónico"
-  description="Encuentra un área o función y copia el número que necesitas."
-/>
-
 <div class="min-h-[55vh] bg-muted/30 pb-16">
+  <public-page-header
+    title="Directorio telefónico"
+    description="Encuentra un área o función y copia el número que necesitas."
+  />
+
   <section
-    class="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8"
+    class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
     aria-labelledby="directory-results-title"
   >
     <div class="mx-auto max-w-3xl">
@@ -39,24 +39,25 @@
       </div>
     </div>
 
-    <div class="mt-7 flex items-center justify-between gap-4">
-      <h2
-        id="directory-results-title"
-        class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-      >
-        Destinos telefónicos
-      </h2>
-      @if (!directoryResource.isLoading() && !directoryResource.error()) {
-        <span class="text-sm tabular-nums text-muted-foreground">
-          {{ entries().length }}
-          {{ entries().length === 1 ? "resultado" : "resultados" }}
-        </span>
-      }
-    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between gap-4">
+        <h2
+          id="directory-results-title"
+          class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+        >
+          Destinos telefónicos
+        </h2>
+        @if (!directoryResource.isLoading() && !directoryResource.error()) {
+          <span class="text-sm tabular-nums text-muted-foreground">
+            {{ entries().length }}
+            {{ entries().length === 1 ? "resultado" : "resultados" }}
+          </span>
+        }
+      </div>
 
-    <div
-      class="directory-list mt-3 overflow-hidden rounded-2xl border border-border bg-card"
-    >
+      <div
+        class="directory-list overflow-hidden rounded-2xl border border-border bg-card"
+      >
       @if (directoryResource.error()) {
         <div
           class="flex min-h-56 flex-col items-center justify-center px-6 py-12 text-center"
@@ -249,6 +250,7 @@
           </article>
         }
       }
+      </div>
     </div>
   </section>
 </div>

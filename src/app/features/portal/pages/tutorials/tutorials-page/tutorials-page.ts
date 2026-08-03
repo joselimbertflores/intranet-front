@@ -20,7 +20,7 @@ import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmSkeleton } from '@spartan-ng/helm/skeleton';
 
 import { PaginationControls } from '../../../../../shared';
-import { PublicSectionHeader } from '../../../components';
+import { PublicPageHeader } from '../../../components';
 import { PortalTutorialDataSource } from '../../../services';
 
 const PAGE_SIZES = [12, 24, 48] as const;
@@ -37,7 +37,7 @@ const PAGE_SIZES = [12, 24, 48] as const;
     HlmSkeleton,
     NgIcon,
     PaginationControls,
-    PublicSectionHeader,
+    PublicPageHeader,
     RouterLink,
   ],
   providers: [provideIcons({ lucideArrowRight, lucideRefreshCw, lucideSearch })],

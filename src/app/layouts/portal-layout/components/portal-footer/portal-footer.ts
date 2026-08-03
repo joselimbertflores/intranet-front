@@ -23,9 +23,7 @@ interface FooterLink {
       >
         <section class="max-w-xl" aria-labelledby="portal-footer-brand">
           <div class="flex items-start gap-3.5">
-            <institutional-logo
-              class="grid size-14 shrink-0 place-items-center [&>div]:!size-14 [&>div]:!border-white/85 [&>div>div]:!bg-transparent [&_svg]:!size-10"
-            />
+            <institutional-logo class="size-12" />
 
             <div class="min-w-0 pt-0.5">
               <h2

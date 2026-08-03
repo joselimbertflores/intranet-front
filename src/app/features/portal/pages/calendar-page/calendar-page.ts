@@ -20,7 +20,7 @@ import { RouterModule } from '@angular/router';
 
 import { PortalCalendarResponse } from '../../interfaces';
 import { PortalCalendarDataSource } from '../../services';
-import { PublicSectionHeader } from '../../components';
+import { PublicPageHeader } from '../../components';
 
 @Component({
   selector: 'app--calendar-page',
@@ -28,7 +28,7 @@ import { PublicSectionHeader } from '../../components';
     CommonModule,
     RouterModule,
   
-    PublicSectionHeader,
+    PublicPageHeader,
     // FullCalendarModule,
   ],
   templateUrl: './calendar-page.html',

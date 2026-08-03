@@ -29,7 +29,7 @@ import {
 } from '../../../../shared';
 import { DocSectionFilterResponse } from '../../interfaces';
 import { PortalDocumentDataSource } from '../../services';
-import { PublicSectionHeader } from '../../components';
+import { PublicPageHeader } from '../../components';
 import { PortalDocumentGridCard } from './components/portal-document-grid-card/portal-document-grid-card';
 import { PortalDocumentListItem } from './components/portal-document-list-item/portal-document-list-item';
 
@@ -54,7 +54,7 @@ interface PortalOrganizationalUnitData {
     FormField,
     FormRoot,
     HierarchicalCombobox,
-    PublicSectionHeader,
+    PublicPageHeader,
     PortalDocumentGridCard,
     PortalDocumentListItem,
     YearSelector,

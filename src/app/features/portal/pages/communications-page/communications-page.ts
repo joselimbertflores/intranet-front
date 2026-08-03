@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 
 import { SearchInput } from '../../../../shared';
-import { PublicSectionHeader } from '../../components';
+import { PublicPageHeader } from '../../components';
 import { PortalCommunicationResponse } from '../../interfaces';
 import { PortalCommunicationDataSource } from '../../services';
 
@@ -24,7 +24,7 @@ import { PortalCommunicationDataSource } from '../../services';
     FormsModule,
   
     SearchInput,
-    PublicSectionHeader,
+    PublicPageHeader,
   ],
   templateUrl: './communications-page.html',
   styles: `

@@ -1,1 +1,1 @@
-export * from './public-section-header/public-section-header';
+export * from './public-page-header/public-page-header';

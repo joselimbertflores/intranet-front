@@ -27,7 +27,6 @@ import {
 import { HlmAlertImports } from '@spartan-ng/helm/alert';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmCollapsibleImports } from '@spartan-ng/helm/collapsible';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
@@ -101,7 +100,6 @@ const EMPTY_FILTERS: Readonly<DocumentFiltersModel> = {
     HlmAlertImports,
     HlmBadgeImports,
     HlmButtonImports,
-    HlmCollapsibleImports,
     HlmFieldImports,
     HlmInputGroupImports,
     HlmSelectImports,

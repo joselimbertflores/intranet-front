@@ -85,18 +85,15 @@
             <div hlmSkeleton class="h-9 lg:col-span-2"></div>
           </div>
         } @else {
-          <div
-            hlmCollapsible
-            [expanded]="advancedFiltersOpen()"
-            (expandedChange)="advancedFiltersOpen.set($event)"
-          >
+          <div>
             <div class="flex items-center justify-between gap-3 lg:hidden">
               <button
                 hlmBtn
-                hlmCollapsibleTrigger
                 type="button"
                 variant="outline"
-                [attr.aria-controls]="'portal-document-secondary-filters'"
+                aria-controls="portal-document-secondary-filters"
+                [attr.aria-expanded]="advancedFiltersOpen()"
+                (click)="toggleAdvancedFilters()"
               >
                 <ng-icon name="lucideFilter" data-icon="inline-start" />
                 Filtros
@@ -118,8 +115,8 @@
 
             <div
               id="portal-document-secondary-filters"
-              hlmCollapsibleContent
-              class="lg:data-[state=closed]:block"
+              class="lg:block"
+              [class.hidden]="!advancedFiltersOpen()"
             >
               <div
                 class="mt-4 grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:mt-0 lg:grid-cols-12 lg:border-t-0 lg:pt-0"

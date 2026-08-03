@@ -44,8 +44,8 @@ import { LandingNotice } from '../../../../models';
         class="max-h-[calc(100dvh-2rem)] overflow-hidden sm:max-w-3xl"
       >
         <hlm-dialog-header>
-          <h2 hlmDialogTitle class="font-display text-xl tracking-[-0.02em] text-primary-950">Avisos institucionales</h2>
-          <p hlmDialogDescription class="text-surface-600">
+          <h2 hlmDialogTitle class="font-display text-xl tracking-[-0.02em] text-primary">Avisos institucionales</h2>
+          <p hlmDialogDescription class="text-muted-foreground">
             Información vigente publicada para el personal municipal.
           </p>
         </hlm-dialog-header>
@@ -60,7 +60,7 @@ import { LandingNotice } from '../../../../models';
               <hlm-carousel-item class="pl-0">
                 <article class="max-h-[65dvh] overflow-y-auto px-1 pb-1">
                   <h3
-                    class="font-display max-w-[28ch] text-balance text-2xl leading-tight tracking-[-0.02em] text-primary-950"
+                    class="font-display max-w-[28ch] text-balance text-2xl leading-tight tracking-[-0.02em] text-primary"
                   >
                     {{ notice.title }}
                   </h3>
@@ -105,7 +105,7 @@ import { LandingNotice } from '../../../../models';
 
                   @if (notice.contentHtml) {
                     <div
-                      class="prose prose-slate mt-5 max-w-none wrap-break-word"
+                      class="prose mt-5 max-w-none wrap-break-word"
                       [innerHTML]="notice.contentHtml"
                     ></div>
                   }
@@ -115,8 +115,8 @@ import { LandingNotice } from '../../../../models';
           </hlm-carousel-content>
 
           @if (hasMultipleItems()) {
-            <div class="mt-4 flex items-center justify-between border-t border-surface-200 pt-4">
-              <p class="text-sm font-medium text-surface-500">
+            <div class="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p class="text-sm font-medium text-muted-foreground">
                 Aviso {{ noticeCarousel.currentSlide() + 1 }} de {{ items().length }}
               </p>
               <div class="flex gap-2">

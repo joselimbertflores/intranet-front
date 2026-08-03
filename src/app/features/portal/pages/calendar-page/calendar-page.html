@@ -22,11 +22,11 @@
   @if (event) {
     <div class="flex flex-col gap-y-6">
       <div class="flex flex-col gap-y-2">
-        <span class="text-lg font-medium text-surface-900 leading-tight">
+        <span class="text-lg font-medium text-foreground leading-tight">
           {{ event.title }}
         </span>
         @if (event.extendedProps["description"]) {
-          <span class="text-sm text-surface-700 leading-relaxed">
+          <span class="text-sm text-muted-foreground leading-relaxed">
             {{ event.extendedProps["description"] }}
           </span>
         }
@@ -34,33 +34,33 @@
       <div>
         @if (event.allDay) {
           <div class="flex items-center gap-x-2">
-            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-muted-foreground" style="font-size: 18px"></i>
             <span> {{ event.start | date: "longDate" }} </span>
           </div>
         } @else {
           <div class="flex items-center gap-x-2">
-            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-muted-foreground" style="font-size: 18px"></i>
             <span>Inicio: {{ event.start | date: "medium" }} </span>
           </div>
           <div class="flex items-center gap-x-2">
-            <i class="ui-icon ui-icon-clock text-surface-500" style="font-size: 18px"></i>
+            <i class="ui-icon ui-icon-clock text-muted-foreground" style="font-size: 18px"></i>
             <span>Fin: {{ event.end | date: "medium" }} </span>
           </div>
         }
       </div>
       @let communication = event.extendedProps["communication"];
       @if (communication) {
-        <div class="flex flex-col gap-y-2 border-t border-surface-300 pt-2">
-          <span class="text-lg font-medium text-surface-900">
+        <div class="flex flex-col gap-y-2 border-t border-border pt-2">
+          <span class="text-lg font-medium text-foreground">
             {{ communication.type | titlecase }}
           </span>
-          <span class="text-sm text-surface-700 leading-relaxed">
+          <span class="text-sm text-muted-foreground leading-relaxed">
             {{ communication.reference }}
           </span>
           <span>CITE: {{ communication.code }}</span>
         </div>
         <div class="app-dialog-actions">
-          <div class="pt-4 border-t border-surface-100">
+          <div class="pt-4 border-t border-border">
             <a
               [routerLink]="['/communications', communication.id]"
               target="_blank"

@@ -44,7 +44,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
               [class.communication-card-peach]="index % 4 === 2"
               [class.communication-card-lilac]="index % 4 === 3"
             >
-              <div class="relative aspect-[4/3] overflow-hidden bg-white/65">
+              <div class="relative aspect-[4/3] overflow-hidden bg-card/65">
                 @if (communication.previewUrl && !failedImages().has(communication.id)) {
                   <img
                     [ngSrc]="communication.previewUrl"

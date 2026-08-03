@@ -11,6 +11,7 @@ import { HlmButton } from '@spartan-ng/helm/button';
 import { filter, map } from 'rxjs';
 
 import { AdminSidebar, UserMenu } from './components';
+import { ThemeSwitcher } from '../../shared/components/theme-switcher/theme-switcher';
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 64rem)';
 
@@ -27,6 +28,7 @@ const DESKTOP_MEDIA_QUERY = '(min-width: 64rem)';
     NgIcon,
     HlmButton,
     HlmSheetImports,
+    ThemeSwitcher,
   ],
   providers: [provideIcons({ lucideLandmark, lucideMenu })],
   templateUrl: './admin-layout.component.html',

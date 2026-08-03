@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
         <h1 class="text-2xl font-semibold">Panel de Administración</h1>
 
-        <p class="text-surface-500">
+        <p class="text-muted-foreground">
           Selecciona una opción del menú lateral para comenzar
         </p>
       </div>

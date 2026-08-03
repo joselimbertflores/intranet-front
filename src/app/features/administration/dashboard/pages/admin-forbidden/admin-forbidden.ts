@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
 
         <h1 class="text-2xl font-semibold">Acceso denegado</h1>
 
-        <p class="text-surface-500">
+        <p class="text-muted-foreground">
           No tienes permiso para ver esta seccion.
         </p>
 

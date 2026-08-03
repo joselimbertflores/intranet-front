@@ -51,6 +51,6 @@ export class FileIcon {
       return 'ui-icon ui-icon-file text-orange-500';
     }
     const extension = this.fileName().trim().split('.').pop()?.toLowerCase() ?? '';
-    return extensionIconMap[extension] ?? 'ui-icon ui-icon-file text-gray-500';
+    return extensionIconMap[extension] ?? 'ui-icon ui-icon-file text-muted-foreground';
   });
 }

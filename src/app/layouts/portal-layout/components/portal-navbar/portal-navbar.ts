@@ -19,6 +19,7 @@ import {
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 
 import { InstitutionalLogo } from '../../../../shared/components/institutional-logo/institutional-logo';
+import { ThemeSwitcher } from '../../../../shared/components/theme-switcher/theme-switcher';
 
 interface NavItem {
   label: string;
@@ -35,6 +36,7 @@ interface NavItem {
     NgIcon,
     RouterLink,
     RouterLinkActive,
+    ThemeSwitcher,
   ],
   providers: [
     provideIcons({
@@ -54,7 +56,7 @@ interface NavItem {
       aria-label="Navegación principal"
     >
       <div
-        class="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+        class="mx-auto flex min-h-20 w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8"
       >
         <a
           routerLink="/"
@@ -78,7 +80,7 @@ interface NavItem {
           </span>
         </a>
 
-        <div class="hidden items-center gap-0.5 xl:flex">
+        <div class="ml-auto hidden items-center gap-0.5 xl:flex">
           @for (item of navItems; track item.route) {
             <a
               [routerLink]="item.route"
@@ -97,7 +99,7 @@ interface NavItem {
           hlmBtn
           variant="secondary"
           size="icon"
-          class="shrink-0 xl:hidden"
+          class="ml-auto shrink-0 xl:hidden"
           aria-label="Abrir o cerrar el menú de navegación"
           aria-controls="mobile-navigation"
           [attr.aria-expanded]="isMobileMenuOpen()"
@@ -105,6 +107,8 @@ interface NavItem {
         >
           <ng-icon [name]="isMobileMenuOpen() ? 'lucideX' : 'lucideMenu'" />
         </button>
+
+        <app-theme-switcher class="shrink-0" />
       </div>
 
       @if (isMobileMenuOpen()) {

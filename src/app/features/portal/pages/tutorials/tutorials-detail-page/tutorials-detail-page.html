@@ -39,7 +39,7 @@
             @switch (block.type) {
               @case (blockType.TEXT) {
                 @if (block.content) {
-                  <div class="prose prose-neutral max-w-none wrap-break-word" [innerHTML]="block.content"></div>
+                  <div class="prose max-w-none wrap-break-word" [innerHTML]="block.content"></div>
                 }
               }
               @case (blockType.IMAGE) {

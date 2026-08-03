@@ -30,7 +30,7 @@ import { PortalCommunicationDataSource } from '../../services';
   styles: `
     :host ::ng-deep .p-paginator {
       flex-wrap: wrap;
-      border-radius: var(--p-border-radius-lg);
+      border-radius: var(--radius);
       background: transparent;
     }
 

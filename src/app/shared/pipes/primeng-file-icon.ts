@@ -16,7 +16,7 @@ const FILE_ICONS: Record<FileCategory, string> = {
   image: 'ui-icon ui-icon-image text-yellow-500',
   video: 'ui-icon ui-icon-video text-purple-500',
   compressed: 'ui-icon ui-icon-file-zip text-orange-500',
-  other: 'ui-icon ui-icon-file text-gray-500',
+  other: 'ui-icon ui-icon-file text-muted-foreground',
 };
 
 const EXTENSION_MAP: Record<string, FileCategory> = {

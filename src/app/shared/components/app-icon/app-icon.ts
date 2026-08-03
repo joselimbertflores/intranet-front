@@ -20,8 +20,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
           y2="420"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" style="stop-color: var(--p-primary-600)" />
-          <stop offset="100%" style="stop-color: var(--p-primary-300)" />
+          <stop offset="0%" style="stop-color: var(--primary)" />
+          <stop offset="100%" style="stop-color: color-mix(in oklch, var(--primary) 58%, var(--primary-foreground))" />
         </linearGradient>
 
         <clipPath id="circleClip">
@@ -32,7 +32,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       <circle cx="256" cy="256" r="230" fill="url(#logoGradient)" />
 
       <g
-        class="stroke-surface-0"
+        class="stroke-primary-foreground"
         stroke-width="30"
         stroke-linecap="round"
         fill="none"
@@ -44,7 +44,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         <path d="M190 300 C260 315 310 330 350 350" />
       </g>
 
-      <g class="fill-surface-0">
+      <g class="fill-primary-foreground">
         <circle cx="190" cy="290" r="42" />
         <circle cx="365" cy="175" r="46" />
         <circle cx="350" cy="350" r="60" />

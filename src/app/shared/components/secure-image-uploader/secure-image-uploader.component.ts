@@ -15,7 +15,7 @@ import { FileUploadService } from '../../services/file-upload.service';
   selector: 'secure-image-uploader',
   imports: [],
   template: `
-    <div class="flex flex-col border border-slate-500 p-3 rounded-xl">
+    <div class="flex flex-col rounded-xl border border-border p-3">
       @if(imageDataUrl()){
       <figure class="flex justify-center items-center rounded-2xl mb-4">
         <img

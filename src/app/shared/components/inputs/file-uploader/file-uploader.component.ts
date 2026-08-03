@@ -50,7 +50,7 @@ interface UploadedFile {
         >
           <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto p-2">
             @for (file of files; track $index) {
-              <div class="flex justify-between p-2 rounded-lg border border-gray-300">
+              <div class="flex justify-between rounded-lg border border-border p-2">
                 <div class="flex items-center space-x-3">
                   <i [ngClass]="file.name | primengFileIcon" style="font-size: 1.5rem;"></i>
                   <div>
@@ -70,7 +70,7 @@ interface UploadedFile {
               </div>
             }
             @for (file of uploadedFiles(); track $index) {
-               <div class="flex justify-between p-2 rounded-lg border border-gray-300">
+               <div class="flex justify-between rounded-lg border border-border p-2">
                 <div class="flex items-center space-x-3">
                   <i [ngClass]="file.originalName | primengFileIcon" style="font-size: 1.5rem;"></i>
                   <div>

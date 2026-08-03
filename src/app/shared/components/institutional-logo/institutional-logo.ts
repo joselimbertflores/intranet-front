@@ -5,11 +5,11 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
-      class="grid h-12 w-12 place-items-center rounded-full border-2 border-primary-800 p-0.5"
+      class="grid size-12 place-items-center rounded-full border-2 border-primary p-0.5"
       aria-hidden="true"
     >
       <div
-        class="grid h-full w-full place-items-center rounded-full bg-primary-800 text-white"
+        class="grid size-full place-items-center rounded-full bg-primary text-primary-foreground"
       >
         <svg viewBox="0 0 886 893" class="h-8 w-8 fill-current">
           <path

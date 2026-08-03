@@ -1,9 +1,9 @@
 <article
-  class="group grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-surface-200 bg-surface-0 p-3 shadow-sm transition duration-200 hover:border-primary-200 hover:shadow-md sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4 motion-reduce:transition-none"
+  class="group grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-border bg-card p-3 shadow-sm transition duration-200 hover:border-primary/30 hover:shadow-md sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4 motion-reduce:transition-none"
 >
   <div class="flex w-16 flex-col items-center gap-1">
     <div
-      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-surface-200 bg-surface-50 transition-colors group-hover:border-primary-200 group-hover:bg-primary-50"
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted transition-colors group-hover:border-primary/30 group-hover:bg-primary/10"
       aria-hidden="true"
     >
       <file-icon
@@ -12,7 +12,7 @@
       />
     </div>
     <span
-      class="whitespace-nowrap text-[10px] font-medium leading-4 text-surface-500"
+      class="whitespace-nowrap text-[10px] font-medium leading-4 text-muted-foreground"
     >
       {{ document().file.size | fileSize }}
     </span>
@@ -20,7 +20,7 @@
 
   <div class="min-w-0">
     <h3
-      class="line-clamp-2 text-[0.95rem] font-semibold leading-5 text-surface-900 transition-colors group-hover:text-primary-800 sm:line-clamp-1 sm:text-base"
+      class="line-clamp-2 text-[0.95rem] font-semibold leading-5 text-foreground transition-colors group-hover:text-primary sm:line-clamp-1 sm:text-base"
       [title]="document().title"
     >
       {{ document().title }}
@@ -28,39 +28,39 @@
 
     @if (document().organizationalUnit) {
       <p
-        class="mt-0.5 line-clamp-1 text-xs leading-5 text-surface-500 sm:text-[0.8125rem]"
+        class="mt-0.5 line-clamp-1 text-xs leading-5 text-muted-foreground sm:text-[0.8125rem]"
         [title]="document().organizationalUnit"
       >
-        <span class="font-medium text-surface-600">Unidad:</span>
+        <span class="font-medium text-foreground/75">Unidad:</span>
         {{ document().organizationalUnit }}
       </p>
     }
 
     <div
-      class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-surface-500 sm:text-xs"
+      class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-muted-foreground sm:text-xs"
     >
       <span>
-        <span class="font-medium text-surface-600">Tipo:</span>
+        <span class="font-medium text-foreground/75">Tipo:</span>
         {{ document().type }}
       </span>
       @if (document().subtype) {
         <span aria-hidden="true">·</span>
         <span>
-          <span class="font-medium text-surface-600">Subtipo:</span>
+          <span class="font-medium text-foreground/75">Subtipo:</span>
           {{ document().subtype }}
         </span>
       }
       @if (document().year) {
         <span aria-hidden="true">·</span>
         <span>
-          <span class="font-medium text-surface-600">Gestión:</span>
+          <span class="font-medium text-foreground/75">Gestión:</span>
           {{ document().year }}
         </span>
       }
       <span aria-hidden="true">·</span>
       @if (document().downloadCount > 10) {
         <span>
-          <span class="font-medium text-surface-600">Descargas:</span>
+          <span class="font-medium text-foreground/75">Descargas:</span>
           {{ document().downloadCount }}
         </span>
       }

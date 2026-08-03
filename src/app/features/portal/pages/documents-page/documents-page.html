@@ -1,4 +1,4 @@
-<main class="bg-surface-50/70 pb-16">
+<main class="bg-muted/30 pb-16">
   <public-section-header
     title="Documentos institucionales"
     description="Consulta, filtra y descarga documentos institucionales de manera ordenada."
@@ -7,7 +7,7 @@
   <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <section
       #filtersTop
-      class="scroll-mt-24 rounded-xl border border-surface-200 bg-surface-0 p-2 shadow-sm sm:p-4"
+      class="scroll-mt-24 rounded-xl border border-border bg-card p-2 shadow-sm sm:p-4"
       aria-label="Filtros de documentos"
     >
       <form [formRoot]="filterForm">
@@ -121,7 +121,7 @@
         </div>
 
         <div
-          class="mt-4 hidden justify-end border-t border-surface-100 pt-3 lg:flex"
+          class="mt-4 hidden justify-end border-t border-border pt-3 lg:flex"
         >
           <!-- <app-ui-button
             type="button"
@@ -139,21 +139,21 @@
     <section class="mt-8" aria-label="Resultados de documentos">
       @if (dataResource.error()) {
         <div
-          class="fade-in flex min-h-80 flex-col items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center shadow-sm"
+          class="fade-in flex min-h-80 flex-col items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/10 px-6 py-12 text-center shadow-sm"
           role="alert"
         >
           <span
-            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600"
+            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/15 text-destructive"
           >
             <i
               class="ui-icon ui-icon-exclamation-triangle text-xl"
               aria-hidden="true"
             ></i>
           </span>
-          <h3 class="mt-4 text-base font-semibold text-red-950">
+          <h3 class="mt-4 text-base font-semibold text-destructive">
             No pudimos cargar los documentos
           </h3>
-          <p class="mx-auto mt-1 max-w-md text-sm text-red-700">
+          <p class="mx-auto mt-1 max-w-md text-sm text-destructive/80">
             Ocurrió un problema al obtener la información. Intenta nuevamente.
           </p>
           <!-- <app-ui-button
@@ -172,7 +172,7 @@
           >
             @for (_ of listSkeletonRows; track $index) {
               <article
-                class="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-surface-200 bg-surface-0 p-3 shadow-sm sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4"
+                class="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2.5 rounded-2xl border border-border bg-card p-3 shadow-sm sm:px-4 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:gap-x-4"
               >
                 <div class="flex w-16 flex-col items-center gap-1">
                   <!-- <app-ui-skeleton
@@ -214,7 +214,7 @@
           >
             @for (_ of gridSkeletonCards; track $index) {
               <article
-                class="flex h-full flex-col rounded-2xl border border-surface-200 bg-surface-0 p-3.5 shadow-sm sm:p-4"
+                class="flex h-full flex-col rounded-2xl border border-border bg-card p-3.5 shadow-sm sm:p-4"
               >
                 <div class="flex w-16 flex-col items-center gap-1">
                   <!-- <app-ui-skeleton
@@ -254,10 +254,10 @@
         dataResource.hasValue() && dataResource.value().documents.length === 0
       ) {
         <div
-          class="fade-in flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-surface-300 bg-surface-0 px-6 py-14 text-center shadow-sm"
+          class="fade-in flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center shadow-sm"
         >
           <span
-            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-100 text-surface-500"
+            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground"
           >
             <i
               class="ui-icon ui-icon-folder-open text-xl"
@@ -266,10 +266,10 @@
           </span>
 
           @if (hasActiveFilters()) {
-            <h3 class="mt-4 text-base font-semibold text-surface-900">
+            <h3 class="mt-4 text-base font-semibold text-foreground">
               No se encontraron documentos
             </h3>
-            <p class="mx-auto mt-1 max-w-md text-sm text-surface-500">
+            <p class="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
               Intenta ajustar los filtros o limpiar la búsqueda.
             </p>
             <!-- <app-ui-button
@@ -282,10 +282,10 @@
               (onClick)="resetFilters()"
             /> -->
           } @else {
-            <h3 class="mt-4 text-base font-semibold text-surface-900">
+            <h3 class="mt-4 text-base font-semibold text-foreground">
               Aún no hay documentos disponibles
             </h3>
-            <p class="mx-auto mt-1 max-w-md text-sm text-surface-500">
+            <p class="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
               Cuando se publiquen documentos institucionales aparecerán aquí.
             </p>
           }
@@ -314,10 +314,10 @@
               >
                 <p
                   id="document-results-count"
-                  class="text-sm font-medium text-surface-700"
+                  class="text-sm font-medium text-muted-foreground"
                   aria-live="polite"
                 >
-                  <span class="font-semibold text-surface-900">
+                  <span class="font-semibold text-foreground">
                     {{ dataResource.value().total }}
                   </span>
                   {{

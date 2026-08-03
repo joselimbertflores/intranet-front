@@ -21,6 +21,22 @@
   color: var(--landing-forest);
 }
 
+:host-context(.dark) .landing-surface {
+  --landing-forest: var(--primary);
+  --landing-green: var(--primary);
+  --landing-mint: color-mix(in oklch, var(--card) 86%, var(--primary));
+  --landing-sky: color-mix(in oklch, var(--card) 88%, var(--color-sky-700));
+  --landing-lilac: color-mix(in oklch, var(--card) 88%, var(--color-violet-700));
+  --landing-peach: color-mix(in oklch, var(--card) 88%, var(--color-orange-700));
+  --landing-rose: color-mix(in oklch, var(--card) 88%, var(--color-rose-700));
+  --landing-warm: color-mix(in oklch, var(--background) 88%, var(--color-amber-700));
+  --landing-paper: var(--background);
+  --landing-line: var(--border);
+  --landing-muted: var(--muted-foreground);
+
+  color: var(--foreground);
+}
+
 .section-title {
   font-family: "Archivo Black", Aptos, "Segoe UI Variable", sans-serif;
   font-size: clamp(1.75rem, 3vw, 2.5rem);
@@ -65,12 +81,33 @@
   color: color-mix(in srgb, var(--quick-access-color) 88%, black);
 }
 
+:host-context(.dark) .quick-access-card {
+  border-color: color-mix(in oklch, var(--quick-access-color) 42%, var(--border));
+  background: color-mix(in oklch, var(--quick-access-color) 20%, var(--card));
+  color: color-mix(in oklch, var(--quick-access-color) 68%, var(--foreground));
+  box-shadow: 0 12px 30px -28px color-mix(in oklch, var(--quick-access-color) 70%, transparent);
+}
+
+:host-context(.dark) .quick-access-card:hover {
+  border-color: color-mix(in oklch, var(--quick-access-color) 58%, var(--border));
+  background: color-mix(in oklch, var(--quick-access-color) 28%, var(--card));
+  box-shadow: 0 18px 36px -28px color-mix(in oklch, var(--quick-access-color) 82%, transparent);
+}
+
+:host-context(.dark) .quick-access-card:focus-visible {
+  outline-color: color-mix(in oklch, var(--quick-access-color) 70%, var(--foreground));
+}
+
+:host-context(.dark) .quick-access-icon {
+  color: color-mix(in oklch, var(--quick-access-color) 78%, var(--foreground));
+}
+
 .document-row {
   transition: background-color 160ms ease;
 }
 
 .document-row:hover {
-  background: rgb(233 244 236 / 0.66);
+  background: color-mix(in srgb, var(--landing-mint) 66%, transparent);
 }
 
 @media (max-width: 479px) {

@@ -19,7 +19,7 @@ import { PortalDirectoryDataSource } from '../../services';
   templateUrl: './directory-page.html',
   styles: `
     .directory-list {
-      box-shadow: 0 18px 50px -42px color-mix(in srgb, var(--p-primary-900) 55%, transparent);
+      box-shadow: 0 18px 50px -42px color-mix(in srgb, var(--primary) 55%, transparent);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

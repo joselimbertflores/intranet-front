@@ -4,25 +4,63 @@
     description="Encuentra los sistemas y recursos institucionales disponibles."
   />
 
-  <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+  >
+    <div>
+      <a hlmBtn variant="ghost" size="sm" routerLink="/">
+        <ng-icon name="lucideArrowLeft" data-icon="inline-start" />
+        Volver al inicio
+      </a>
+    </div>
+
+    <section class="flex justify-center" aria-label="Buscar accesos rápidos">
+      <hlm-input-group class="w-full sm:max-w-lg">
+        <hlm-input-group-addon>
+          <ng-icon name="lucideSearch" />
+        </hlm-input-group-addon>
+        <input
+          id="quick-access-search"
+          hlmInputGroupInput
+          type="search"
+          autocomplete="off"
+          placeholder="Buscar accesos..."
+          aria-label="Buscar accesos"
+          [value]="searchTerm()"
+          [disabled]="!quickAccessesResource.hasValue()"
+          (input)="onSearchInput($event)"
+        />
+        @if (searchTerm()) {
+          <hlm-input-group-addon align="inline-end">
+            <button
+              hlmInputGroupButton
+              type="button"
+              size="icon-xs"
+              aria-label="Limpiar búsqueda"
+              (click)="clearSearch()"
+            >
+              <ng-icon name="lucideX" />
+            </button>
+          </hlm-input-group-addon>
+        }
+      </hlm-input-group>
+    </section>
+
     @if (
       quickAccessesResource.isLoading() && !quickAccessesResource.hasValue()
     ) {
       <div
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         aria-label="Cargando accesos rápidos"
       >
         @for (_ of skeletonItems; track $index) {
-          <div
-            class="flex min-h-52 flex-col gap-4 rounded-xl border border-border bg-card p-5"
-          >
-            <div hlmSkeleton class="size-12 rounded-xl"></div>
-            <div class="flex flex-col gap-2">
+          <div class="h-full rounded-xl border border-border bg-card p-5">
+            <div hlmSkeleton class="size-14 rounded-xl"></div>
+            <div class="mt-4 flex flex-col gap-2">
               <div hlmSkeleton class="h-5 w-4/5"></div>
               <div hlmSkeleton class="h-4 w-full"></div>
               <div hlmSkeleton class="h-4 w-2/3"></div>
             </div>
-            <div hlmSkeleton class="mt-auto h-4 w-28"></div>
           </div>
         }
       </div>
@@ -49,49 +87,7 @@
           Reintentar
         </button>
       </section>
-    } @else if (quickAccessesResource.value()?.length) {
-      <nav
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        aria-label="Todos los accesos rápidos"
-      >
-        @for (item of quickAccessesResource.value(); track item.id) {
-          <a
-            class="public-quick-access group flex min-h-52 min-w-0 flex-col rounded-xl border border-border bg-card p-5 text-card-foreground no-underline outline-none"
-            [href]="item.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            [style.--quick-access-color]="item.backgroundColor"
-            [attr.aria-label]="'Abrir ' + item.title + ' en una nueva pestaña'"
-          >
-            <span
-              class="public-quick-access-icon grid size-12 shrink-0 place-items-center rounded-xl text-2xl"
-              aria-hidden="true"
-            >
-              <ng-icon [name]="quickAccessIcon(item.iconKey)" />
-            </span>
-
-            <h2 class="mt-4 wrap-break-word text-lg font-semibold leading-6">
-              {{ item.title }}
-            </h2>
-
-            @if (item.description) {
-              <p
-                class="mt-2 wrap-break-word text-sm leading-6 text-muted-foreground"
-              >
-                {{ item.description }}
-              </p>
-            }
-
-            <span
-              class="mt-auto flex items-center gap-1.5 pt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-            >
-              Enlace externo
-              <ng-icon name="lucideExternalLink" aria-hidden="true" />
-            </span>
-          </a>
-        }
-      </nav>
-    } @else {
+    } @else if (!quickAccessesResource.value()?.length) {
       <section
         class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
       >
@@ -103,6 +99,70 @@
         <p class="mt-1 max-w-md text-sm text-muted-foreground">
           Los accesos activos aparecerán aquí cuando estén disponibles.
         </p>
+      </section>
+    } @else if (filteredQuickAccesses().length) {
+      <nav
+        class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        aria-label="Todos los accesos rápidos"
+      >
+        @for (item of filteredQuickAccesses(); track item.id) {
+          <a
+            class="public-quick-access relative h-full min-w-0 rounded-xl border border-border bg-card p-5 pr-12 text-card-foreground no-underline outline-none"
+            [href]="item.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            [style.--quick-access-color]="item.backgroundColor"
+          >
+            <span
+              class="public-quick-access-icon grid size-14 place-items-center rounded-xl"
+              aria-hidden="true"
+            >
+              <ng-icon [name]="quickAccessIcon(item.iconKey)" size="24px" />
+            </span>
+
+            <ng-icon
+              name="lucideExternalLink"
+              class="absolute right-4 top-4 text-sm text-muted-foreground"
+              aria-hidden="true"
+            />
+
+            <h2
+              class="mt-4 line-clamp-2 wrap-break-word text-lg font-semibold leading-6"
+            >
+              {{ item.title }}
+            </h2>
+
+            @if (item.description) {
+              <p
+                class="mt-2 line-clamp-3 wrap-break-word text-sm leading-6 text-muted-foreground"
+              >
+                {{ item.description }}
+              </p>
+            }
+
+            <span class="sr-only">Se abre en una nueva pestaña.</span>
+          </a>
+        }
+      </nav>
+    } @else {
+      <section
+        class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+        aria-live="polite"
+      >
+        <ng-icon name="lucideSearchX" class="text-3xl text-muted-foreground" />
+        <h2 class="mt-4 text-lg font-semibold">No se encontraron accesos</h2>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">
+          Prueba con otro título o descripción.
+        </p>
+        <button
+          hlmBtn
+          type="button"
+          variant="outline"
+          class="mt-5"
+          (click)="clearSearch()"
+        >
+          Limpiar búsqueda
+        </button>
       </section>
     }
   </div>

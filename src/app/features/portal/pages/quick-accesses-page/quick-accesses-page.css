@@ -36,9 +36,19 @@
 
 .public-quick-access-icon {
   border: 1px solid
-    color-mix(in oklch, var(--quick-access-color) 35%, var(--border));
-  background: color-mix(in oklch, var(--quick-access-color) 14%, var(--card));
-  color: color-mix(in oklch, var(--quick-access-color) 78%, var(--foreground));
+    color-mix(in srgb, var(--quick-access-color) 23%, var(--border));
+  background: color-mix(in srgb, var(--quick-access-color) 10%, var(--card));
+  color: var(--quick-access-color);
+}
+
+:host-context(.dark) .public-quick-access-icon {
+  border-color: color-mix(
+    in srgb,
+    var(--quick-access-color) 25%,
+    var(--border)
+  );
+  background: color-mix(in srgb, var(--quick-access-color) 12%, var(--card));
+  color: var(--quick-access-color);
 }
 
 @media (prefers-reduced-motion: reduce) {

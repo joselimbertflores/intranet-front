@@ -45,10 +45,7 @@ import { HlmSeparator } from '@spartan-ng/helm/separator';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
 
-import {
-  HierarchicalCombobox,
-  YearSelector,
-} from '../../../../../shared';
+import { HierarchicalCombobox, YearSelector } from '../../../../../shared';
 import { DOCUMENT_FILE_RULES } from '../../constants/document-file-rules';
 import { DocumentResponse, DocumentValidityStatus } from '../../interfaces';
 import { DocumentDataSource } from '../../services';
@@ -61,8 +58,8 @@ interface DocumentEditContext {
 interface DocumentEditFormModel {
   title: string;
   organizationalUnitId: number | null;
-  documentTypeId: number | null;
-  documentSubtypeId: number | null;
+  typeId: number | null;
+  subtypeId: number | null;
   year: number | null;
   status: string | null;
   validityStatus: DocumentValidityStatus;
@@ -131,6 +128,8 @@ export class DocumentEdit {
   readonly fileSelectionError = signal<string | null>(null);
   readonly updateError = signal<string | null>(null);
 
+  private lastSelectedDocumentTypeId: number | null = this.document.type.id;
+
   readonly formModel = signal<DocumentEditFormModel>(
     this.createInitialFormModel(),
   );
@@ -154,7 +153,7 @@ export class DocumentEdit {
         message: 'El título admite hasta 150 caracteres.',
       });
 
-      required(schemaPath.documentTypeId, {
+      required(schemaPath.typeId, {
         message: 'Seleccione un tipo documental.',
       });
       required(schemaPath.status, {
@@ -164,9 +163,9 @@ export class DocumentEdit {
         message: 'Seleccione la vigencia.',
       });
 
-      disabled(schemaPath.documentSubtypeId, {
+      disabled(schemaPath.subtypeId, {
         when: ({ valueOf }) => {
-          const typeId = valueOf(schemaPath.documentTypeId);
+          const typeId = valueOf(schemaPath.typeId);
           return !this.documentTypes().some(
             ({ id, subtypes }) => id === typeId && subtypes.length > 0,
           );
@@ -192,7 +191,7 @@ export class DocumentEdit {
   );
 
   readonly documentSubtypes = computed(() => {
-    const selectedTypeId = this.documentForm.documentTypeId().value();
+    const selectedTypeId = this.documentForm.typeId().value();
     return (
       this.documentTypes().find(({ id }) => id === selectedTypeId)?.subtypes ??
       []
@@ -225,8 +224,12 @@ export class DocumentEdit {
     }
   }
 
-  onDocumentTypeChange(): void {
-    this.documentForm.documentSubtypeId().value.set(null);
+  onDocumentTypeChange(currentTypeId: number | null | undefined): void {
+    if (currentTypeId === this.lastSelectedDocumentTypeId) {
+      return;
+    }
+    this.lastSelectedDocumentTypeId = currentTypeId ?? null;
+    this.documentForm.subtypeId().value.set(null);
   }
 
   onReplaceFileChange(replaceFile: boolean): void {
@@ -304,8 +307,8 @@ export class DocumentEdit {
     return {
       title: this.document.title,
       organizationalUnitId: this.document.organizationalUnit?.id ?? null,
-      documentTypeId: this.document.type.id,
-      documentSubtypeId: this.document.subtype?.id ?? null,
+      typeId: this.document.type.id,
+      subtypeId: this.document.subtype?.id ?? null,
       year: this.document.year ?? null,
       status: this.document.status,
       validityStatus: this.document.validityStatus,
@@ -322,8 +325,8 @@ export class DocumentEdit {
         this.documentDataSource.update(this.document.id, {
           title: formValue.title.trim(),
           organizationalUnitId: formValue.organizationalUnitId,
-          documentTypeId: formValue.documentTypeId,
-          documentSubtypeId: formValue.documentSubtypeId,
+          typeId: formValue.typeId,
+          subtypeId: formValue.subtypeId,
           year: formValue.year,
           status: formValue.status,
           validityStatus: formValue.validityStatus,

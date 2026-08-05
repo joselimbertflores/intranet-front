@@ -28,8 +28,8 @@ export interface CreateDocumentBatchDto {
 
 interface UpdateDocumentDto {
   organizationalUnitId?: number | null;
-  documentTypeId?: number | null;
-  documentSubtypeId?: number | null;
+  typeId?: number | null;
+  subtypeId?: number | null;
   year?: number | null;
   status?: string | null;
   validityStatus?: DocumentValidityStatus;

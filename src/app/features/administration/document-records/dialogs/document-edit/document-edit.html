@@ -49,8 +49,8 @@
       <div hlmField>
         <label hlmFieldLabel for="document-edit-type"> Tipo documental </label>
         <hlm-select
-          [formField]="documentForm.documentTypeId"
-          (valueChange)="onDocumentTypeChange()"
+          [formField]="documentForm.typeId"
+           (valueChange)="onDocumentTypeChange($event)"
         >
           <hlm-select-trigger class="w-full" buttonId="document-edit-type">
             <ng-template hlmSelectValueTemplate let-documentTypeId>
@@ -70,11 +70,8 @@
           </hlm-select-content>
         </hlm-select>
 
-        @if (isFieldInvalid("documentTypeId")) {
-          @for (
-            error of documentForm.documentTypeId().errors();
-            track error.kind
-          ) {
+        @if (isFieldInvalid("typeId")) {
+          @for (error of documentForm.typeId().errors(); track error.kind) {
             <hlm-field-error [validator]="error.kind">
               {{ error.message }}
             </hlm-field-error>
@@ -87,7 +84,7 @@
           Subtipo
           <span class="font-normal text-muted-foreground">(opcional)</span>
         </label>
-        <hlm-select [formField]="documentForm.documentSubtypeId">
+        <hlm-select [formField]="documentForm.subtypeId">
           <hlm-select-trigger class="w-full" buttonId="document-edit-subtype">
             <ng-template hlmSelectValueTemplate let-documentSubtypeId>
               {{ documentSubtypeNames().get(documentSubtypeId) }}

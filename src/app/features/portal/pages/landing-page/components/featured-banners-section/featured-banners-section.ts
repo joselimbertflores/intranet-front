@@ -35,16 +35,33 @@ import { FeaturedBanner } from '../../../../models';
     }),
   ],
   template: `
-    <hlm-carousel
-      #bannerCarousel
-      class="w-full"
-      [options]="carouselOptions()"
+    <section
+      class="bg-muted/60 py-14 text-foreground sm:py-16 lg:py-20"
+      aria-labelledby="featured-banners-title"
     >
+      <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+        <div class="mb-8 sm:mb-10">
+          <h2
+            id="featured-banners-title"
+            class="font-display text-3xl leading-tight tracking-[-0.025em] text-foreground sm:text-4xl"
+          >
+            Banners destacados
+          </h2>
+          <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg">
+            Conoce información y recursos relevantes para el trabajo municipal.
+          </p>
+        </div>
+
+        <hlm-carousel
+          #bannerCarousel
+          class="w-full"
+          [options]="carouselOptions()"
+        >
       <hlm-carousel-content class="ml-0 gap-4 sm:gap-6">
         @for (banner of items(); track banner.id) {
           <hlm-carousel-item class="basis-full pl-0">
             <article
-              class="featured-banner group relative h-[22rem] overflow-hidden rounded-3xl bg-[var(--landing-forest)] text-white sm:h-[24rem] lg:h-[26rem]"
+              class="featured-banner group relative h-[22rem] overflow-hidden rounded-3xl text-white sm:h-[24rem] lg:h-[26rem]"
             >
               @if (!failedImages().has(banner.id)) {
                 <img
@@ -129,7 +146,9 @@ import { FeaturedBanner } from '../../../../models';
           Banner {{ bannerCarousel.currentSlide() + 1 }} de {{ items().length }}
         </p>
       }
-    </hlm-carousel>
+        </hlm-carousel>
+      </div>
+    </section>
   `,
   styles: `
     :host {
@@ -137,6 +156,7 @@ import { FeaturedBanner } from '../../../../models';
     }
 
     .featured-banner {
+      background: #063f2b;
       box-shadow: 0 24px 56px -38px rgb(6 63 43 / 0.58);
     }
 
@@ -161,7 +181,7 @@ import { FeaturedBanner } from '../../../../models';
     .image-fallback {
       background:
         radial-gradient(circle at 78% 25%, rgb(255 255 255 / 0.13), transparent 24%),
-        linear-gradient(135deg, var(--landing-green), var(--landing-navy));
+        linear-gradient(135deg, #087a43, #06334a);
     }
 
     .banner-control {

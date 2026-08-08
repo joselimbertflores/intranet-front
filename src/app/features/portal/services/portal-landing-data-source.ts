@@ -5,7 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { PortalLandingResponse, QuickAccess } from '../models';
 
 @Injectable({ providedIn: 'root' })
-export class PortalLandingService {
+export class PortalLandingDataSource {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.baseUrl}/api/portal/landing`;
 

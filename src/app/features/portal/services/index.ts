@@ -4,4 +4,4 @@ export * from './portal-data-source';
 export * from './portal-directory-data-source';
 export * from './portal-document-data-source';
 export * from './portal-calendar-data-source';
-export * from './portal-landing.service';
+export * from './portal-landing-data-source';

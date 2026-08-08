@@ -6,6 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
@@ -13,13 +14,21 @@ import {
   lucideArrowUpRight,
   lucideMegaphone,
 } from '@ng-icons/lucide';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 
 import { PortalCommunicationResponse } from '../../../../interfaces';
 
 @Component({
   selector: 'landing-communications-section',
-  imports: [DatePipe, HlmCarouselImports, NgIcon, NgOptimizedImage],
+  imports: [
+    DatePipe,
+    HlmButtonImports,
+    HlmCarouselImports,
+    NgIcon,
+    NgOptimizedImage,
+    RouterLink,
+  ],
   providers: [
     { provide: LOCALE_ID, useValue: 'es' },
     provideIcons({
@@ -30,11 +39,34 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     }),
   ],
   template: `
-    <hlm-carousel
-      #communicationsCarousel
-      class="w-full"
-      [options]="carouselOptions"
+    <section
+      class="bg-card py-14 text-card-foreground sm:py-16 lg:py-20"
+      aria-labelledby="communications-title"
     >
+      <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
+        <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2
+              id="communications-title"
+              class="font-display text-3xl leading-tight tracking-[-0.025em] text-foreground sm:text-4xl"
+            >
+              Comunicados recientes
+            </h2>
+            <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg">
+              Mantente informado con las últimas comunicaciones institucionales.
+            </p>
+          </div>
+          <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
+            Ver todos los comunicados
+            <ng-icon name="lucideArrowRight" />
+          </a>
+        </div>
+
+        <hlm-carousel
+          #communicationsCarousel
+          class="w-full"
+          [options]="carouselOptions"
+        >
       <hlm-carousel-content>
         @for (communication of items(); track communication.id; let index = $index) {
           <hlm-carousel-item class="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
@@ -55,30 +87,30 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
                     (error)="markImageAsFailed(communication.id)"
                   />
                 } @else {
-                  <div class="grid h-full place-items-center text-5xl text-[var(--landing-green)]" aria-hidden="true">
+                  <div class="grid h-full place-items-center text-5xl text-primary" aria-hidden="true">
                     <ng-icon name="lucideMegaphone" />
                   </div>
                 }
               </div>
 
               <div class="flex flex-1 flex-col p-5">
-                <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--landing-green)]">
+                <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-primary">
                   <span>{{ communication.typeName }}</span>
                   @if (communication.code) {
-                    <span class="font-medium text-[var(--landing-muted)]">{{ communication.code }}</span>
+                    <span class="font-medium text-muted-foreground">{{ communication.code }}</span>
                   }
                 </div>
-                <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-extrabold text-[var(--landing-forest)]">
+                <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-extrabold text-foreground">
                   {{ communication.reference }}
                 </h3>
-                <time class="mt-3 text-sm text-[var(--landing-muted)]" [attr.datetime]="communication.createdAt">
+                <time class="mt-3 text-sm text-muted-foreground" [attr.datetime]="communication.createdAt">
                   {{ communication.createdAt | date: 'dd MMM yyyy' }}
                 </time>
                 <a
                   [href]="communication.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[var(--landing-green)] underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[var(--landing-green)]"
+                  class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Leer comunicado
                   <ng-icon name="lucideArrowUpRight" />
@@ -111,7 +143,9 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
           </button>
         </div>
       }
-    </hlm-carousel>
+        </hlm-carousel>
+      </div>
+    </section>
   `,
   styles: `
     :host {
@@ -119,8 +153,8 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     }
 
     .communication-card {
-      border-color: rgb(6 63 43 / 0.12);
-      background: var(--landing-mint);
+      border-color: var(--border);
+      background: var(--muted);
       box-shadow: 0 18px 45px -38px rgb(6 63 43 / 0.62);
       transition:
         border-color 180ms ease,
@@ -129,42 +163,42 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     }
 
     .communication-card-sky {
-      background: var(--landing-sky);
-      border-color: rgb(21 90 163 / 0.18);
+      background: var(--secondary);
+      border-color: var(--border);
     }
 
     .communication-card-peach {
-      background: var(--landing-peach);
-      border-color: rgb(194 93 10 / 0.18);
+      background: var(--accent);
+      border-color: var(--border);
     }
 
     .communication-card-lilac {
-      background: var(--landing-lilac);
-      border-color: rgb(112 38 165 / 0.16);
+      background: color-mix(in oklch, var(--muted) 82%, var(--primary));
+      border-color: var(--border);
     }
 
     .communication-card:hover {
-      border-color: rgb(8 122 67 / 0.42);
-      box-shadow: 0 24px 52px -36px rgb(6 63 43 / 0.48);
+      border-color: color-mix(in oklch, var(--primary) 42%, var(--border));
+      box-shadow: 0 24px 52px -36px color-mix(in oklch, var(--primary) 48%, transparent);
       transform: translateY(-0.2rem);
     }
 
     .communication-control {
-      border: 1px solid var(--landing-line);
-      background: white;
-      color: var(--landing-green);
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--primary);
       transition:
         border-color 160ms ease,
         background-color 160ms ease;
     }
 
     .communication-control:hover:not(:disabled) {
-      border-color: color-mix(in srgb, var(--landing-green) 45%, transparent);
-      background: var(--landing-mint);
+      border-color: color-mix(in oklch, var(--primary) 45%, transparent);
+      background: var(--muted);
     }
 
     .communication-control:focus-visible {
-      outline: 2px solid var(--landing-green);
+      outline: 2px solid var(--ring);
       outline-offset: 2px;
     }
 

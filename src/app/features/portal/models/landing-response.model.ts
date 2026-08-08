@@ -56,7 +56,6 @@ export interface LandingNotice {
 export interface PortalLandingResponse {
   heroSlides: HeroSlide[];
   quickAccesses: QuickAccess[];
-  hasMoreQuickAccesses: boolean;
   featuredBanners: FeaturedBanner[];
   landingNotices: LandingNotice[];
   latestCommunications: PortalCommunicationResponse[];

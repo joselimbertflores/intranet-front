@@ -27,7 +27,7 @@ import {
   quickAccessIconName,
 } from '../../constants/quick-access-icons';
 import { QuickAccessIconKey } from '../../models';
-import { PortalLandingService } from '../../services';
+import { PortalLandingDataSource } from '../../services';
 
 @Component({
   selector: 'app-quick-accesses-page',
@@ -56,7 +56,7 @@ import { PortalLandingService } from '../../services';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class QuickAccessesPage {
-  private readonly portalLandingService = inject(PortalLandingService);
+  private readonly portalLandingService = inject(PortalLandingDataSource);
 
   readonly quickAccessesResource = rxResource({
     stream: () => this.portalLandingService.getQuickAccesses(),

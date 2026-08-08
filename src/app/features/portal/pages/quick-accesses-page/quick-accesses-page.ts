@@ -21,12 +21,8 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
+import { QUICK_ACCESS_ICONS } from '../../../../shared/constants/quick-access-icons';
 import { PublicPageHeader } from '../../components';
-import {
-  QUICK_ACCESS_ICON_REGISTRY,
-  quickAccessIconName,
-} from '../../constants/quick-access-icons';
-import { QuickAccessIconKey } from '../../models';
 import { PortalLandingDataSource } from '../../services';
 
 @Component({
@@ -48,11 +44,11 @@ import { PortalLandingDataSource } from '../../services';
       lucideSearch,
       lucideSearchX,
       lucideX,
-      ...QUICK_ACCESS_ICON_REGISTRY,
+      ...QUICK_ACCESS_ICONS,
     }),
   ],
+  host: { class: 'block' },
   templateUrl: './quick-accesses-page.html',
-  styleUrl: './quick-accesses-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class QuickAccessesPage {
@@ -81,10 +77,6 @@ export default class QuickAccessesPage {
 
   clearSearch(): void {
     this.searchTerm.set('');
-  }
-
-  quickAccessIcon(iconKey: QuickAccessIconKey): string {
-    return quickAccessIconName(iconKey);
   }
 
   private normalizeSearchValue(value: string): string {

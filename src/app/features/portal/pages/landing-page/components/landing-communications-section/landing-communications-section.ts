@@ -38,6 +38,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
       lucideMegaphone,
     }),
   ],
+  host: { class: 'block' },
   template: `
     <section
       class="bg-card py-14 text-card-foreground sm:py-16 lg:py-20"
@@ -48,7 +49,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
           <div>
             <h2
               id="communications-title"
-              class="font-display text-3xl leading-tight tracking-[-0.025em] text-foreground sm:text-4xl"
+              class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
             >
               Comunicados recientes
             </h2>
@@ -71,7 +72,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
         @for (communication of items(); track communication.id; let index = $index) {
           <hlm-carousel-item class="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
             <article
-              class="communication-card flex min-h-96 flex-col overflow-hidden rounded-2xl border"
+              class="communication-card flex min-h-96 flex-col overflow-hidden rounded-2xl border border-border bg-muted"
               [class.communication-card-sky]="index % 4 === 1"
               [class.communication-card-peach]="index % 4 === 2"
               [class.communication-card-lilac]="index % 4 === 3"
@@ -87,8 +88,8 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
                     (error)="markImageAsFailed(communication.id)"
                   />
                 } @else {
-                  <div class="grid h-full place-items-center text-5xl text-primary" aria-hidden="true">
-                    <ng-icon name="lucideMegaphone" />
+                  <div class="grid h-full place-items-center text-primary" aria-hidden="true">
+                    <ng-icon name="lucideMegaphone" size="3rem" />
                   </div>
                 }
               </div>
@@ -124,8 +125,10 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
       @if (communicationsCarousel.canScrollPrev() || communicationsCarousel.canScrollNext()) {
         <div class="mt-5 flex items-center justify-end gap-2">
           <button
+            hlmBtn
             type="button"
-            class="communication-control grid size-9 place-items-center rounded-full outline-none"
+            variant="outline"
+            size="icon-lg"
             [disabled]="!communicationsCarousel.canScrollPrev()"
             aria-label="Mostrar comunicados anteriores"
             (click)="communicationsCarousel.scrollPrev()"
@@ -133,8 +136,10 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
             <ng-icon name="lucideArrowLeft" />
           </button>
           <button
+            hlmBtn
             type="button"
-            class="communication-control grid size-9 place-items-center rounded-full outline-none"
+            variant="outline"
+            size="icon-lg"
             [disabled]="!communicationsCarousel.canScrollNext()"
             aria-label="Mostrar comunicados siguientes"
             (click)="communicationsCarousel.scrollNext()"
@@ -148,14 +153,8 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     </section>
   `,
   styles: `
-    :host {
-      display: block;
-    }
-
     .communication-card {
-      border-color: var(--border);
-      background: var(--muted);
-      box-shadow: 0 18px 45px -38px rgb(6 63 43 / 0.62);
+      box-shadow: 0 18px 45px -38px color-mix(in oklch, var(--primary) 62%, transparent);
       transition:
         border-color 180ms ease,
         box-shadow 180ms ease,
@@ -164,17 +163,14 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
 
     .communication-card-sky {
       background: var(--secondary);
-      border-color: var(--border);
     }
 
     .communication-card-peach {
       background: var(--accent);
-      border-color: var(--border);
     }
 
     .communication-card-lilac {
       background: color-mix(in oklch, var(--muted) 82%, var(--primary));
-      border-color: var(--border);
     }
 
     .communication-card:hover {
@@ -183,33 +179,8 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
       transform: translateY(-0.2rem);
     }
 
-    .communication-control {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--primary);
-      transition:
-        border-color 160ms ease,
-        background-color 160ms ease;
-    }
-
-    .communication-control:hover:not(:disabled) {
-      border-color: color-mix(in oklch, var(--primary) 45%, transparent);
-      background: var(--muted);
-    }
-
-    .communication-control:focus-visible {
-      outline: 2px solid var(--ring);
-      outline-offset: 2px;
-    }
-
-    .communication-control:disabled {
-      cursor: not-allowed;
-      opacity: 0.35;
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .communication-card,
-      .communication-control {
+      .communication-card {
         transition: none;
       }
 

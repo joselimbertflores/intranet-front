@@ -9,20 +9,6 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  lucideAppWindow,
-  lucideBookOpen,
-  lucideCalendarDays,
-  lucideCarFront,
-  lucideChartNoAxesColumn,
-  lucideCircleHelp,
-  lucideClipboardList,
-  lucideExternalLink,
-  lucideFileText,
-  lucideLandmark,
-  lucideMail,
-  lucideUserRound,
-} from '@ng-icons/lucide';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
@@ -39,10 +25,11 @@ import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { firstValueFrom } from 'rxjs';
 
+import { QUICK_ACCESS_ICONS } from '../../../../../shared/constants/quick-access-icons';
+import type { QuickAccessIconKey } from '../../../../../shared/models/quick-access-icon-key';
 import {
-  QUICK_ACCESS_ICON_CATALOG,
+  QUICK_ACCESS_ICON_LABELS,
   QUICK_ACCESS_ICON_OPTIONS,
-  QuickAccessIconKey,
 } from '../../constants/quick-access-icons';
 import { QuickAccessResponse, QuickAccessToSave } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -81,22 +68,7 @@ interface QuickAccessEditorContext {
     HlmTextareaImports,
     NgIcon,
   ],
-  providers: [
-    provideIcons({
-      lucideAppWindow,
-      lucideBookOpen,
-      lucideCalendarDays,
-      lucideCarFront,
-      lucideChartNoAxesColumn,
-      lucideCircleHelp,
-      lucideClipboardList,
-      lucideExternalLink,
-      lucideFileText,
-      lucideLandmark,
-      lucideMail,
-      lucideUserRound,
-    }),
-  ],
+  providers: [provideIcons(QUICK_ACCESS_ICONS)],
   templateUrl: './quick-access-editor.html',
   host: {
     class: 'flex max-h-[calc(100dvh-4rem)] flex-col',
@@ -109,6 +81,8 @@ export class QuickAccessEditor {
   private readonly context = injectBrnDialogContext<QuickAccessEditorContext>();
 
   readonly quickAccess = this.context.quickAccess;
+  readonly iconLabels: Readonly<Record<string, string>> =
+    QUICK_ACCESS_ICON_LABELS;
   readonly iconOptions = QUICK_ACCESS_ICON_OPTIONS;
   readonly formModel = signal<QuickAccessFormData>({
     title: this.quickAccess?.title ?? '',
@@ -159,10 +133,6 @@ export class QuickAccessEditor {
       },
     },
   );
-
-  iconConfig(iconKey: QuickAccessIconKey) {
-    return QUICK_ACCESS_ICON_CATALOG[iconKey];
-  }
 
   isFieldInvalid(fieldName: keyof QuickAccessFormData): boolean {
     const field = this.quickAccessForm[fieldName]();

@@ -1,5 +1,6 @@
 import { DOCUMENT, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   PLATFORM_ID,
@@ -78,7 +79,8 @@ import { HeroSlide } from '../../../../models';
                     >
                       <ng-icon
                         name="lucideImageOff"
-                        class="text-6xl text-white/45"
+                        size="3.75rem"
+                        class="text-white/45"
                       />
                     </div>
                   }
@@ -101,13 +103,13 @@ import { HeroSlide } from '../../../../models';
                     <div class="max-w-3xl">
                       @if (index === 0) {
                         <h1
-                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]"
+                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
                         >
                           {{ slide.title }}
                         </h1>
                       } @else {
                         <h2
-                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]"
+                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
                         >
                           {{ slide.title }}
                         </h2>
@@ -128,7 +130,6 @@ import { HeroSlide } from '../../../../models';
                               hlmBtn
                               size="lg"
                               [routerLink]="url"
-                              class="w-fit"
                             >
                               {{ slide.linkLabel }}
                               <ng-icon name="lucideArrowRight" />
@@ -140,7 +141,6 @@ import { HeroSlide } from '../../../../models';
                               [href]="url"
                               target="_blank"
                               rel="noopener noreferrer"
-                              class="w-fit"
                             >
                               {{ slide.linkLabel }}
                               <ng-icon name="lucideArrowUpRight" />
@@ -205,7 +205,7 @@ import { HeroSlide } from '../../../../models';
           <div class="max-w-3xl">
             <h1
               id="landing-hero-fallback-title"
-              class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] text-white sm:text-5xl lg:text-[3.75rem]"
+              class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
             >
               Intranet institucional
             </h1>
@@ -221,6 +221,7 @@ import { HeroSlide } from '../../../../models';
     }
   `,
   styleUrl: './landing-hero-section.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingHeroSection {
   private readonly destroyRef = inject(DestroyRef);

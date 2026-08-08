@@ -156,21 +156,11 @@
             </button>
 
             <span
-              class="grid size-10 place-items-center rounded-lg border"
-              [style.border-color]="
-                'color-mix(in srgb, ' +
-                item.backgroundColor +
-                ' 35%, transparent)'
-              "
-              [style.background]="
-                'color-mix(in srgb, ' +
-                item.backgroundColor +
-                ' 16%, transparent)'
-              "
-              [style.color]="item.backgroundColor"
+              class="quick-access-icon-surface grid size-10 place-items-center rounded-lg border"
+              [style.--quick-access-color]="item.backgroundColor"
               aria-hidden="true"
             >
-              <ng-icon [name]="iconConfig(item.iconKey).icon" />
+              <ng-icon [name]="item.iconKey" />
             </span>
 
             <div class="min-w-0">

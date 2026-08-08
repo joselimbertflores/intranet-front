@@ -22,7 +22,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
           <div>
             <h2
               id="documents-title"
-              class="font-display text-3xl leading-tight tracking-[-0.025em] text-foreground sm:text-4xl"
+              class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
             >
               Documentos más descargados
             </h2>
@@ -38,7 +38,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
 
         <div class="overflow-hidden rounded-2xl border border-border bg-card/90 text-card-foreground shadow-sm">
           @for (document of visibleDocuments(); track document.id) {
-            <article class="document-row grid gap-4 border-b border-border p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <article class="grid gap-4 border-b border-border p-4 transition-colors last:border-b-0 hover:bg-muted/70 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
               <div class="flex min-w-0 items-center gap-4">
                 <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-primary" aria-hidden="true">
                   <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
@@ -78,21 +78,6 @@ import { PortalDocumentResponse } from '../../../../interfaces';
         </div>
       </div>
     </section>
-  `,
-  styles: `
-    .document-row {
-      transition: background-color 160ms ease;
-    }
-
-    .document-row:hover {
-      background: color-mix(in oklch, var(--muted) 72%, transparent);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .document-row {
-        transition: none;
-      }
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

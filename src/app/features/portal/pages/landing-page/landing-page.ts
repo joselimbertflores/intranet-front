@@ -1,4 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideRefreshCw } from '@ng-icons/lucide';
@@ -43,6 +48,7 @@ const EMPTY_LANDING_RESPONSE: PortalLandingResponse = {
   providers: [provideIcons({ lucideRefreshCw })],
   host: { class: 'block min-h-full bg-background text-foreground' },
   templateUrl: './landing-page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LandingPage {
   private readonly portalLandingDataSource = inject(PortalLandingDataSource);

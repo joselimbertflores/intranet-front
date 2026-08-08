@@ -1,4 +1,4 @@
-import { QuickAccessIconKey } from '../../constants/quick-access-icons';
+import type { QuickAccessIconKey } from '../../../../../shared/models/quick-access-icon-key';
 
 export interface QuickAccessResponse {
   id: number;

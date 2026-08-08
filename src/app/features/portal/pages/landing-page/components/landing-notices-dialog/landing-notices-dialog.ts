@@ -43,7 +43,7 @@ import { LandingNotice } from '../../../../models';
       >
         <hlm-dialog-header class="min-w-0 shrink-0">
           <h2 hlmDialogTitle class="font-display wrap-break-word text-xl tracking-[-0.02em] text-primary">Avisos institucionales</h2>
-          <p hlmDialogDescription class="text-muted-foreground">
+          <p hlmDialogDescription>
             Información vigente publicada para el personal municipal.
           </p>
         </hlm-dialog-header>
@@ -55,7 +55,7 @@ import { LandingNotice } from '../../../../models';
         >
           <hlm-carousel-content class="ml-0 w-full min-w-0">
             @for (notice of items(); track notice.id) {
-              <hlm-carousel-item class="w-full min-w-0 shrink-0 basis-full pl-0">
+              <hlm-carousel-item class="w-full pl-0">
                 <article class="max-h-[65dvh] w-full min-w-0 overflow-x-hidden overflow-y-auto px-1 pb-1">
                   <h3
                     class="font-display w-full min-w-0 max-w-[28ch] wrap-break-word text-balance text-2xl leading-tight tracking-[-0.02em] text-primary"

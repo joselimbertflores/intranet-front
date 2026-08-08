@@ -45,10 +45,7 @@ import {
   PermissionAction,
   Resource,
 } from '../../../../../core/auth/auth.types';
-import {
-  QUICK_ACCESS_ICON_CATALOG,
-  QuickAccessIconKey,
-} from '../../constants/quick-access-icons';
+import { QUICK_ACCESS_ICONS } from '../../../../../shared/constants/quick-access-icons';
 import { QuickAccessEditor } from '../../dialogs';
 import { QuickAccessResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -80,6 +77,7 @@ import { ContentSettingsDataSource } from '../../services';
       lucidePlus,
       lucideRefreshCw,
       lucideTrash2,
+      ...QUICK_ACCESS_ICONS,
     }),
   ],
   templateUrl: './quick-accesses-admin.html',
@@ -273,10 +271,6 @@ export default class QuickAccessesAdmin {
           );
         },
       });
-  }
-
-  iconConfig(iconKey: QuickAccessIconKey) {
-    return QUICK_ACCESS_ICON_CATALOG[iconKey];
   }
 
   private moveItem(previousIndex: number, currentIndex: number): void {

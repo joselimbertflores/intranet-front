@@ -107,17 +107,17 @@
       >
         @for (item of filteredQuickAccesses(); track item.id) {
           <a
-            class="public-quick-access relative h-full min-w-0 rounded-xl border border-border bg-card p-5 pr-12 text-card-foreground no-underline outline-none"
+            class="quick-access-surface relative h-full min-w-0 rounded-xl border p-5 pr-12 no-underline outline-none"
             [href]="item.url"
             target="_blank"
             rel="noopener noreferrer"
             [style.--quick-access-color]="item.backgroundColor"
           >
             <span
-              class="public-quick-access-icon grid size-14 place-items-center rounded-xl"
+              class="quick-access-icon-surface grid size-14 place-items-center rounded-xl border"
               aria-hidden="true"
             >
-              <ng-icon [name]="quickAccessIcon(item.iconKey)" size="24px" />
+              <ng-icon [name]="item.iconKey" size="1.5rem" />
             </span>
 
             <ng-icon

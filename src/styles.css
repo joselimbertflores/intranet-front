@@ -55,7 +55,6 @@
   --sidebar-ring: oklch(0.527 0.154 150.069);
 
   /* Existing portal surfaces remain application-level tokens. */
-  --portal-cream: #fbf6e9;
   --portal-mint: #eef8f1;
   --portal-sky: #edf6fb;
   --portal-amber: #fff3d8;
@@ -93,7 +92,6 @@
   --sidebar-border: oklch(0.42 0.025 158 / 55%);
   --sidebar-ring: oklch(0.72 0.17 150);
 
-  --portal-cream: color-mix(in oklch, var(--card) 88%, var(--color-amber-700));
   --portal-mint: color-mix(in oklch, var(--card) 86%, var(--primary));
   --portal-sky: color-mix(in oklch, var(--card) 88%, var(--color-sky-700));
   --portal-amber: color-mix(in oklch, var(--card) 82%, var(--color-amber-700));
@@ -133,6 +131,39 @@
     --tw-prose-th-borders: var(--border);
     --tw-prose-td-borders: var(--border);
   }
+
+  .quick-access-surface {
+    --quick-access-color: var(--primary);
+
+    border-color: color-mix(in srgb, var(--quick-access-color) 22%, var(--border));
+    background: color-mix(in srgb, var(--quick-access-color) 8%, var(--card));
+    color: var(--card-foreground);
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .quick-access-surface:hover {
+    border-color: color-mix(in srgb, var(--quick-access-color) 36%, var(--border));
+    background: color-mix(in srgb, var(--quick-access-color) 12%, var(--card));
+    transform: translateY(-0.2rem);
+  }
+
+  .quick-access-surface:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--quick-access-color) 35%, var(--ring));
+    outline-offset: 3px;
+  }
+
+  .quick-access-identity,
+  .quick-access-icon-surface {
+    color: color-mix(in srgb, var(--quick-access-color) 78%, var(--card-foreground));
+  }
+
+  .quick-access-icon-surface {
+    border-color: color-mix(in srgb, var(--quick-access-color) 28%, var(--border));
+    background: color-mix(in srgb, var(--quick-access-color) 12%, var(--card));
+  }
 }
 
 .portal-shell {
@@ -145,33 +176,12 @@
   }
 }
 
-/* DRAG AND DROP BASE BEHAVIOR */
-/* .app-drag-card {
-  width: 100%;
-  background: var(--p-surface-0, #ffffff);
-} */
+@media (prefers-reduced-motion: reduce) {
+  .quick-access-surface {
+    transition: none;
+  }
 
-/* Preview flotante */
-/* .cdk-drag-preview.app-drag-card {
-  box-sizing: border-box;
-  background: var(--p-surface-0, #ffffff);
-  border: 1px solid var(--p-surface-200, #e5e7eb);
-  border-radius: 0.75rem;
-  opacity: 1;
-  z-index: 9999;
-  box-shadow:
-    0 20px 25px -5px rgb(0 0 0 / 0.18),
-    0 8px 10px -6px rgb(0 0 0 / 0.18);
-} */
-
-/* Espacio que queda mientras arrastras */
-/* .cdk-drag-placeholder.app-drag-card {
-  opacity: 0.35;
-} */
-
-/* Animación al reordenar */
-/* .cdk-drag-animating.app-drag-card,
-.app-drag-list.cdk-drop-list-dragging
-  .app-drag-card:not(.cdk-drag-placeholder) {
-  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
-} */
+  .quick-access-surface:hover {
+    transform: none;
+  }
+}

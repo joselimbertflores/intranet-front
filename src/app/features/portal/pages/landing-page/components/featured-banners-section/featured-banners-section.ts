@@ -34,16 +34,17 @@ import { FeaturedBanner } from '../../../../models';
       lucideImageOff,
     }),
   ],
+  host: { class: 'block' },
   template: `
     <section
-      class="bg-muted/60 py-14 text-foreground sm:py-16 lg:py-20"
+      class="bg-muted/60 py-14 sm:py-16 lg:py-20"
       aria-labelledby="featured-banners-title"
     >
       <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
         <div class="mb-8 sm:mb-10">
           <h2
             id="featured-banners-title"
-            class="font-display text-3xl leading-tight tracking-[-0.025em] text-foreground sm:text-4xl"
+            class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
           >
             Banners destacados
           </h2>
@@ -59,7 +60,7 @@ import { FeaturedBanner } from '../../../../models';
         >
       <hlm-carousel-content class="ml-0 gap-4 sm:gap-6">
         @for (banner of items(); track banner.id) {
-          <hlm-carousel-item class="basis-full pl-0">
+          <hlm-carousel-item class="pl-0">
             <article
               class="featured-banner group relative h-[22rem] overflow-hidden rounded-3xl text-white sm:h-[24rem] lg:h-[26rem]"
             >
@@ -74,13 +75,13 @@ import { FeaturedBanner } from '../../../../models';
                 />
               } @else {
                 <div class="image-fallback absolute inset-0 grid place-items-center" aria-hidden="true">
-                  <ng-icon name="lucideImageOff" class="text-5xl text-white/60" />
+                  <ng-icon name="lucideImageOff" size="3rem" class="text-white/60" />
                 </div>
               }
 
               <div class="featured-wash absolute inset-0" aria-hidden="true"></div>
               <div class="relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10">
-                <h3 class="font-display max-w-[20ch] text-balance text-3xl leading-[1.06] tracking-[-0.025em] text-white sm:text-4xl">
+                <h3 class="font-display max-w-[20ch] text-balance text-3xl leading-[1.06] tracking-[-0.025em] sm:text-4xl">
                   {{ banner.title }}
                 </h3>
                 @if (banner.description) {
@@ -91,7 +92,7 @@ import { FeaturedBanner } from '../../../../models';
                 @if (banner.linkLabel && validUrl(banner.linkUrl); as url) {
                   <div class="mt-5">
                     @if (isInternalUrl(url)) {
-                      <a hlmBtn variant="secondary" [routerLink]="url" class="w-fit">
+                      <a hlmBtn variant="secondary" [routerLink]="url">
                         {{ banner.linkLabel }}
                         <ng-icon name="lucideArrowRight" />
                       </a>
@@ -102,7 +103,6 @@ import { FeaturedBanner } from '../../../../models';
                         [href]="url"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="w-fit"
                       >
                         {{ banner.linkLabel }}
                         <ng-icon name="lucideArrowUpRight" />
@@ -151,13 +151,9 @@ import { FeaturedBanner } from '../../../../models';
     </section>
   `,
   styles: `
-    :host {
-      display: block;
-    }
-
     .featured-banner {
-      background: #063f2b;
-      box-shadow: 0 24px 56px -38px rgb(6 63 43 / 0.58);
+      background: var(--primary);
+      box-shadow: 0 24px 56px -38px color-mix(in oklch, var(--primary) 58%, transparent);
     }
 
     .featured-banner-photo {

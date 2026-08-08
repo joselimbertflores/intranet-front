@@ -6,10 +6,7 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
   imports: [HlmSkeletonImports],
   host: { class: 'block' },
   template: `
-    <div
-      aria-label="Cargando contenido de la intranet"
-      aria-busy="true"
-    >
+    <div aria-label="Cargando contenido de la intranet" aria-busy="true">
       <section class="landing-hero-skeleton px-5 py-12 sm:px-8" aria-hidden="true">
         <div class="mx-auto flex h-full w-full max-w-7xl items-end sm:items-center">
           <div class="w-full max-w-2xl">

@@ -20,23 +20,10 @@
       [style.--quick-access-color]="quickAccessForm.backgroundColor().value()"
     >
       <span
-        class="grid size-11 shrink-0 place-items-center rounded-lg border"
-        style="
-          border-color: color-mix(
-            in srgb,
-            var(--quick-access-color) 35%,
-            transparent
-          );
-          background: color-mix(
-            in srgb,
-            var(--quick-access-color) 16%,
-            transparent
-          );
-          color: var(--quick-access-color);
-        "
+        class="quick-access-icon-surface grid size-11 shrink-0 place-items-center rounded-lg border"
         aria-hidden="true"
       >
-        <ng-icon [name]="iconConfig(quickAccessForm.iconKey().value()).icon" />
+        <ng-icon [name]="quickAccessForm.iconKey().value()" />
       </span>
       <div class="min-w-0">
         <p class="line-clamp-2 font-medium">
@@ -98,8 +85,8 @@
             <hlm-select-trigger class="w-full" buttonId="quick-access-icon">
               <ng-template hlmSelectValueTemplate let-iconKey>
                 <span class="flex min-w-0 items-center gap-2">
-                  <ng-icon [name]="iconConfig(iconKey).icon" />
-                  <span class="truncate">{{ iconConfig(iconKey).label }}</span>
+                  <ng-icon [name]="iconKey" />
+                  <span class="truncate">{{ iconLabels[iconKey] }}</span>
                 </span>
               </ng-template>
               <hlm-select-placeholder
@@ -110,7 +97,7 @@
               <hlm-select-group>
                 @for (option of iconOptions; track option.key) {
                   <hlm-select-item [value]="option.key">
-                    <ng-icon [name]="option.icon" />
+                    <ng-icon [name]="option.key" />
                     <span>{{ option.label }}</span>
                   </hlm-select-item>
                 }

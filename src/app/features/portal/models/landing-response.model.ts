@@ -2,6 +2,7 @@ import {
   PortalCommunicationResponse,
   PortalDocumentResponse,
 } from '../interfaces';
+import type { QuickAccessIconKey } from '../../../shared/models/quick-access-icon-key';
 
 export interface HeroSlide {
   id: number;
@@ -11,20 +12,6 @@ export interface HeroSlide {
   linkUrl: string | null;
   imageUrl: string;
 }
-
-export type QuickAccessIconKey =
-  | 'email'
-  | 'application'
-  | 'document'
-  | 'book'
-  | 'form'
-  | 'report'
-  | 'calendar'
-  | 'user'
-  | 'support'
-  | 'finance'
-  | 'vehicle'
-  | 'external-link';
 
 export interface QuickAccess {
   id: number;

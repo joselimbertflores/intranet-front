@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   debounced,
@@ -10,7 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { FormField, FormRoot, form } from '@angular/forms/signals';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -36,6 +35,7 @@ import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { PublicPageHeader } from '../../components';
 import { PortalDirectoryEntryResponse } from '../../interfaces';
 import { PortalDirectoryDataSource } from '../../services';
+import { HlmTableImports } from '@spartan-ng/helm/table';
 
 interface DirectoryFiltersModel {
   siteId: number | null;
@@ -71,6 +71,7 @@ interface DirectorySiteGroup {
     HlmSpinner,
     NgIcon,
     PublicPageHeader,
+    HlmTableImports
   ],
   providers: [
     provideIcons({
@@ -87,7 +88,6 @@ interface DirectorySiteGroup {
     }),
   ],
   templateUrl: './directory-page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DirectoryPage {
   private readonly route = inject(ActivatedRoute);
@@ -97,18 +97,20 @@ export default class DirectoryPage {
     initialValue: this.route.snapshot.queryParamMap,
   });
 
-  readonly entriesResource = this.dataSource.entriesResource;
-  readonly sitesResource = this.dataSource.sitesResource;
-  readonly sites = computed(() => this.sitesResource.value() ?? []);
-  readonly siteNames = computed(
+  entriesResource = rxResource({ stream: () => this.dataSource.getEntries() });
+
+  sites = toSignal(this.dataSource.getSites(), { initialValue: [] });
+  siteNames = computed(
     () => new Map(this.sites().map(({ id, name }) => [id, name])),
   );
+
   readonly skeletonRows = Array.from({ length: 8 });
   readonly copiedValue = signal<string | null>(null);
 
   private readonly rawQueryState = computed(() =>
     this.parseQueryState(this.queryParamMap()),
   );
+
   readonly queryState = computed<DirectoryQueryState>(() => {
     const state = this.rawQueryState();
     const siteId = this.sites().some(({ id }) => id === state.siteId)
@@ -157,15 +159,6 @@ export default class DirectoryPage {
       if (term === state.term) return;
       untracked(() => this.navigateToState({ ...state, term }, true));
     });
-
-    effect(() => {
-      const paramMap = this.queryParamMap();
-      if (!this.sitesResource.hasValue()) return;
-      const state = this.queryState();
-      const params = this.toQueryParams(state);
-      if (this.queryParamsMatch(paramMap, params)) return;
-      untracked(() => this.navigateToState(state, true));
-    });
   }
 
   onSearchInput(event: Event): void {
@@ -178,27 +171,16 @@ export default class DirectoryPage {
     this.navigateToState({ ...this.queryState(), term: '' }, true);
   }
 
-  selectSite(siteId: number | null | undefined): void {
-    this.navigateToState(
-      { ...this.queryState(), siteId: siteId ?? null },
-      true,
-    );
-  }
-
   resetFilters(): void {
     this.searchTerm.set('');
     this.navigateToState({ term: '', siteId: null }, true);
   }
 
-  reloadDirectory(): void {
-    this.dataSource.reload();
-  }
-
-  reloadSites(): void {
-    this.dataSource.reloadSites();
-  }
-
-  copyToken(entryId: number, kind: 'phone' | 'extension', value: string): string {
+  copyToken(
+    entryId: number,
+    kind: 'phone' | 'extension',
+    value: string,
+  ): string {
     return `${entryId}:${kind}:${value}`;
   }
 
@@ -258,7 +240,10 @@ export default class DirectoryPage {
         name: group.name,
         areas: [...group.areas.entries()]
           .sort(([left], [right]) => left.localeCompare(right, 'es'))
-          .map(([areaName, areaEntries]) => ({ areaName, entries: areaEntries })),
+          .map(([areaName, areaEntries]) => ({
+            areaName,
+            entries: areaEntries,
+          })),
       }));
   }
 
@@ -303,7 +288,10 @@ export default class DirectoryPage {
     );
   }
 
-  private navigateToState(state: DirectoryQueryState, replaceUrl: boolean): void {
+  private navigateToState(
+    state: DirectoryQueryState,
+    replaceUrl: boolean,
+  ): void {
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: this.toQueryParams(state),

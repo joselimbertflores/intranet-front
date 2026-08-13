@@ -1,0 +1,238 @@
+<div class="flex flex-col gap-5">
+  <section
+    class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+    aria-label="Búsqueda y filtros del directorio"
+  >
+    <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end">
+      <div hlmField>
+        <label hlmFieldLabel for="directory-search">Buscar en el directorio</label>
+        <hlm-input-group class="w-full">
+          <hlm-input-group-addon>
+            <ng-icon name="lucideSearch" />
+          </hlm-input-group-addon>
+          <input
+            id="directory-search"
+            hlmInputGroupInput
+            type="search"
+            autocomplete="off"
+            maxlength="255"
+            placeholder="Área, contacto, teléfono o interno…"
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+          />
+          @if (searchTerm()) {
+            <hlm-input-group-addon align="inline-end">
+              <button
+                hlmInputGroupButton
+                type="button"
+                size="icon-xs"
+                aria-label="Limpiar búsqueda"
+                (click)="searchTerm.set('')"
+              >
+                <ng-icon name="lucideX" />
+              </button>
+            </hlm-input-group-addon>
+          }
+        </hlm-input-group>
+      </div>
+
+      <div hlmField>
+        <label hlmFieldLabel for="directory-site">Sede</label>
+        <hlm-select
+          [value]="selectedSiteId()"
+          (valueChange)="selectSite($event)"
+        >
+          <hlm-select-trigger class="w-full" buttonId="directory-site">
+            <ng-template hlmSelectValueTemplate let-value>
+              {{ value === null ? "Todas las sedes" : siteNames().get(value) }}
+            </ng-template>
+            <hlm-select-placeholder>Todas las sedes</hlm-select-placeholder>
+          </hlm-select-trigger>
+          <hlm-select-content *hlmSelectPortal>
+            <hlm-select-group>
+              <hlm-select-item [value]="null">Todas las sedes</hlm-select-item>
+              @for (site of sites(); track site.id) {
+                <hlm-select-item [value]="site.id">{{ site.name }}</hlm-select-item>
+              }
+            </hlm-select-group>
+          </hlm-select-content>
+        </hlm-select>
+      </div>
+
+      <button
+        hlmBtn
+        type="button"
+        variant="ghost"
+        class="w-full md:w-auto"
+        [disabled]="!hasActiveFilters()"
+        (click)="resetFilters()"
+      >
+        <ng-icon name="lucideX" data-icon="inline-start" />
+        Limpiar
+      </button>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-3" aria-labelledby="directory-results-title">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2
+        id="directory-results-title"
+        class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+      >
+        Contactos institucionales
+      </h2>
+      <span class="text-sm text-muted-foreground" aria-live="polite">
+        <span class="font-semibold text-foreground">{{ filteredEntries().length }}</span>
+        {{ filteredEntries().length === 1 ? "contacto" : "contactos" }}
+      </span>
+    </div>
+
+    @if (filteredEntries().length) {
+      <div hlmTableContainer class="hidden overflow-hidden rounded-xl border bg-card md:block">
+        <table hlmTable>
+          <thead hlmTableHeader>
+            <tr hlmTableRow>
+              <th hlmTableHead>Área / contacto</th>
+              <th hlmTableHead>Sede</th>
+              <th hlmTableHead>Teléfonos</th>
+              <th hlmTableHead>Correo</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (entry of filteredEntries(); track entry.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell class="max-w-72 whitespace-normal px-4 py-3 align-top">
+                  <p class="font-medium">{{ entry.areaName }}</p>
+                  @if (entry.contactLabel) {
+                    <p class="mt-1 text-sm text-muted-foreground">{{ entry.contactLabel }}</p>
+                  }
+                </td>
+                <td hlmTableCell class="max-w-64 whitespace-normal px-4 py-3 align-top">
+                  @if (entry.site) {
+                    <p>{{ entry.site.name }}</p>
+                    @if (entry.siteDetails) {
+                      <p class="mt-1 text-sm text-muted-foreground">{{ entry.siteDetails }}</p>
+                    }
+                  } @else {
+                    <span class="text-muted-foreground">—</span>
+                  }
+                </td>
+                <td hlmTableCell class="whitespace-normal px-4 py-3 align-top">
+                  <div class="flex flex-col items-start gap-1.5">
+                    @for (phone of entry.phones; track phone) {
+                      <a
+                        class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+                        [href]="phoneHref(phone)"
+                      >
+                        <ng-icon name="lucidePhone" />
+                        {{ phone }}
+                      </a>
+                    }
+                    @if (entry.extensions.length) {
+                      <div class="flex flex-wrap gap-1.5">
+                        @for (extension of entry.extensions; track extension) {
+                          <span hlmBadge variant="secondary">Int. {{ extension }}</span>
+                        }
+                      </div>
+                    }
+                    @if (!entry.phones.length && !entry.extensions.length) {
+                      <span class="text-muted-foreground">—</span>
+                    }
+                  </div>
+                </td>
+                <td hlmTableCell class="max-w-72 whitespace-normal px-4 py-3 align-top">
+                  @if (entry.email) {
+                    <a
+                      class="wrap-break-word text-primary hover:underline"
+                      [href]="'mailto:' + entry.email"
+                    >
+                      {{ entry.email }}
+                    </a>
+                  } @else {
+                    <span class="text-muted-foreground">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid gap-3 md:hidden">
+        @for (entry of filteredEntries(); track entry.id) {
+          <article class="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div class="flex flex-col gap-1">
+              <h3 class="font-semibold">{{ entry.areaName }}</h3>
+              @if (entry.contactLabel) {
+                <p class="text-sm text-muted-foreground">{{ entry.contactLabel }}</p>
+              }
+            </div>
+
+            @if (entry.site || entry.siteDetails) {
+              <div class="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+                <ng-icon name="lucideMapPin" class="mt-0.5 shrink-0" />
+                <p>
+                  {{ entry.site?.name }}
+                  @if (entry.siteDetails) {
+                    <span> · {{ entry.siteDetails }}</span>
+                  }
+                </p>
+              </div>
+            }
+
+            @if (entry.phones.length || entry.extensions.length || entry.email) {
+              <div class="mt-4 flex flex-col gap-2 border-t border-border pt-3">
+                @for (phone of entry.phones; track phone) {
+                  <a
+                    class="inline-flex items-center gap-2 text-sm font-medium text-primary"
+                    [href]="phoneHref(phone)"
+                  >
+                    <ng-icon name="lucidePhone" />
+                    {{ phone }}
+                  </a>
+                }
+                @if (entry.extensions.length) {
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (extension of entry.extensions; track extension) {
+                      <span hlmBadge variant="secondary">Int. {{ extension }}</span>
+                    }
+                  </div>
+                }
+                @if (entry.email) {
+                  <a
+                    class="inline-flex min-w-0 items-center gap-2 text-sm text-primary"
+                    [href]="'mailto:' + entry.email"
+                  >
+                    <ng-icon name="lucideMail" class="shrink-0" />
+                    <span class="truncate">{{ entry.email }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    } @else {
+      <div
+        class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+      >
+        <ng-icon name="lucideContactRound" class="text-3xl text-muted-foreground" />
+        <h2 class="mt-4 text-lg font-semibold">
+          {{ hasActiveFilters() ? "No hay coincidencias" : "El directorio está vacío" }}
+        </h2>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">
+          {{
+            hasActiveFilters()
+              ? "Prueba con otra área, contacto, teléfono, interno o sede."
+              : "Los contactos aparecerán aquí cuando estén disponibles."
+          }}
+        </p>
+        @if (hasActiveFilters()) {
+          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    }
+  </section>
+</div>

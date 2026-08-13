@@ -1,426 +1,79 @@
 <div class="min-h-[55vh] bg-muted/30 pb-16">
   <public-page-header
     title="Directorio institucional"
-    description="Consulta teléfonos, internos y contactos de las áreas municipales."
+    description="Consulta teléfonos, internos, contactos y la ubicación de nuestras sedes."
   />
 
-  <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-  >
-    <section
-      class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
-      aria-label="Búsqueda y filtros del directorio"
+  <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <hlm-tabs
+      [tab]="activeTab()"
+      (tabActivated)="selectTab($event)"
+      class="gap-5"
     >
-      <form
-        class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end"
-        [formRoot]="filtersForm"
-        (submit)="$event.preventDefault()"
-      >
-        <div hlmField>
-          <label hlmFieldLabel for="directory-search"
-            >Buscar en el directorio</label
-          >
-          <hlm-input-group class="w-full">
-            <hlm-input-group-addon
-              ><ng-icon name="lucideSearch"
-            /></hlm-input-group-addon>
-            <input
-              id="directory-search"
-              hlmInputGroupInput
-              type="search"
-              autocomplete="off"
-              maxlength="255"
-              placeholder="Área, contacto, teléfono o interno…"
-              [value]="searchTerm()"
-              (input)="onSearchInput($event)"
-            />
-            <!-- @if (searchTerm()) {
-              <hlm-input-group-addon align="inline-end">
-                <button hlmInputGroupButton type="button" size="icon-xs" aria-label="Limpiar búsqueda" (click)="clearSearch()">
-                  <ng-icon name="lucideX" />
-                </button>
-              </hlm-input-group-addon>
-            } -->
-          </hlm-input-group>
-        </div>
-
-        <hlm-field>
-          <label hlmFieldLabel for="directory-site">Sede</label>
-          <hlm-select [formField]="filtersForm.siteId">
-            <hlm-select-trigger class="w-full" buttonId="directory-site">
-              <ng-template hlmSelectValueTemplate let-value>
-                {{
-                  value === null ? "Todas las sedes" : siteNames().get(value)
-                }}
-              </ng-template>
-              <hlm-select-placeholder>Todas las sedes</hlm-select-placeholder>
-            </hlm-select-trigger>
-            <hlm-select-content *hlmSelectPortal>
-              <hlm-select-group>
-                <hlm-select-item [value]="null">
-                  Todas las sedes
-                </hlm-select-item>
-                @for (site of sites(); track site.id) {
-                  <hlm-select-item [value]="site.id">
-                    {{ site.name }}
-                  </hlm-select-item>
-                }
-              </hlm-select-group>
-            </hlm-select-content>
-          </hlm-select>
-        </hlm-field>
-
-        <button
-          hlmBtn
-          type="button"
-          variant="ghost"
-          class="w-full md:w-auto"
-          [disabled]="!hasActiveFilters()"
-          (click)="resetFilters()"
-        >
-          <ng-icon name="lucideX" data-icon="inline-start" /> Limpiar
+      <hlm-tabs-list class="grid w-full grid-cols-2 sm:w-fit">
+        <button hlmTabsTrigger="directory">
+          <ng-icon name="lucideBuilding2" />
+          Directorio
         </button>
-      </form>
-    </section>
+        <button hlmTabsTrigger="map">
+          <ng-icon name="lucideMapPinned" />
+          Mapa de sedes
+        </button>
+      </hlm-tabs-list>
 
-    <section
-      class="flex flex-col gap-4"
-      aria-labelledby="directory-results-title"
-    >
-      <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
-        <h2
-          id="directory-results-title"
-          class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
-        >
-          Contactos institucionales
-        </h2>
-        <div class="flex items-center gap-4">
-          @if (entriesResource.hasValue()) {
-            <span class="text-sm text-muted-foreground" aria-live="polite">
-              <span class="font-semibold text-foreground">{{
-                filteredEntries().length
-              }}</span>
-              {{ filteredEntries().length === 1 ? "contacto" : "contactos" }}
-            </span>
-          }
-          @if (isUpdating()) {
-            <span
-              class="inline-flex items-center gap-2 text-sm text-muted-foreground"
-              role="status"
-              ><hlm-spinner /> Actualizando…</span
-            >
-          }
-        </div>
-      </div>
-
-      @if (isInitialLoading()) {
-        <div
-          class="overflow-hidden rounded-xl border border-border bg-card"
-          aria-label="Cargando directorio"
-        >
-          @for (_ of skeletonRows; track $index) {
+      @if (activeTab() === "directory") {
+        <div hlmTabsContent="directory">
+          @if (directoryResource.isLoading() && !directoryResource.hasValue()) {
             <div
-              class="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center"
+              class="flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4"
+              aria-label="Cargando directorio"
             >
-              <div class="flex flex-col gap-2">
-                <div hlmSkeleton class="h-5 w-52"></div>
-                <div hlmSkeleton class="h-4 w-36"></div>
-              </div>
-              <div hlmSkeleton class="h-8 w-full"></div>
-            </div>
-          }
-        </div>
-      } @else if (entriesResource.error()) {
-        <div
-          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
-          role="alert"
-        >
-          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-          <h2 class="mt-4 text-lg font-semibold">
-            No se pudo cargar el directorio
-          </h2>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">
-            Verifica la conexión e intenta nuevamente.
-          </p>
-        </div>
-      } @else if (filteredEntries().length) {
-        <!-- <div class="flex flex-col gap-5">
-          @for (siteGroup of groupedEntries(); track siteGroup.key) {
-            <section
-              class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-              [attr.aria-labelledby]="'directory-site-' + siteGroup.key"
-            >
-              <header
-                class="flex items-center gap-3 border-b border-border bg-muted/45 px-4 py-3 sm:px-5"
-              >
-                <span
-                  class="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
-                  ><ng-icon name="lucideMapPin"
-                /></span>
-                <h3
-                  [id]="'directory-site-' + siteGroup.key"
-                  class="min-w-0 font-semibold"
-                >
-                  {{ siteGroup.name }}
-                </h3>
-              </header>
-
-              @for (area of siteGroup.areas; track area.areaName) {
-                <section
-                  class="border-b border-border last:border-b-0"
-                  [attr.aria-labelledby]="
-                    'directory-area-' + siteGroup.key + '-' + $index
-                  "
-                >
-                  <div
-                    class="border-b border-border/70 bg-muted/20 px-4 py-2.5 sm:px-5"
-                  >
-                    <h4
-                      [id]="'directory-area-' + siteGroup.key + '-' + $index"
-                      class="text-sm font-semibold text-primary"
-                    >
-                      {{ area.areaName }}
-                    </h4>
-                  </div>
-
-                  @for (entry of area.entries; track entry.id) {
-                    <article
-                      class="grid min-w-0 gap-4 border-b border-border/70 px-4 py-4 last:border-b-0 sm:px-5 lg:grid-cols-[minmax(12rem,1fr)_minmax(0,1.6fr)] lg:items-center"
-                    >
-                      <div class="min-w-0">
-                        <p class="font-medium">
-                          {{ entry.contactLabel || "Contacto institucional" }}
-                        </p>
-                        @if (entry.siteDetails) {
-                          <p
-                            class="mt-1 wrap-break-word text-sm text-muted-foreground"
-                          >
-                            {{ entry.siteDetails }}
-                          </p>
-                        }
-                        @if (entry.email) {
-                          <a
-                            class="mt-2 inline-flex max-w-full items-center gap-2 text-sm text-muted-foreground outline-none hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring"
-                            [href]="'mailto:' + entry.email"
-                          >
-                            <ng-icon name="lucideMail" class="shrink-0" />
-                            <span class="truncate">{{ entry.email }}</span>
-                          </a>
-                        }
-                      </div>
-
-                      <div class="flex min-w-0 flex-col gap-3 lg:items-end">
-                        @if (entry.extensions.length) {
-                          <div
-                            class="flex flex-wrap items-center gap-2 lg:justify-end"
-                          >
-                            <span
-                              class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                              >Internos</span
-                            >
-                            @for (
-                              extension of entry.extensions;
-                              track extension
-                            ) {
-                              @let token =
-                                copyToken(entry.id, "extension", extension);
-                              <button
-                                hlmBtn
-                                type="button"
-                                size="sm"
-                                variant="secondary"
-                                class="font-mono"
-                                [title]="
-                                  copiedValue() === token
-                                    ? 'Interno copiado'
-                                    : 'Copiar interno'
-                                "
-                                [attr.aria-label]="
-                                  'Copiar interno ' + extension
-                                "
-                                (click)="copyValue(token, extension)"
-                              >
-                                {{ extension }}
-                                <ng-icon
-                                  [name]="
-                                    copiedValue() === token
-                                      ? 'lucideCheck'
-                                      : 'lucideCopy'
-                                  "
-                                  data-icon="inline-end"
-                                />
-                              </button>
-                            }
-                          </div>
-                        }
-
-                        @if (entry.phones.length) {
-                          <div
-                            class="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end"
-                          >
-                            @for (phone of entry.phones; track phone) {
-                              @let token = copyToken(entry.id, "phone", phone);
-                              <div
-                                class="inline-flex max-w-full items-center rounded-lg border border-border bg-background"
-                              >
-                                <a
-                                  hlmBtn
-                                  size="sm"
-                                  variant="ghost"
-                                  class="min-w-0 font-mono"
-                                  [href]="phoneHref(phone)"
-                                  [attr.aria-label]="'Llamar al ' + phone"
-                                >
-                                  <ng-icon
-                                    name="lucidePhone"
-                                    data-icon="inline-start"
-                                  />
-                                  <span class="truncate">{{ phone }}</span>
-                                </a>
-                                <button
-                                  hlmBtn
-                                  type="button"
-                                  size="icon-sm"
-                                  variant="ghost"
-                                  [title]="
-                                    copiedValue() === token
-                                      ? 'Teléfono copiado'
-                                      : 'Copiar teléfono'
-                                  "
-                                  [attr.aria-label]="'Copiar teléfono ' + phone"
-                                  (click)="copyValue(token, phone)"
-                                >
-                                  <ng-icon
-                                    [name]="
-                                      copiedValue() === token
-                                        ? 'lucideCheck'
-                                        : 'lucideCopy'
-                                    "
-                                  />
-                                </button>
-                              </div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    </article>
-                  }
-                </section>
+              @for (_ of skeletonRows; track $index) {
+                <div class="grid gap-3 py-2 md:grid-cols-4">
+                  <div hlmSkeleton class="h-5 w-48"></div>
+                  <div hlmSkeleton class="h-5 w-36"></div>
+                  <div hlmSkeleton class="h-5 w-32"></div>
+                  <div hlmSkeleton class="h-5 w-40"></div>
+                </div>
               }
-            </section>
+            </div>
+          } @else if (directoryResource.error()) {
+            <ng-container *ngTemplateOutlet="loadError" />
+          } @else {
+            <app-directory-list
+              [entries]="directoryResource.value()?.entries ?? []"
+              [sites]="sites()"
+            />
           }
-        </div> -->
-        
-
-        <div
-          hlmTableContainer
-          class="overflow-hidden rounded-xl border bg-card p-2"
-        >
-          <div class="overflow-x-auto">
-            <table hlmTable class="w-full">
-              <thead hlmTableHeader>
-                <tr hlmTableRow>
-                  <th hlmTableHead>Área / contacto</th>
-                  <th hlmTableHead>Sede</th>
-                  <th hlmTableHead>Teléfonos</th>
-                  <th hlmTableHead>Correo</th>
-                </tr>
-              </thead>
-
-              <tbody hlmTableBody>
-                @for (entry of entriesResource.value() ?? []; track entry.id) {
-                  <tr hlmTableRow>
-                    <td hlmTableCell>
-                      <div class="font-medium">
-                        {{ entry.areaName }}
-                      </div>
-
-                      @if (entry.contactLabel) {
-                        <div class="text-sm text-muted-foreground">
-                          {{ entry.contactLabel }}
-                        </div>
-                      }
-                    </td>
-
-                    <td hlmTd>
-                      @if (entry.site) {
-                        <div>{{ entry.site.name }}</div>
-
-                        @if (entry.siteDetails) {
-                          <div class="mt-1 text-sm text-muted-foreground">
-                            {{ entry.siteDetails }}
-                          </div>
-                        }
-                      } @else {
-                        <span class="text-muted-foreground">—</span>
-                      }
-                    </td>
-
-                    <td hlmTd>
-                      @for (phone of entry.phones; track phone) {
-                        <div>{{ phone }}</div>
-                      }
-
-                      @if (entry.extensions.length) {
-                        <div class="mt-1 text-sm text-muted-foreground">
-                          Int. {{ entry.extensions.join(", ") }}
-                        </div>
-                      }
-                    </td>
-
-                    <td hlmTd>
-                      @if (entry.email) {
-                        <a
-                          class="text-primary hover:underline"
-                          [href]="'mailto:' + entry.email"
-                        >
-                          {{ entry.email }}
-                        </a>
-                      } @else {
-                        <span class="text-muted-foreground">—</span>
-                      }
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
         </div>
       } @else {
-        <div
-          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
-        >
-          <ng-icon
-            name="lucideContactRound"
-            class="text-3xl text-muted-foreground"
-          />
-          <h2 class="mt-4 text-lg font-semibold">
-            {{
-              hasActiveFilters()
-                ? "No hay coincidencias"
-                : "El directorio está vacío"
-            }}
-          </h2>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">
-            {{
-              hasActiveFilters()
-                ? "Prueba con otra área, contacto, teléfono, interno o sede."
-                : "Los contactos aparecerán aquí cuando estén disponibles."
-            }}
-          </p>
-          @if (hasActiveFilters()) {
-            <button
-              hlmBtn
-              type="button"
-              variant="outline"
-              class="mt-5"
-              (click)="resetFilters()"
-            >
-              Limpiar filtros
-            </button>
+        <div hlmTabsContent="map">
+          @if (directoryResource.isLoading() && !directoryResource.hasValue()) {
+            <div
+              hlmSkeleton
+              class="h-[32rem] w-full rounded-xl"
+              aria-label="Cargando mapa de sedes"
+            ></div>
+          } @else if (directoryResource.error()) {
+            <ng-container *ngTemplateOutlet="loadError" />
+          } @else {
+            <app-directory-map [sites]="sites()" />
           }
         </div>
       }
-    </section>
+    </hlm-tabs>
   </div>
 </div>
+
+<ng-template #loadError>
+  <div
+    class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+    role="alert"
+  >
+    <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+    <h2 class="mt-4 text-lg font-semibold">No se pudo cargar el directorio</h2>
+    <p class="mt-1 max-w-md text-sm text-muted-foreground">
+      Verifica la conexión e intenta nuevamente.
+    </p>
+  </div>
+</ng-template>

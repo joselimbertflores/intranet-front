@@ -14,6 +14,9 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "leaflet"
+            ],
             "polyfills": [
               "zone.js"
             ],
@@ -22,10 +25,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*.png",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "assets/leaflet"
               }
             ],
             "styles": [
               "node_modules/quill/dist/quill.snow.css",
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
             ]
           },
@@ -86,10 +95,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*.png",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "assets/leaflet"
               }
             ],
             "styles": [
               "node_modules/quill/dist/quill.snow.css",
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
             ]
           }

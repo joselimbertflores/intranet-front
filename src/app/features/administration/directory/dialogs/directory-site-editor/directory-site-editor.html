@@ -27,6 +27,18 @@
       }
     </div>
 
+    <hlm-field>
+      <label hlmFieldLabel for="site-coordinates">Coordinates</label>
+      <input hlmInput id="site-coordinates" placeholder="Leonidas" [formField]="siteForm.coordinates" />
+       @if (siteForm.coordinates().touched() && siteForm.coordinates().errors().length > 0) {
+        @for (error of siteForm.coordinates().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
+        }
+      }
+    </hlm-field>
+
     <div hlmField orientation="horizontal">
       <hlm-checkbox
         inputId="directory-site-active"

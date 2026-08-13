@@ -30,6 +30,7 @@ export interface DirectorySiteEditorContext {
 
 interface DirectorySiteFormModel {
   name: string;
+  coordinates: string;
   isActive: boolean;
 }
 
@@ -62,15 +63,13 @@ export class DirectorySiteEditor {
   readonly site = this.context.site;
   readonly formModel = signal<DirectorySiteFormModel>({
     name: this.site?.name ?? '',
+    coordinates: '',
     isActive: this.site?.isActive ?? true,
   });
 
   readonly siteForm = form(
     this.formModel,
     (schemaPath) => {
-      disabled(schemaPath, {
-        when: ({ state }) => state.submitting(),
-      });
       validate(schemaPath.name, ({ value }) =>
         value().trim()
           ? null
@@ -79,19 +78,36 @@ export class DirectorySiteEditor {
               message: 'El nombre de la sede es obligatorio.',
             },
       );
-      minLength(schemaPath.name, 2, {
-        message: 'El nombre debe tener al menos 2 caracteres.',
-      });
-      maxLength(schemaPath.name, 120, {
-        message: 'El nombre admite hasta 120 caracteres.',
+
+      validate(schemaPath.coordinates, ({ value }) => {
+        const coordinates = value().trim();
+        if (!coordinates) return null;
+
+        return this.parseCoordinates(coordinates)
+          ? null
+          : {
+              kind: 'coordinates',
+              message: 'Ingrese coordenadas válidas: latitud, longitud',
+            };
       });
     },
     {
       submission: {
         action: async (formField) => {
+          const { coordinates, ...props } = formField().value();
+          const parsedCoordinates = formField().value().coordinates.trim()
+            ? this.parseCoordinates(formField().value().coordinates)
+            : null;
+          const payload = {
+            ...props,
+            ...(parsedCoordinates && {
+              latitude: parsedCoordinates[0],
+              longitude: parsedCoordinates[1],
+            }),
+          };
           const request = this.site
-            ? this.dataSource.updateSite(this.site.id, formField().value())
-            : this.dataSource.createSite(formField().value());
+            ? this.dataSource.updateSite(this.site.id, payload)
+            : this.dataSource.createSite(payload);
 
           const response = await firstValueFrom(request);
           this.dialogRef.close(response);
@@ -102,5 +118,28 @@ export class DirectorySiteEditor {
 
   close(): void {
     if (!this.siteForm().submitting()) this.dialogRef.close();
+  }
+
+  private parseCoordinates(value: string): [number, number] | null {
+    const parts = value.split(',').map((part) => part.trim());
+
+    if (parts.length !== 2 || parts.some((part) => !part)) {
+      return null;
+    }
+
+    const [latitude, longitude] = parts.map(Number);
+
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return null;
+    }
+
+    return [latitude, longitude];
   }
 }

@@ -1,6 +1,8 @@
 export interface PortalDirectorySiteResponse {
   id: number;
   name: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface PortalDirectoryEntryResponse {

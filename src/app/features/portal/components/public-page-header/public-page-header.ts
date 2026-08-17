@@ -31,11 +31,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .public-page-header {
       width: 100%;
       border-bottom: 1px solid var(--border);
+      background-color: var(--background);
       background-image: linear-gradient(
-        105deg,
-        color-mix(in oklch, var(--primary) 11%, var(--background)) 0%,
-        color-mix(in oklch, var(--primary) 3%, var(--background)) 54%,
-        color-mix(in oklch, var(--secondary) 32%, var(--background)) 100%
+        100deg,
+        color-mix(in oklch, var(--primary) 9%, var(--background)) 0%,
+        color-mix(in oklch, var(--portal-mint) 42%, var(--background)) 54%,
+        color-mix(in oklch, var(--portal-amber) 58%, var(--background)) 100%
       );
     }
   `,

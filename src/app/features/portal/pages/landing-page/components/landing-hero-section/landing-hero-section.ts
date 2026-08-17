@@ -1,9 +1,9 @@
 import { DOCUMENT, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  PLATFORM_ID,
   Component,
   DestroyRef,
-  PLATFORM_ID,
   computed,
   inject,
   input,

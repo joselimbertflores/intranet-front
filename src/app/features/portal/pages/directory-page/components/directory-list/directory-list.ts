@@ -4,11 +4,10 @@ import {
   lucideContactRound,
   lucideMail,
   lucideMapPin,
-  lucidePhone,
+  lucideNavigation,
   lucideSearch,
   lucideX,
 } from '@ng-icons/lucide';
-import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
@@ -23,7 +22,6 @@ import {
 @Component({
   selector: 'app-directory-list',
   imports: [
-    HlmBadgeImports,
     HlmButtonImports,
     HlmFieldImports,
     HlmInputGroupImports,
@@ -36,7 +34,7 @@ import {
       lucideContactRound,
       lucideMail,
       lucideMapPin,
-      lucidePhone,
+      lucideNavigation,
       lucideSearch,
       lucideX,
     }),
@@ -49,6 +47,7 @@ export class DirectoryList {
 
   readonly searchTerm = signal('');
   readonly selectedSiteId = signal<number | null>(null);
+
   readonly filteredEntries = computed(() => {
     const term = this.normalize(this.searchTerm());
     const siteId = this.selectedSiteId();
@@ -62,6 +61,7 @@ export class DirectoryList {
       );
     });
   });
+  
   readonly hasActiveFilters = computed(
     () => this.searchTerm().trim().length > 0 || this.selectedSiteId() !== null,
   );
@@ -85,6 +85,10 @@ export class DirectoryList {
 
   phoneHref(phone: string): string {
     return `tel:${phone.replace(/[^\d+]/g, '')}`;
+  }
+
+  directionsHref(site: PortalDirectorySiteResponse): string {
+    return `https://www.google.com/maps/dir/?api=1&destination=${site.latitude},${site.longitude}`;
   }
 
   private searchableValues(entry: PortalDirectoryEntryResponse): string[] {

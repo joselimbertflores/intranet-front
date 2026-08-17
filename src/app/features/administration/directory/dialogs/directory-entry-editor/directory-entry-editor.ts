@@ -25,11 +25,7 @@ import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
 
-import {
-  DirectoryEntry,
-  DirectoryEntryPayload,
-  DirectorySite,
-} from '../../interfaces';
+import { DirectoryEntry, DirectorySite } from '../../interfaces';
 import { DirectoryDataSource } from '../../services';
 
 export interface DirectoryEntryEditorContext {
@@ -224,7 +220,7 @@ export class DirectoryEntryEditor {
     if (!this.entryForm().submitting()) this.dialogRef.close();
   }
 
-  private buildPayload(value: DirectoryEntryFormModel): DirectoryEntryPayload {
+  private buildPayload(value: DirectoryEntryFormModel) {
     return {
       areaName: value.areaName.trim(),
       contactLabel: value.contactLabel.trim() || null,

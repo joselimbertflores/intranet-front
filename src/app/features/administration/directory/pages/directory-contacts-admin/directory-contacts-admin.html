@@ -9,7 +9,7 @@
 
 <section class="flex flex-col gap-3" aria-label="Administración de contactos">
   <div
-    class="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_16rem_13rem]"
+    class="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_26rem_13rem]"
   >
     <hlm-input-group>
       <input
@@ -18,19 +18,15 @@
         type="search"
         autocomplete="off"
         aria-label="Buscar contactos"
-        placeholder="Buscar área, referencia o número…"
+        placeholder="Buscar área, contacto, correo o número…"
         [formField]="filtersForm.term"
-        (input)="onFiltersChange()"
       />
       <hlm-input-group-addon>
         <ng-icon name="lucideSearch" />
       </hlm-input-group-addon>
     </hlm-input-group>
 
-    <hlm-select
-      [formField]="filtersForm.siteId"
-      (valueChange)="onFiltersChange()"
-    >
+    <hlm-select [formField]="filtersForm.siteId">
       <hlm-select-trigger class="w-full" buttonId="directory-contacts-site">
         <ng-template hlmSelectValueTemplate let-siteId>
           {{ siteNames().get(siteId) ?? "Todas las sedes" }}
@@ -49,10 +45,7 @@
       </hlm-select-content>
     </hlm-select>
 
-    <hlm-select
-      [formField]="filtersForm.isActive"
-      (valueChange)="onFiltersChange()"
-    >
+    <hlm-select [formField]="filtersForm.isActive">
       <hlm-select-trigger class="w-full" buttonId="directory-contacts-status">
         <ng-template hlmSelectValueTemplate let-isActive>
           {{
@@ -75,28 +68,29 @@
     </hlm-select>
   </div>
 
-  <div class="flex flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
-    <div hlmTableContainer>
+  <div class="rounded-xl border bg-card p-3 sm:p-4">
+    <div
+      hlmTableContainer
+      class="max-h-[60dvh] overflow-auto sm:max-h-[65dvh] lg:max-h-[calc(100dvh-14rem)]"
+    >
       <table
         hlmTable
-        class="min-w-[920px] table-fixed"
+        class="min-w-[960px] table-fixed"
         aria-label="Listado de contactos del directorio"
       >
         <colgroup>
+          <col class="w-[31%]" />
+          <col class="w-[24%]" />
           <col class="w-[27%]" />
-          <col class="w-[18%]" />
-          <col class="w-[20%]" />
-          <col class="w-[20%]" />
           <col class="w-28" />
           <col class="w-12" />
         </colgroup>
 
-        <thead hlmTableHeader>
+        <thead hlmTableHeader class="sticky top-0 z-10 bg-card">
           <tr hlmTableRow>
-            <th hlmTableHead scope="col">Área y referencia</th>
-            <th hlmTableHead scope="col">Internos</th>
-            <th hlmTableHead scope="col">Teléfonos</th>
+            <th hlmTableHead scope="col">Contacto</th>
             <th hlmTableHead scope="col">Sede</th>
+            <th hlmTableHead scope="col">Teléfonos</th>
             <th hlmTableHead scope="col">Estado</th>
             <th hlmTableHead scope="col">
               <span class="sr-only">Acciones</span>
@@ -105,9 +99,9 @@
         </thead>
 
         <tbody hlmTableBody>
-          @if (isListLoading()) {
+          @if (entriesResource.isLoading()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-10 text-center">
+              <td hlmTableCell colspan="5" class="py-10 text-center">
                 <span
                   class="inline-flex items-center gap-2 text-sm text-muted-foreground"
                   role="status"
@@ -120,7 +114,7 @@
             </tr>
           } @else if (entriesResource.error()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="6" class="py-10 text-center">
+              <td hlmTableCell colspan="5" class="py-10 text-center">
                 <div
                   class="flex flex-col items-center gap-3 whitespace-normal"
                   role="alert"
@@ -134,33 +128,30 @@
                       Verifica la conexión e intenta nuevamente.
                     </p>
                   </div>
-                  <button
-                    hlmBtn
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    (click)="reloadEntries()"
-                  >
-                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
-                    Reintentar
-                  </button>
                 </div>
               </td>
             </tr>
           } @else {
-            @for (entry of entries(); track entry.id) {
+            @for (entry of filteredEntries(); track entry.id) {
               <tr hlmTableRow>
                 <td hlmTableCell>
                   <div class="min-w-0">
-                    <p class="truncate font-medium" [title]="entry.areaName">
-                      {{ entry.areaName }}
-                    </p>
                     @if (entry.contactLabel) {
                       <p
-                        class="truncate text-xs text-muted-foreground"
+                        class="truncate font-medium"
                         [title]="entry.contactLabel"
                       >
                         {{ entry.contactLabel }}
+                      </p>
+                      <p
+                        class="truncate text-xs text-muted-foreground"
+                        [title]="entry.areaName"
+                      >
+                        {{ entry.areaName }}
+                      </p>
+                    } @else {
+                      <p class="truncate font-medium" [title]="entry.areaName">
+                        {{ entry.areaName }}
                       </p>
                     }
                     @if (entry.email) {
@@ -175,36 +166,9 @@
                 </td>
 
                 <td hlmTableCell>
-                  <div class="flex max-w-full flex-wrap gap-1">
-                    @for (extension of entry.extensions; track extension) {
-                      <span
-                        hlmBadge
-                        variant="secondary"
-                        class="max-w-full truncate font-mono"
-                        [title]="extension"
-                      >
-                        {{ extension }}
-                      </span>
-                    } @empty {
-                      <span class="text-muted-foreground">—</span>
-                    }
-                  </div>
-                </td>
-
-                <td hlmTableCell>
-                  <div class="flex min-w-0 flex-col gap-1 font-mono text-xs">
-                    @for (phone of entry.phones; track phone) {
-                      <span class="truncate" [title]="phone">{{ phone }}</span>
-                    } @empty {
-                      <span class="text-muted-foreground">—</span>
-                    }
-                  </div>
-                </td>
-
-                <td hlmTableCell>
                   @if (entry.site) {
                     <div class="min-w-0">
-                      <p class="truncate" [title]="entry.site.name">
+                      <p class="truncate font-medium" [title]="entry.site.name">
                         {{ entry.site.name }}
                       </p>
                       @if (entry.siteDetails) {
@@ -226,6 +190,41 @@
                   } @else {
                     <span class="text-muted-foreground">—</span>
                   }
+                </td>
+
+                <td hlmTableCell>
+                  <div class="flex min-w-0 flex-col gap-1.5 text-xs">
+                    @if (entry.phones.length) {
+                      <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                        <span class="text-muted-foreground">Fijo:</span>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 font-mono">
+                          @for (phone of entry.phones; track phone) {
+                            <span class="truncate" [title]="phone">
+                              {{ phone }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (entry.extensions.length) {
+                      <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                        <span class="text-muted-foreground">Interno:</span>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 font-mono">
+                          @for (
+                            extension of entry.extensions;
+                            track extension
+                          ) {
+                            <span class="truncate" [title]="extension">
+                              {{ extension }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (!entry.phones.length && !entry.extensions.length) {
+                      <span class="text-muted-foreground">—</span>
+                    }
+                  </div>
                 </td>
 
                 <td hlmTableCell>
@@ -280,7 +279,7 @@
               </tr>
             } @empty {
               <tr hlmTableRow>
-                <td hlmTableCell colspan="6" class="py-10 text-center">
+                <td hlmTableCell colspan="5" class="py-10 text-center">
                   <div class="flex flex-col gap-1 whitespace-normal">
                     @if (hasFilters()) {
                       <p class="font-medium">No se encontraron contactos</p>
@@ -301,15 +300,6 @@
         </tbody>
       </table>
     </div>
-
-    @if (!isListLoading() && !entriesResource.error() && total() > 0) {
-      <app-pagination-controls
-        [totalItems]="total()"
-        [pageSizes]="pageSizeOptions"
-        [(currentPage)]="currentPage"
-        [(pageSize)]="pageSize"
-      />
-    }
   </div>
 </section>
 

@@ -1,10 +1,9 @@
 import {
-  signal,
-  inject,
   Component,
   computed,
-  debounced,
+  inject,
   linkedSignal,
+  signal,
 } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { form, FormField } from '@angular/forms/signals';
@@ -13,11 +12,11 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideEllipsisVertical,
   lucideCircleAlert,
-  lucideRefreshCw,
   lucidePencil,
   lucideSearch,
   lucideTrash2,
   lucidePlus,
+  lucideX,
 } from '@ng-icons/lucide';
 import {
   HlmAlertDialog,
@@ -36,7 +35,6 @@ import {
   DirectoryEntryEditor,
   DirectoryEntryEditorContext,
 } from '../../dialogs';
-import { PaginationControls } from '../../../../../shared';
 import { DirectoryDataSource } from '../../services';
 import { DirectoryEntry } from '../../interfaces';
 
@@ -55,7 +53,6 @@ interface DirectoryFiltersModel {
     HlmButtonImports,
     HlmDropdownMenuImports,
     HlmInputGroupImports,
-    PaginationControls,
     HlmSelectImports,
     HlmTableImports,
     HlmSpinner,
@@ -65,11 +62,11 @@ interface DirectoryFiltersModel {
     provideIcons({
       lucideEllipsisVertical,
       lucideCircleAlert,
-      lucideRefreshCw,
       lucideSearch,
       lucideTrash2,
       lucidePencil,
       lucidePlus,
+      lucideX,
     }),
   ],
   templateUrl: './directory-contacts-admin.html',
@@ -78,18 +75,12 @@ export default class DirectoryContactsAdmin {
   private readonly dataSource = inject(DirectoryDataSource);
   private readonly dialogService = inject(HlmDialogService);
 
-  readonly pageSize = signal(10);
-  readonly currentPage = signal(1);
-  readonly pageSizeOptions = [10, 25, 50];
-  readonly offset = computed(() => this.pageSize() * (this.currentPage() - 1));
-
   readonly filtersModel = signal<DirectoryFiltersModel>({
     term: '',
     siteId: null,
     isActive: null,
   });
   readonly filtersForm = form(this.filtersModel);
-  readonly debouncedFilters = debounced(this.filtersModel, 300);
 
   readonly sites = toSignal(this.dataSource.findSites(), {
     initialValue: [],
@@ -99,40 +90,42 @@ export default class DirectoryContactsAdmin {
   );
 
   readonly entriesResource = rxResource({
-    params: () => ({
-      limit: this.pageSize(),
-      offset: this.offset(),
-      term: this.debouncedFilters.value().term.trim(),
-      siteId: this.debouncedFilters.value().siteId,
-      isActive: this.debouncedFilters.value().isActive,
-    }),
-    stream: ({ params }) => this.dataSource.findAll(params),
+    stream: () => this.dataSource.findAll(),
   });
+  readonly entries = linkedSignal(() => this.entriesResource.value() ?? []);
+  readonly filteredEntries = computed(() => {
+    const entries = this.entries();
+    const { term, siteId, isActive } = this.filtersModel();
+    const normalizedTerm = this.normalize(term);
 
-  readonly entries = linkedSignal(
-    () => this.entriesResource.value()?.entries ?? [],
-  );
-  readonly total = linkedSignal(() => this.entriesResource.value()?.total ?? 0);
-  readonly isListLoading = computed(
-    () => this.debouncedFilters.isLoading() || this.entriesResource.isLoading(),
-  );
+    if (!normalizedTerm && siteId === null && isActive === null) return entries;
+
+    return entries.filter((entry) => {
+      if (siteId !== null && entry.siteId !== siteId) return false;
+      if (isActive !== null && entry.isActive !== isActive) return false;
+      if (!normalizedTerm) return true;
+
+      return [
+        entry.areaName,
+        entry.contactLabel ?? '',
+        entry.email ?? '',
+        entry.site?.name ?? '',
+        entry.siteDetails ?? '',
+        ...entry.phones,
+        ...entry.extensions,
+      ].some((value) => this.normalize(value).includes(normalizedTerm));
+    });
+  });
+  
   readonly hasFilters = computed(() => {
-    const filters = this.filtersModel();
-    return (
-      filters.term.trim().length > 0 ||
-      filters.siteId !== null ||
-      filters.isActive !== null
-    );
+    const { term, siteId, isActive } = this.filtersModel();
+    return term.trim().length > 0 || siteId !== null || isActive !== null;
   });
 
   readonly entryPendingDelete = signal<DirectoryEntry | null>(null);
 
-  onFiltersChange(): void {
-    this.currentPage.set(1);
-  }
-
-  reloadEntries(): void {
-    this.entriesResource.reload();
+  resetFilters(): void {
+    this.filtersModel.set({ term: '', siteId: null, isActive: null });
   }
 
   openEditor(trigger: HTMLElement, entry?: DirectoryEntry): void {
@@ -185,26 +178,18 @@ export default class DirectoryContactsAdmin {
       return;
     }
 
-    this.entries.update((values) =>
-      [newItem, ...values].slice(0, this.pageSize()),
-    );
-    this.total.update((value) => value + 1);
+    this.entries.update((values) => [newItem, ...values]);
   }
 
   private removeItem(id: number): void {
     this.entries.update((values) => values.filter((item) => item.id !== id));
+  }
 
-    const total = Math.max(0, this.total() - 1);
-    this.total.set(total);
-
-    const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
-    if (this.currentPage() > lastPage) {
-      this.currentPage.set(lastPage);
-      return;
-    }
-
-    if (this.entries().length === 0 && total > 0) {
-      this.entriesResource.reload();
-    }
+  private normalize(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('es')
+      .trim();
   }
 }

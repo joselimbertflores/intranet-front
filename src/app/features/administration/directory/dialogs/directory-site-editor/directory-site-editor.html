@@ -27,17 +27,26 @@
       }
     </div>
 
-    <hlm-field>
-      <label hlmFieldLabel for="site-coordinates">Coordinates</label>
-      <input hlmInput id="site-coordinates" placeholder="Leonidas" [formField]="siteForm.coordinates" />
-       @if (siteForm.coordinates().touched() && siteForm.coordinates().errors().length > 0) {
+    <div hlmField>
+      <label hlmFieldLabel for="directory-site-coordinates">Coordenadas</label>
+      <input
+        hlmInput
+        id="directory-site-coordinates"
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        placeholder="-17.40499691496484, -66.03424526136527"
+        [formField]="siteForm.coordinates"
+      />
+      <p hlmFieldDescription>Latitud y longitud separadas por una coma.</p>
+      @if (siteForm.coordinates().touched()) {
         @for (error of siteForm.coordinates().errors(); track error.kind) {
           <hlm-field-error [validator]="error.kind">
             {{ error.message }}
           </hlm-field-error>
         }
       }
-    </hlm-field>
+    </div>
 
     <div hlmField orientation="horizontal">
       <hlm-checkbox

@@ -21,7 +21,22 @@
         </button>
       </hlm-tabs-list>
 
-      @if (activeTab() === "directory") {
+      @if (directoryResource.error()) {
+        <div
+          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          role="alert"
+        >
+          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
+
+          <h2 class="mt-4 text-lg font-semibold">
+            No se pudo cargar el directorio
+          </h2>
+
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">
+            Verifica la conexión e intenta nuevamente.
+          </p>
+        </div>
+      } @else if (activeTab() === "directory") {
         <div hlmTabsContent="directory">
           @if (directoryResource.isLoading() && !directoryResource.hasValue()) {
             <div
@@ -29,19 +44,16 @@
               aria-label="Cargando directorio"
             >
               @for (_ of skeletonRows; track $index) {
-                <div class="grid gap-3 py-2 md:grid-cols-4">
+                <div class="grid gap-3 py-2 md:grid-cols-3">
                   <div hlmSkeleton class="h-5 w-48"></div>
                   <div hlmSkeleton class="h-5 w-36"></div>
                   <div hlmSkeleton class="h-5 w-32"></div>
-                  <div hlmSkeleton class="h-5 w-40"></div>
                 </div>
               }
             </div>
-          } @else if (directoryResource.error()) {
-            <ng-container *ngTemplateOutlet="loadError" />
           } @else {
             <app-directory-list
-              [entries]="directoryResource.value()?.entries ?? []"
+              [entries]="directoryResource.value()!.entries"
               [sites]="sites()"
             />
           }
@@ -51,11 +63,9 @@
           @if (directoryResource.isLoading() && !directoryResource.hasValue()) {
             <div
               hlmSkeleton
-              class="h-[32rem] w-full rounded-xl"
+              class="h-128 w-full rounded-xl"
               aria-label="Cargando mapa de sedes"
             ></div>
-          } @else if (directoryResource.error()) {
-            <ng-container *ngTemplateOutlet="loadError" />
           } @else {
             <app-directory-map [sites]="sites()" />
           }
@@ -64,16 +74,3 @@
     </hlm-tabs>
   </div>
 </div>
-
-<ng-template #loadError>
-  <div
-    class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
-    role="alert"
-  >
-    <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-    <h2 class="mt-4 text-lg font-semibold">No se pudo cargar el directorio</h2>
-    <p class="mt-1 max-w-md text-sm text-muted-foreground">
-      Verifica la conexión e intenta nuevamente.
-    </p>
-  </div>
-</ng-template>

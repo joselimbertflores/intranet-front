@@ -1,13 +1,13 @@
-import { Component, computed, debounced, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
 import {
   lucideCircleAlert,
   lucideEllipsisVertical,
+  lucideMapPin,
   lucidePencil,
   lucidePlus,
-  lucideRefreshCw,
   lucideSearch,
   lucideTrash2,
 } from '@ng-icons/lucide';
@@ -19,6 +19,7 @@ import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -36,20 +37,21 @@ import { DirectorySite } from '../../interfaces';
     HlmAlertDialogImports,
     HlmInputGroupImports,
     HlmButtonImports,
+    HlmSelectImports,
     HlmTableImports,
     HlmSpinner,
-    NgIcon,
     HlmBadge,
+    NgIcon,
   ],
   providers: [
     provideIcons({
-      lucideCircleAlert,
       lucideEllipsisVertical,
+      lucideCircleAlert,
+      lucideMapPin,
       lucidePencil,
-      lucidePlus,
-      lucideRefreshCw,
       lucideTrash2,
       lucideSearch,
+      lucidePlus,
     }),
   ],
   templateUrl: './directory-sites-admin.html',
@@ -64,21 +66,20 @@ export default class DirectorySitesAdmin {
 
   readonly sitePendingDelete = signal<DirectorySite | null>(null);
 
-  searchTerm = signal('');
-  readonly debouncedSearchTerm = debounced(this.searchTerm, 250);
+  readonly searchTerm = signal('');
+  readonly isActiveFilter = signal<boolean | null>(null);
 
   readonly filteredSites = computed(() => {
-    const term = this.debouncedSearchTerm.value();
-    if (!term) return this.sitesResource.value();
+    const term = this.searchTerm().trim().toLocaleLowerCase('es');
+    const isActive = this.isActiveFilter();
     const items = this.sitesResource.value() ?? [];
-    return items.filter((row) =>
-      row.name.toLowerCase().includes(term.toLowerCase()),
+
+    return items.filter(
+      (site) =>
+        (isActive === null || site.isActive === isActive) &&
+        (!term || site.name.toLocaleLowerCase('es').includes(term)),
     );
   });
-
-  reloadSites(): void {
-    this.sitesResource.reload();
-  }
 
   openEditor(trigger: HTMLElement, site?: DirectorySite): void {
     const context: DirectorySiteEditorContext = { site };

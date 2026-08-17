@@ -1,11 +1,13 @@
-<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-6">
   <section
     class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
     aria-label="Búsqueda y filtros del directorio"
   >
-    <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end">
+    <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_26rem] md:items-end">
       <div hlmField>
-        <label hlmFieldLabel for="directory-search">Buscar en el directorio</label>
+        <label hlmFieldLabel for="directory-search"
+          >Buscar en el directorio</label
+        >
         <hlm-input-group class="w-full">
           <hlm-input-group-addon>
             <ng-icon name="lucideSearch" />
@@ -20,19 +22,6 @@
             [value]="searchTerm()"
             (input)="onSearchInput($event)"
           />
-          @if (searchTerm()) {
-            <hlm-input-group-addon align="inline-end">
-              <button
-                hlmInputGroupButton
-                type="button"
-                size="icon-xs"
-                aria-label="Limpiar búsqueda"
-                (click)="searchTerm.set('')"
-              >
-                <ng-icon name="lucideX" />
-              </button>
-            </hlm-input-group-addon>
-          }
         </hlm-input-group>
       </div>
 
@@ -52,105 +41,154 @@
             <hlm-select-group>
               <hlm-select-item [value]="null">Todas las sedes</hlm-select-item>
               @for (site of sites(); track site.id) {
-                <hlm-select-item [value]="site.id">{{ site.name }}</hlm-select-item>
+                <hlm-select-item [value]="site.id">{{
+                  site.name
+                }}</hlm-select-item>
               }
             </hlm-select-group>
           </hlm-select-content>
         </hlm-select>
       </div>
+    </div>
 
+    <div class="mt-4 flex justify-end">
       <button
         hlmBtn
         type="button"
         variant="ghost"
-        class="w-full md:w-auto"
+        size="sm"
         [disabled]="!hasActiveFilters()"
         (click)="resetFilters()"
       >
         <ng-icon name="lucideX" data-icon="inline-start" />
-        Limpiar
+        Limpiar filtros
       </button>
     </div>
   </section>
 
-  <section class="flex flex-col gap-3" aria-labelledby="directory-results-title">
+  <section
+    class="flex flex-col gap-3"
+    aria-labelledby="directory-results-title"
+  >
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2
         id="directory-results-title"
-        class="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+        class="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
       >
-        Contactos institucionales
+        Contactos
       </h2>
       <span class="text-sm text-muted-foreground" aria-live="polite">
-        <span class="font-semibold text-foreground">{{ filteredEntries().length }}</span>
+        <span class="font-semibold text-foreground">{{
+          filteredEntries().length
+        }}</span>
         {{ filteredEntries().length === 1 ? "contacto" : "contactos" }}
       </span>
     </div>
 
     @if (filteredEntries().length) {
-      <div hlmTableContainer class="hidden overflow-hidden rounded-xl border bg-card md:block">
+      <div
+        hlmTableContainer
+        class="hidden overflow-hidden rounded-xl border bg-card md:block"
+      >
         <table hlmTable>
           <thead hlmTableHeader>
             <tr hlmTableRow>
-              <th hlmTableHead>Área / contacto</th>
+              <th hlmTableHead>Contacto</th>
               <th hlmTableHead>Sede</th>
               <th hlmTableHead>Teléfonos</th>
-              <th hlmTableHead>Correo</th>
             </tr>
           </thead>
           <tbody hlmTableBody>
             @for (entry of filteredEntries(); track entry.id) {
               <tr hlmTableRow>
-                <td hlmTableCell class="max-w-72 whitespace-normal px-4 py-3 align-top">
-                  <p class="font-medium">{{ entry.areaName }}</p>
+                <td
+                  hlmTableCell
+                  class="max-w-96 whitespace-normal px-4 py-3 align-top"
+                >
                   @if (entry.contactLabel) {
-                    <p class="mt-1 text-sm text-muted-foreground">{{ entry.contactLabel }}</p>
+                    <p class="font-medium">{{ entry.contactLabel }}</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      {{ entry.areaName }}
+                    </p>
+                  } @else {
+                    <p class="font-medium">{{ entry.areaName }}</p>
+                  }
+                  @if (entry.email) {
+                    <a
+                      class="mt-2 inline-block wrap-break-word text-sm text-primary hover:underline"
+                      [href]="'mailto:' + entry.email"
+                    >
+                      {{ entry.email }}
+                    </a>
                   }
                 </td>
-                <td hlmTableCell class="max-w-64 whitespace-normal px-4 py-3 align-top">
+                <td
+                  hlmTableCell
+                  class="max-w-80 whitespace-normal px-4 py-3 align-top"
+                >
                   @if (entry.site) {
-                    <p>{{ entry.site.name }}</p>
+                    <p class="font-medium">{{ entry.site.name }}</p>
                     @if (entry.siteDetails) {
-                      <p class="mt-1 text-sm text-muted-foreground">{{ entry.siteDetails }}</p>
+                      <p class="mt-1 text-sm text-muted-foreground">
+                        {{ entry.siteDetails }}
+                      </p>
                     }
+                    @if (
+                      entry.site.latitude !== null &&
+                      entry.site.longitude !== null
+                    ) {
+                      <a
+                        class="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                        [href]="directionsHref(entry.site)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ng-icon name="lucideNavigation" />
+                        Cómo llegar
+                      </a>
+                    }
+                  } @else if (entry.siteDetails) {
+                    <p class="text-sm text-muted-foreground">
+                      {{ entry.siteDetails }}
+                    </p>
                   } @else {
                     <span class="text-muted-foreground">—</span>
                   }
                 </td>
                 <td hlmTableCell class="whitespace-normal px-4 py-3 align-top">
-                  <div class="flex flex-col items-start gap-1.5">
-                    @for (phone of entry.phones; track phone) {
-                      <a
-                        class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
-                        [href]="phoneHref(phone)"
-                      >
-                        <ng-icon name="lucidePhone" />
-                        {{ phone }}
-                      </a>
+                  <div class="flex flex-col gap-2 text-sm">
+                    @if (entry.phones.length) {
+                      <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                        <span class="text-muted-foreground">Fijo:</span>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1">
+                          @for (phone of entry.phones; track phone) {
+                            <a
+                              class="font-medium text-primary hover:underline"
+                              [href]="phoneHref(phone)"
+                            >
+                              {{ phone }}
+                            </a>
+                          }
+                        </div>
+                      </div>
                     }
                     @if (entry.extensions.length) {
-                      <div class="flex flex-wrap gap-1.5">
-                        @for (extension of entry.extensions; track extension) {
-                          <span hlmBadge variant="secondary">Int. {{ extension }}</span>
-                        }
+                      <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                        <span class="text-muted-foreground">Interno:</span>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 font-medium">
+                          @for (
+                            extension of entry.extensions;
+                            track extension
+                          ) {
+                            <span>{{ extension }}</span>
+                          }
+                        </div>
                       </div>
                     }
                     @if (!entry.phones.length && !entry.extensions.length) {
                       <span class="text-muted-foreground">—</span>
                     }
                   </div>
-                </td>
-                <td hlmTableCell class="max-w-72 whitespace-normal px-4 py-3 align-top">
-                  @if (entry.email) {
-                    <a
-                      class="wrap-break-word text-primary hover:underline"
-                      [href]="'mailto:' + entry.email"
-                    >
-                      {{ entry.email }}
-                    </a>
-                  } @else {
-                    <span class="text-muted-foreground">—</span>
-                  }
                 </td>
               </tr>
             }
@@ -160,52 +198,90 @@
 
       <div class="grid gap-3 md:hidden">
         @for (entry of filteredEntries(); track entry.id) {
-          <article class="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <article
+            class="rounded-xl border border-border bg-card p-4 shadow-sm"
+          >
             <div class="flex flex-col gap-1">
-              <h3 class="font-semibold">{{ entry.areaName }}</h3>
               @if (entry.contactLabel) {
-                <p class="text-sm text-muted-foreground">{{ entry.contactLabel }}</p>
+                <h3 class="font-semibold">{{ entry.contactLabel }}</h3>
+                <p class="text-sm text-muted-foreground">
+                  {{ entry.areaName }}
+                </p>
+              } @else {
+                <h3 class="font-semibold">{{ entry.areaName }}</h3>
+              }
+              @if (entry.email) {
+                <a
+                  class="mt-1 inline-flex min-w-0 items-center gap-2 text-sm text-primary"
+                  [href]="'mailto:' + entry.email"
+                >
+                  <ng-icon name="lucideMail" class="shrink-0" />
+                  <span class="truncate">{{ entry.email }}</span>
+                </a>
               }
             </div>
 
             @if (entry.site || entry.siteDetails) {
-              <div class="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+              <div
+                class="mt-3 flex items-start gap-2 text-sm text-muted-foreground"
+              >
                 <ng-icon name="lucideMapPin" class="mt-0.5 shrink-0" />
-                <p>
-                  {{ entry.site?.name }}
-                  @if (entry.siteDetails) {
-                    <span> · {{ entry.siteDetails }}</span>
+                <div class="flex min-w-0 flex-col gap-1">
+                  @if (entry.site) {
+                    <p class="font-medium text-foreground">
+                      {{ entry.site.name }}
+                    </p>
                   }
-                </p>
+                  @if (entry.siteDetails) {
+                    <p>{{ entry.siteDetails }}</p>
+                  }
+                  @if (
+                    entry.site &&
+                    entry.site.latitude !== null &&
+                    entry.site.longitude !== null
+                  ) {
+                    <a
+                      class="inline-flex items-center gap-1.5 underline-offset-4 hover:text-primary hover:underline"
+                      [href]="directionsHref(entry.site)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ng-icon name="lucideNavigation" />
+                      Cómo llegar
+                    </a>
+                  }
+                </div>
               </div>
             }
 
-            @if (entry.phones.length || entry.extensions.length || entry.email) {
-              <div class="mt-4 flex flex-col gap-2 border-t border-border pt-3">
-                @for (phone of entry.phones; track phone) {
-                  <a
-                    class="inline-flex items-center gap-2 text-sm font-medium text-primary"
-                    [href]="phoneHref(phone)"
-                  >
-                    <ng-icon name="lucidePhone" />
-                    {{ phone }}
-                  </a>
-                }
-                @if (entry.extensions.length) {
-                  <div class="flex flex-wrap gap-1.5">
-                    @for (extension of entry.extensions; track extension) {
-                      <span hlmBadge variant="secondary">Int. {{ extension }}</span>
-                    }
+            @if (entry.phones.length || entry.extensions.length) {
+              <div
+                class="mt-4 flex flex-col gap-2 border-t border-border pt-3 text-sm"
+              >
+                @if (entry.phones.length) {
+                  <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                    <span class="text-muted-foreground">Fijo:</span>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1">
+                      @for (phone of entry.phones; track phone) {
+                        <a
+                          class="font-medium text-primary"
+                          [href]="phoneHref(phone)"
+                        >
+                          {{ phone }}
+                        </a>
+                      }
+                    </div>
                   </div>
                 }
-                @if (entry.email) {
-                  <a
-                    class="inline-flex min-w-0 items-center gap-2 text-sm text-primary"
-                    [href]="'mailto:' + entry.email"
-                  >
-                    <ng-icon name="lucideMail" class="shrink-0" />
-                    <span class="truncate">{{ entry.email }}</span>
-                  </a>
+                @if (entry.extensions.length) {
+                  <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                    <span class="text-muted-foreground">Interno:</span>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 font-medium">
+                      @for (extension of entry.extensions; track extension) {
+                        <span>{{ extension }}</span>
+                      }
+                    </div>
+                  </div>
                 }
               </div>
             }
@@ -216,9 +292,16 @@
       <div
         class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
       >
-        <ng-icon name="lucideContactRound" class="text-3xl text-muted-foreground" />
+        <ng-icon
+          name="lucideContactRound"
+          class="text-3xl text-muted-foreground"
+        />
         <h2 class="mt-4 text-lg font-semibold">
-          {{ hasActiveFilters() ? "No hay coincidencias" : "El directorio está vacío" }}
+          {{
+            hasActiveFilters()
+              ? "No hay coincidencias"
+              : "El directorio está vacío"
+          }}
         </h2>
         <p class="mt-1 max-w-md text-sm text-muted-foreground">
           {{
@@ -228,7 +311,13 @@
           }}
         </p>
         @if (hasActiveFilters()) {
-          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">
+          <button
+            hlmBtn
+            type="button"
+            variant="outline"
+            class="mt-5"
+            (click)="resetFilters()"
+          >
             Limpiar filtros
           </button>
         }

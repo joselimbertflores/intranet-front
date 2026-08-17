@@ -1,16 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import {
-  disabled,
   form,
   FormField,
   FormRoot,
-  maxLength,
-  minLength,
   validate,
 } from '@angular/forms/signals';
 import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
-import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmCheckbox } from '@spartan-ng/helm/checkbox';
+import { HlmButton } from '@spartan-ng/helm/button';
 import {
   HlmDialogFooter,
   HlmDialogHeader,
@@ -21,7 +18,7 @@ import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { firstValueFrom } from 'rxjs';
 
-import { DirectorySite, DirectorySitePayload } from '../../interfaces';
+import { DirectorySite } from '../../interfaces';
 import { DirectoryDataSource } from '../../services';
 
 export interface DirectorySiteEditorContext {
@@ -63,7 +60,12 @@ export class DirectorySiteEditor {
   readonly site = this.context.site;
   readonly formModel = signal<DirectorySiteFormModel>({
     name: this.site?.name ?? '',
-    coordinates: '',
+    coordinates:
+      this.site &&
+      this.site.latitude !== null &&
+      this.site.longitude !== null
+        ? `${this.site.latitude}, ${this.site.longitude}`
+        : '',
     isActive: this.site?.isActive ?? true,
   });
 
@@ -87,7 +89,7 @@ export class DirectorySiteEditor {
           ? null
           : {
               kind: 'coordinates',
-              message: 'Ingrese coordenadas válidas: latitud, longitud',
+              message: 'Ingrese coordenadas válidas: latitud, longitud.',
             };
       });
     },
@@ -95,15 +97,11 @@ export class DirectorySiteEditor {
       submission: {
         action: async (formField) => {
           const { coordinates, ...props } = formField().value();
-          const parsedCoordinates = formField().value().coordinates.trim()
-            ? this.parseCoordinates(formField().value().coordinates)
-            : null;
+          const parsedCoordinates = this.parseCoordinates(coordinates);
           const payload = {
             ...props,
-            ...(parsedCoordinates && {
-              latitude: parsedCoordinates[0],
-              longitude: parsedCoordinates[1],
-            }),
+            latitude: parsedCoordinates?.[0] ?? null,
+            longitude: parsedCoordinates?.[1] ?? null,
           };
           const request = this.site
             ? this.dataSource.updateSite(this.site.id, payload)
@@ -122,8 +120,12 @@ export class DirectorySiteEditor {
 
   private parseCoordinates(value: string): [number, number] | null {
     const parts = value.split(',').map((part) => part.trim());
+    const coordinatePattern = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
 
-    if (parts.length !== 2 || parts.some((part) => !part)) {
+    if (
+      parts.length !== 2 ||
+      parts.some((part) => !coordinatePattern.test(part))
+    ) {
       return null;
     }
 

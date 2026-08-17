@@ -7,12 +7,12 @@
 </header>
 
 <section aria-label="Administración de sedes" class="flex flex-col gap-2">
-  <div class="flex sm:justify-end">
+  <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
     <hlm-input-group class="w-full sm:w-72">
       <input
         hlmInputGroupInput
         type="search"
-        aria-label="Buscar tipos de documentos"
+        aria-label="Buscar sedes"
         placeholder="Buscar por nombre"
         [(ngModel)]="searchTerm"
       />
@@ -20,16 +20,46 @@
         <ng-icon name="lucideSearch" />
       </hlm-input-group-addon>
     </hlm-input-group>
+
+    <hlm-select
+      [value]="isActiveFilter()"
+      (valueChange)="isActiveFilter.set($event ?? null)"
+    >
+      <hlm-select-trigger
+        class="w-full sm:w-40"
+        buttonId="directory-sites-status"
+        aria-label="Filtrar sedes por estado"
+      >
+        <ng-template hlmSelectValueTemplate let-isActive>
+          {{
+            isActive === true
+              ? "Activos"
+              : isActive === false
+                ? "Inactivos"
+                : "Todos"
+          }}
+        </ng-template>
+        <hlm-select-placeholder>Todos</hlm-select-placeholder>
+      </hlm-select-trigger>
+      <hlm-select-content *hlmSelectPortal>
+        <hlm-select-group>
+          <hlm-select-item [value]="null">Todos</hlm-select-item>
+          <hlm-select-item [value]="true">Activos</hlm-select-item>
+          <hlm-select-item [value]="false">Inactivos</hlm-select-item>
+        </hlm-select-group>
+      </hlm-select-content>
+    </hlm-select>
   </div>
   <div class="rounded-xl border bg-card p-3 sm:p-4">
     <div hlmTableContainer class="max-h-[calc(100dvh-14rem)] overflow-auto">
       <table
         hlmTable
-        class="min-w-[560px] table-fixed"
+        class="min-w-[720px] table-fixed"
         aria-label="Listado de sedes del directorio"
       >
         <colgroup>
-          <col />
+          <col class="w-[42%]" />
+          <col class="w-[36%]" />
           <col class="w-32" />
           <col class="w-12" />
         </colgroup>
@@ -37,6 +67,7 @@
         <thead hlmTableHeader>
           <tr hlmTableRow>
             <th hlmTableHead scope="col">Nombre</th>
+            <th hlmTableHead scope="col">Ubicación</th>
             <th hlmTableHead scope="col">Estado</th>
             <th hlmTableHead scope="col">
               <span class="sr-only">Acciones</span>
@@ -45,9 +76,9 @@
         </thead>
 
         <tbody hlmTableBody>
-          @if (sitesResource.isLoading() || debouncedSearchTerm.isLoading()) {
+          @if (sitesResource.isLoading()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="3" class="py-10 text-center">
+              <td hlmTableCell colspan="4" class="py-10 text-center">
                 <span
                   class="inline-flex items-center gap-2 text-sm text-muted-foreground"
                   role="status"
@@ -60,7 +91,7 @@
             </tr>
           } @else if (sitesResource.error()) {
             <tr hlmTableRow>
-              <td hlmTableCell colspan="3" class="py-10 text-center">
+              <td hlmTableCell colspan="4" class="py-10 text-center">
                 <div
                   class="flex flex-col items-center gap-3 whitespace-normal"
                   role="alert"
@@ -72,16 +103,6 @@
                       Verifica la conexión e intenta nuevamente.
                     </p>
                   </div>
-                  <button
-                    hlmBtn
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    (click)="reloadSites()"
-                  >
-                    <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
-                    Reintentar
-                  </button>
                 </div>
               </td>
             </tr>
@@ -94,11 +115,31 @@
                   </span>
                 </td>
                 <td hlmTableCell>
+                  @if (site.latitude !== null && site.longitude !== null) {
+                    <a
+                      class="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                      [href]="
+                        'https://www.google.com/maps/search/?api=1&query=' +
+                        site.latitude +
+                        ',' +
+                        site.longitude
+                      "
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ng-icon name="lucideMapPin" />
+                      Ver mapa
+                    </a>
+                  } @else {
+                    <span class="text-sm text-muted-foreground">Sin ubicación</span>
+                  }
+                </td>
+                <td hlmTableCell>
                   <span
                     hlmBadge
                     [variant]="site.isActive ? 'default' : 'secondary'"
                   >
-                    {{ site.isActive ? "Activa" : "Inactiva" }}
+                    {{ site.isActive ? "Activo" : "Inactivo" }}
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
@@ -144,12 +185,19 @@
               </tr>
             } @empty {
               <tr hlmTableRow>
-                <td hlmTableCell colspan="3" class="py-10 text-center">
+                <td hlmTableCell colspan="4" class="py-10 text-center">
                   <div class="flex flex-col gap-1 whitespace-normal">
-                    <p class="font-medium">No hay sedes registradas</p>
-                    <p class="text-sm text-muted-foreground">
-                      Agrege una sede o cambie el termino de busqueda.
-                    </p>
+                    @if (searchTerm().trim() || isActiveFilter() !== null) {
+                      <p class="font-medium">No se encontraron sedes</p>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otro nombre o estado.
+                      </p>
+                    } @else {
+                      <p class="font-medium">No hay sedes registradas</p>
+                      <p class="text-sm text-muted-foreground">
+                        Agrega una sede para comenzar.
+                      </p>
+                    }
                   </div>
                 </td>
               </tr>

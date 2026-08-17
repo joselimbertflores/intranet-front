@@ -1,6 +1,6 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideBuilding2,
@@ -13,8 +13,7 @@ import { forkJoin } from 'rxjs';
 
 import { PublicPageHeader } from '../../components';
 import { PortalDirectoryDataSource } from '../../services';
-import { DirectoryList } from './components/directory-list/directory-list';
-import { DirectoryMap } from './components/directory-map/directory-map';
+import { DirectoryList, DirectoryMap } from './components';
 
 type DirectoryTab = 'directory' | 'map';
 
@@ -26,7 +25,6 @@ type DirectoryTab = 'directory' | 'map';
     HlmSkeletonImports,
     HlmTabsImports,
     NgIcon,
-    NgTemplateOutlet,
     PublicPageHeader,
   ],
   providers: [

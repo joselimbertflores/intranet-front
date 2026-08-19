@@ -6,6 +6,7 @@ import {
   debounced,
   effect,
   inject,
+  linkedSignal,
   signal,
   untracked,
   viewChild,
@@ -16,6 +17,8 @@ import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideChevronDown,
+  lucideChevronLeft,
+  lucideChevronRight,
   lucideChevronUp,
   lucideCircleAlert,
   lucideFileSearch,
@@ -42,6 +45,7 @@ import {
 import {
   DocSectionFilterResponse,
   DocumentFiltersResponse,
+  PortalDocumentResponse,
 } from '../../interfaces';
 import {
   PortalDocumentDataSource,
@@ -55,6 +59,7 @@ interface DocumentFiltersModel {
   documentType: string | null;
   documentSubtype: string | null;
   year: number | null;
+  validityStatus: DocumentValidityStatus | null;
 }
 
 interface DocumentQueryState {
@@ -63,6 +68,7 @@ interface DocumentQueryState {
   documentType: string | null;
   documentSubtype: string | null;
   year: number | null;
+  validityStatus: DocumentValidityStatus | null;
   page: number;
 }
 
@@ -70,15 +76,9 @@ interface PortalOrganizationalUnitData {
   readonly items: readonly HierarchicalComboboxItem[];
   readonly idBySlug: ReadonlyMap<string, number>;
   readonly slugById: ReadonlyMap<number, string>;
-  readonly nameById: ReadonlyMap<number, string>;
 }
 
-type ActiveFilterKey = 'search' | 'unit' | 'type' | 'subtype' | 'year';
-
-interface ActiveFilterChip {
-  readonly key: ActiveFilterKey;
-  readonly label: string;
-}
+type DocumentValidityStatus = PortalDocumentResponse['validityStatus'];
 
 const PAGE_SIZE = 20;
 const MIN_YEAR = 2000;
@@ -89,6 +89,17 @@ const EMPTY_FILTERS: Readonly<DocumentFiltersModel> = {
   documentType: null,
   documentSubtype: null,
   year: null,
+  validityStatus: null,
+};
+
+const EMPTY_QUERY_STATE: Readonly<DocumentQueryState> = {
+  searchTerm: '',
+  organizationalUnit: null,
+  documentType: null,
+  documentSubtype: null,
+  year: null,
+  validityStatus: null,
+  page: 1,
 };
 
 @Component({
@@ -114,6 +125,8 @@ const EMPTY_FILTERS: Readonly<DocumentFiltersModel> = {
   providers: [
     provideIcons({
       lucideChevronDown,
+      lucideChevronLeft,
+      lucideChevronRight,
       lucideChevronUp,
       lucideCircleAlert,
       lucideFileSearch,
@@ -135,6 +148,16 @@ export default class DocumentsPage {
   readonly minYear = MIN_YEAR;
   readonly maxYear = MAX_YEAR;
   readonly skeletonRows = Array.from({ length: 6 });
+  readonly validityStatusOptions: readonly {
+    value: DocumentValidityStatus;
+    label: string;
+  }[] = [
+    { value: 'CURRENT', label: 'Vigente' },
+    { value: 'HISTORICAL', label: 'Histórico' },
+  ];
+  readonly validityStatusNames = new Map(
+    this.validityStatusOptions.map(({ value, label }) => [value, label]),
+  );
 
   readonly catalogResource =
     this.documentDataSource.documentFiltersResource;
@@ -146,14 +169,44 @@ export default class DocumentsPage {
   private readonly routeQueryParamMap = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
-  private readonly routeStateReady = signal(false);
+  private readonly routeQueryState = computed(() =>
+    this.parseQueryParams(this.routeQueryParamMap()),
+  );
 
-  readonly searchTerm = signal('');
-  private readonly appliedSearchTerm = signal('');
+  readonly organizationalUnitData = computed<PortalOrganizationalUnitData>(
+    () => this.mapOrganizationalUnits(this.catalogs()),
+  );
+
+  readonly types = computed(() => this.catalogs()?.types ?? []);
+
+  private readonly queryState = computed(() => {
+    const catalogs = this.catalogs();
+    if (!catalogs) return undefined;
+
+    return this.validateQueryState(this.routeQueryState(), catalogs);
+  });
+
+  readonly searchTerm = linkedSignal(
+    () => this.routeQueryState().searchTerm,
+  );
   private readonly debouncedSearchTerm = debounced(this.searchTerm, 350);
-  private readonly pendingNavigationSearchTerm = signal<string | null>(null);
 
-  readonly filtersModel = signal<DocumentFiltersModel>({ ...EMPTY_FILTERS });
+  readonly filtersModel = linkedSignal<DocumentFiltersModel>(() => {
+    const state = this.queryState();
+    if (!state) return { ...EMPTY_FILTERS };
+
+    return {
+      organizationalUnitId: state.organizationalUnit
+        ? (this.organizationalUnitData().idBySlug.get(
+            state.organizationalUnit,
+          ) ?? null)
+        : null,
+      documentType: state.documentType,
+      documentSubtype: state.documentSubtype,
+      year: state.year,
+      validityStatus: state.validityStatus,
+    };
+  });
   readonly filtersForm = form(this.filtersModel, (schemaPath) => {
     disabled(schemaPath.documentSubtype, {
       when: ({ valueOf }) => {
@@ -167,19 +220,6 @@ export default class DocumentsPage {
       },
     });
   });
-
-  readonly page = signal(1);
-  readonly advancedFiltersOpen = signal(false);
-  private readonly filtersTop = viewChild<ElementRef<HTMLElement>>('filtersTop');
-  private applyingNavigationState = false;
-
-  readonly organizationalUnitData = computed<PortalOrganizationalUnitData>(
-    () => this.mapOrganizationalUnits(this.catalogs()),
-  );
-
-  readonly types = computed(
-    () => this.catalogs()?.types ?? [],
-  );
 
   readonly subtypes = computed(() => {
     const selectedType = this.filtersModel().documentType;
@@ -198,69 +238,43 @@ export default class DocumentsPage {
     () => new Map(this.subtypes().map(({ slug, name }) => [slug, name])),
   );
 
-  readonly activeSecondaryFiltersCount = computed(() =>
-    Object.values(this.filtersModel()).filter(
-      (value) => value !== null && value !== '',
-    ).length,
-  );
+  readonly page = computed(() => this.queryState()?.page ?? 1);
+  readonly advancedFiltersOpen = signal(false);
+  private readonly filtersTop = viewChild<ElementRef<HTMLElement>>('filtersTop');
+
+  readonly activeSecondaryFiltersCount = computed(() => {
+    const state = this.queryState();
+    if (!state) return 0;
+
+    return [
+      state.organizationalUnit,
+      state.documentType,
+      state.documentSubtype,
+      state.year,
+      state.validityStatus,
+    ].filter((value) => value !== null && value !== '').length;
+  });
 
   readonly hasActiveFilters = computed(
     () =>
-      this.appliedSearchTerm().length > 0 ||
+      Boolean(this.routeQueryState().searchTerm) ||
       this.activeSecondaryFiltersCount() > 0,
   );
 
-  readonly activeFilterChips = computed<readonly ActiveFilterChip[]>(() => {
-    const filters = this.filtersModel();
-    const chips: ActiveFilterChip[] = [];
-
-    if (this.appliedSearchTerm()) {
-      chips.push({
-        key: 'search',
-        label: `Búsqueda: ${this.appliedSearchTerm()}`,
-      });
-    }
-    if (filters.organizationalUnitId !== null) {
-      const unitName = this.organizationalUnitData().nameById.get(
-        filters.organizationalUnitId,
-      );
-      if (unitName) chips.push({ key: 'unit', label: unitName });
-    }
-    if (filters.documentType) {
-      const typeName = this.typeNames().get(filters.documentType);
-      if (typeName) chips.push({ key: 'type', label: typeName });
-    }
-    if (filters.documentSubtype) {
-      const subtypeName = this.subtypeNames().get(filters.documentSubtype);
-      if (subtypeName) chips.push({ key: 'subtype', label: subtypeName });
-    }
-    if (filters.year !== null) {
-      chips.push({ key: 'year', label: `Gestión ${filters.year}` });
-    }
-
-    return chips;
-  });
-
   readonly documentsResource = rxResource({
     params: (): SearchPublicDocumentsParams | undefined => {
-      if (!this.routeStateReady() || !this.catalogResource.hasValue()) {
-        return undefined;
-      }
+      const state = this.queryState();
+      if (!state) return undefined;
 
-      const filters = this.filtersModel();
       return {
         limit: PAGE_SIZE,
-        offset: (this.page() - 1) * PAGE_SIZE,
-        term: this.appliedSearchTerm() || null,
-        organizationalUnit:
-          filters.organizationalUnitId === null
-            ? null
-            : (this.organizationalUnitData().slugById.get(
-                filters.organizationalUnitId,
-              ) ?? null),
-        type: filters.documentType,
-        subtype: filters.documentSubtype,
-        year: filters.year,
+        offset: (state.page - 1) * PAGE_SIZE,
+        term: state.searchTerm || null,
+        organizationalUnit: state.organizationalUnit,
+        type: state.documentType,
+        subtype: state.documentSubtype,
+        year: state.year,
+        validityStatus: state.validityStatus,
       };
     },
     stream: ({ params }) =>
@@ -281,50 +295,43 @@ export default class DocumentsPage {
       this.documentsResource.hasValue(),
   );
 
+  readonly totalPages = computed(() => {
+    const total = this.documentsResource.hasValue()
+      ? this.documentsResource.value().total
+      : 0;
+    return Math.max(1, Math.ceil(total / PAGE_SIZE));
+  });
+  readonly hasPreviousPage = computed(
+    () => !this.isUpdating() && this.page() > 1,
+  );
+  readonly hasNextPage = computed(
+    () => !this.isUpdating() && this.page() < this.totalPages(),
+  );
+
   constructor() {
     effect(() => {
       const paramMap = this.routeQueryParamMap();
-      const catalogs = this.catalogs();
-      if (!catalogs) return;
+      const state = this.queryState();
+      if (!state || this.queryParamsMatch(paramMap, this.toQueryParams(state))) {
+        return;
+      }
 
-      const queryState = this.validateQueryState(
-        this.parseQueryParams(paramMap),
-        catalogs,
-      );
-
-      untracked(() => {
-        this.applyNavigationState(queryState);
-        this.routeStateReady.set(true);
-
-        const normalizedParams = this.toQueryParams(queryState);
-        if (!this.queryParamsMatch(paramMap, normalizedParams)) {
-          this.navigateToQuery(queryState, true);
-        }
-      });
+      untracked(() => this.navigateToQuery(state, true));
     });
 
     effect(() => {
       const debouncedTerm = this.normalizeString(
         this.debouncedSearchTerm.value(),
       );
-      const ready = this.routeStateReady();
-      const pendingNavigationTerm = this.pendingNavigationSearchTerm();
-      if (!ready) return;
+      const state = this.queryState();
+      if (!state || debouncedTerm === state.searchTerm) return;
 
-      if (pendingNavigationTerm !== null) {
-        if (debouncedTerm === pendingNavigationTerm) {
-          untracked(() => this.pendingNavigationSearchTerm.set(null));
-        }
-        return;
-      }
-
-      untracked(() => {
-        if (debouncedTerm === this.appliedSearchTerm()) return;
-
-        this.appliedSearchTerm.set(debouncedTerm);
-        this.page.set(1);
-        this.navigateFromCurrentState(true);
-      });
+      untracked(() =>
+        this.navigateToQuery(
+          { ...state, searchTerm: debouncedTerm, page: 1 },
+          true,
+        ),
+      );
     });
 
     effect(() => {
@@ -332,107 +339,110 @@ export default class DocumentsPage {
         ? this.documentsResource.value()
         : undefined;
       const isLoading = this.documentsResource.isLoading();
-      const currentPage = this.page();
-      if (!response || isLoading) return;
+      const state = this.queryState();
+      if (!response || isLoading || !state) return;
 
       const lastPage = Math.max(1, Math.ceil(response.total / PAGE_SIZE));
-      if (currentPage <= lastPage) return;
+      if (state.page <= lastPage) return;
 
-      untracked(() => {
-        this.page.set(lastPage);
-        this.navigateFromCurrentState(true);
-      });
+      untracked(() =>
+        this.navigateToQuery({ ...state, page: lastPage }, true),
+      );
     });
   }
 
   onSearchInput(event: Event): void {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
-    this.pendingNavigationSearchTerm.set(null);
     this.searchTerm.set(input.value);
   }
 
   clearSearch(): void {
-    if (!this.searchTerm() && !this.appliedSearchTerm()) return;
+    const state = this.queryState();
+    if (!state || (!this.searchTerm() && !state.searchTerm)) return;
 
     this.searchTerm.set('');
-    this.appliedSearchTerm.set('');
-    this.pendingNavigationSearchTerm.set(null);
-    this.page.set(1);
-    this.navigateFromCurrentState(true);
+    this.navigateToQuery({ ...state, searchTerm: '', page: 1 }, true);
   }
 
   changeOrganizationalUnit(value: number | null | undefined): void {
-    if (this.applyingNavigationState) return;
-    this.applyFilterChange({ organizationalUnitId: value ?? null });
+    const state = this.queryState();
+    if (!state) return;
+
+    const organizationalUnit = value
+      ? (this.organizationalUnitData().slugById.get(value) ?? null)
+      : null;
+    if (organizationalUnit === state.organizationalUnit) return;
+
+    this.navigateToQuery({ ...state, organizationalUnit, page: 1 }, true);
   }
 
   changeDocumentType(value: string | null | undefined): void {
-    if (this.applyingNavigationState) return;
-    this.applyFilterChange({
-      documentType: this.normalizeNullableString(value),
-      documentSubtype: null,
-    });
+    const state = this.queryState();
+    if (!state) return;
+
+    const documentType = this.normalizeNullableString(value);
+    if (documentType === state.documentType) return;
+
+    this.navigateToQuery(
+      { ...state, documentType, documentSubtype: null, page: 1 },
+      true,
+    );
   }
 
   changeDocumentSubtype(value: string | null | undefined): void {
-    if (this.applyingNavigationState) return;
-    this.applyFilterChange({
-      documentSubtype: this.normalizeNullableString(value),
-    });
+    const state = this.queryState();
+    if (!state) return;
+
+    const documentSubtype = this.normalizeNullableString(value);
+    if (documentSubtype === state.documentSubtype) return;
+
+    this.navigateToQuery({ ...state, documentSubtype, page: 1 }, true);
   }
 
   changeYear(value: number | null): void {
-    if (this.applyingNavigationState) return;
-    this.applyFilterChange({ year: value });
+    const state = this.queryState();
+    if (!state || value === state.year) return;
+
+    this.navigateToQuery({ ...state, year: value, page: 1 }, true);
+  }
+
+  changeValidityStatus(
+    value: DocumentValidityStatus | null | undefined,
+  ): void {
+    const state = this.queryState();
+    if (!state) return;
+
+    const validityStatus = this.normalizeValidityStatus(value);
+    if (validityStatus === state.validityStatus) return;
+
+    this.navigateToQuery({ ...state, validityStatus, page: 1 }, true);
   }
 
   changePage(page: number): void {
-    if (!Number.isInteger(page) || page < 1 || page === this.page()) return;
+    if (
+      !Number.isInteger(page) ||
+      page < 1 ||
+      page > this.totalPages() ||
+      page === this.page()
+    ) {
+      return;
+    }
 
-    this.page.set(page);
-    this.navigateFromCurrentState(false);
+    const state = this.queryState();
+    if (!state) return;
+
+    this.navigateToQuery({ ...state, page }, false);
     this.filtersTop()?.nativeElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
   }
 
-  removeActiveFilter(key: ActiveFilterKey): void {
-    if (key === 'search') {
-      this.clearSearch();
-      return;
-    }
-
-    switch (key) {
-      case 'unit':
-        this.applyFilterChange({ organizationalUnitId: null });
-        break;
-      case 'type':
-        this.applyFilterChange({
-          documentType: null,
-          documentSubtype: null,
-        });
-        break;
-      case 'subtype':
-        this.applyFilterChange({ documentSubtype: null });
-        break;
-      case 'year':
-        this.applyFilterChange({ year: null });
-        break;
-    }
-  }
-
   resetFilters(): void {
-    this.applyingNavigationState = true;
     this.searchTerm.set('');
-    this.appliedSearchTerm.set('');
-    this.pendingNavigationSearchTerm.set(null);
-    this.filtersForm().reset({ ...EMPTY_FILTERS });
-    this.page.set(1);
     this.advancedFiltersOpen.set(false);
-    this.navigateFromCurrentState(true);
-    queueMicrotask(() => (this.applyingNavigationState = false));
+    this.navigateToQuery({ ...EMPTY_QUERY_STATE }, true);
   }
 
   toggleAdvancedFilters(): void {
@@ -443,41 +453,6 @@ export default class DocumentsPage {
     this.documentDataSource.reloadDocumentFilters();
   }
 
-  private applyFilterChange(changes: Partial<DocumentFiltersModel>): void {
-    this.applyingNavigationState = true;
-    this.filtersModel.update((filters) => ({ ...filters, ...changes }));
-    this.page.set(1);
-    this.navigateFromCurrentState(true);
-    queueMicrotask(() => (this.applyingNavigationState = false));
-  }
-
-  private applyNavigationState(state: DocumentQueryState): void {
-    this.applyingNavigationState = true;
-    this.pendingNavigationSearchTerm.set(state.searchTerm);
-    const nextFilters: DocumentFiltersModel = {
-      organizationalUnitId: state.organizationalUnit
-        ? (this.organizationalUnitData().idBySlug.get(
-            state.organizationalUnit,
-          ) ?? null)
-        : null,
-      documentType: state.documentType,
-      documentSubtype: state.documentSubtype,
-      year: state.year,
-    };
-
-    if (this.searchTerm() !== state.searchTerm) {
-      this.searchTerm.set(state.searchTerm);
-    }
-    if (this.appliedSearchTerm() !== state.searchTerm) {
-      this.appliedSearchTerm.set(state.searchTerm);
-    }
-    if (!this.filtersEqual(this.filtersModel(), nextFilters)) {
-      this.filtersForm().reset(nextFilters);
-    }
-    if (this.page() !== state.page) this.page.set(state.page);
-    queueMicrotask(() => (this.applyingNavigationState = false));
-  }
-
   private parseQueryParams(paramMap: ParamMap): DocumentQueryState {
     return {
       searchTerm: this.normalizeString(paramMap.get('q')).slice(0, 255),
@@ -485,6 +460,9 @@ export default class DocumentsPage {
       documentType: this.normalizeNullableString(paramMap.get('type')),
       documentSubtype: this.normalizeNullableString(paramMap.get('subtype')),
       year: this.parseInteger(paramMap.get('year')),
+      validityStatus: this.normalizeValidityStatus(
+        paramMap.get('validityStatus'),
+      ),
       page: this.parsePage(paramMap.get('page')),
     };
   }
@@ -536,43 +514,24 @@ export default class DocumentsPage {
     if (state.documentType) params['type'] = state.documentType;
     if (state.documentSubtype) params['subtype'] = state.documentSubtype;
     if (state.year !== null) params['year'] = state.year;
+    if (state.validityStatus) {
+      params['validityStatus'] = state.validityStatus;
+    }
     if (state.page > 1) params['page'] = state.page;
 
     return params;
-  }
-
-  private currentQueryState(): DocumentQueryState {
-    const filters = this.filtersModel();
-    return {
-      searchTerm: this.appliedSearchTerm(),
-      organizationalUnit:
-        filters.organizationalUnitId === null
-          ? null
-          : (this.organizationalUnitData().slugById.get(
-              filters.organizationalUnitId,
-            ) ?? null),
-      documentType: filters.documentType,
-      documentSubtype: filters.documentSubtype,
-      year: filters.year,
-      page: this.page(),
-    };
-  }
-
-  private navigateFromCurrentState(replaceUrl: boolean): void {
-    const state = this.currentQueryState();
-    const params = this.toQueryParams(state);
-    if (this.queryParamsMatch(this.routeQueryParamMap(), params)) return;
-
-    this.navigateToQuery(state, replaceUrl);
   }
 
   private navigateToQuery(
     state: DocumentQueryState,
     replaceUrl: boolean,
   ): void {
+    const queryParams = this.toQueryParams(state);
+    if (this.queryParamsMatch(this.routeQueryParamMap(), queryParams)) return;
+
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: this.toQueryParams(state),
+      queryParams,
       replaceUrl,
     });
   }
@@ -595,7 +554,6 @@ export default class DocumentsPage {
   ): PortalOrganizationalUnitData {
     const idBySlug = new Map<string, number>();
     const slugById = new Map<number, string>();
-    const nameById = new Map<number, string>();
 
     const toItems = (
       nodes: readonly DocSectionFilterResponse[],
@@ -606,7 +564,6 @@ export default class DocumentsPage {
         const path = [...parentNames, node.name];
         idBySlug.set(node.slug, node.id);
         slugById.set(node.id, node.slug);
-        nameById.set(node.id, node.name);
 
         return {
           id: node.id,
@@ -622,7 +579,6 @@ export default class DocumentsPage {
       items: toItems(catalogs?.organizationalUnits ?? []),
       idBySlug,
       slugById,
-      nameById,
     };
   }
 
@@ -635,18 +591,6 @@ export default class DocumentsPage {
     ]);
   }
 
-  private filtersEqual(
-    first: DocumentFiltersModel,
-    second: DocumentFiltersModel,
-  ): boolean {
-    return (
-      first.organizationalUnitId === second.organizationalUnitId &&
-      first.documentType === second.documentType &&
-      first.documentSubtype === second.documentSubtype &&
-      first.year === second.year
-    );
-  }
-
   private normalizeString(value: string | null | undefined): string {
     return value?.trim() ?? '';
   }
@@ -655,6 +599,12 @@ export default class DocumentsPage {
     value: string | null | undefined,
   ): string | null {
     return this.normalizeString(value) || null;
+  }
+
+  private normalizeValidityStatus(
+    value: string | null | undefined,
+  ): DocumentValidityStatus | null {
+    return value === 'CURRENT' || value === 'HISTORICAL' ? value : null;
   }
 
   private parseInteger(value: string | null): number | null {

@@ -4,8 +4,10 @@ export interface PortalDocumentResponse {
   year: number | null;
   organizationalUnit: string | null;
   type: string;
-  subtype?: string;
+  subtype: string | null;
   downloadCount: number;
+  createdAt: string;
+  validityStatus: 'CURRENT' | 'HISTORICAL';
   file: PortalFileResponse;
 }
 

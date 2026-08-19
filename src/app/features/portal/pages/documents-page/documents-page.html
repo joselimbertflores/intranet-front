@@ -13,13 +13,13 @@
       aria-label="Búsqueda y filtros de documentos"
     >
       <form
-        class="flex flex-col gap-4"
+        class="grid grid-cols-1 gap-4 lg:grid-cols-12"
         [formRoot]="filtersForm"
         (submit)="$event.preventDefault()"
       >
-        <div hlmField>
-          <label class="sr-only" for="portal-document-search">
-            Buscar documentos por título
+        <div hlmField class="lg:col-span-9">
+          <label hlmFieldLabel for="portal-document-search">
+            Buscar documentos
           </label>
           <hlm-input-group class="w-full">
             <hlm-input-group-addon>
@@ -54,7 +54,7 @@
         </div>
 
         @if (catalogResource.error()) {
-          <div hlmAlert variant="destructive">
+          <div hlmAlert variant="destructive" class="lg:col-span-12">
             <ng-icon name="lucideCircleAlert" />
             <h2 hlmAlertTitle>No se pudieron cargar los filtros</h2>
             <p hlmAlertDescription>
@@ -75,198 +75,212 @@
             </div>
           </div>
         } @else if (!catalogResource.hasValue()) {
-          <div
-            class="grid gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:grid-cols-12"
-            aria-label="Cargando filtros"
-          >
-            <div hlmSkeleton class="h-9 sm:col-span-2 lg:col-span-4"></div>
-            <div hlmSkeleton class="h-9 lg:col-span-3"></div>
-            <div hlmSkeleton class="h-9 lg:col-span-3"></div>
-            <div hlmSkeleton class="h-9 lg:col-span-2"></div>
-          </div>
+          <div hlmSkeleton class="h-9 lg:col-span-3"></div>
+          <div hlmSkeleton class="h-9 lg:col-span-3"></div>
+          <div hlmSkeleton class="h-9 lg:col-span-4"></div>
+          <div hlmSkeleton class="h-9 lg:col-span-2"></div>
+          <div hlmSkeleton class="h-9 lg:col-span-3"></div>
         } @else {
-          <div>
-            <div class="flex items-center justify-between gap-3 lg:hidden">
-              <button
-                hlmBtn
-                type="button"
-                variant="outline"
-                aria-controls="portal-document-secondary-filters"
-                [attr.aria-expanded]="advancedFiltersOpen()"
-                (click)="toggleAdvancedFilters()"
-              >
-                <ng-icon name="lucideFilter" data-icon="inline-start" />
-                Filtros
-                @if (activeSecondaryFiltersCount() > 0) {
-                  <span hlmBadge variant="secondary">
-                    {{ activeSecondaryFiltersCount() }}
-                  </span>
-                }
-                <ng-icon
-                  [name]="
-                    advancedFiltersOpen()
-                      ? 'lucideChevronUp'
-                      : 'lucideChevronDown'
-                  "
-                  data-icon="inline-end"
-                />
-              </button>
-            </div>
-
-            <div
-              id="portal-document-secondary-filters"
-              class="lg:block"
-              [class.hidden]="!advancedFiltersOpen()"
+          <div class="flex items-center lg:hidden">
+            <button
+              hlmBtn
+              type="button"
+              variant="outline"
+              aria-controls="portal-document-secondary-filters"
+              [attr.aria-expanded]="advancedFiltersOpen()"
+              (click)="toggleAdvancedFilters()"
             >
-              <div
-                class="mt-4 grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:mt-0 lg:grid-cols-12 lg:border-t-0 lg:pt-0"
-              >
-                <hierarchical-combobox
-                  class="sm:col-span-2 lg:col-span-4"
-                  emptyText="Sin unidades coincidentes."
-                  inputId="portal-document-organizational-unit"
-                  label="Unidad organizacional"
-                  placeholder="Todas las unidades"
-                  [formField]="filtersForm.organizationalUnitId"
-                  [items]="organizationalUnitData().items"
-                  (valueChange)="changeOrganizationalUnit($event)"
-                />
+              <ng-icon name="lucideFilter" data-icon="inline-start" />
+              Filtros
+              @if (activeSecondaryFiltersCount() > 0) {
+                <span hlmBadge variant="secondary">
+                  {{ activeSecondaryFiltersCount() }}
+                </span>
+              }
+              <ng-icon
+                [name]="
+                  advancedFiltersOpen()
+                    ? 'lucideChevronUp'
+                    : 'lucideChevronDown'
+                "
+                data-icon="inline-end"
+              />
+            </button>
+          </div>
 
-                <div hlmField class="lg:col-span-3">
-                  <label hlmFieldLabel for="portal-document-type">Tipo</label>
-                  <hlm-select
-                    [formField]="filtersForm.documentType"
-                    (valueChange)="changeDocumentType($event)"
-                  >
-                    <hlm-select-trigger
-                      class="w-full"
-                      buttonId="portal-document-type"
-                    >
-                      <ng-template hlmSelectValueTemplate let-type>
-                        {{ typeNames().get(type) }}
-                      </ng-template>
-                      <hlm-select-placeholder>
-                        Todos los tipos
-                      </hlm-select-placeholder>
-                    </hlm-select-trigger>
-                    <hlm-select-content *hlmSelectPortal class="max-h-72">
-                      <hlm-select-group>
-                        <hlm-select-item [value]="null">
-                          Todos los tipos
-                        </hlm-select-item>
-                        @for (type of types(); track type.id) {
-                          <hlm-select-item [value]="type.slug">
-                            {{ type.name }}
-                          </hlm-select-item>
-                        }
-                      </hlm-select-group>
-                    </hlm-select-content>
-                  </hlm-select>
-                </div>
-
-                <div hlmField class="lg:col-span-3">
-                  <label hlmFieldLabel for="portal-document-subtype">
-                    Subtipo
-                  </label>
-                  <hlm-select
-                    [formField]="filtersForm.documentSubtype"
-                    (valueChange)="changeDocumentSubtype($event)"
-                  >
-                    <hlm-select-trigger
-                      class="w-full"
-                      buttonId="portal-document-subtype"
-                    >
-                      <ng-template hlmSelectValueTemplate let-subtype>
-                        {{ subtypeNames().get(subtype) }}
-                      </ng-template>
-                      <hlm-select-placeholder>
-                        @if (!filtersModel().documentType) {
-                          Selecciona un tipo primero
-                        } @else if (!subtypes().length) {
-                          Sin subtipos disponibles
-                        } @else {
-                          Todos los subtipos
-                        }
-                      </hlm-select-placeholder>
-                    </hlm-select-trigger>
-                    <hlm-select-content *hlmSelectPortal class="max-h-72">
-                      <hlm-select-group>
-                        <hlm-select-item [value]="null">
-                          Todos los subtipos
-                        </hlm-select-item>
-                        @for (subtype of subtypes(); track subtype.id) {
-                          <hlm-select-item [value]="subtype.slug">
-                            {{ subtype.name }}
-                          </hlm-select-item>
-                        }
-                      </hlm-select-group>
-                    </hlm-select-content>
-                  </hlm-select>
-                </div>
-
-                <year-selector
-                  class="lg:col-span-2"
-                  inputId="portal-document-year"
-                  label="Gestión"
-                  placeholder="Todas"
-                  [minYear]="minYear"
-                  [maxYear]="maxYear"
-                  [formField]="filtersForm.year"
-                  (yearSelected)="changeYear($event)"
-                />
-
-                <div
-                  class="flex justify-end border-t border-border pt-3 sm:col-span-2 lg:hidden"
+          <div
+            id="portal-document-secondary-filters"
+            class="lg:contents"
+            [class.hidden]="!advancedFiltersOpen()"
+          >
+            <div
+              class="grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:contents"
+            >
+              <div hlmField class="sm:col-span-2 lg:col-span-3">
+                <label hlmFieldLabel for="portal-document-validity-status">
+                  Vigencia
+                </label>
+                <hlm-select
+                  [formField]="filtersForm.validityStatus"
+                  (valueChange)="changeValidityStatus($event)"
                 >
-                  <button
-                    hlmBtn
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    (click)="advancedFiltersOpen.set(false)"
+                  <hlm-select-trigger
+                    class="w-full"
+                    buttonId="portal-document-validity-status"
                   >
-                    Cerrar filtros
-                  </button>
-                </div>
+                    <ng-template
+                      hlmSelectValueTemplate
+                      let-validityStatus
+                    >
+                      {{ validityStatusNames.get(validityStatus) }}
+                    </ng-template>
+                    <hlm-select-placeholder>
+                      Todas las vigencias
+                    </hlm-select-placeholder>
+                  </hlm-select-trigger>
+                  <hlm-select-content *hlmSelectPortal>
+                    <hlm-select-group>
+                      <hlm-select-item [value]="null">
+                        Todas las vigencias
+                      </hlm-select-item>
+                      @for (
+                        status of validityStatusOptions;
+                        track status.value
+                      ) {
+                        <hlm-select-item [value]="status.value">
+                          {{ status.label }}
+                        </hlm-select-item>
+                      }
+                    </hlm-select-group>
+                  </hlm-select-content>
+                </hlm-select>
+              </div>
+
+              <div hlmField class="lg:col-span-3">
+                <label hlmFieldLabel for="portal-document-type">Tipo</label>
+                <hlm-select
+                  [formField]="filtersForm.documentType"
+                  (valueChange)="changeDocumentType($event)"
+                >
+                  <hlm-select-trigger
+                    class="w-full"
+                    buttonId="portal-document-type"
+                  >
+                    <ng-template hlmSelectValueTemplate let-type>
+                      {{ typeNames().get(type) }}
+                    </ng-template>
+                    <hlm-select-placeholder>
+                      Todos los tipos
+                    </hlm-select-placeholder>
+                  </hlm-select-trigger>
+                  <hlm-select-content *hlmSelectPortal class="max-h-72">
+                    <hlm-select-group>
+                      <hlm-select-item [value]="null">
+                        Todos los tipos
+                      </hlm-select-item>
+                      @for (type of types(); track type.id) {
+                        <hlm-select-item [value]="type.slug">
+                          {{ type.name }}
+                        </hlm-select-item>
+                      }
+                    </hlm-select-group>
+                  </hlm-select-content>
+                </hlm-select>
+              </div>
+
+              <div hlmField class="lg:col-span-4">
+                <label hlmFieldLabel for="portal-document-subtype">
+                  Subtipo
+                </label>
+                <hlm-select
+                  [formField]="filtersForm.documentSubtype"
+                  (valueChange)="changeDocumentSubtype($event)"
+                >
+                  <hlm-select-trigger
+                    class="w-full"
+                    buttonId="portal-document-subtype"
+                  >
+                    <ng-template hlmSelectValueTemplate let-subtype>
+                      {{ subtypeNames().get(subtype) }}
+                    </ng-template>
+                    <hlm-select-placeholder>
+                      @if (!filtersModel().documentType) {
+                        Selecciona un tipo primero
+                      } @else if (!subtypes().length) {
+                        Sin subtipos disponibles
+                      } @else {
+                        Todos los subtipos
+                      }
+                    </hlm-select-placeholder>
+                  </hlm-select-trigger>
+                  <hlm-select-content *hlmSelectPortal class="max-h-72">
+                    <hlm-select-group>
+                      <hlm-select-item [value]="null">
+                        Todos los subtipos
+                      </hlm-select-item>
+                      @for (subtype of subtypes(); track subtype.id) {
+                        <hlm-select-item [value]="subtype.slug">
+                          {{ subtype.name }}
+                        </hlm-select-item>
+                      }
+                    </hlm-select-group>
+                  </hlm-select-content>
+                </hlm-select>
+              </div>
+
+              <year-selector
+                class="lg:col-span-2"
+                inputId="portal-document-year"
+                label="Gestión"
+                placeholder="Todas"
+                [minYear]="minYear"
+                [maxYear]="maxYear"
+                [formField]="filtersForm.year"
+                (yearSelected)="changeYear($event)"
+              />
+
+              <hierarchical-combobox
+                class="sm:col-span-2 lg:col-span-3"
+                emptyText="Sin unidades coincidentes."
+                inputId="portal-document-organizational-unit"
+                label="Unidad organizacional"
+                placeholder="Todas las unidades"
+                [formField]="filtersForm.organizationalUnitId"
+                [items]="organizationalUnitData().items"
+                (valueChange)="changeOrganizationalUnit($event)"
+              />
+
+              <div
+                class="flex justify-end border-t border-border pt-3 sm:col-span-2 lg:hidden"
+              >
+                <button
+                  hlmBtn
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  (click)="advancedFiltersOpen.set(false)"
+                >
+                  Cerrar filtros
+                </button>
               </div>
             </div>
           </div>
         }
 
-        @if (activeFilterChips().length) {
-          <div
-            class="flex flex-wrap items-center gap-2 border-t border-border pt-4"
-            aria-label="Filtros activos"
+        <div
+          class="flex justify-end border-t border-border/70 pt-3 lg:col-span-12"
+        >
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="ghost"
+            [disabled]="!hasActiveFilters()"
+            (click)="resetFilters()"
           >
-            <span class="mr-1 text-sm font-medium text-muted-foreground">
-              Filtros activos:
-            </span>
-            @for (chip of activeFilterChips(); track chip.key) {
-              <button
-                hlmBtn
-                type="button"
-                size="xs"
-                variant="secondary"
-                class="max-w-full"
-                [title]="chip.label"
-                [attr.aria-label]="'Quitar filtro ' + chip.label"
-                (click)="removeActiveFilter(chip.key)"
-              >
-                <span class="max-w-64 truncate">{{ chip.label }}</span>
-                <ng-icon name="lucideX" data-icon="inline-end" />
-              </button>
-            }
-            <button
-              hlmBtn
-              type="button"
-              size="xs"
-              variant="ghost"
-              (click)="resetFilters()"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        }
+            Limpiar filtros
+          </button>
+        </div>
       </form>
     </section>
 
@@ -280,18 +294,18 @@
           <div class="overflow-hidden rounded-xl border border-border bg-card">
             @for (_ of skeletonRows; track $index) {
               <div
-                class="flex gap-4 border-b border-border p-4 last:border-b-0 sm:p-5"
+                class="flex gap-3 border-b border-border px-4 py-3 last:border-b-0 sm:gap-4 sm:px-5"
               >
-                <div hlmSkeleton class="size-12 shrink-0 rounded-xl"></div>
-                <div class="flex min-w-0 flex-1 flex-col gap-3">
-                  <div hlmSkeleton class="h-5 w-3/4 max-w-xl"></div>
-                  <div hlmSkeleton class="h-4 w-1/2 max-w-sm"></div>
+                <div hlmSkeleton class="size-10 shrink-0 rounded-lg"></div>
+                <div class="flex min-w-0 flex-1 flex-col gap-2">
+                  <div hlmSkeleton class="h-4 w-3/4 max-w-xl"></div>
                   <div class="flex gap-2">
                     <div hlmSkeleton class="h-5 w-20"></div>
                     <div hlmSkeleton class="h-5 w-24"></div>
                   </div>
+                  <div hlmSkeleton class="h-3 w-1/2 max-w-sm"></div>
                 </div>
-                <div hlmSkeleton class="hidden h-9 w-28 md:block"></div>
+                <div hlmSkeleton class="hidden h-7 w-24 sm:block"></div>
               </div>
             }
           </div>
@@ -332,15 +346,45 @@
             {{ response.total === 1 ? "documento encontrado" : "documentos encontrados" }}
           </p>
 
-          @if (isUpdating()) {
-            <span
-              class="inline-flex items-center gap-2 text-sm text-muted-foreground"
-              role="status"
+          <div class="flex items-center gap-3">
+            @if (isUpdating()) {
+              <span
+                class="hidden items-center gap-2 text-sm text-muted-foreground sm:inline-flex"
+                role="status"
+              >
+                <hlm-spinner />
+                Actualizando…
+              </span>
+            }
+
+            <nav
+              class="flex items-center gap-1.5"
+              aria-label="Navegación rápida de resultados"
             >
-              <hlm-spinner />
-              Actualizando…
-            </span>
-          }
+              <button
+                hlmBtn
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                aria-label="Página anterior"
+                [disabled]="!hasPreviousPage()"
+                (click)="changePage(page() - 1)"
+              >
+                <ng-icon name="lucideChevronLeft" />
+              </button>
+              <button
+                hlmBtn
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                aria-label="Página siguiente"
+                [disabled]="!hasNextPage()"
+                (click)="changePage(page() + 1)"
+              >
+                <ng-icon name="lucideChevronRight" />
+              </button>
+            </nav>
+          </div>
         </div>
 
         @if (response.documents.length) {

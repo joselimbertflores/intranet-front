@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   template: `
     <header class="public-page-header">
       <div
-        class="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8"
+        class="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8"
       >
         <div class="max-w-3xl">
           <h1
@@ -36,7 +36,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         100deg,
         color-mix(in oklch, var(--primary) 9%, var(--background)) 0%,
         color-mix(in oklch, var(--portal-mint) 42%, var(--background)) 54%,
-        color-mix(in oklch, var(--portal-amber) 58%, var(--background)) 100%
+        color-mix(in oklch, var(--portal-amber) 93%, var(--color-orange-600)) 100%
       );
     }
   `,

@@ -1,0 +1,179 @@
+<div class="min-h-[55vh] bg-muted/30 pb-16">
+  <public-page-header
+    title="Autoridades municipales"
+    description="Conoce a las autoridades del Gobierno Autónomo Municipal de Sacaba."
+  />
+
+  <div
+    class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+  >
+    <section
+      class="flex flex-col gap-3"
+      aria-labelledby="authorities-results-title"
+    >
+      <div
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2
+            id="authorities-results-title"
+            class="text-sm font-semibold uppercase tracking-wide"
+          >
+            AUTORIDADES
+          </h2>
+          <span class="text-sm text-muted-foreground" aria-live="polite">
+            <span class="font-semibold text-foreground">
+              {{ filteredAuthorities().length }}
+            </span>
+            {{ filteredAuthorities().length === 1 ? "resultado" : "resultados" }}
+          </span>
+        </div>
+
+        <div class="w-full sm:w-80">
+          <label class="sr-only" for="authorities-search">
+            Buscar autoridades
+          </label>
+          <input
+            id="authorities-search"
+            hlmInput
+            type="search"
+            autocomplete="off"
+            maxlength="255"
+            placeholder="Buscar autoridades..."
+            [value]="searchTerm()"
+            [disabled]="!authoritiesResource.value()?.length"
+            (input)="onSearchInput($event)"
+          />
+        </div>
+      </div>
+
+      <div
+        hlmTableContainer
+        class="rounded-lg border border-border bg-card"
+      >
+        <table
+          hlmTable
+          class="min-w-[640px]"
+          [attr.aria-busy]="
+            authoritiesResource.isLoading() &&
+            !authoritiesResource.hasValue()
+          "
+        >
+          <thead hlmTableHeader>
+            <tr hlmTableRow class="bg-muted/40 hover:bg-muted/40">
+              <th hlmTableHead class="w-1/3 px-4">Nombre</th>
+              <th hlmTableHead class="w-1/3">Cargo</th>
+              <th hlmTableHead class="w-1/3 px-4">Unidad</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @if (
+              authoritiesResource.isLoading() &&
+              !authoritiesResource.hasValue()
+            ) {
+              @for (_ of skeletonItems; track $index) {
+                <tr hlmTableRow aria-label="Cargando autoridad">
+                  <td hlmTableCell class="px-4 py-3">
+                    <div hlmSkeleton class="h-4 w-4/5"></div>
+                  </td>
+                  <td hlmTableCell class="py-3">
+                    <div hlmSkeleton class="h-4 w-3/4"></div>
+                  </td>
+                  <td hlmTableCell class="px-4 py-3">
+                    <div hlmSkeleton class="h-4 w-2/3"></div>
+                  </td>
+                </tr>
+              }
+            } @else if (authoritiesResource.error()) {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="3" class="whitespace-normal px-6 py-12">
+                  <div
+                    class="flex flex-col items-center gap-4 text-center"
+                    role="alert"
+                  >
+                    <div class="flex flex-col gap-1">
+                      <h3 class="font-semibold">
+                        No se pudieron cargar las autoridades
+                      </h3>
+                      <p class="text-sm text-muted-foreground">
+                        Verifica la conexión e intenta nuevamente.
+                      </p>
+                    </div>
+                    <button
+                      hlmBtn
+                      type="button"
+                      variant="outline"
+                      (click)="authoritiesResource.reload()"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @else if (!authoritiesResource.value()?.length) {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="3" class="whitespace-normal px-6 py-12">
+                  <div class="flex flex-col items-center gap-1 text-center">
+                    <h3 class="font-semibold">No hay autoridades disponibles</h3>
+                    <p class="text-sm text-muted-foreground">
+                      Las autoridades aparecerán aquí cuando estén disponibles.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            } @else if (filteredAuthorities().length) {
+              @for (authority of filteredAuthorities(); track $index) {
+                <tr hlmTableRow>
+                  <td
+                    hlmTableCell
+                    class="whitespace-normal px-4 py-3 align-top font-medium"
+                  >
+                    {{ authority.name }}
+                  </td>
+                  <td
+                    hlmTableCell
+                    class="whitespace-normal py-3 align-top"
+                  >
+                    {{ authority.position }}
+                  </td>
+                  <td
+                    hlmTableCell
+                    class="whitespace-normal px-4 py-3 align-top text-muted-foreground"
+                  >
+                    {{ authority.unit || "—" }}
+                  </td>
+                </tr>
+              }
+            } @else {
+              <tr hlmTableRow>
+                <td hlmTableCell colspan="3" class="whitespace-normal px-6 py-12">
+                  <div
+                    class="flex flex-col items-center gap-4 text-center"
+                    aria-live="polite"
+                  >
+                    <div class="flex flex-col gap-1">
+                      <h3 class="font-semibold">
+                        No se encontraron autoridades
+                      </h3>
+                      <p class="text-sm text-muted-foreground">
+                        Prueba con otro nombre, cargo o unidad.
+                      </p>
+                    </div>
+                    <button
+                      hlmBtn
+                      type="button"
+                      variant="outline"
+                      (click)="clearSearch()"
+                    >
+                      Limpiar búsqueda
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

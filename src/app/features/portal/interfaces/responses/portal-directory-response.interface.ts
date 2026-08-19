@@ -16,3 +16,11 @@ export interface PortalDirectoryEntryResponse {
   site: PortalDirectorySiteResponse | null;
   siteDetails: string | null;
 }
+
+export interface PortalAuthorityResponse {
+  name: string;
+  position: string;
+  unit: string | null;
+  area: string | null;
+  level: number;
+}

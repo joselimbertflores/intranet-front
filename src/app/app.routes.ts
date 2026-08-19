@@ -53,6 +53,12 @@ export const routes: Routes = [
           import('./features/portal/pages/directory-page/directory-page'),
       },
       {
+        path: 'autoridades',
+        title: 'Autoridades municipales',
+        loadComponent: () =>
+          import('./features/portal/pages/authorities-page/authorities-page'),
+      },
+      {
         path: 'accesos',
         title: 'Accesos rápidos',
         loadComponent: () =>

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { environment } from '../../../../environments/environment';
 import {
+  PortalAuthorityResponse,
   PortalDirectoryEntryResponse,
   PortalDirectorySiteResponse,
 } from '../interfaces';
@@ -18,5 +19,9 @@ export class PortalDirectoryDataSource {
 
   getSites() {
     return this.http.get<PortalDirectorySiteResponse[]>(`${this.url}/sites`);
+  }
+
+  getAuthorities() {
+    return this.http.get<PortalAuthorityResponse[]>(`${this.url}/authorities`);
   }
 }

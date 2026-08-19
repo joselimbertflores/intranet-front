@@ -12,6 +12,7 @@ import {
   lucideFileText,
   lucideGraduationCap,
   lucideHome,
+  lucideLandmark,
   lucideMegaphone,
   lucideMenu,
   lucideX,
@@ -45,6 +46,7 @@ interface NavItem {
       lucideFileText,
       lucideGraduationCap,
       lucideHome,
+      lucideLandmark,
       lucideMegaphone,
       lucideMenu,
       lucideX,
@@ -52,7 +54,7 @@ interface NavItem {
   ],
   template: `
     <nav
-      class="relative border-b border-white/10 bg-[var(--portal-forest)] text-white shadow-[0_14px_30px_-24px_rgb(3_29_19/0.8)]"
+      class="relative border-b border-white/10 bg-(--portal-forest) text-white shadow-[0_14px_30px_-24px_rgb(3_29_19/0.8)]"
       aria-label="Navegación principal"
     >
       <div
@@ -198,6 +200,12 @@ export class PortalNavbar {
       route: '/directory',
       exact: false,
       icon: 'lucideContactRound',
+    },
+    {
+      label: 'Autoridades',
+      route: '/autoridades',
+      exact: true,
+      icon: 'lucideLandmark',
     },
     {
       label: 'Tutoriales',

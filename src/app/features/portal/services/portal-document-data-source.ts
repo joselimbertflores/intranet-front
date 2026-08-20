@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
   DocumentFiltersResponse,
@@ -27,27 +27,16 @@ export class PortalDocumentDataSource {
   private readonly URL = `${environment.baseUrl}/api/portal-documents`;
   private readonly http = inject(HttpClient);
 
-  /**
-   * Recurso compartido por toda la aplicación. Al vivir en este servicio root,
-   * conserva el catálogo al navegar fuera de Documentos y volver.
-   */
-  readonly documentFiltersResource = rxResource({
-    stream: () => this.getDocumentFilters(),
-  });
+  readonly documentFilters = toSignal(
+    this.http.get<DocumentFiltersResponse>(`${this.URL}/filters`),
+    { initialValue: { organizationalUnits: [], types: [] } },
+  );
 
   searchDocuments(filterParams: SearchPublicDocumentsParams) {
     const params = new HttpParams({
       fromObject: this.removeEmptyProperties(filterParams),
     });
     return this.http.get<PortalDocumentSearchResponse>(this.URL, { params });
-  }
-
-  getDocumentFilters() {
-    return this.http.get<DocumentFiltersResponse>(`${this.URL}/filters`);
-  }
-
-  reloadDocumentFilters(): void {
-    this.documentFiltersResource.reload();
   }
 
   private removeEmptyProperties(

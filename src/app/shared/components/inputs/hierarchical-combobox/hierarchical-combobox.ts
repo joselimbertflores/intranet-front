@@ -11,7 +11,7 @@ import { HlmComboboxImports } from '@spartan-ng/helm/combobox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 
 export interface HierarchicalComboboxItem {
-  readonly id: number;
+  readonly id: string | number;
   readonly name: string;
   readonly depth?: number;
   readonly parentPath?: string;
@@ -20,7 +20,7 @@ export interface HierarchicalComboboxItem {
 }
 
 interface HierarchicalComboboxOption {
-  readonly id: number;
+  readonly id: string | number;
   readonly name: string;
   readonly depth: number;
   readonly parentPath: string;
@@ -81,7 +81,9 @@ interface HierarchicalComboboxOption {
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HierarchicalCombobox implements FormValueControl<number | null> {
+export class HierarchicalCombobox
+  implements FormValueControl<string | number | null>
+{
   readonly items = input.required<readonly HierarchicalComboboxItem[]>();
   readonly label = input('Opción');
   readonly inputId = input('hierarchical-combobox');
@@ -89,7 +91,7 @@ export class HierarchicalCombobox implements FormValueControl<number | null> {
   readonly emptyText = input('Sin resultados.');
   readonly disabled = input(false);
 
-  readonly value = model<number | null>(null);
+  readonly value = model<string | number | null>(null);
 
   private readonly hierarchicalOptions = computed<
     readonly HierarchicalComboboxOption[]

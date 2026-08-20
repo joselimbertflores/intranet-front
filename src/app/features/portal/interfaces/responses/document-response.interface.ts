@@ -18,16 +18,16 @@ export interface PortalFileResponse {
   downloadUrl: string;
 }
 export interface DocumentFiltersResponse {
-  organizationalUnits: DocSectionFilterResponse[];
+  organizationalUnits: OrgUnitsFilterResponse[];
   types: DocTypeFilterResponse[];
 }
 
-export interface DocSectionFilterResponse {
+export interface OrgUnitsFilterResponse {
   id: number;
   name: string;
   slug: string;
   parentId: number | null;
-  children: DocSectionFilterResponse[];
+  children: OrgUnitsFilterResponse[];
 }
 
 export interface DocTypeFilterResponse {

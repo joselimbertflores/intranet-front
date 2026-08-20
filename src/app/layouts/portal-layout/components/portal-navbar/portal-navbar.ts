@@ -97,9 +97,9 @@ interface NavItem {
         <button
           type="button"
           hlmBtn
-          variant="secondary"
-          size="icon"
-          class="ml-auto shrink-0 xl:hidden"
+          variant="ghost"
+          size="icon-lg"
+          class="ml-auto size-11 shrink-0 text-current hover:bg-current/10 hover:text-current focus-visible:border-current/30 focus-visible:ring-current/40 aria-expanded:bg-current/10 aria-expanded:text-current xl:hidden"
           aria-label="Abrir o cerrar el menú de navegación"
           aria-controls="mobile-navigation"
           [attr.aria-expanded]="isMobileMenuOpen()"

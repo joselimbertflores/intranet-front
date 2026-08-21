@@ -6,25 +6,6 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <script>
-    (() => {
-      const storageKey = 'intranet-theme';
-      let preference = 'system';
-
-      try {
-        const storedPreference = localStorage.getItem(storageKey);
-        if (storedPreference === 'light' || storedPreference === 'dark' || storedPreference === 'system') {
-          preference = storedPreference;
-        }
-      } catch {
-        // Storage can be unavailable in privacy-restricted contexts.
-      }
-
-      const isDark = preference === 'dark'
-        || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.classList.toggle('dark', isDark);
-    })();
-  </script>
 </head>
 <body>
   <app-root></app-root>

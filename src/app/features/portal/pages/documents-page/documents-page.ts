@@ -1,12 +1,13 @@
 import {
-  Component,
+  linkedSignal,
   ElementRef,
+  viewChild,
+  untracked,
+  Component,
   computed,
   effect,
   inject,
-  linkedSignal,
   signal,
-  viewChild,
 } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -15,18 +16,14 @@ import {
   form,
   FormField,
   FormRoot,
-  maxLength,
 } from '@angular/forms/signals';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideChevronDown,
   lucideChevronLeft,
   lucideChevronRight,
-  lucideChevronUp,
   lucideCircleAlert,
   lucideFileSearch,
-  lucideFilter,
   lucideRefreshCw,
   lucideSearch,
   lucideX,
@@ -37,22 +34,23 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
-import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { map } from 'rxjs';
 
 import {
-  HierarchicalCombobox,
   HierarchicalComboboxItem,
+  HierarchicalCombobox,
   PaginationControls,
   YearSelector,
 } from '../../../../shared';
+
 import {
   OrgUnitsFilterResponse,
   PortalDocumentResponse,
 } from '../../interfaces';
+
+import { PortalDocumentListItem } from './components/portal-document-list-item/portal-document-list-item';
 import { PortalDocumentDataSource } from '../../services';
 import { PublicPageHeader } from '../../components';
-import { PortalDocumentListItem } from './components/portal-document-list-item/portal-document-list-item';
 
 type DocumentValidityStatus = PortalDocumentResponse['validityStatus'];
 
@@ -73,26 +71,16 @@ const PAGE_SIZE = 20;
 const MIN_YEAR = 2000;
 const MAX_YEAR = new Date().getFullYear() + 1;
 
-const EMPTY_QUERY_STATE: Readonly<DocumentQueryState> = {
-  term: '',
-  organizationalUnit: null,
-  documentType: null,
-  documentSubtype: null,
-  year: null,
-  validityStatus: null,
-  page: 1,
-};
-
 function mapQueryParams(paramMap: ParamMap): DocumentQueryState {
-  const year = Number(paramMap.get('year'));
+  const year = Number(paramMap.get('gestion'));
   const page = Number(paramMap.get('page'));
-  const validityStatus = paramMap.get('validityStatus');
+  const validityStatus = paramMap.get('vigencia');
 
   return {
-    term: (paramMap.get('q')?.trim() ?? '').slice(0, 255),
-    organizationalUnit: paramMap.get('unit')?.trim() || null,
-    documentType: paramMap.get('type')?.trim() || null,
-    documentSubtype: paramMap.get('subtype')?.trim() || null,
+    term: paramMap.get('q')?.trim() ?? '',
+    organizationalUnit: paramMap.get('unidad')?.trim() || null,
+    documentType: paramMap.get('tipo')?.trim() || null,
+    documentSubtype: paramMap.get('subtipo')?.trim() || null,
     year:
       Number.isInteger(year) && year >= MIN_YEAR && year <= MAX_YEAR
         ? year
@@ -109,11 +97,11 @@ function toQueryParams(state: DocumentQueryState): Params {
   const params: Params = {};
 
   if (state.term) params['q'] = state.term;
-  if (state.organizationalUnit) params['unit'] = state.organizationalUnit;
-  if (state.documentType) params['type'] = state.documentType;
-  if (state.documentSubtype) params['subtype'] = state.documentSubtype;
-  if (state.year !== null) params['year'] = state.year;
-  if (state.validityStatus) params['validityStatus'] = state.validityStatus;
+  if (state.organizationalUnit) params['unidad'] = state.organizationalUnit;
+  if (state.documentType) params['tipo'] = state.documentType;
+  if (state.documentSubtype) params['subtipo'] = state.documentSubtype;
+  if (state.year !== null) params['gestion'] = state.year;
+  if (state.validityStatus) params['vigencia'] = state.validityStatus;
   if (state.page > 1) params['page'] = state.page;
 
   return params;
@@ -141,22 +129,18 @@ function mapOrganizationalUnits(
     HlmInputGroupImports,
     HlmSelectImports,
     HlmSkeletonImports,
-    HlmSpinner,
-    NgIcon,
     PaginationControls,
     PortalDocumentListItem,
     PublicPageHeader,
     YearSelector,
+    NgIcon,
   ],
   providers: [
     provideIcons({
-      lucideChevronDown,
       lucideChevronLeft,
       lucideChevronRight,
-      lucideChevronUp,
       lucideCircleAlert,
       lucideFileSearch,
-      lucideFilter,
       lucideRefreshCw,
       lucideSearch,
       lucideX,
@@ -169,7 +153,7 @@ export default class DocumentsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly documentDataSource = inject(PortalDocumentDataSource);
 
-  private queryParams = toSignal(
+  private readonly queryParams = toSignal(
     this.route.queryParamMap.pipe(map(mapQueryParams)),
     {
       initialValue: mapQueryParams(this.route.snapshot.queryParamMap),
@@ -222,7 +206,6 @@ export default class DocumentsPage {
   });
 
   readonly filtersForm = form(this.filtersModel, (schemaPath) => {
-    maxLength(schemaPath.term, 255);
     debounce(schemaPath.term, 350);
     disabled(schemaPath.documentSubtype, {
       when: ({ valueOf }) => {
@@ -252,9 +235,10 @@ export default class DocumentsPage {
   );
 
   readonly page = computed(() => this.queryParams().page);
-  readonly advancedFiltersOpen = signal(false);
-  private readonly filtersTop =
-    viewChild<ElementRef<HTMLElement>>('filtersTop');
+
+  readonly mobileFiltersOpen = signal(false);
+
+  private readonly filtersTop = viewChild<ElementRef<HTMLElement>>('filtersTop');
 
   readonly activeSecondaryFiltersCount = computed(
     () =>
@@ -272,55 +256,51 @@ export default class DocumentsPage {
       this.activeSecondaryFiltersCount() > 0,
   );
 
-  readonly isInitialLoading = computed(
-    () =>
-      this.documentsResource.isLoading() && !this.documentsResource.hasValue(),
-  );
-  readonly isUpdating = computed(
-    () =>
-      this.documentsResource.isLoading() && this.documentsResource.hasValue(),
-  );
   readonly totalPages = computed(() => {
     const total = this.documentsResource.hasValue()
       ? this.documentsResource.value().total
       : 0;
     return Math.max(1, Math.ceil(total / PAGE_SIZE));
   });
+
   readonly hasPreviousPage = computed(
-    () => !this.isUpdating() && this.page() > 1,
+    () => !this.documentsResource.isLoading() && this.page() > 1,
   );
   readonly hasNextPage = computed(
-    () => !this.isUpdating() && this.page() < this.totalPages(),
+    () =>
+      !this.documentsResource.isLoading() && this.page() < this.totalPages(),
   );
 
   constructor() {
     effect(() => {
-      const state = this.queryParams();
       const filters = this.filtersModel();
+      const current = untracked(this.queryParams);
       const term = filters.term.trim();
+      const documentTypeChanged = filters.documentType !== current.documentType;
+      const documentSubtype = documentTypeChanged
+        ? null
+        : filters.documentSubtype;
 
       if (
-        term === state.term &&
-        filters.organizationalUnit === state.organizationalUnit &&
-        filters.documentType === state.documentType &&
-        filters.documentSubtype === state.documentSubtype &&
-        filters.year === state.year &&
-        filters.validityStatus === state.validityStatus
+        term === current.term &&
+        filters.organizationalUnit === current.organizationalUnit &&
+        filters.documentType === current.documentType &&
+        documentSubtype === current.documentSubtype &&
+        filters.year === current.year &&
+        filters.validityStatus === current.validityStatus
       ) {
         return;
       }
 
-      const documentTypeChanged = filters.documentType !== state.documentType;
-
-      void this.router.navigate([], {
+      this.router.navigate([], {
         relativeTo: this.route,
         queryParams: toQueryParams({
           ...filters,
           term,
-          documentSubtype: documentTypeChanged ? null : filters.documentSubtype,
+          documentSubtype,
           page: 1,
         }),
-        replaceUrl: true,
+        scroll: 'manual',
       });
     });
   }
@@ -331,24 +311,29 @@ export default class DocumentsPage {
     }
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: toQueryParams({ ...this.queryParams(), page }),
+      queryParams: { page },
+      queryParamsHandling: 'merge',
+      scroll: 'manual',
     });
     this.filtersTop()?.nativeElement.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'instant',
       block: 'start',
     });
   }
 
   resetFilters(): void {
-    this.advancedFiltersOpen.set(false);
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: toQueryParams({ ...EMPTY_QUERY_STATE }),
-      replaceUrl: true,
+    this.mobileFiltersOpen.set(false);
+    this.filtersForm().reset({
+      year: null,
+      term: '',
+      organizationalUnit: null,
+      documentType: null,
+      documentSubtype: null,
+      validityStatus: null,
     });
   }
 
-  toggleAdvancedFilters(): void {
-    this.advancedFiltersOpen.update((open) => !open);
+  toggleMobileFilters(): void {
+    this.mobileFiltersOpen.update((open) => !open);
   }
 }

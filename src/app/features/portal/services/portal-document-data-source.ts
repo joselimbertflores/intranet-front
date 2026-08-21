@@ -4,7 +4,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
   DocumentFiltersResponse,
-  PortalDocumentResponse,
   PortalDocumentSearchResponse,
 } from '../interfaces';
 import { environment } from '../../../../environments/environment';
@@ -14,7 +13,7 @@ export interface SearchPublicDocumentsParams {
   type?: string | null;
   subtype?: string | null;
   year?: number | null;
-  validityStatus?: PortalDocumentResponse['validityStatus'] | null;
+  validityStatus?: string | null;
   term?: string | null;
   limit: number;
   offset: number;

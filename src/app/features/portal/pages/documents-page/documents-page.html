@@ -9,7 +9,7 @@
   >
     <section
       #filtersTop
-      class="scroll-mt-24 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      class="scroll-mt-24 rounded-xl border border-border bg-card p-2 shadow-sm sm:p-4"
       aria-label="Búsqueda y filtros de documentos"
     >
       <form
@@ -36,35 +36,43 @@
           </hlm-input-group>
         </div>
 
-        <div class="flex items-center lg:hidden">
+        <div class="flex items-center justify-between gap-3 lg:hidden">
           <button
             hlmBtn
             type="button"
+            size="sm"
             variant="outline"
             aria-controls="portal-document-secondary-filters"
-            [attr.aria-expanded]="advancedFiltersOpen()"
-            (click)="toggleAdvancedFilters()"
+            [attr.aria-expanded]="mobileFiltersOpen()"
+            (click)="toggleMobileFilters()"
           >
-            <ng-icon name="lucideFilter" data-icon="inline-start" />
             Filtros
             @if (activeSecondaryFiltersCount() > 0) {
               <span hlmBadge variant="secondary">
                 {{ activeSecondaryFiltersCount() }}
               </span>
             }
-            <ng-icon
-              [name]="
-                advancedFiltersOpen() ? 'lucideChevronUp' : 'lucideChevronDown'
-              "
-              data-icon="inline-end"
-            />
+          </button>
+
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="ghost"
+            [disabled]="!hasActiveFilters()"
+            (click)="resetFilters()"
+          >
+            Limpiar
           </button>
         </div>
 
         <div
           id="portal-document-secondary-filters"
-          class="lg:contents"
-          [class.hidden]="!advancedFiltersOpen()"
+          [class]="
+            mobileFiltersOpen()
+              ? 'lg:contents'
+              : 'max-lg:hidden lg:contents'
+          "
         >
           <div
             class="grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:contents"
@@ -194,7 +202,7 @@
                 type="button"
                 size="sm"
                 variant="ghost"
-                (click)="advancedFiltersOpen.set(false)"
+                (click)="mobileFiltersOpen.set(false)"
               >
                 Cerrar filtros
               </button>
@@ -203,7 +211,7 @@
         </div>
 
         <div
-          class="flex justify-end border-t border-border/70 pt-3 lg:col-span-12"
+          class="hidden justify-end border-t border-border/70 pt-2 lg:col-span-12 lg:flex"
         >
           <button
             hlmBtn
@@ -220,7 +228,7 @@
     </section>
 
     <section class="flex flex-col gap-4" aria-label="Resultados de documentos">
-      @if (isInitialLoading()) {
+      @if (documentsResource.isLoading()) {
         <div class="flex flex-col gap-3" aria-label="Cargando documentos">
           <div class="flex items-center justify-between gap-4">
             <div hlmSkeleton class="h-5 w-44"></div>
@@ -285,16 +293,6 @@
           </p>
 
           <div class="flex items-center gap-3">
-            @if (isUpdating()) {
-              <span
-                class="hidden items-center gap-2 text-sm text-muted-foreground sm:inline-flex"
-                role="status"
-              >
-                <hlm-spinner />
-                Actualizando…
-              </span>
-            }
-
             <nav
               class="flex items-center gap-1.5"
               aria-label="Navegación rápida de resultados"

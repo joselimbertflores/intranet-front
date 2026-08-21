@@ -1,9 +1,10 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideDownload } from '@ng-icons/lucide';
+import { Component, input } from '@angular/core';
+
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import { HlmButton } from '@spartan-ng/helm/button';
+import { lucideDownload } from '@ng-icons/lucide';
 
 import { FileIcon, FileSizePipe } from '../../../../../../shared';
 import { PortalDocumentResponse } from '../../../../interfaces';
@@ -20,7 +21,6 @@ import { PortalDocumentResponse } from '../../../../interfaces';
   ],
   providers: [provideIcons({ lucideDownload })],
   templateUrl: './portal-document-list-item.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortalDocumentListItem {
   readonly document = input.required<PortalDocumentResponse>();

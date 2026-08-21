@@ -11,7 +11,6 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
   lucideCircleAlert,
-  lucideExternalLink,
   lucideRefreshCw,
   lucideSearch,
   lucideSearchX,
@@ -21,8 +20,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
-import { QUICK_ACCESS_ICONS } from '../../../../shared/constants/quick-access-icons';
-import { PublicPageHeader } from '../../components';
+import { PublicPageHeader, QuickAccessCard } from '../../components';
 import { PortalLandingDataSource } from '../../services';
 
 @Component({
@@ -33,18 +31,17 @@ import { PortalLandingDataSource } from '../../services';
     HlmSkeletonImports,
     NgIcon,
     PublicPageHeader,
+    QuickAccessCard,
     RouterLink,
   ],
   providers: [
     provideIcons({
       lucideArrowLeft,
       lucideCircleAlert,
-      lucideExternalLink,
       lucideRefreshCw,
       lucideSearch,
       lucideSearchX,
       lucideX,
-      ...QUICK_ACCESS_ICONS,
     }),
   ],
   host: { class: 'block' },

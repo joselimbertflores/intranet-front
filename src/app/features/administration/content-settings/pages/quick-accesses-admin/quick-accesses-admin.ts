@@ -19,7 +19,6 @@ import {
   lucideArrowDown,
   lucideArrowUp,
   lucideCircleAlert,
-  lucideExternalLink,
   lucideGripVertical,
   lucideMoreHorizontal,
   lucidePencil,
@@ -45,7 +44,10 @@ import {
   PermissionAction,
   Resource,
 } from '../../../../../core/auth/auth.types';
-import { QUICK_ACCESS_ICONS } from '../../../../../shared/constants/quick-access-icons';
+import {
+  QUICK_ACCESS_ICONS,
+  resolveQuickAccessIcon,
+} from '../../../../../shared/constants/quick-access-icons';
 import { QuickAccessEditor } from '../../dialogs';
 import { QuickAccessResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -70,7 +72,6 @@ import { ContentSettingsDataSource } from '../../services';
       lucideArrowDown,
       lucideArrowUp,
       lucideCircleAlert,
-      lucideExternalLink,
       lucideGripVertical,
       lucideMoreHorizontal,
       lucidePencil,
@@ -125,6 +126,7 @@ export default class QuickAccessesAdmin {
   readonly quickAccessToDelete = signal<QuickAccessResponse | null>(null);
   readonly actionError = signal<string | null>(null);
   readonly skeletonItems = Array.from({ length: 5 });
+  readonly resolveIcon = resolveQuickAccessIcon;
 
   readonly canCreate = computed(() =>
     this.authDataSource.can(Resource.CONTENT, PermissionAction.CREATE),

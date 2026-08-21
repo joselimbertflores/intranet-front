@@ -25,7 +25,10 @@ import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { firstValueFrom } from 'rxjs';
 
-import { QUICK_ACCESS_ICONS } from '../../../../../shared/constants/quick-access-icons';
+import {
+  QUICK_ACCESS_ICONS,
+  resolveQuickAccessIcon,
+} from '../../../../../shared/constants/quick-access-icons';
 import type { QuickAccessIconKey } from '../../../../../shared/models/quick-access-icon-key';
 import {
   QUICK_ACCESS_ICON_LABELS,
@@ -84,6 +87,7 @@ export class QuickAccessEditor {
   readonly iconLabels: Readonly<Record<string, string>> =
     QUICK_ACCESS_ICON_LABELS;
   readonly iconOptions = QUICK_ACCESS_ICON_OPTIONS;
+  readonly resolveIcon = resolveQuickAccessIcon;
   readonly formModel = signal<QuickAccessFormData>({
     title: this.quickAccess?.title ?? '',
     description: this.quickAccess?.description ?? '',

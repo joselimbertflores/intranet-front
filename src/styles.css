@@ -135,34 +135,32 @@
   .quick-access-surface {
     --quick-access-color: var(--primary);
 
-    border-color: color-mix(in srgb, var(--quick-access-color) 22%, var(--border));
-    background: color-mix(in srgb, var(--quick-access-color) 8%, var(--card));
+    border-color: var(--border);
+    background: var(--card);
     color: var(--card-foreground);
     transition:
       border-color 180ms ease,
       background-color 180ms ease,
+      box-shadow 180ms ease,
       transform 180ms ease;
   }
 
   .quick-access-surface:hover {
-    border-color: color-mix(in srgb, var(--quick-access-color) 36%, var(--border));
-    background: color-mix(in srgb, var(--quick-access-color) 12%, var(--card));
-    transform: translateY(-0.2rem);
+    border-color: color-mix(in srgb, var(--quick-access-color) 28%, var(--border));
+    background: color-mix(in srgb, var(--muted) 45%, var(--card));
+    box-shadow: 0 0.375rem 1rem color-mix(in srgb, var(--foreground) 7%, transparent);
+    transform: translateY(-1px);
   }
 
   .quick-access-surface:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--quick-access-color) 35%, var(--ring));
+    outline: 3px solid var(--ring);
     outline-offset: 3px;
   }
 
-  .quick-access-identity,
   .quick-access-icon-surface {
-    color: color-mix(in srgb, var(--quick-access-color) 78%, var(--card-foreground));
-  }
-
-  .quick-access-icon-surface {
-    border-color: color-mix(in srgb, var(--quick-access-color) 28%, var(--border));
-    background: color-mix(in srgb, var(--quick-access-color) 12%, var(--card));
+    border-color: color-mix(in srgb, var(--quick-access-color) 24%, var(--border));
+    background: color-mix(in srgb, var(--quick-access-color) 14%, var(--muted));
+    color: color-mix(in srgb, var(--quick-access-color) 58%, var(--foreground));
   }
 }
 

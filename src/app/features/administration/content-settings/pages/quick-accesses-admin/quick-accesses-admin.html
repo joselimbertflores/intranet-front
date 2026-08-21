@@ -160,7 +160,7 @@
               [style.--quick-access-color]="item.backgroundColor"
               aria-hidden="true"
             >
-              <ng-icon [name]="item.iconKey" />
+              <ng-icon [name]="resolveIcon(item.iconKey)" />
             </span>
 
             <div class="min-w-0">

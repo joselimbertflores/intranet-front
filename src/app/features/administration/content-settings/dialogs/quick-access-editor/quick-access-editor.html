@@ -23,7 +23,7 @@
         class="quick-access-icon-surface grid size-11 shrink-0 place-items-center rounded-lg border"
         aria-hidden="true"
       >
-        <ng-icon [name]="quickAccessForm.iconKey().value()" />
+        <ng-icon [name]="resolveIcon(quickAccessForm.iconKey().value())" />
       </span>
       <div class="min-w-0">
         <p class="line-clamp-2 font-medium">
@@ -85,7 +85,7 @@
             <hlm-select-trigger class="w-full" buttonId="quick-access-icon">
               <ng-template hlmSelectValueTemplate let-iconKey>
                 <span class="flex min-w-0 items-center gap-2">
-                  <ng-icon [name]="iconKey" />
+                  <ng-icon [name]="resolveIcon(iconKey)" />
                   <span class="truncate">{{ iconLabels[iconKey] }}</span>
                 </span>
               </ng-template>

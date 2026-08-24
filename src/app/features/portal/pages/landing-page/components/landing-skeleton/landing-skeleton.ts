@@ -27,23 +27,28 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
         </div>
       </section>
 
-      <section class="bg-muted/60 px-5 py-14 sm:px-8" aria-hidden="true">
+      <section class="featured-skeleton px-5 py-14 sm:px-8" aria-hidden="true">
+        <div class="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(13rem,0.7fr)_minmax(0,1.8fr)] lg:items-center lg:gap-12">
+          <div>
+            <div hlmSkeleton class="h-9 w-56"></div>
+            <div hlmSkeleton class="mt-4 h-5 w-full max-w-72"></div>
+          </div>
+          <div hlmSkeleton class="h-72 w-full rounded-3xl sm:h-96"></div>
+        </div>
+      </section>
+
+      <section class="communications-skeleton px-5 py-14 sm:px-8" aria-hidden="true">
         <div class="mx-auto w-full max-w-7xl">
-          <div hlmSkeleton class="h-9 w-56"></div>
-          <div hlmSkeleton class="mt-7 h-72 w-full rounded-3xl"></div>
+          <div hlmSkeleton class="h-9 w-72"></div>
+          <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (item of communicationSkeletons; track $index) {
+              <div hlmSkeleton class="h-80 rounded-2xl"></div>
+            }
+          </div>
         </div>
       </section>
 
-      <section class="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8" aria-hidden="true">
-        <div hlmSkeleton class="h-9 w-72"></div>
-        <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          @for (item of contentSkeletons; track $index) {
-            <div hlmSkeleton class="h-80 rounded-2xl"></div>
-          }
-        </div>
-      </section>
-
-      <section class="bg-secondary/45 px-5 py-14 sm:px-8" aria-hidden="true">
+      <section class="documents-skeleton px-5 py-14 sm:px-8" aria-hidden="true">
         <div class="mx-auto w-full max-w-7xl">
           <div hlmSkeleton class="h-9 w-80"></div>
           <div class="mt-7 grid gap-2">
@@ -67,10 +72,42 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
         ),
         #06334a;
     }
+
+    .featured-skeleton {
+      background: linear-gradient(
+        118deg,
+        color-mix(in oklch, var(--landing-emerald) 11%, var(--background)),
+        color-mix(in oklch, var(--landing-gold) 24%, var(--landing-cream))
+      );
+    }
+
+    .documents-skeleton {
+      --accent: color-mix(in srgb, var(--color-white) 18%, transparent);
+      background:
+        radial-gradient(
+          circle at 88% 8%,
+          color-mix(in oklch, var(--landing-gold) 15%, transparent),
+          transparent 27%
+        ),
+        linear-gradient(
+          118deg,
+          color-mix(in oklch, var(--landing-emerald) 64%, var(--landing-forest)),
+          color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest))
+        );
+    }
+
+    .communications-skeleton {
+      background: linear-gradient(
+        112deg,
+        color-mix(in oklch, var(--landing-cream) 94%, var(--background)),
+        color-mix(in oklch, var(--landing-sand) 64%, var(--background))
+      );
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingSkeleton {
   protected readonly quickAccessSkeletons = Array.from({ length: 5 });
+  protected readonly communicationSkeletons = Array.from({ length: 3 });
   protected readonly contentSkeletons = Array.from({ length: 4 });
 }

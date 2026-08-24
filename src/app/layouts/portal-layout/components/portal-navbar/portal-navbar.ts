@@ -140,7 +140,7 @@ interface NavItem {
   styles: `
     :host {
       display: block;
-      --portal-forest: #073d2a;
+      --portal-forest: var(--landing-forest);
     }
 
     .portal-mobile-menu-enter {

@@ -35,7 +35,7 @@ interface OfficialChannel {
   ],
   template: `
     <footer
-      class="border-t border-sidebar-border bg-sidebar text-sidebar-foreground"
+      class="portal-footer border-t border-sidebar-border bg-sidebar text-sidebar-foreground"
     >
       <div
         class="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.15fr_1.35fr_0.8fr]"
@@ -162,6 +162,28 @@ interface OfficialChannel {
         </div>
       </div>
     </footer>
+  `,
+  styles: `
+    .portal-footer {
+      --sidebar: color-mix(in oklch, var(--landing-forest) 78%, black);
+      --sidebar-foreground: var(--color-white);
+      --sidebar-border: color-mix(
+        in srgb,
+        var(--color-white) 13%,
+        transparent
+      );
+      --foreground: var(--color-white);
+      --muted-foreground: color-mix(
+        in srgb,
+        var(--color-white) 68%,
+        transparent
+      );
+      --primary: var(--landing-emerald);
+      --primary-foreground: var(--landing-forest);
+      --accent: color-mix(in srgb, var(--color-white) 10%, transparent);
+      --accent-foreground: var(--color-white);
+      --ring: color-mix(in srgb, var(--color-white) 82%, transparent);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

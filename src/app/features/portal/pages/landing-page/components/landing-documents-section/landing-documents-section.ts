@@ -14,11 +14,11 @@ import { PortalDocumentResponse } from '../../../../interfaces';
   host: { class: 'block' },
   template: `
     <section
-      class="bg-secondary/45 py-14 text-secondary-foreground sm:py-16 lg:py-20"
+      class="documents-section py-14 sm:py-16 lg:py-20"
       aria-labelledby="documents-title"
     >
-      <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-        <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+      <div class="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
+        <div class="documents-heading mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
               id="documents-title"
@@ -36,11 +36,11 @@ import { PortalDocumentResponse } from '../../../../interfaces';
           </a>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-border bg-card/90 text-card-foreground shadow-sm">
+        <div class="documents-list overflow-hidden rounded-2xl border text-card-foreground shadow-sm">
           @for (document of visibleDocuments(); track document.id) {
-            <article class="grid gap-4 border-b border-border p-4 transition-colors last:border-b-0 hover:bg-muted/70 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <article class="document-row grid gap-4 border-b p-4 transition-colors last:border-b-0 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
               <div class="flex min-w-0 items-center gap-4">
-                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-primary" aria-hidden="true">
+                <span class="document-icon grid size-11 shrink-0 place-items-center rounded-xl" aria-hidden="true">
                   <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
                 </span>
                 <div class="min-w-0">
@@ -78,6 +78,53 @@ import { PortalDocumentResponse } from '../../../../interfaces';
         </div>
       </div>
     </section>
+  `,
+  styles: `
+    .documents-section {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at 88% 8%,
+          color-mix(in oklch, var(--landing-gold) 15%, transparent),
+          transparent 27%
+        ),
+        linear-gradient(
+          118deg,
+          color-mix(in oklch, var(--landing-emerald) 64%, var(--landing-forest)) 0%,
+          color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest)) 100%
+        );
+    }
+
+    .documents-heading {
+      --primary: var(--color-white);
+      --muted-foreground: color-mix(
+        in srgb,
+        var(--color-white) 76%,
+        transparent
+      );
+      --ring: color-mix(in srgb, var(--color-white) 86%, transparent);
+    }
+
+    .documents-list {
+      border-color: color-mix(in srgb, var(--color-white) 24%, transparent);
+      background: var(--card);
+      box-shadow: 0 26px 64px -42px
+        color-mix(in oklch, var(--landing-forest) 82%, transparent);
+    }
+
+    .document-row {
+      border-color: var(--border);
+    }
+
+    .document-row:hover {
+      background: var(--muted);
+    }
+
+    .document-icon {
+      color: var(--primary);
+      background: var(--muted);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -31,7 +31,7 @@ import { QuickAccess } from '../../../../models';
         </div>
 
         <nav
-          class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          class="mx-auto grid max-w-6xl auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           aria-label="Accesos rápidos"
         >
           @for (item of items(); track item.id) {

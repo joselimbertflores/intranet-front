@@ -1,11 +1,8 @@
-import { DOCUMENT, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  PLATFORM_ID,
   Component,
-  DestroyRef,
   computed,
-  inject,
   input,
   signal,
   viewChild,
@@ -46,10 +43,6 @@ import { HeroSlide } from '../../../../models';
       <section
         class="hero-stage relative overflow-hidden text-white"
         aria-label="Contenido destacado"
-        (mouseenter)="setPointerInside(true)"
-        (mouseleave)="setPointerInside(false)"
-        (focusin)="setFocusInside(true)"
-        (focusout)="onFocusOut($event)"
         (keydown)="onCarouselKeydown($event)"
       >
         <hlm-carousel
@@ -224,23 +217,19 @@ import { HeroSlide } from '../../../../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingHeroSection {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly document = inject(DOCUMENT);
   private readonly carousel = viewChild<HlmCarousel>('heroCarousel');
   private readonly autoplay = Autoplay({
     delay: 5500,
     playOnInit: true,
     stopOnInteraction: false,
-    stopOnMouseEnter: false,
-    stopOnFocusIn: false,
+    stopOnMouseEnter: true,
+    stopOnFocusIn: true,
+    breakpoints: {
+      '(prefers-reduced-motion: reduce)': { active: false },
+    },
   });
-  private readonly pointerInside = signal(false);
-  private readonly focusInside = signal(false);
-  private readonly pageHidden = signal(false);
 
   readonly slides = input.required<HeroSlide[]>();
-  readonly reducedMotion = signal(false);
   readonly failedImages = signal<ReadonlySet<number>>(new Set());
   readonly hasMultipleSlides = computed(() => this.slides().length > 1);
   readonly carouselOptions = computed(() => ({
@@ -248,52 +237,8 @@ export class LandingHeroSection {
     align: 'start' as const,
   }));
   readonly plugins = computed(() =>
-    this.hasMultipleSlides() && !this.reducedMotion() && !this.pageHidden()
-      ? [this.autoplay]
-      : [],
+    this.hasMultipleSlides() ? [this.autoplay] : [],
   );
-
-  constructor() {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const updateMotionPreference = () => {
-      this.reducedMotion.set(motionQuery.matches);
-      this.syncAutoplay();
-    };
-    const updateVisibility = () => {
-      this.pageHidden.set(this.document.hidden);
-      this.syncAutoplay();
-    };
-
-    updateMotionPreference();
-    updateVisibility();
-    motionQuery.addEventListener('change', updateMotionPreference);
-    this.document.addEventListener('visibilitychange', updateVisibility);
-
-    this.destroyRef.onDestroy(() => {
-      motionQuery.removeEventListener('change', updateMotionPreference);
-      this.document.removeEventListener('visibilitychange', updateVisibility);
-    });
-  }
-
-  setPointerInside(inside: boolean): void {
-    this.pointerInside.set(inside);
-    this.syncAutoplay();
-  }
-
-  setFocusInside(inside: boolean): void {
-    this.focusInside.set(inside);
-    this.syncAutoplay();
-  }
-
-  onFocusOut(event: FocusEvent): void {
-    const currentTarget = event.currentTarget as HTMLElement;
-    const nextTarget = event.relatedTarget as Node | null;
-
-    if (nextTarget && currentTarget.contains(nextTarget)) return;
-    this.setFocusInside(false);
-  }
 
   onCarouselKeydown(event: KeyboardEvent): void {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -324,26 +269,7 @@ export class LandingHeroSection {
     return this.isInternalUrl(url) || /^https?:\/\//i.test(url) ? url : null;
   }
 
-  private shouldPauseAutoplay(): boolean {
-    return (
-      this.reducedMotion() ||
-      this.pageHidden() ||
-      this.pointerInside() ||
-      this.focusInside()
-    );
-  }
-
-  private syncAutoplay(): void {
-    if (!this.carousel()) return;
-
-    if (this.shouldPauseAutoplay()) {
-      this.autoplay.stop();
-    } else {
-      this.autoplay.play();
-    }
-  }
-
   private restartAutoplayTimer(): void {
-    if (!this.shouldPauseAutoplay()) this.autoplay.reset();
+    this.autoplay.reset();
   }
 }

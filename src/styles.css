@@ -54,6 +54,14 @@
   --sidebar-border: oklch(0.89 0.018 155);
   --sidebar-ring: oklch(0.527 0.154 150.069);
 
+  /* Public landing identity: institutional, vivid and intentionally compact. */
+  --landing-forest: #073d2a;
+  --landing-emerald: #0f8058;
+  --landing-teal: #0b6070;
+  --landing-gold: #c7943f;
+  --landing-cream: #fff9e9;
+  --landing-sand: #f4e4b8;
+
   /* Existing portal surfaces remain application-level tokens. */
   --portal-mint: #eef8f1;
   --portal-sky: #edf6fb;
@@ -91,6 +99,13 @@
   --sidebar-accent-foreground: oklch(0.95 0.018 155);
   --sidebar-border: oklch(0.42 0.025 158 / 55%);
   --sidebar-ring: oklch(0.72 0.17 150);
+
+  --landing-forest: #073d2a;
+  --landing-emerald: #35b983;
+  --landing-teal: #3b9ca5;
+  --landing-gold: #d8b35f;
+  --landing-cream: #29271f;
+  --landing-sand: #343021;
 
   --portal-mint: color-mix(in oklch, var(--card) 86%, var(--primary));
   --portal-sky: color-mix(in oklch, var(--card) 88%, var(--color-sky-700));

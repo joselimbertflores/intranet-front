@@ -1,6 +1,6 @@
 :host {
   display: block;
-  --hero-petrol-950: #062d3c;
+  --hero-petrol-950: color-mix(in oklch, var(--landing-teal) 60%, #041f2d);
   --hero-navy-950: #071d33;
 }
 
@@ -43,10 +43,10 @@
 .hero-photo-horizontal {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--hero-navy-950) 78%, transparent) 0%,
-    color-mix(in srgb, var(--hero-petrol-950) 58%, transparent) 34%,
-    color-mix(in srgb, var(--hero-petrol-950) 20%, transparent) 68%,
-    transparent 100%
+    color-mix(in srgb, var(--hero-navy-950) 82%, transparent) 0%,
+    color-mix(in srgb, var(--hero-petrol-950) 60%, transparent) 28%,
+    color-mix(in srgb, var(--hero-petrol-950) 22%, transparent) 52%,
+    transparent 76%
   );
 }
 

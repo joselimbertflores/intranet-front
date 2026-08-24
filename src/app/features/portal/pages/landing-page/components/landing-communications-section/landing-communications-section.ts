@@ -14,6 +14,7 @@ import {
   lucideArrowUpRight,
   lucideMegaphone,
 } from '@ng-icons/lucide';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 
@@ -23,6 +24,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
   selector: 'landing-communications-section',
   imports: [
     DatePipe,
+    HlmBadgeImports,
     HlmButtonImports,
     HlmCarouselImports,
     NgIcon,
@@ -41,7 +43,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
   host: { class: 'block' },
   template: `
     <section
-      class="bg-card py-14 text-card-foreground sm:py-16 lg:py-20"
+      class="communications-section py-14 text-card-foreground sm:py-16 lg:py-20"
       aria-labelledby="communications-title"
     >
       <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
@@ -69,20 +71,17 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
           [options]="carouselOptions"
         >
       <hlm-carousel-content>
-        @for (communication of items(); track communication.id; let index = $index) {
-          <hlm-carousel-item class="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+        @for (communication of items(); track communication.id) {
+          <hlm-carousel-item class="basis-full sm:basis-1/2 lg:basis-1/3">
             <article
-              class="communication-card flex min-h-96 flex-col overflow-hidden rounded-2xl border border-border bg-muted"
-              [class.communication-card-sky]="index % 4 === 1"
-              [class.communication-card-peach]="index % 4 === 2"
-              [class.communication-card-lilac]="index % 4 === 3"
+              class="communication-card flex h-full min-h-96 flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground"
             >
-              <div class="relative aspect-[4/3] overflow-hidden bg-card/65">
+              <div class="relative aspect-[4/3] overflow-hidden bg-muted/55">
                 @if (communication.previewUrl && !failedImages().has(communication.id)) {
                   <img
                     [ngSrc]="communication.previewUrl"
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     class="object-contain p-4 transition-transform duration-300 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
                     [alt]="'Vista previa de ' + communication.reference"
                     (error)="markImageAsFailed(communication.id)"
@@ -95,8 +94,10 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
               </div>
 
               <div class="flex flex-1 flex-col p-5">
-                <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-primary">
-                  <span>{{ communication.typeName }}</span>
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <span hlmBadge variant="secondary">
+                    {{ communication.typeName }}
+                  </span>
                   @if (communication.code) {
                     <span class="font-medium text-muted-foreground">{{ communication.code }}</span>
                   }
@@ -153,24 +154,21 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     </section>
   `,
   styles: `
+    .communications-section {
+      background: linear-gradient(
+        112deg,
+        color-mix(in oklch, var(--landing-cream) 94%, var(--background)) 0%,
+        color-mix(in oklch, var(--landing-sand) 64%, var(--background)) 100%
+      );
+    }
+
     .communication-card {
+      background: var(--card);
       box-shadow: 0 18px 45px -38px color-mix(in oklch, var(--primary) 62%, transparent);
       transition:
         border-color 180ms ease,
         box-shadow 180ms ease,
         transform 180ms ease;
-    }
-
-    .communication-card-sky {
-      background: var(--secondary);
-    }
-
-    .communication-card-peach {
-      background: var(--accent);
-    }
-
-    .communication-card-lilac {
-      background: color-mix(in oklch, var(--muted) 82%, var(--primary));
     }
 
     .communication-card:hover {

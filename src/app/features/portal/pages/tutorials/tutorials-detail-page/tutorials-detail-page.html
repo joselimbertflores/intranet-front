@@ -1,12 +1,22 @@
 <main class="min-h-[55vh] bg-muted/30 pb-16">
-  <div class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-    <button hlmBtn type="button" variant="ghost" class="mb-5 -ml-3" (click)="goBack()">
-      <ng-icon name="lucideArrowLeft" data-icon="inline-start" /> Volver a tutoriales
+  <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <button
+      hlmBtn
+      type="button"
+      variant="ghost"
+      class="mb-5 -ml-3"
+      (click)="goBack()"
+    >
+      <ng-icon name="lucideArrowLeft" data-icon="inline-start" /> Volver a
+      tutoriales
     </button>
 
     @if (tutorial.isLoading() && !tutorial.hasValue()) {
-      <article class="overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-8" aria-label="Cargando tutorial">
-        <div class="flex flex-col gap-5">
+      <article
+        class="overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-8"
+        aria-label="Cargando tutorial"
+      >
+        <div class="mx-auto flex w-full max-w-4xl flex-col gap-5">
           <div hlmSkeleton class="h-5 w-32"></div>
           <div hlmSkeleton class="h-12 w-4/5"></div>
           <div hlmSkeleton class="h-5 w-full"></div>
@@ -15,66 +25,129 @@
         </div>
       </article>
     } @else if (tutorial.error()) {
-      <section class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+      <section
+        class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+        role="alert"
+      >
         <ng-icon name="lucideFileText" class="text-3xl text-muted-foreground" />
-        <h1 class="mt-4 text-xl font-semibold">{{ notFound() ? "Tutorial no encontrado" : "No se pudo abrir el tutorial" }}</h1>
+        <h1 class="mt-4 text-xl font-semibold">
+          {{
+            notFound()
+              ? "Tutorial no encontrado"
+              : "No se pudo abrir el tutorial"
+          }}
+        </h1>
         <p class="mt-1 max-w-md text-sm text-muted-foreground">
-          {{ notFound() ? "El enlace no existe o el tutorial ya no está publicado." : "Verifica la conexión e intenta nuevamente." }}
+          {{
+            notFound()
+              ? "El enlace no existe o el tutorial ya no está publicado."
+              : "Verifica la conexión e intenta nuevamente."
+          }}
         </p>
         <div class="mt-5 flex flex-wrap justify-center gap-2">
           @if (!notFound()) {
-            <button hlmBtn type="button" variant="outline" (click)="tutorial.reload()">
-              <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+            <button
+              hlmBtn
+              type="button"
+              variant="outline"
+              (click)="tutorial.reload()"
+            >
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+              Reintentar
             </button>
           }
-          <button hlmBtn type="button" (click)="goBack()">Ir a tutoriales</button>
+          <button hlmBtn type="button" (click)="goBack()">
+            Ir a tutoriales
+          </button>
         </div>
       </section>
     } @else if (tutorial.value(); as item) {
-      <article class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <article
+        class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+      >
         <header class="border-b border-border p-5 sm:p-8">
-          <div class="flex flex-wrap items-center gap-3">
-            @if (item.category) {
-              <span hlmBadge variant="secondary">{{ item.category.name }}</span>
-            } @else {
-              <span hlmBadge variant="outline">General</span>
+          <div class="mx-auto w-full max-w-4xl">
+            <div class="flex flex-wrap items-center gap-3">
+              @if (item.category) {
+                <span hlmBadge variant="secondary">{{
+                  item.category.name
+                }}</span>
+              } @else {
+                <span hlmBadge variant="outline">General</span>
+              }
+              <time
+                class="text-sm text-muted-foreground"
+                [attr.datetime]="item.createdAt"
+              >
+                {{
+                  item.createdAt | date: "d 'de' MMMM 'de' y" : undefined : "es"
+                }}
+              </time>
+            </div>
+            <h1
+              class="mt-5 wrap-break-word text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl"
+            >
+              {{ item.title }}
+            </h1>
+            @if (item.summary) {
+              <p
+                class="mt-4 wrap-break-word text-base leading-7 text-muted-foreground sm:text-lg"
+              >
+                {{ item.summary }}
+              </p>
             }
-            <time class="text-sm text-muted-foreground" [attr.datetime]="item.createdAt">
-              {{ item.createdAt | date: "d 'de' MMMM 'de' y":undefined:"es" }}
-            </time>
           </div>
-          <h1 class="mt-5 max-w-3xl wrap-break-word text-3xl font-bold leading-tight tracking-tight text-primary sm:text-4xl">{{ item.title }}</h1>
-          @if (item.summary) {
-            <p class="mt-4 max-w-3xl wrap-break-word text-base leading-7 text-muted-foreground sm:text-lg">{{ item.summary }}</p>
-          }
         </header>
 
         @if (item.blocks.length) {
-          <div class="flex flex-col gap-8 p-5 sm:gap-10 sm:p-8">
+          <div class="flex min-w-0 flex-col gap-8 p-5 sm:gap-10 sm:p-8">
             @for (block of item.blocks; track block.id) {
               @switch (block.type) {
                 @case (blockType.TEXT) {
                   @if (block.content) {
-                    <div class="prose max-w-none wrap-break-word overflow-hidden" [innerHTML]="block.content"></div>
+                    <div
+                      class="prose mx-auto w-full max-w-4xl wrap-break-word overflow-hidden [&_a]:wrap-break-word [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_video]:max-w-full"
+                      [innerHTML]="block.content"
+                    ></div>
                   }
                 }
                 @case (blockType.IMAGE) {
                   @if (block.file; as file) {
-                    <figure class="overflow-hidden rounded-xl border border-border bg-muted/40">
-                      <img class="max-h-[42rem] w-full object-contain" [src]="file.url" [alt]="file.name || 'Imagen del tutorial'" loading="lazy" />
+                    <figure
+                      class="mx-auto w-full max-w-6xl overflow-hidden rounded-xl border border-border bg-muted/40"
+                    >
+                      <img
+                        class="h-auto max-h-[42rem] w-full max-w-full object-contain"
+                        [src]="file.url"
+                        [alt]="file.name || 'Imagen del tutorial'"
+                        loading="lazy"
+                      />
                     </figure>
                   }
                 }
                 @case (blockType.YOUTUBE) {
                   @if (block.content | tutorialYoutubeUrl; as safeUrl) {
-                    <div class="aspect-video w-full overflow-hidden rounded-xl border border-border bg-foreground">
-                      <iframe class="size-full border-0" [src]="safeUrl" title="Video del tutorial" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <div
+                      class="mx-auto aspect-video w-full max-w-6xl overflow-hidden rounded-xl border border-border bg-foreground"
+                    >
+                      <iframe
+                        class="size-full border-0"
+                        [src]="safeUrl"
+                        title="Video del tutorial"
+                        loading="lazy"
+                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                      ></iframe>
                     </div>
                   }
                 }
                 @case (blockType.VIDEO_FILE) {
                   @if (block.file; as file) {
-                    <video class="max-h-[42rem] w-full rounded-xl border border-border bg-foreground" controls preload="metadata">
+                    <video
+                      class="mx-auto max-h-[42rem] w-full max-w-6xl rounded-xl border border-border bg-foreground"
+                      controls
+                      preload="metadata"
+                    >
                       <source [src]="file.url" [type]="file.mimeType" />
                       Tu navegador no soporta este video.
                     </video>
@@ -82,14 +155,38 @@
                 }
                 @case (blockType.FILE) {
                   @if (block.file; as file) {
-                    <div class="flex min-w-0 flex-col gap-4 rounded-xl border border-border bg-muted/25 p-4 sm:flex-row sm:items-center">
-                      <span class="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><ng-icon name="lucideFileText" /></span>
+                    <div
+                      class="mx-auto flex w-full max-w-4xl min-w-0 flex-col gap-4 rounded-xl border border-border bg-muted/25 p-4 sm:flex-row sm:items-center"
+                    >
+                      <span
+                        class="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+                        ><ng-icon name="lucideFileText"
+                      /></span>
                       <div class="min-w-0 flex-1">
-                        <p class="truncate font-semibold" [title]="file.name">{{ file.name }}</p>
-                        <p class="mt-1 wrap-break-word text-sm text-muted-foreground">{{ file.mimeType }} <span aria-hidden="true">·</span> {{ file.size | fileSize }}</p>
+                        <p class="truncate font-semibold" [title]="file.name">
+                          {{ file.name }}
+                        </p>
+                        <p
+                          class="mt-1 wrap-break-word text-sm text-muted-foreground"
+                        >
+                          {{ file.mimeType }} <span aria-hidden="true">·</span>
+                          {{ file.size | fileSize }}
+                        </p>
                       </div>
-                      <a hlmBtn variant="outline" class="w-full shrink-0 sm:w-auto" [href]="file.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir archivo ' + file.name">
-                        Abrir archivo <ng-icon name="lucideExternalLink" data-icon="inline-end" />
+                      <a
+                        hlmBtn
+                        variant="outline"
+                        class="w-full shrink-0 sm:w-auto"
+                        [href]="file.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="'Abrir archivo ' + file.name"
+                      >
+                        Abrir archivo
+                        <ng-icon
+                          name="lucideExternalLink"
+                          data-icon="inline-end"
+                        />
                       </a>
                     </div>
                   }
@@ -98,10 +195,19 @@
             }
           </div>
         } @else {
-          <section class="flex min-h-56 flex-col items-center justify-center p-8 text-center">
-            <ng-icon name="lucideFileText" class="text-3xl text-muted-foreground" />
-            <h2 class="mt-4 text-lg font-semibold">Este tutorial aún no tiene contenido</h2>
-            <p class="mt-1 text-sm text-muted-foreground">Vuelve a consultarlo más adelante.</p>
+          <section
+            class="flex min-h-56 flex-col items-center justify-center p-8 text-center"
+          >
+            <ng-icon
+              name="lucideFileText"
+              class="text-3xl text-muted-foreground"
+            />
+            <h2 class="mt-4 text-lg font-semibold">
+              Este tutorial aún no tiene contenido
+            </h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Vuelve a consultarlo más adelante.
+            </p>
           </section>
         }
       </article>

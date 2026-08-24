@@ -68,10 +68,7 @@
               [formField]="filtersForm.typeId"
               (valueChange)="changeType($event)"
             >
-              <hlm-select-trigger
-                class="w-full"
-                buttonId="communication-type"
-              >
+              <hlm-select-trigger class="w-full" buttonId="communication-type">
                 <ng-template hlmSelectValueTemplate let-typeId>
                   {{
                     typeId === null
@@ -83,9 +80,13 @@
               </hlm-select-trigger>
               <hlm-select-content *hlmSelectPortal>
                 <hlm-select-group>
-                  <hlm-select-item [value]="null">Todos los tipos</hlm-select-item>
+                  <hlm-select-item [value]="null"
+                    >Todos los tipos</hlm-select-item
+                  >
                   @for (type of types(); track type.id) {
-                    <hlm-select-item [value]="type.id">{{ type.name }}</hlm-select-item>
+                    <hlm-select-item [value]="type.id">{{
+                      type.name
+                    }}</hlm-select-item>
                   }
                 </hlm-select-group>
               </hlm-select-content>
@@ -112,35 +113,69 @@
 
     <section class="flex flex-col gap-4" aria-labelledby="communications-title">
       <div class="flex min-h-6 flex-wrap items-center justify-between gap-3">
-        <h2 id="communications-title" class="sr-only">Listado de comunicados</h2>
+        <h2 id="communications-title" class="sr-only">
+          Listado de comunicados
+        </h2>
         @if (communicationResource.value(); as response) {
-          <p class="text-sm font-medium text-muted-foreground" aria-live="polite">
-            <span class="font-semibold text-foreground">{{ response.total }}</span>
-            {{ response.total === 1 ? "comunicado encontrado" : "comunicados encontrados" }}
+          <p
+            class="text-sm font-medium text-muted-foreground"
+            aria-live="polite"
+          >
+            <span class="font-semibold text-foreground">{{
+              response.total
+            }}</span>
+            {{
+              response.total === 1
+                ? "comunicado encontrado"
+                : "comunicados encontrados"
+            }}
           </p>
         } @else {
           <span></span>
         }
         @if (isUpdating()) {
-          <span class="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status">
+          <span
+            class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+            role="status"
+          >
             <hlm-spinner /> Actualizando…
           </span>
         }
       </div>
 
       @if (typesResource.error()) {
-        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+        <div
+          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          role="alert"
+        >
           <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-          <h2 class="mt-4 text-lg font-semibold">No se pudieron preparar los comunicados</h2>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">No fue posible cargar los tipos necesarios para realizar la consulta.</p>
-          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="reloadTypes()">
-            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+          <h2 class="mt-4 text-lg font-semibold">
+            No se pudieron preparar los comunicados
+          </h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">
+            No fue posible cargar los tipos necesarios para realizar la
+            consulta.
+          </p>
+          <button
+            hlmBtn
+            type="button"
+            variant="outline"
+            class="mt-5"
+            (click)="reloadTypes()"
+          >
+            <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
+            Reintentar
           </button>
         </div>
       } @else if (isInitialLoading()) {
-        <div class="overflow-hidden rounded-xl border border-border bg-card" aria-label="Cargando comunicados">
+        <div
+          class="overflow-hidden rounded-xl border border-border bg-card"
+          aria-label="Cargando comunicados"
+        >
           @for (_ of skeletonRows; track $index) {
-            <div class="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[8rem_10rem_minmax(0,1fr)_7rem] md:items-center">
+            <div
+              class="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[8rem_10rem_minmax(0,1fr)_7rem] md:items-center"
+            >
               <div hlmSkeleton class="h-4 w-24"></div>
               <div hlmSkeleton class="h-5 w-28"></div>
               <div class="flex flex-col gap-2">
@@ -152,44 +187,103 @@
           }
         </div>
       } @else if (communicationResource.error()) {
-        <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center" role="alert">
+        <div
+          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          role="alert"
+        >
           <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-          <h2 class="mt-4 text-lg font-semibold">No se pudieron cargar los comunicados</h2>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">Verifica la conexión e intenta nuevamente.</p>
-          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="communicationResource.reload()">
+          <h2 class="mt-4 text-lg font-semibold">
+            No se pudieron cargar los comunicados
+          </h2>
+          <p class="mt-1 max-w-md text-sm text-muted-foreground">
+            Verifica la conexión e intenta nuevamente.
+          </p>
+          <button
+            hlmBtn
+            type="button"
+            variant="outline"
+            class="mt-5"
+            (click)="communicationResource.reload()"
+          >
             <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
             Reintentar
           </button>
         </div>
       } @else if (communicationResource.value(); as response) {
         @if (response.communications.length) {
-          <div class="hidden overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block">
+          <div
+            class="hidden overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block"
+          >
             <div hlmTableContainer>
-              <table hlmTable>
+              <table hlmTable class="table-fixed">
+                <colgroup>
+                  <col class="w-28" />
+                  <col class="w-32" />
+                  <col class="w-36" />
+                  <col />
+                  <col class="w-36" />
+                </colgroup>
                 <thead hlmTHead>
                   <tr hlmTr class="bg-muted/40 hover:bg-muted/40">
-                    <th hlmTh class="w-36 px-4">Fecha</th>
-                    <th hlmTh class="w-44">Tipo</th>
-                    <th hlmTh class="w-48">Cite</th>
+                    <th hlmTh class="px-4">Fecha</th>
+                    <th hlmTh>Tipo</th>
+                    <th hlmTh>Cite</th>
                     <th hlmTh>Referencia / resumen</th>
-                    <th hlmTh class="w-36 px-4 text-right">Documento</th>
+                    <th hlmTh class="px-4 text-right">Documento</th>
                   </tr>
                 </thead>
                 <tbody hlmTBody>
-                  @for (communication of response.communications; track communication.id) {
+                  @for (
+                    communication of response.communications;
+                    track communication.id
+                  ) {
                     <tr hlmTr>
-                      <td hlmTd class="px-4 tabular-nums text-muted-foreground">
-                        <time [attr.datetime]="communication.createdAt">{{ communication.createdAt | date: "dd/MM/yyyy" }}</time>
+                      <td
+                        hlmTd
+                        class="px-4 py-4 align-top tabular-nums text-muted-foreground"
+                      >
+                        <time [attr.datetime]="communication.createdAt">{{
+                          communication.createdAt | date: "dd/MM/yyyy"
+                        }}</time>
                       </td>
-                      <td hlmTd>
-                        <span hlmBadge variant="secondary">{{ communication.typeName }}</span>
+                      <td hlmTd class="whitespace-normal py-4 align-top">
+                        <span
+                          hlmBadge
+                          variant="secondary"
+                          class="max-w-full whitespace-normal wrap-break-word text-left"
+                          >{{ communication.typeName }}</span
+                        >
                       </td>
-                      <td hlmTd class="font-medium">{{ communication.code || "—" }}</td>
-                      <td hlmTd class="max-w-xl whitespace-normal py-4 leading-6">{{ communication.reference }}</td>
-                      <td hlmTd class="px-4 text-right">
-                        <a hlmBtn size="sm" variant="outline" [href]="communication.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir PDF de ' + communication.reference">
+                      <td
+                        hlmTd
+                        class="whitespace-normal py-4 align-top wrap-break-word font-medium"
+                      >
+                        {{ communication.code || "—" }}
+                      </td>
+                      <td
+                        hlmTd
+                        class="min-w-0 whitespace-normal py-4 align-top wrap-break-word text-sm leading-6"
+                      >
+                        {{ communication.reference }}
+                      </td>
+                      <td hlmTd class="px-4 py-4 text-right align-top">
+                        <a
+                          hlmBtn
+                          size="sm"
+                          variant="outline"
+                          class="whitespace-nowrap"
+                          [href]="communication.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="
+                            'Abrir PDF de ' + communication.reference
+                          "
+                        >
                           Abrir PDF
-                          <ng-icon name="lucideExternalLink" data-icon="inline-end" />
+                          <ng-icon
+                            name="lucideExternalLink"
+                            data-icon="inline-end"
+                          />
                         </a>
                       </td>
                     </tr>
@@ -199,22 +293,51 @@
             </div>
           </div>
 
-          <div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm md:hidden">
-            @for (communication of response.communications; track communication.id) {
-              <article class="flex min-w-0 flex-col gap-4 border-b border-border p-4 last:border-b-0">
+          <div
+            class="overflow-hidden rounded-xl border border-border bg-card shadow-sm md:hidden"
+          >
+            @for (
+              communication of response.communications;
+              track communication.id
+            ) {
+              <article
+                class="flex min-w-0 flex-col gap-4 border-b border-border p-4 last:border-b-0"
+              >
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <span hlmBadge variant="secondary">{{ communication.typeName }}</span>
-                  <time class="text-sm tabular-nums text-muted-foreground" [attr.datetime]="communication.createdAt">
+                  <span hlmBadge variant="secondary">{{
+                    communication.typeName
+                  }}</span>
+                  <time
+                    class="text-sm tabular-nums text-muted-foreground"
+                    [attr.datetime]="communication.createdAt"
+                  >
                     {{ communication.createdAt | date: "dd/MM/yyyy" }}
                   </time>
                 </div>
                 <div class="min-w-0">
-                  <h3 class="wrap-break-word font-semibold leading-6">{{ communication.reference }}</h3>
+                  <h3
+                    class="whitespace-normal wrap-break-word font-semibold leading-6"
+                  >
+                    {{ communication.reference }}
+                  </h3>
                   @if (communication.code) {
-                    <p class="mt-2 text-sm text-muted-foreground"><span class="font-medium text-foreground/80">Cite:</span> {{ communication.code }}</p>
+                    <p
+                      class="mt-2 whitespace-normal wrap-break-word text-sm text-muted-foreground"
+                    >
+                      <span class="font-medium text-foreground/80">Cite:</span>
+                      {{ communication.code }}
+                    </p>
                   }
                 </div>
-                <a hlmBtn variant="outline" class="w-full" [href]="communication.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Abrir PDF de ' + communication.reference">
+                <a
+                  hlmBtn
+                  variant="outline"
+                  class="w-full"
+                  [href]="communication.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="'Abrir PDF de ' + communication.reference"
+                >
                   Abrir PDF
                   <ng-icon name="lucideExternalLink" data-icon="inline-end" />
                 </a>
@@ -230,16 +353,37 @@
             (currentPageChange)="changePage($event)"
           />
         } @else {
-          <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center">
-            <ng-icon name="lucideFileSearch" class="text-3xl text-muted-foreground" />
+          <div
+            class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          >
+            <ng-icon
+              name="lucideFileSearch"
+              class="text-3xl text-muted-foreground"
+            />
             <h2 class="mt-4 text-lg font-semibold">
-              {{ hasActiveFilters() ? "No hay coincidencias" : "No hay comunicados publicados" }}
+              {{
+                hasActiveFilters()
+                  ? "No hay coincidencias"
+                  : "No hay comunicados publicados"
+              }}
             </h2>
             <p class="mt-1 max-w-md text-sm text-muted-foreground">
-              {{ hasActiveFilters() ? "Prueba con otra búsqueda o tipo de comunicado." : "Los comunicados aparecerán aquí cuando se publiquen." }}
+              {{
+                hasActiveFilters()
+                  ? "Prueba con otra búsqueda o tipo de comunicado."
+                  : "Los comunicados aparecerán aquí cuando se publiquen."
+              }}
             </p>
             @if (hasActiveFilters()) {
-              <button hlmBtn type="button" variant="outline" class="mt-5" (click)="resetFilters()">Limpiar filtros</button>
+              <button
+                hlmBtn
+                type="button"
+                variant="outline"
+                class="mt-5"
+                (click)="resetFilters()"
+              >
+                Limpiar filtros
+              </button>
             }
           </div>
         }

@@ -16,8 +16,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideArrowDown,
-  lucideArrowUp,
   lucideCircleAlert,
   lucideGripVertical,
   lucideMoreHorizontal,
@@ -69,8 +67,6 @@ import { ContentSettingsDataSource } from '../../services';
   ],
   providers: [
     provideIcons({
-      lucideArrowDown,
-      lucideArrowUp,
       lucideCircleAlert,
       lucideGripVertical,
       lucideMoreHorizontal,
@@ -85,9 +81,7 @@ import { ContentSettingsDataSource } from '../../services';
   styles: `
     .quick-access-row.cdk-drag-preview {
       box-sizing: border-box;
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--border);
-      background: var(--card);
+      opacity: 1;
       box-shadow: 0 18px 36px rgb(0 0 0 / 0.18);
     }
 
@@ -199,14 +193,6 @@ export default class QuickAccessesAdmin {
     )
       return;
     this.moveItem(event.previousIndex, event.currentIndex);
-  }
-
-  moveUp(index: number): void {
-    if (index > 0) this.moveItem(index, index - 1);
-  }
-
-  moveDown(index: number): void {
-    if (index < this.items().length - 1) this.moveItem(index, index + 1);
   }
 
   discardOrder(): void {

@@ -122,7 +122,9 @@
       class="flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm sm:p-6"
       aria-labelledby="tutorial-content-title"
     >
-      <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <header
+        class="sticky -top-4 z-10 -mx-5 -mt-5 flex flex-col gap-3 rounded-t-xl border-b bg-card px-5 pt-5 pb-4 sm:-top-6 sm:-mx-6 sm:-mt-6 sm:flex-row sm:items-start sm:justify-between sm:px-6 sm:pt-6"
+      >
         <div>
           <h2 id="tutorial-content-title" class="text-lg font-semibold">
             Bloques de contenido
@@ -243,12 +245,14 @@
 
       @if (activeEditor(); as editor) {
         @if (editor.blockId === null) {
-          <app-tutorial-block-inline-editor
-            [tutorialId]="id()"
-            [type]="editor.type"
-            (saved)="onBlockSaved($event)"
-            (cancelled)="activeEditor.set(null)"
-          />
+          <div #newBlockEditor class="scroll-mt-40 sm:scroll-mt-28">
+            <app-tutorial-block-inline-editor
+              [tutorialId]="id()"
+              [type]="editor.type"
+              (saved)="onBlockSaved($event)"
+              (cancelled)="activeEditor.set(null)"
+            />
+          </div>
         }
       }
 

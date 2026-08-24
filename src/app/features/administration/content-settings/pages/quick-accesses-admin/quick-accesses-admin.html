@@ -138,7 +138,7 @@
         @for (item of items(); track item.id; let index = $index) {
           <li
             cdkDrag
-            class="quick-access-row grid grid-cols-[2.5rem_2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_6rem_3rem]"
+            class="quick-access-row grid grid-cols-[2.5rem_2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 border-b border-border bg-card p-4 last:border-b-0 md:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_6rem_3rem]"
             [cdkDragData]="item"
             [cdkDragDisabled]="!canUpdate() || isBusy()"
           >
@@ -208,7 +208,7 @@
               variant="ghost"
               align="end"
               [hlmDropdownMenuTrigger]="actionsMenu"
-              [hlmDropdownMenuTriggerData]="{ item: item, index: index }"
+              [hlmDropdownMenuTriggerData]="{ item: item }"
               [attr.aria-label]="'Acciones para ' + item.title"
               [disabled]="isBusy()"
             >
@@ -240,30 +240,11 @@
   </section>
 </div>
 
-<ng-template #actionsMenu let-item="item" let-index="index">
+<ng-template #actionsMenu let-item="item">
   <hlm-dropdown-menu>
     <hlm-dropdown-menu-group>
       <hlm-dropdown-menu-label>Acciones</hlm-dropdown-menu-label>
       @if (canUpdate()) {
-        <button
-          type="button"
-          hlmDropdownMenuItem
-          [disabled]="index === 0"
-          (click)="moveUp(index)"
-        >
-          <ng-icon name="lucideArrowUp" />
-          Mover arriba
-        </button>
-        <button
-          type="button"
-          hlmDropdownMenuItem
-          [disabled]="index === items().length - 1"
-          (click)="moveDown(index)"
-        >
-          <ng-icon name="lucideArrowDown" />
-          Mover abajo
-        </button>
-        <hlm-dropdown-menu-separator />
         <button type="button" hlmDropdownMenuItem (click)="openEditor(item)">
           <ng-icon name="lucidePencil" />
           Editar

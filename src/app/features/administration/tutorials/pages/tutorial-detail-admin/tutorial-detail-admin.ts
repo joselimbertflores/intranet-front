@@ -1,13 +1,17 @@
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  Injector,
   computed,
   inject,
   input,
   linkedSignal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -97,6 +101,9 @@ export default class TutorialDetailAdmin {
   private readonly dataSource = inject(TutorialDataSource);
   private readonly authDataSource = inject(AuthDataSource);
   private readonly dialogService = inject(HlmDialogService);
+  private readonly injector = inject(Injector);
+  private readonly newBlockEditor =
+    viewChild<ElementRef<HTMLElement>>('newBlockEditor');
   private readonly hasPreviousNavigation = Boolean(
     this.router.currentNavigation()?.previousNavigation ??
       this.router.lastSuccessfulNavigation()?.previousNavigation,
@@ -178,6 +185,18 @@ export default class TutorialDetailAdmin {
 
   startCreateBlock(type: TutorialBlockType): void {
     this.activeEditor.set({ type, blockId: null });
+    afterNextRender(
+      {
+        write: () => {
+          this.newBlockEditor()?.nativeElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
+          });
+        },
+      },
+      { injector: this.injector },
+    );
   }
 
   startEditBlock(block: TutorialBlockResponse): void {

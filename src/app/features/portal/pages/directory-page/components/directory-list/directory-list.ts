@@ -4,7 +4,6 @@ import {
   lucideContactRound,
   lucideMail,
   lucideMapPin,
-  lucideNavigation,
   lucideSearch,
   lucideX,
 } from '@ng-icons/lucide';
@@ -34,7 +33,6 @@ import {
       lucideContactRound,
       lucideMail,
       lucideMapPin,
-      lucideNavigation,
       lucideSearch,
       lucideX,
     }),

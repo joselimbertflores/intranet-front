@@ -5,7 +5,6 @@ import {
   lucideMail,
   lucideMapPin,
   lucideSearch,
-  lucideX,
 } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -34,7 +33,6 @@ import {
       lucideMail,
       lucideMapPin,
       lucideSearch,
-      lucideX,
     }),
   ],
   templateUrl: './directory-list.html',

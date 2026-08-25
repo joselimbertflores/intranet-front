@@ -12,9 +12,10 @@ import { QuickAccess } from '../../models';
   imports: [NgIcon],
   providers: [provideIcons(QUICK_ACCESS_ICONS)],
   host: { class: 'block h-full' },
+  styleUrl: './quick-access-card.css',
   template: `
     <a
-      class="quick-access-surface flex h-full min-h-44 min-w-0 flex-col rounded-xl border p-5 no-underline outline-none"
+      class="quick-access-surface flex h-full min-h-44 min-w-0 flex-col rounded-xl border p-5 no-underline"
       [href]="item().url"
       target="_blank"
       rel="noopener noreferrer"
@@ -40,7 +41,7 @@ import { QuickAccess } from '../../models';
       </span>
 
       <span
-        class="mt-4 line-clamp-2 wrap-break-word text-base leading-6 font-bold text-foreground"
+        class="mt-4 line-clamp-2 wrap-break-word text-base leading-6 font-bold"
       >
         {{ item().title }}
       </span>

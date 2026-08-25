@@ -8,7 +8,6 @@ import {
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideArrowLeft,
   lucideArrowRight,
   lucideArrowUpRight,
   lucideImageOff,
@@ -28,7 +27,6 @@ import { FeaturedBanner } from '../../../../models';
   ],
   providers: [
     provideIcons({
-      lucideArrowLeft,
       lucideArrowRight,
       lucideArrowUpRight,
       lucideImageOff,
@@ -59,6 +57,7 @@ import { FeaturedBanner } from '../../../../models';
           <hlm-carousel
             #bannerCarousel
             class="w-full"
+            aria-label="Carrusel de banners destacados"
             [options]="carouselOptions()"
           >
             <hlm-carousel-content class="ml-0 gap-4 sm:gap-6">
@@ -136,35 +135,37 @@ import { FeaturedBanner } from '../../../../models';
             </hlm-carousel-content>
 
             @if (hasMultipleItems()) {
-              <button
-                type="button"
-                class="banner-control absolute top-1/2 left-3 grid size-8 -translate-y-1/2 place-items-center rounded-full outline-none sm:left-5 sm:size-9"
-                aria-label="Mostrar banner anterior"
-                (click)="bannerCarousel.scrollPrev()"
-              >
-                <ng-icon name="lucideArrowLeft" />
-              </button>
-              <button
-                type="button"
-                class="banner-control absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-full outline-none sm:right-5 sm:size-9"
-                aria-label="Mostrar banner siguiente"
-                (click)="bannerCarousel.scrollNext()"
-              >
-                <ng-icon name="lucideArrowRight" />
-              </button>
-
               <div
-                class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2"
-                aria-hidden="true"
+                class="mt-5 flex items-center justify-center gap-4"
+                role="group"
+                aria-label="Navegación de banners destacados"
               >
-                @for (banner of items(); track banner.id; let index = $index) {
-                  <span
-                    class="banner-indicator"
-                    [class.banner-indicator-active]="
-                      bannerCarousel.currentSlide() === index
-                    "
-                  ></span>
-                }
+                <button
+                  hlmCarouselPrevious
+                  type="button"
+                  size="icon-lg"
+                  class="static size-11 translate-y-0"
+                  aria-label="Mostrar banner anterior"
+                ></button>
+
+                <div class="flex items-center gap-2" aria-hidden="true">
+                  @for (banner of items(); track banner.id; let index = $index) {
+                    <span
+                      class="banner-indicator"
+                      [class.banner-indicator-active]="
+                        bannerCarousel.currentSlide() === index
+                      "
+                    ></span>
+                  }
+                </div>
+
+                <button
+                  hlmCarouselNext
+                  type="button"
+                  size="icon-lg"
+                  class="static size-11 translate-y-0"
+                  aria-label="Mostrar banner siguiente"
+                ></button>
               </div>
               <p class="sr-only" aria-live="polite">
                 Banner {{ bannerCarousel.currentSlide() + 1 }} de
@@ -254,44 +255,17 @@ import { FeaturedBanner } from '../../../../models';
         linear-gradient(135deg, #087a43, #06334a);
     }
 
-    .banner-control {
-      border: 1px solid rgb(255 255 255 / 0.25);
-      background: rgb(3 28 20 / 0.38);
-      color: rgb(255 255 255 / 0.92);
-      box-shadow: 0 5px 16px rgb(2 15 10 / 0.14);
-      backdrop-filter: blur(5px);
-      transition:
-        background-color 160ms ease,
-        border-color 160ms ease;
-    }
-
-    .banner-control:hover {
-      border-color: rgb(255 255 255 / 0.48);
-      background: rgb(3 28 20 / 0.62);
-    }
-
-    .banner-control:focus-visible {
-      outline: 2px solid white;
-      outline-offset: 3px;
-    }
-
     .banner-indicator {
       display: block;
-      width: 0.5rem;
-      height: 0.5rem;
-      border: 1px solid rgb(255 255 255 / 0.82);
+      width: 0.55rem;
+      height: 0.55rem;
+      border: 1px solid color-mix(in oklch, var(--primary) 62%, var(--border));
       border-radius: 9999px;
-      background: rgb(255 255 255 / 0.3);
+      background: color-mix(in oklch, var(--primary) 18%, transparent);
     }
 
     .banner-indicator-active {
-      background: white;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .banner-control {
-        transition: none;
-      }
+      background: var(--primary);
     }
 
     @media (max-width: 639px) {

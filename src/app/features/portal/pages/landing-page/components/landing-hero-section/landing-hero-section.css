@@ -56,6 +56,12 @@
     linear-gradient(135deg, #075a47, #06334a 68%);
 }
 
+.hero-cta {
+  height: 2.75rem;
+  padding-inline: 1.5rem;
+  font-size: 1rem;
+}
+
 .hero-side-control {
   z-index: 1;
   border: 1px solid rgb(255 255 255 / 0.24);

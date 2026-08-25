@@ -9,7 +9,6 @@ import {
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideArrowLeft,
   lucideArrowRight,
   lucideArrowUpRight,
   lucideMegaphone,
@@ -34,7 +33,6 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
   providers: [
     { provide: LOCALE_ID, useValue: 'es' },
     provideIcons({
-      lucideArrowLeft,
       lucideArrowRight,
       lucideArrowUpRight,
       lucideMegaphone,
@@ -68,9 +66,10 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
         <hlm-carousel
           #communicationsCarousel
           class="w-full"
+          aria-label="Carrusel de comunicados recientes"
           [options]="carouselOptions"
         >
-      <hlm-carousel-content>
+      <hlm-carousel-content class="py-2">
         @for (communication of items(); track communication.id) {
           <hlm-carousel-item class="basis-full sm:basis-1/2 lg:basis-1/3">
             <article
@@ -124,29 +123,25 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
       </hlm-carousel-content>
 
       @if (communicationsCarousel.canScrollPrev() || communicationsCarousel.canScrollNext()) {
-        <div class="mt-5 flex items-center justify-end gap-2">
+        <div
+          class="mt-5 flex items-center justify-end gap-2"
+          role="group"
+          aria-label="Navegación de comunicados recientes"
+        >
           <button
-            hlmBtn
+            hlmCarouselPrevious
             type="button"
-            variant="outline"
             size="icon-lg"
-            [disabled]="!communicationsCarousel.canScrollPrev()"
+            class="static size-11 translate-y-0"
             aria-label="Mostrar comunicados anteriores"
-            (click)="communicationsCarousel.scrollPrev()"
-          >
-            <ng-icon name="lucideArrowLeft" />
-          </button>
+          ></button>
           <button
-            hlmBtn
+            hlmCarouselNext
             type="button"
-            variant="outline"
             size="icon-lg"
-            [disabled]="!communicationsCarousel.canScrollNext()"
+            class="static size-11 translate-y-0"
             aria-label="Mostrar comunicados siguientes"
-            (click)="communicationsCarousel.scrollNext()"
-          >
-            <ng-icon name="lucideArrowRight" />
-          </button>
+          ></button>
         </div>
       }
         </hlm-carousel>

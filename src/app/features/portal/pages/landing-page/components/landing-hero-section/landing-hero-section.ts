@@ -5,18 +5,16 @@ import {
   computed,
   input,
   signal,
-  viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  lucideArrowLeft,
   lucideArrowRight,
   lucideArrowUpRight,
   lucideImageOff,
 } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmCarousel, HlmCarouselImports } from '@spartan-ng/helm/carousel';
+import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
 import { HeroSlide } from '../../../../models';
@@ -32,7 +30,6 @@ import { HeroSlide } from '../../../../models';
   ],
   providers: [
     provideIcons({
-      lucideArrowLeft,
       lucideArrowRight,
       lucideArrowUpRight,
       lucideImageOff,
@@ -43,11 +40,11 @@ import { HeroSlide } from '../../../../models';
       <section
         class="hero-stage relative overflow-hidden text-white"
         aria-label="Contenido destacado"
-        (keydown)="onCarouselKeydown($event)"
       >
         <hlm-carousel
           #heroCarousel
           class="w-full"
+          aria-label="Carrusel de contenido destacado"
           [options]="carouselOptions()"
           [plugins]="plugins()"
         >
@@ -122,6 +119,7 @@ import { HeroSlide } from '../../../../models';
                             <a
                               hlmBtn
                               size="lg"
+                              class="hero-cta"
                               [routerLink]="url"
                             >
                               {{ slide.linkLabel }}
@@ -131,6 +129,7 @@ import { HeroSlide } from '../../../../models';
                             <a
                               hlmBtn
                               size="lg"
+                              class="hero-cta"
                               [href]="url"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -150,22 +149,20 @@ import { HeroSlide } from '../../../../models';
 
           @if (hasMultipleSlides()) {
             <button
+              hlmCarouselPrevious
               type="button"
-              class="hero-side-control absolute top-1/2 left-3 grid size-8 -translate-y-1/2 place-items-center rounded-full outline-none sm:left-5 sm:size-9"
+              size="icon-lg"
+              class="hero-side-control start-3 top-1/2 size-11 -translate-y-1/2 sm:start-5"
               aria-label="Mostrar contenido anterior"
-              (click)="showPreviousSlide()"
-            >
-              <ng-icon name="lucideArrowLeft" />
-            </button>
+            ></button>
 
             <button
+              hlmCarouselNext
               type="button"
-              class="hero-side-control absolute top-1/2 right-3 grid size-8 -translate-y-1/2 place-items-center rounded-full outline-none sm:right-5 sm:size-9"
+              size="icon-lg"
+              class="hero-side-control end-3 top-1/2 size-11 -translate-y-1/2 sm:end-5"
               aria-label="Mostrar contenido siguiente"
-              (click)="showNextSlide()"
-            >
-              <ng-icon name="lucideArrowRight" />
-            </button>
+            ></button>
 
             <div
               class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 sm:bottom-5"
@@ -217,7 +214,6 @@ import { HeroSlide } from '../../../../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingHeroSection {
-  private readonly carousel = viewChild<HlmCarousel>('heroCarousel');
   private readonly autoplay = Autoplay({
     delay: 5500,
     playOnInit: true,
@@ -240,22 +236,6 @@ export class LandingHeroSection {
     this.hasMultipleSlides() ? [this.autoplay] : [],
   );
 
-  onCarouselKeydown(event: KeyboardEvent): void {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      this.restartAutoplayTimer();
-    }
-  }
-
-  showPreviousSlide(): void {
-    this.carousel()?.scrollPrev();
-    this.restartAutoplayTimer();
-  }
-
-  showNextSlide(): void {
-    this.carousel()?.scrollNext();
-    this.restartAutoplayTimer();
-  }
-
   markImageAsFailed(id: number): void {
     this.failedImages.update((failed) => new Set(failed).add(id));
   }
@@ -267,9 +247,5 @@ export class LandingHeroSection {
   validUrl(url: string | null): string | null {
     if (!url) return null;
     return this.isInternalUrl(url) || /^https?:\/\//i.test(url) ? url : null;
-  }
-
-  private restartAutoplayTimer(): void {
-    this.autoplay.reset();
   }
 }

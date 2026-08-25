@@ -1,0 +1,60 @@
+.quick-access-surface {
+  --quick-access-color: var(--primary);
+
+  border-color: var(--border);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.quick-access-surface:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--quick-access-color) 45%,
+    var(--border)
+  );
+  background-color: color-mix(
+    in srgb,
+    var(--quick-access-color) 8%,
+    var(--card)
+  );
+  box-shadow: 0 0.5rem 1.25rem
+    color-mix(in srgb, var(--quick-access-color) 24%, transparent);
+  transform: translateY(-4px) scale(1.01);
+}
+
+.quick-access-surface:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.quick-access-icon-surface {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.quick-access-surface:hover .quick-access-icon-surface {
+  background-color: color-mix(
+    in srgb,
+    var(--quick-access-color) 25%,
+    var(--muted)
+  );
+  transform: scale(1.1) rotate(-3deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-access-surface,
+  .quick-access-icon-surface {
+    transition: none;
+  }
+
+  .quick-access-surface:hover,
+  .quick-access-surface:hover .quick-access-icon-surface {
+    transform: none;
+  }
+}

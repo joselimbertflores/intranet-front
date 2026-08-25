@@ -6,10 +6,17 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 
 import { QuickAccessCard } from '../../../../components';
 import { QuickAccess } from '../../../../models';
+import { LandingReveal } from '../../scroll-reveal.directive';
 
 @Component({
   selector: 'landing-quick-access-section',
-  imports: [HlmButtonImports, NgIcon, QuickAccessCard, RouterLink],
+  imports: [
+    HlmButtonImports,
+    LandingReveal,
+    NgIcon,
+    QuickAccessCard,
+    RouterLink,
+  ],
   providers: [provideIcons({ lucideArrowRight })],
   host: { class: 'block' },
   template: `
@@ -18,7 +25,7 @@ import { QuickAccess } from '../../../../models';
       aria-labelledby="quick-access-title"
     >
       <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-        <div class="mb-8 text-center sm:mb-10">
+        <div landingReveal class="mb-8 text-center sm:mb-10">
           <h2
             id="quick-access-title"
             class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
@@ -31,6 +38,8 @@ import { QuickAccess } from '../../../../models';
         </div>
 
         <nav
+          landingReveal
+          [landingRevealDelay]="80"
           class="mx-auto grid max-w-6xl auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           aria-label="Accesos rápidos"
         >

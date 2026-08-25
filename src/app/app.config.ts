@@ -6,9 +6,9 @@ import {
 } from '@angular/core';
 import {
   provideRouter,
-  withViewTransitions,
   withComponentInputBinding,
   withInMemoryScrolling,
+  withViewTransitions,
 } from '@angular/router';
 import {
   provideHttpClient,
@@ -40,8 +40,8 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
       withViewTransitions({
-        onViewTransitionCreated: handleTransitionCreated,
         skipInitialTransition: true,
+        onViewTransitionCreated: handleTransitionCreated,
       }),
     ),
     provideHttpClient(

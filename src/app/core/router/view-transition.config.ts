@@ -1,10 +1,13 @@
 import { inject } from '@angular/core';
-import { Router, ViewTransitionInfo } from '@angular/router';
+import { isActive, Router, ViewTransitionInfo } from '@angular/router';
 
 export function handleTransitionCreated({ transition }: ViewTransitionInfo) {
   const router = inject(Router);
+  const targetUrl = router.currentNavigation()?.finalUrl;
 
-  const targetUrl = router.currentNavigation()?.finalUrl ?? '';
+  if (!targetUrl) {
+    return;
+  }
 
   const config = {
     paths: 'exact',
@@ -13,8 +16,9 @@ export function handleTransitionCreated({ transition }: ViewTransitionInfo) {
     queryParams: 'ignored',
   } as const;
 
-  if (router.isActive(targetUrl, config)) {
+  const isTargetRouteCurrent = isActive(targetUrl, router, config);
+
+  if (isTargetRouteCurrent()) {
     transition.skipTransition();
-    return;
   }
 }

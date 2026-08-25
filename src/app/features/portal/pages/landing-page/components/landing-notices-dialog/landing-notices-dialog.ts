@@ -2,7 +2,6 @@ import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   afterNextRender,
   computed,
   inject,
@@ -194,7 +193,6 @@ const DISMISSED_LANDING_NOTICES_STORAGE_KEY =
 })
 export class LandingNoticesDialog {
   private readonly document = inject(DOCUMENT);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly items = input.required<LandingNotice[]>();
   readonly dialogState = signal<BrnDialogState>('closed');
@@ -223,16 +221,11 @@ export class LandingNoticesDialog {
       if (!view) return;
 
       this.dismissedNoticeIds.set(this.readDismissedNoticeIds(view));
+      const visibleItems = this.visibleItems();
+      if (!visibleItems.length) return;
 
-      const timeoutId = view.setTimeout(() => {
-        const visibleItems = this.visibleItems();
-        if (!visibleItems.length) return;
-
-        this.shownNoticeIds = visibleItems.map(({ id }) => id);
-        this.dialogState.set('open');
-      }, 450);
-
-      this.destroyRef.onDestroy(() => view.clearTimeout(timeoutId));
+      this.shownNoticeIds = visibleItems.map(({ id }) => id);
+      this.dialogState.set('open');
     });
   }
 

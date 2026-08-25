@@ -18,12 +18,14 @@ import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
 import { HeroSlide } from '../../../../models';
+import { LandingReveal } from '../../scroll-reveal.directive';
 
 @Component({
   selector: 'landing-hero-section',
   imports: [
     HlmButtonImports,
     HlmCarouselImports,
+    LandingReveal,
     NgIcon,
     NgOptimizedImage,
     RouterLink,
@@ -43,6 +45,7 @@ import { HeroSlide } from '../../../../models';
       >
         <hlm-carousel
           #heroCarousel
+          landingReveal
           class="w-full"
           aria-label="Carrusel de contenido destacado"
           [options]="carouselOptions()"
@@ -186,6 +189,7 @@ import { HeroSlide } from '../../../../models';
       </section>
     } @else {
       <section
+        landingReveal
         class="landing-hero-fallback relative overflow-hidden text-white"
         aria-labelledby="landing-hero-fallback-title"
       >

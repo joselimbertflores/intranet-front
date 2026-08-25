@@ -16,12 +16,14 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 
 import { FeaturedBanner } from '../../../../models';
+import { LandingReveal } from '../../scroll-reveal.directive';
 
 @Component({
   selector: 'featured-banners-section',
   imports: [
     HlmButtonImports,
     HlmCarouselImports,
+    LandingReveal,
     NgIcon,
     RouterLink,
   ],
@@ -41,19 +43,22 @@ import { FeaturedBanner } from '../../../../models';
       <div
         class="relative mx-auto grid w-full max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[minmax(13rem,0.7fr)_minmax(0,1.8fr)] lg:items-center lg:gap-12"
       >
-        <header class="max-w-xl lg:pb-12">
+        <header landingReveal class="max-w-xl lg:pb-12">
           <h2
             id="featured-banners-title"
             class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
           >
-            Banners destacados
+            Información destacada
           </h2>
-          <p class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg">
-            Conoce información y recursos relevantes para el trabajo municipal.
+          <p
+            class="mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg"
+          >
+            Accede a información y recursos relevantes para el trabajo
+            municipal.
           </p>
         </header>
 
-        <div class="min-w-0">
+        <div landingReveal [landingRevealDelay]="80" class="min-w-0">
           <hlm-carousel
             #bannerCarousel
             class="w-full"
@@ -107,7 +112,10 @@ import { FeaturedBanner } from '../../../../models';
                           {{ banner.description }}
                         </p>
                       }
-                      @if (banner.linkLabel && validUrl(banner.linkUrl); as url) {
+                      @if (
+                        banner.linkLabel && validUrl(banner.linkUrl);
+                        as url
+                      ) {
                         <div class="mt-5">
                           @if (isInternalUrl(url)) {
                             <a hlmBtn variant="secondary" [routerLink]="url">
@@ -149,7 +157,11 @@ import { FeaturedBanner } from '../../../../models';
                 ></button>
 
                 <div class="flex items-center gap-2" aria-hidden="true">
-                  @for (banner of items(); track banner.id; let index = $index) {
+                  @for (
+                    banner of items();
+                    track banner.id;
+                    let index = $index
+                  ) {
                     <span
                       class="banner-indicator"
                       [class.banner-indicator-active]="
@@ -190,7 +202,8 @@ import { FeaturedBanner } from '../../../../models';
           118deg,
           color-mix(in oklch, var(--landing-emerald) 11%, var(--background)) 0%,
           color-mix(in oklch, var(--landing-teal) 14%, var(--background)) 54%,
-          color-mix(in oklch, var(--landing-gold) 24%, var(--landing-cream)) 100%
+          color-mix(in oklch, var(--landing-gold) 24%, var(--landing-cream))
+            100%
         );
     }
 
@@ -200,7 +213,8 @@ import { FeaturedBanner } from '../../../../models';
       left: -11rem;
       width: 25rem;
       height: 25rem;
-      border: 1px solid color-mix(in oklch, var(--landing-teal) 24%, transparent);
+      border: 1px solid
+        color-mix(in oklch, var(--landing-teal) 24%, transparent);
       border-radius: 9999px;
       box-shadow: 0 0 0 4.5rem
         color-mix(in oklch, var(--landing-emerald) 5%, transparent);
@@ -251,7 +265,11 @@ import { FeaturedBanner } from '../../../../models';
 
     .image-fallback {
       background:
-        radial-gradient(circle at 78% 25%, rgb(255 255 255 / 0.13), transparent 24%),
+        radial-gradient(
+          circle at 78% 25%,
+          rgb(255 255 255 / 0.13),
+          transparent 24%
+        ),
         linear-gradient(135deg, #087a43, #06334a);
     }
 

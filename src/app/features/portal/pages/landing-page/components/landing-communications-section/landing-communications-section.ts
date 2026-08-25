@@ -18,6 +18,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 
 import { PortalCommunicationResponse } from '../../../../interfaces';
+import { LandingReveal } from '../../scroll-reveal.directive';
 
 @Component({
   selector: 'landing-communications-section',
@@ -26,6 +27,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
     HlmBadgeImports,
     HlmButtonImports,
     HlmCarouselImports,
+    LandingReveal,
     NgIcon,
     NgOptimizedImage,
     RouterLink,
@@ -45,7 +47,7 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
       aria-labelledby="communications-title"
     >
       <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-        <div class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+        <div landingReveal class="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
               id="communications-title"
@@ -65,6 +67,8 @@ import { PortalCommunicationResponse } from '../../../../interfaces';
 
         <hlm-carousel
           #communicationsCarousel
+          landingReveal
+          [landingRevealDelay]="80"
           class="w-full"
           aria-label="Carrusel de comunicados recientes"
           [options]="carouselOptions"

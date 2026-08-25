@@ -6,10 +6,18 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 
 import { FileIcon, FileSizePipe } from '../../../../../../shared';
 import { PortalDocumentResponse } from '../../../../interfaces';
+import { LandingReveal } from '../../scroll-reveal.directive';
 
 @Component({
   selector: 'landing-documents-section',
-  imports: [FileIcon, FileSizePipe, HlmButtonImports, NgIcon, RouterLink],
+  imports: [
+    FileIcon,
+    FileSizePipe,
+    HlmButtonImports,
+    LandingReveal,
+    NgIcon,
+    RouterLink,
+  ],
   providers: [provideIcons({ lucideArrowRight, lucideDownload })],
   host: { class: 'block' },
   template: `
@@ -18,7 +26,7 @@ import { PortalDocumentResponse } from '../../../../interfaces';
       aria-labelledby="documents-title"
     >
       <div class="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
-        <div class="documents-heading mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+        <div landingReveal class="documents-heading mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
               id="documents-title"
@@ -36,7 +44,11 @@ import { PortalDocumentResponse } from '../../../../interfaces';
           </a>
         </div>
 
-        <div class="documents-list overflow-hidden rounded-2xl border text-card-foreground shadow-sm">
+        <div
+          landingReveal
+          [landingRevealDelay]="80"
+          class="documents-list overflow-hidden rounded-2xl border text-card-foreground shadow-sm"
+        >
           @for (document of visibleDocuments(); track document.id) {
             <article class="document-row grid gap-4 border-b p-4 transition-colors last:border-b-0 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
               <div class="flex min-w-0 items-center gap-4">

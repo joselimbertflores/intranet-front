@@ -1,5 +1,5 @@
 <main class="min-h-[55vh] bg-muted/30 pb-16">
-  <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+  <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <button
       hlmBtn
       type="button"
@@ -114,10 +114,10 @@
                 @case (blockType.IMAGE) {
                   @if (block.file; as file) {
                     <figure
-                      class="mx-auto w-full max-w-6xl overflow-hidden rounded-xl border border-border bg-muted/40"
+                      class="mx-auto w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-muted/40"
                     >
                       <img
-                        class="h-auto max-h-[42rem] w-full max-w-full object-contain"
+                        class="h-auto w-full max-w-full object-contain"
                         [src]="file.url"
                         [alt]="file.name || 'Imagen del tutorial'"
                         loading="lazy"
@@ -128,7 +128,7 @@
                 @case (blockType.YOUTUBE) {
                   @if (block.content | tutorialYoutubeUrl; as safeUrl) {
                     <div
-                      class="mx-auto aspect-video w-full max-w-6xl overflow-hidden rounded-xl border border-border bg-foreground"
+                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-foreground"
                     >
                       <iframe
                         class="size-full border-0"
@@ -143,14 +143,18 @@
                 }
                 @case (blockType.VIDEO_FILE) {
                   @if (block.file; as file) {
-                    <video
-                      class="mx-auto max-h-[42rem] w-full max-w-6xl rounded-xl border border-border bg-foreground"
-                      controls
-                      preload="metadata"
+                    <div
+                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-foreground"
                     >
-                      <source [src]="file.url" [type]="file.mimeType" />
-                      Tu navegador no soporta este video.
-                    </video>
+                      <video
+                        class="size-full object-contain"
+                        controls
+                        preload="metadata"
+                      >
+                        <source [src]="file.url" [type]="file.mimeType" />
+                        Tu navegador no soporta este video.
+                      </video>
+                    </div>
                   }
                 }
                 @case (blockType.FILE) {

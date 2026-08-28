@@ -1,30 +1,38 @@
 import { NgOptimizedImage } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
   computed,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideArrowRight,
   lucideArrowUpRight,
+  lucideChevronLeft,
+  lucideChevronRight,
   lucideImageOff,
 } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
-import Autoplay from 'embla-carousel-autoplay';
+import { register } from 'swiper/element/bundle';
+import type { SwiperContainer } from 'swiper/element';
+import type { SwiperOptions } from 'swiper/types';
 
 import { HeroSlide } from '../../../../models';
 import { LandingReveal } from '../../scroll-reveal.directive';
+
+register();
 
 @Component({
   selector: 'landing-hero-section',
   imports: [
     HlmButtonImports,
-    HlmCarouselImports,
     LandingReveal,
     NgIcon,
     NgOptimizedImage,
@@ -34,6 +42,8 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     provideIcons({
       lucideArrowRight,
       lucideArrowUpRight,
+      lucideChevronLeft,
+      lucideChevronRight,
       lucideImageOff,
     }),
   ],
@@ -43,149 +53,128 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         class="hero-stage relative overflow-hidden text-white"
         aria-label="Contenido destacado"
       >
-        <hlm-carousel
+        <swiper-container
           #heroCarousel
+          init="false"
           landingReveal
-          class="w-full"
+          class="hero-swiper block w-full"
           aria-label="Carrusel de contenido destacado"
-          [options]="carouselOptions()"
-          [plugins]="plugins()"
         >
-          <hlm-carousel-content class="ml-0">
-            @for (slide of slides(); track slide.id; let index = $index) {
-              <hlm-carousel-item class="pl-0">
-                <article class="hero-slide relative overflow-hidden">
-                  @if (!failedImages().has(slide.id)) {
-                    <img
-                      [ngSrc]="slide.imageUrl"
-                      fill
-                      sizes="100vw"
-                      [priority]="index === 0"
-                      class="hero-photo object-cover"
-                      alt=""
-                      (error)="markImageAsFailed(slide.id)"
-                    />
-                  } @else {
-                    <div
-                      class="hero-image-fallback absolute inset-0 grid place-items-center"
-                      aria-hidden="true"
-                    >
-                      <ng-icon
-                        name="lucideImageOff"
-                        size="3.75rem"
-                        class="text-white/45"
-                      />
-                    </div>
-                  }
-
+          @for (slide of slides(); track slide.id; let index = $index) {
+            <swiper-slide>
+              <article class="hero-slide relative overflow-hidden">
+                @if (!failedImages().has(slide.id)) {
+                  <img
+                    [ngSrc]="slide.imageUrl"
+                    fill
+                    sizes="100vw"
+                    [priority]="index === 0"
+                    class="hero-photo object-cover"
+                    alt=""
+                    (error)="markImageAsFailed(slide.id)"
+                  />
+                } @else {
                   <div
-                    class="hero-photo-veil absolute inset-0"
+                    class="hero-image-fallback absolute inset-0 grid place-items-center"
                     aria-hidden="true"
-                  ></div>
-                  <div
-                    class="hero-photo-vertical absolute inset-0"
-                    aria-hidden="true"
-                  ></div>
-                  <div
-                    class="hero-photo-horizontal absolute inset-0"
-                    aria-hidden="true"
-                  ></div>
-                  <div
-                    class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14"
                   >
-                    <div class="max-w-3xl">
-                      @if (index === 0) {
-                        <h1
-                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
-                        >
-                          {{ slide.title }}
-                        </h1>
-                      } @else {
-                        <h2
-                          class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
-                        >
-                          {{ slide.title }}
-                        </h2>
-                      }
-
-                      @if (slide.description) {
-                        <p
-                          class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg"
-                        >
-                          {{ slide.description }}
-                        </p>
-                      }
-
-                      @if (slide.linkLabel && validUrl(slide.linkUrl); as url) {
-                        <div class="mt-6">
-                          @if (isInternalUrl(url)) {
-                            <a
-                              hlmBtn
-                              size="lg"
-                              class="hero-cta"
-                              [routerLink]="url"
-                            >
-                              {{ slide.linkLabel }}
-                              <ng-icon name="lucideArrowRight" />
-                            </a>
-                          } @else {
-                            <a
-                              hlmBtn
-                              size="lg"
-                              class="hero-cta"
-                              [href]="url"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {{ slide.linkLabel }}
-                              <ng-icon name="lucideArrowUpRight" />
-                            </a>
-                          }
-                        </div>
-                      }
-                    </div>
+                    <ng-icon
+                      name="lucideImageOff"
+                      size="3.75rem"
+                      class="text-white/45"
+                    />
                   </div>
-                </article>
-              </hlm-carousel-item>
-            }
-          </hlm-carousel-content>
+                }
 
-          @if (hasMultipleSlides()) {
-            <button
-              hlmCarouselPrevious
-              type="button"
-              size="icon-lg"
-              class="hero-side-control start-3 top-1/2 size-11 -translate-y-1/2 sm:start-5"
-              aria-label="Mostrar contenido anterior"
-            ></button>
+                <div
+                  class="hero-photo-overlay absolute inset-0"
+                  aria-hidden="true"
+                ></div>
+                <div
+                  class="relative mx-auto flex h-full w-full max-w-7xl items-center px-16 py-12 text-left sm:px-20 lg:px-24"
+                >
+                  <div class="max-w-3xl">
+                    @if (index === 0) {
+                      <h1
+                        class="hero-title font-display max-w-[18ch] text-balance"
+                      >
+                        {{ slide.title }}
+                      </h1>
+                    } @else {
+                      <h2
+                        class="hero-title font-display max-w-[18ch] text-balance"
+                      >
+                        {{ slide.title }}
+                      </h2>
+                    }
 
-            <button
-              hlmCarouselNext
-              type="button"
-              size="icon-lg"
-              class="hero-side-control end-3 top-1/2 size-11 -translate-y-1/2 sm:end-5"
-              aria-label="Mostrar contenido siguiente"
-            ></button>
+                    @if (slide.description) {
+                      <p
+                        class="hero-description mt-5 max-w-3xl text-pretty font-medium text-white/88"
+                      >
+                        {{ slide.description }}
+                      </p>
+                    }
 
-            <div
-              class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 sm:bottom-5"
-              aria-hidden="true"
-            >
-              @for (slide of slides(); track slide.id; let index = $index) {
-                <span
-                  class="hero-indicator"
-                  [class.hero-indicator-active]="
-                    heroCarousel.currentSlide() === index
-                  "
-                ></span>
-              }
-            </div>
-            <p class="sr-only" aria-live="polite">
-              Contenido {{ heroCarousel.currentSlide() + 1 }} de
-              {{ slides().length }}
-            </p>
+                    @if (slide.linkLabel && validUrl(slide.linkUrl); as url) {
+                      <div class="mt-6">
+                        @if (isInternalUrl(url)) {
+                          <a
+                            hlmBtn
+                            size="lg"
+                            class="hero-cta"
+                            [routerLink]="url"
+                          >
+                            {{ slide.linkLabel }}
+                            <ng-icon name="lucideArrowRight" />
+                          </a>
+                        } @else {
+                          <a
+                            hlmBtn
+                            size="lg"
+                            class="hero-cta"
+                            [href]="url"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {{ slide.linkLabel }}
+                            <ng-icon name="lucideArrowUpRight" />
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </article>
+            </swiper-slide>
           }
-        </hlm-carousel>
+        </swiper-container>
+
+        @if (hasMultipleSlides()) {
+          <button
+            #previousButton
+            hlmBtn
+            type="button"
+            variant="ghost"
+            size="icon-lg"
+            class="hero-side-control hero-side-control-previous size-11"
+            aria-label="Banner anterior"
+          >
+            <ng-icon name="lucideChevronLeft" aria-hidden="true" />
+          </button>
+
+          <button
+            #nextButton
+            hlmBtn
+            type="button"
+            variant="ghost"
+            size="icon-lg"
+            class="hero-side-control hero-side-control-next size-11"
+            aria-label="Banner siguiente"
+          >
+            <ng-icon name="lucideChevronRight" aria-hidden="true" />
+          </button>
+        }
       </section>
     } @else {
       <section
@@ -194,17 +183,17 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         aria-labelledby="landing-hero-fallback-title"
       >
         <div
-          class="relative mx-auto flex h-full w-full max-w-7xl items-end px-14 pb-16 pt-12 sm:px-20 sm:pb-18 lg:items-center lg:px-24 lg:pb-14"
+          class="relative mx-auto flex h-full w-full max-w-7xl items-center px-16 py-12 text-left sm:px-20 lg:px-24"
         >
           <div class="max-w-3xl">
             <h1
               id="landing-hero-fallback-title"
-              class="font-display max-w-[18ch] text-balance text-[2.25rem] leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]"
+              class="hero-title font-display max-w-[18ch] text-balance"
             >
               Intranet institucional
             </h1>
             <p
-              class="mt-4 max-w-[58ch] text-pretty text-base leading-7 font-medium text-white/85 sm:text-lg"
+              class="hero-description mt-5 max-w-3xl text-pretty font-medium text-white/88"
             >
               Acceda a información, documentos y recursos institucionales del
               Gobierno Autónomo Municipal de Sacaba.
@@ -215,30 +204,68 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     }
   `,
   styleUrl: './landing-hero-section.css',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingHeroSection {
-  private readonly autoplay = Autoplay({
-    delay: 5500,
-    playOnInit: true,
-    stopOnInteraction: false,
-    stopOnMouseEnter: true,
-    stopOnFocusIn: true,
-    breakpoints: {
-      '(prefers-reduced-motion: reduce)': { active: false },
-    },
-  });
+export class LandingHeroSection implements AfterViewInit {
+  private readonly heroCarousel =
+    viewChild<ElementRef<SwiperContainer>>('heroCarousel');
+  private readonly previousButton =
+    viewChild<ElementRef<HTMLButtonElement>>('previousButton');
+  private readonly nextButton =
+    viewChild<ElementRef<HTMLButtonElement>>('nextButton');
 
   readonly slides = input.required<HeroSlide[]>();
   readonly failedImages = signal<ReadonlySet<number>>(new Set());
   readonly hasMultipleSlides = computed(() => this.slides().length > 1);
-  readonly carouselOptions = computed(() => ({
-    loop: this.hasMultipleSlides(),
-    align: 'start' as const,
-  }));
-  readonly plugins = computed(() =>
-    this.hasMultipleSlides() ? [this.autoplay] : [],
-  );
+
+  ngAfterViewInit(): void {
+    const carousel = this.heroCarousel()?.nativeElement;
+    if (!carousel) return;
+
+    const hasMultipleSlides = this.hasMultipleSlides();
+    const prefersReducedMotion =
+      globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
+      false;
+    const previousButton = this.previousButton()?.nativeElement;
+    const nextButton = this.nextButton()?.nativeElement;
+
+    const options: SwiperOptions = {
+      slidesPerView: 1,
+      effect: 'fade',
+      fadeEffect: { crossFade: true },
+      speed: prefersReducedMotion ? 0 : 700,
+      loop: hasMultipleSlides,
+      enabled: hasMultipleSlides,
+      allowTouchMove: hasMultipleSlides,
+      autoplay:
+        hasMultipleSlides && !prefersReducedMotion
+          ? {
+              delay: 6000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }
+          : false,
+      navigation:
+        hasMultipleSlides && previousButton && nextButton
+          ? {
+              prevEl: previousButton,
+              nextEl: nextButton,
+            }
+          : false,
+      pagination: hasMultipleSlides ? { type: 'bullets' } : false,
+      a11y: {
+        enabled: true,
+        containerMessage: 'Carrusel de contenido destacado',
+        prevSlideMessage: 'Banner anterior',
+        nextSlideMessage: 'Banner siguiente',
+        paginationBulletMessage: 'Ir al banner {{index}}',
+      },
+    };
+
+    Object.assign(carousel, options);
+    carousel.initialize();
+  }
 
   markImageAsFailed(id: number): void {
     this.failedImages.update((failed) => new Set(failed).add(id));

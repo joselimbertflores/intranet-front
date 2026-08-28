@@ -21,11 +21,11 @@ import { LandingReveal } from '../../scroll-reveal.directive';
   host: { class: 'block' },
   template: `
     <section
-      class="bg-card py-14 text-card-foreground sm:py-16 lg:py-20"
+      class="bg-card pt-12 pb-14 text-card-foreground sm:pt-14 sm:pb-16 lg:pt-16 lg:pb-20"
       aria-labelledby="quick-access-title"
     >
       <div class="mx-auto w-full max-w-7xl px-5 sm:px-8">
-        <div landingReveal class="mb-8 text-center sm:mb-10">
+        <div landingReveal class="mb-8 text-center sm:mb-9">
           <h2
             id="quick-access-title"
             class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"

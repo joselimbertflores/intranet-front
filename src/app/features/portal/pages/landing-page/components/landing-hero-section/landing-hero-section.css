@@ -1,11 +1,12 @@
 :host {
   display: block;
+  --hero-height: clamp(28rem, 54svh, 35rem);
   --hero-petrol-950: color-mix(in oklch, var(--landing-teal) 60%, #041f2d);
   --hero-navy-950: #071d33;
 }
 
 .landing-hero-fallback {
-  height: clamp(28rem, 54svh, 35rem);
+  height: var(--hero-height);
   background:
     radial-gradient(ellipse at 78% 16%, rgb(255 239 190 / 0.14), transparent 38%),
     radial-gradient(ellipse at 34% 106%, rgb(1 32 24 / 0.34), transparent 48%),
@@ -14,8 +15,10 @@
 }
 
 .hero-stage,
-.hero-slide {
-  height: clamp(28rem, 54svh, 35rem);
+.hero-slide,
+.hero-swiper,
+.hero-swiper swiper-slide {
+  height: var(--hero-height);
 }
 
 .hero-stage {
@@ -27,27 +30,53 @@
   filter: saturate(0.86) contrast(1.03) brightness(0.97);
 }
 
-.hero-photo-veil {
-  background: color-mix(in srgb, var(--hero-petrol-950) 10%, transparent);
+.hero-swiper {
+  --swiper-pagination-bottom: 1rem;
+  --swiper-pagination-bullet-horizontal-gap: 0.25rem;
+  --swiper-pagination-bullet-inactive-color: white;
+  --swiper-pagination-bullet-inactive-opacity: 0.34;
+  --swiper-pagination-bullet-size: 0.55rem;
+  --swiper-pagination-color: white;
 }
 
-.hero-photo-vertical {
-  background: linear-gradient(
-    0deg,
-    color-mix(in srgb, var(--hero-navy-950) 52%, transparent) 0%,
-    color-mix(in srgb, var(--hero-petrol-950) 16%, transparent) 48%,
-    color-mix(in srgb, var(--hero-petrol-950) 5%, transparent) 100%
-  );
+.hero-swiper::part(pagination) {
+  line-height: 0;
 }
 
-.hero-photo-horizontal {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--hero-navy-950) 82%, transparent) 0%,
-    color-mix(in srgb, var(--hero-petrol-950) 60%, transparent) 28%,
-    color-mix(in srgb, var(--hero-petrol-950) 22%, transparent) 52%,
-    transparent 76%
-  );
+.hero-swiper::part(bullet) {
+  border: 1px solid rgb(255 255 255 / 0.82);
+}
+
+.hero-swiper::part(button-prev),
+.hero-swiper::part(button-next) {
+  display: none;
+}
+
+.hero-title {
+  font-size: clamp(2.25rem, calc(1.25rem + 4vw), 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.hero-description {
+  font-size: clamp(1.125rem, calc(1rem + 0.35vw), 1.25rem);
+  line-height: 1.65;
+}
+
+.hero-photo-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--hero-navy-950) 90%, transparent) 0%,
+      color-mix(in srgb, var(--hero-petrol-950) 66%, transparent) 30%,
+      color-mix(in srgb, var(--hero-petrol-950) 25%, transparent) 54%,
+      transparent 80%
+    ),
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--hero-navy-950) 25%, transparent),
+      transparent 52%
+    );
 }
 
 .hero-image-fallback {
@@ -63,20 +92,38 @@
 }
 
 .hero-side-control {
+  position: absolute;
+  top: 50%;
   z-index: 1;
   border: 1px solid rgb(255 255 255 / 0.24);
   background: rgb(4 27 43 / 0.38);
   color: rgb(255 255 255 / 0.92);
   box-shadow: 0 5px 16px rgb(2 15 25 / 0.14);
   backdrop-filter: blur(5px);
+  transform: translateY(-50%);
   transition:
     background-color 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.hero-side-control-previous {
+  inset-inline-start: 0.75rem;
+}
+
+.hero-side-control-next {
+  inset-inline-end: 0.75rem;
 }
 
 .hero-side-control:hover {
   border-color: rgb(255 255 255 / 0.45);
   background: rgb(4 27 43 / 0.62);
+  box-shadow: 0 7px 20px rgb(2 15 25 / 0.22);
+}
+
+.hero-side-control:active {
+  translate: none !important;
+  transform: translateY(-50%);
 }
 
 .hero-side-control:focus-visible {
@@ -84,18 +131,30 @@
   outline-offset: 3px;
 }
 
-.hero-indicator {
-  display: block;
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1px solid rgb(255 255 255 / 0.82);
-  border-radius: 9999px;
-  background: rgb(255 255 255 / 0.3);
-  transition: background-color 160ms ease;
+@media (min-width: 640px) {
+  .hero-swiper {
+    --swiper-pagination-bottom: 1.25rem;
+  }
+
+  .hero-side-control-previous {
+    inset-inline-start: 1.25rem;
+  }
+
+  .hero-side-control-next {
+    inset-inline-end: 1.25rem;
+  }
 }
 
-.hero-indicator-active {
-  background: white;
+@media (min-width: 768px) {
+  :host {
+    --hero-height: clamp(27rem, calc(54svh - 1.5rem), 34rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  :host {
+    --hero-height: clamp(26rem, calc(54svh - 2.5rem), 32.5rem);
+  }
 }
 
 @media (max-width: 639px) {
@@ -103,28 +162,25 @@
     opacity: 0.92;
   }
 
-  .hero-photo-vertical {
-    background: linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--hero-navy-950) 74%, transparent) 0%,
-      color-mix(in srgb, var(--hero-petrol-950) 34%, transparent) 58%,
-      color-mix(in srgb, var(--hero-petrol-950) 8%, transparent) 100%
-    );
-  }
-
-  .hero-photo-horizontal {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--hero-navy-950) 62%, transparent),
-      color-mix(in srgb, var(--hero-petrol-950) 18%, transparent) 80%,
-      transparent 100%
-    );
+  .hero-photo-overlay {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--hero-navy-950) 88%, transparent) 0%,
+        color-mix(in srgb, var(--hero-petrol-950) 56%, transparent) 58%,
+        color-mix(in srgb, var(--hero-petrol-950) 20%, transparent) 100%
+      ),
+      linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--hero-navy-950) 32%, transparent),
+        transparent 66%
+      );
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-side-control,
-  .hero-indicator {
+  .hero-swiper::part(bullet) {
     transition: none;
   }
 }

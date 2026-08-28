@@ -17,11 +17,11 @@
         [formRoot]="filtersForm"
         (submit)="$event.preventDefault()"
       >
-        <div hlmField class="lg:col-span-9">
+        <div hlmField class="min-w-0 lg:col-span-6">
           <label hlmFieldLabel for="portal-document-search">
             Buscar documentos
           </label>
-          <hlm-input-group class="w-full">
+          <hlm-input-group class="w-full min-w-0">
             <hlm-input-group-addon>
               <ng-icon name="lucideSearch" />
             </hlm-input-group-addon>
@@ -77,17 +77,32 @@
           <div
             class="grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2 lg:contents"
           >
-            <div hlmField class="sm:col-span-2 lg:col-span-3">
+            <year-selector
+              class="min-w-0 lg:col-span-3"
+              inputId="portal-document-year"
+              label="Gestión"
+              placeholder="Todas"
+              [minYear]="minYear"
+              [maxYear]="maxYear"
+              [formField]="filtersForm.year"
+            />
+
+            <div hlmField class="min-w-0 lg:col-span-3">
               <label hlmFieldLabel for="portal-document-validity-status">
                 Vigencia
               </label>
-              <hlm-select [formField]="filtersForm.validityStatus">
+              <hlm-select
+                class="w-full min-w-0"
+                [formField]="filtersForm.validityStatus"
+              >
                 <hlm-select-trigger
-                  class="w-full"
+                  class="w-full min-w-0"
                   buttonId="portal-document-validity-status"
                 >
                   <ng-template hlmSelectValueTemplate let-validityStatus>
-                    {{ validityStatusNames.get(validityStatus) }}
+                    <span class="block min-w-0 truncate">
+                      {{ validityStatusNames.get(validityStatus) }}
+                    </span>
                   </ng-template>
                   <hlm-select-placeholder>
                     Todas las vigencias
@@ -108,15 +123,20 @@
               </hlm-select>
             </div>
 
-            <div hlmField class="lg:col-span-3">
+            <div hlmField class="min-w-0 lg:col-span-4">
               <label hlmFieldLabel for="portal-document-type">Tipo</label>
-              <hlm-select [formField]="filtersForm.documentType">
+              <hlm-select
+                class="w-full min-w-0"
+                [formField]="filtersForm.documentType"
+              >
                 <hlm-select-trigger
-                  class="w-full"
+                  class="w-full min-w-0"
                   buttonId="portal-document-type"
                 >
                   <ng-template hlmSelectValueTemplate let-type>
-                    {{ typeNames().get(type) }}
+                    <span class="block min-w-0 truncate">
+                      {{ typeNames().get(type) }}
+                    </span>
                   </ng-template>
                   <hlm-select-placeholder>
                     Todos los tipos
@@ -137,17 +157,22 @@
               </hlm-select>
             </div>
 
-            <div hlmField class="lg:col-span-4">
+            <div hlmField class="min-w-0 lg:col-span-4">
               <label hlmFieldLabel for="portal-document-subtype">
                 Subtipo
               </label>
-              <hlm-select [formField]="filtersForm.documentSubtype">
+              <hlm-select
+                class="w-full min-w-0"
+                [formField]="filtersForm.documentSubtype"
+              >
                 <hlm-select-trigger
-                  class="w-full"
+                  class="w-full min-w-0"
                   buttonId="portal-document-subtype"
                 >
                   <ng-template hlmSelectValueTemplate let-subtype>
-                    {{ subtypeNames().get(subtype) }}
+                    <span class="block min-w-0 truncate">
+                      {{ subtypeNames().get(subtype) }}
+                    </span>
                   </ng-template>
                   <hlm-select-placeholder>
                     @if (!filtersModel().documentType) {
@@ -174,18 +199,8 @@
               </hlm-select>
             </div>
 
-            <year-selector
-              class="lg:col-span-2"
-              inputId="portal-document-year"
-              label="Gestión"
-              placeholder="Todas"
-              [minYear]="minYear"
-              [maxYear]="maxYear"
-              [formField]="filtersForm.year"
-            />
-
             <hierarchical-combobox
-              class="sm:col-span-2 lg:col-span-3"
+              class="min-w-0 sm:col-span-2 lg:col-span-4"
               emptyText="Sin unidades coincidentes."
               inputId="portal-document-organizational-unit"
               label="Unidad organizacional"
@@ -293,6 +308,36 @@
           </p>
 
           <div class="flex items-center gap-3">
+            <hlm-toggle-group
+              type="single"
+              size="sm"
+              variant="outline"
+              class="hidden sm:flex"
+              aria-label="Presentación de documentos"
+              [nullable]="false"
+              [value]="viewMode()"
+              (valueChange)="changeViewMode($event)"
+            >
+              <button
+                hlmToggleGroupItem
+                type="button"
+                value="list"
+                aria-label="Ver como lista"
+                title="Lista"
+              >
+                <ng-icon name="lucideList" />
+              </button>
+              <button
+                hlmToggleGroupItem
+                type="button"
+                value="grid"
+                aria-label="Ver como cuadrícula"
+                title="Cuadrícula"
+              >
+                <ng-icon name="lucideLayoutGrid" />
+              </button>
+            </hlm-toggle-group>
+
             <nav
               class="flex items-center gap-1.5"
               aria-label="Navegación rápida de resultados"
@@ -326,9 +371,18 @@
         @if (response.documents.length) {
           <div
             class="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+            [class]="
+              viewMode() === 'grid'
+                ? 'sm:grid sm:grid-cols-2 sm:gap-4 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent sm:shadow-none lg:grid-cols-3'
+                : ''
+            "
           >
             @for (document of response.documents; track document.id) {
-              <portal-document-list-item class="block" [document]="document" />
+              <portal-document-list-item
+                class="block sm:h-full"
+                [document]="document"
+                [viewMode]="viewMode()"
+              />
             }
           </div>
 

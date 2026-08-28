@@ -1,5 +1,7 @@
 <main class="flex flex-col gap-5">
-  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+  <header
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
     <div>
       <h1 class="text-2xl font-semibold tracking-tight">Tutoriales</h1>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -8,7 +10,11 @@
     </div>
 
     <div class="flex flex-wrap gap-2">
-      <a hlmBtn variant="outline" routerLink="/administration/tutorial-categories">
+      <a
+        hlmBtn
+        variant="outline"
+        routerLink="/administration/tutorial-categories"
+      >
         <ng-icon name="lucideFolderCog" data-icon="inline-start" />
         Administrar categorías
       </a>
@@ -64,7 +70,9 @@
                 <td hlmTableCell><div hlmSkeleton class="h-5 w-28"></div></td>
                 <td hlmTableCell><div hlmSkeleton class="h-5 w-20"></div></td>
                 <td hlmTableCell><div hlmSkeleton class="h-5 w-32"></div></td>
-                <td hlmTableCell><div hlmSkeleton class="ml-auto size-8"></div></td>
+                <td hlmTableCell>
+                  <div hlmSkeleton class="ml-auto size-8"></div>
+                </td>
               </tr>
             }
           } @else if (tutorialsResource.error()) {
@@ -72,10 +80,20 @@
               <td hlmTableCell colspan="5" class="py-12 text-center">
                 <div class="flex flex-col items-center gap-3 whitespace-normal">
                   <div>
-                    <p class="font-medium">No se pudieron cargar los tutoriales</p>
-                    <p class="text-sm text-muted-foreground">Intenta nuevamente.</p>
+                    <p class="font-medium">
+                      No se pudieron cargar los tutoriales
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Intenta nuevamente.
+                    </p>
                   </div>
-                  <button hlmBtn type="button" size="sm" variant="outline" (click)="tutorialsResource.reload()">
+                  <button
+                    hlmBtn
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    (click)="tutorialsResource.reload()"
+                  >
                     <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
                     Reintentar
                   </button>
@@ -87,9 +105,13 @@
               <tr hlmTableRow>
                 <td hlmTableCell>
                   <div class="min-w-0">
-                    <p class="truncate font-medium" [title]="tutorial.title">{{ tutorial.title }}</p>
+                    <p class="truncate font-medium" [title]="tutorial.title">
+                      {{ tutorial.title }}
+                    </p>
                     @if (tutorial.summary) {
-                      <p class="mt-0.5 truncate text-sm text-muted-foreground">{{ tutorial.summary }}</p>
+                      <p class="mt-0.5 truncate text-sm text-muted-foreground">
+                        {{ tutorial.summary }}
+                      </p>
                     }
                   </div>
                 </td>
@@ -99,12 +121,18 @@
                   </span>
                 </td>
                 <td hlmTableCell>
-                  <span hlmBadge [variant]="tutorial.isPublished ? 'default' : 'secondary'">
+                  <span
+                    hlmBadge
+                    [variant]="tutorial.isPublished ? 'default' : 'secondary'"
+                  >
                     {{ tutorial.isPublished ? "Publicado" : "No publicado" }}
                   </span>
                 </td>
                 <td hlmTableCell>
-                  <time class="text-sm text-muted-foreground" [attr.datetime]="tutorial.updatedAt">
+                  <time
+                    class="text-sm text-muted-foreground"
+                    [attr.datetime]="tutorial.updatedAt"
+                  >
                     {{ tutorial.updatedAt | date: "medium" }}
                   </time>
                 </td>
@@ -124,18 +152,25 @@
                     <hlm-dropdown-menu class="w-36">
                       <hlm-dropdown-menu-group>
                         @if (canUpdate()) {
-                          <a hlmDropdownMenuItem [routerLink]="['/administration/tutorials', tutorial.id, 'edit']">
-                            <ng-icon name="lucideListTree" />
-                            Administrar contenido
-                          </a>
                           <button
                             hlmDropdownMenuItem
                             type="button"
                             (click)="openTutorialDialog(tutorial)"
                           >
                             <ng-icon name="lucidePencil" />
-                            Editar información
+                            Editar
                           </button>
+                          <a
+                            hlmDropdownMenuItem
+                            [routerLink]="[
+                              '/administration/tutorials',
+                              tutorial.id,
+                              'edit',
+                            ]"
+                          >
+                            <ng-icon name="lucideListTree" />
+                            Administrar
+                          </a>
                         }
                         @if (canDelete()) {
                           <button
@@ -159,10 +194,18 @@
                 <td hlmTableCell colspan="5" class="py-12 text-center">
                   <div class="flex flex-col gap-1 whitespace-normal">
                     <p class="font-medium">
-                      {{ listState().term ? "No se encontraron tutoriales" : "Todavía no hay tutoriales" }}
+                      {{
+                        listState().term
+                          ? "No se encontraron tutoriales"
+                          : "Todavía no hay tutoriales"
+                      }}
                     </p>
                     <p class="text-sm text-muted-foreground">
-                      {{ listState().term ? "Prueba con otro término de búsqueda." : "Crea el primer tutorial para comenzar." }}
+                      {{
+                        listState().term
+                          ? "Prueba con otro término de búsqueda."
+                          : "Crea el primer tutorial para comenzar."
+                      }}
                     </p>
                   </div>
                 </td>
@@ -191,7 +234,8 @@
     <hlm-alert-dialog-header>
       <h3 hlmAlertDialogTitle>Eliminar tutorial</h3>
       <p hlmAlertDialogDescription>
-        Se eliminará “{{ pendingDelete()?.title }}” junto con todos sus bloques asociados. Esta acción no se puede deshacer.
+        Se eliminará “{{ pendingDelete()?.title }}” junto con todos sus bloques
+        asociados. Esta acción no se puede deshacer.
       </p>
     </hlm-alert-dialog-header>
 
@@ -200,8 +244,16 @@
     }
 
     <hlm-alert-dialog-footer>
-      <button hlmAlertDialogCancel type="button" [disabled]="deleting()">Cancelar</button>
-      <button hlmBtn type="button" variant="destructive" [disabled]="deleting()" (click)="confirmRemove(deleteDialog)">
+      <button hlmAlertDialogCancel type="button" [disabled]="deleting()">
+        Cancelar
+      </button>
+      <button
+        hlmBtn
+        type="button"
+        variant="destructive"
+        [disabled]="deleting()"
+        (click)="confirmRemove(deleteDialog)"
+      >
         @if (deleting()) {
           <hlm-spinner data-icon="inline-start" />
           Eliminando...

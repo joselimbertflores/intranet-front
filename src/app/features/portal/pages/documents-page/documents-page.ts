@@ -24,6 +24,8 @@ import {
   lucideChevronRight,
   lucideCircleAlert,
   lucideFileSearch,
+  lucideLayoutGrid,
+  lucideList,
   lucideRefreshCw,
   lucideSearch,
   lucideX,
@@ -34,6 +36,7 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
+import { HlmToggleGroupImports } from '@spartan-ng/helm/toggle-group';
 import { map } from 'rxjs';
 
 import {
@@ -48,7 +51,10 @@ import {
   PortalDocumentResponse,
 } from '../../interfaces';
 
-import { PortalDocumentListItem } from './components/portal-document-list-item/portal-document-list-item';
+import {
+  type DocumentViewMode,
+  PortalDocumentListItem,
+} from './components/portal-document-list-item/portal-document-list-item';
 import { PortalDocumentDataSource } from '../../services';
 import { PublicPageHeader } from '../../components';
 
@@ -129,6 +135,7 @@ function mapOrganizationalUnits(
     HlmInputGroupImports,
     HlmSelectImports,
     HlmSkeletonImports,
+    HlmToggleGroupImports,
     PaginationControls,
     PortalDocumentListItem,
     PublicPageHeader,
@@ -141,6 +148,8 @@ function mapOrganizationalUnits(
       lucideChevronRight,
       lucideCircleAlert,
       lucideFileSearch,
+      lucideLayoutGrid,
+      lucideList,
       lucideRefreshCw,
       lucideSearch,
       lucideX,
@@ -237,6 +246,7 @@ export default class DocumentsPage {
   readonly page = computed(() => this.queryParams().page);
 
   readonly mobileFiltersOpen = signal(false);
+  readonly viewMode = signal<DocumentViewMode>('list');
 
   private readonly filtersTop = viewChild<ElementRef<HTMLElement>>('filtersTop');
 
@@ -319,6 +329,13 @@ export default class DocumentsPage {
       behavior: 'instant',
       block: 'start',
     });
+  }
+
+  changeViewMode(
+    value: DocumentViewMode | DocumentViewMode[] | null | undefined,
+  ): void {
+    if (!value || Array.isArray(value)) return;
+    this.viewMode.set(value);
   }
 
   resetFilters(): void {

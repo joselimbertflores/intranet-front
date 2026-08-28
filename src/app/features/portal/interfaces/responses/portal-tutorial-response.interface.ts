@@ -33,6 +33,8 @@ export interface PortalTutorialResponse {
   slug: string;
   title: string;
   summary: string | null;
+  coverImageFileId: string | null;
+  coverImageUrl: string | null;
   category: TutorialCategory | null;
   createdAt: string;
 }

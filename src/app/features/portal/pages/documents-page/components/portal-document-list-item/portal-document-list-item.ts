@@ -9,6 +9,8 @@ import { lucideDownload } from '@ng-icons/lucide';
 import { FileIcon, FileSizePipe } from '../../../../../../shared';
 import { PortalDocumentResponse } from '../../../../interfaces';
 
+export type DocumentViewMode = 'list' | 'grid';
+
 @Component({
   selector: 'portal-document-list-item',
   imports: [
@@ -24,4 +26,5 @@ import { PortalDocumentResponse } from '../../../../interfaces';
 })
 export class PortalDocumentListItem {
   readonly document = input.required<PortalDocumentResponse>();
+  readonly viewMode = input<DocumentViewMode>('list');
 }

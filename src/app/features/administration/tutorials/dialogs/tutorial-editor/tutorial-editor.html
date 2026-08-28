@@ -1,5 +1,7 @@
-<hlm-dialog-header>
-  <h3 hlmDialogTitle>{{ tutorial ? "Editar información" : "Nuevo tutorial" }}</h3>
+<hlm-dialog-header class="shrink-0 pb-4">
+  <h3 hlmDialogTitle>
+    {{ tutorial ? "Editar información" : "Nuevo tutorial" }}
+  </h3>
   <p hlmDialogDescription>
     {{
       tutorial
@@ -9,64 +11,155 @@
   </p>
 </hlm-dialog-header>
 
-<form
-  id="tutorial-editor-form"
-  class="flex flex-col gap-5 py-2"
-  [formRoot]="tutorialForm"
->
-  <div hlmField>
-    <label hlmFieldLabel for="tutorial-editor-title">Título</label>
-    <input
-      hlmInput
-      id="tutorial-editor-title"
-      type="text"
-      autocomplete="off"
-      placeholder="Ej. Cómo registrar una solicitud"
-      [formField]="tutorialForm.title"
-    />
-    @if (tutorialForm.title().touched()) {
-      @for (error of tutorialForm.title().errors(); track error.kind) {
-        <hlm-field-error [validator]="error.kind">
-          {{ error.message }}
-        </hlm-field-error>
-      }
-    }
-  </div>
-
-  <div hlmField>
-    <label hlmFieldLabel for="tutorial-editor-summary">
-      Resumen (opcional)
-    </label>
-    <textarea
-      hlmTextarea
-      id="tutorial-editor-summary"
-      rows="4"
-      placeholder="Describe brevemente qué aprenderá la persona."
-      [formField]="tutorialForm.summary"
-    ></textarea>
-  </div>
-
-  <div hlmField>
-    <label hlmFieldLabel for="tutorial-editor-category">
-      Categoría (opcional)
-    </label>
-    <hlm-select [formField]="tutorialForm.categoryId">
-      <hlm-select-trigger class="w-full" buttonId="tutorial-editor-category">
-        <hlm-select-value />
-      </hlm-select-trigger>
-      <hlm-select-content *hlmSelectPortal>
-        <hlm-select-item [value]="null">Sin categoría</hlm-select-item>
-        @for (category of categoriesResource.value() ?? []; track category.id) {
-          <hlm-select-item [value]="category.id">
-            {{ category.name }}
-          </hlm-select-item>
+<div class="-mx-4 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+  <form
+    id="tutorial-editor-form"
+    class="flex flex-col gap-5"
+    [formRoot]="tutorialForm"
+  >
+    <div hlmField>
+      <label hlmFieldLabel for="tutorial-editor-title">Título</label>
+      <input
+        hlmInput
+        id="tutorial-editor-title"
+        type="text"
+        autocomplete="off"
+        placeholder="Ej. Cómo registrar una solicitud"
+        [formField]="tutorialForm.title"
+      />
+      @if (tutorialForm.title().touched()) {
+        @for (error of tutorialForm.title().errors(); track error.kind) {
+          <hlm-field-error [validator]="error.kind">
+            {{ error.message }}
+          </hlm-field-error>
         }
-      </hlm-select-content>
-    </hlm-select>
-  </div>
-</form>
+      }
+    </div>
 
-<hlm-dialog-footer>
+    <div hlmField>
+      <label hlmFieldLabel for="tutorial-editor-summary">
+        Resumen (opcional)
+      </label>
+      <textarea
+        hlmTextarea
+        id="tutorial-editor-summary"
+        rows="4"
+        placeholder="Describe brevemente qué aprenderá la persona."
+        [formField]="tutorialForm.summary"
+      ></textarea>
+    </div>
+
+    <div hlmField>
+      <label hlmFieldLabel for="tutorial-editor-category">
+        Categoría (opcional)
+      </label>
+      <hlm-select [formField]="tutorialForm.categoryId">
+        <hlm-select-trigger class="w-full" buttonId="tutorial-editor-category">
+          <hlm-select-value />
+        </hlm-select-trigger>
+        <hlm-select-content *hlmSelectPortal>
+          <hlm-select-item [value]="null">Sin categoría</hlm-select-item>
+          @for (
+            category of categoriesResource.value() ?? [];
+            track category.id
+          ) {
+            <hlm-select-item [value]="category.id">
+              {{ category.name }}
+            </hlm-select-item>
+          }
+        </hlm-select-content>
+      </hlm-select>
+    </div>
+
+    <div class="grid min-w-0 gap-4 rounded-xl border border-border p-4">
+      <div
+        class="relative h-32 w-full overflow-hidden rounded-lg border border-border bg-muted/35"
+      >
+        @if (coverImagePreview()) {
+          <img
+            class="size-full object-cover"
+            [src]="coverImagePreview()"
+            alt="Vista previa de la portada"
+          />
+        } @else {
+          <div class="grid size-full place-items-center" aria-hidden="true">
+            <ng-icon
+              name="lucideImage"
+              class="text-4xl text-muted-foreground"
+            />
+          </div>
+        }
+      </div>
+
+      <div hlmField class="min-w-0">
+        <label hlmFieldLabel for="tutorial-cover-image">
+          Portada
+          <span class="font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        <input
+          #coverImageInput
+          hlmInput
+          id="tutorial-cover-image"
+          type="file"
+          class="min-w-0 w-full"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onCoverImageSelected($event)"
+        />
+        <p hlmFieldDescription>
+          PNG, JPEG o WebP de hasta 5 MB. Se optimizará a WebP con un ancho
+          máximo de 1200 px.
+        </p>
+
+        @if (selectedCoverImage()) {
+          <div class="flex w-full min-w-0 items-center gap-2 text-sm">
+            <ng-icon
+              name="lucideUpload"
+              class="shrink-0 text-muted-foreground"
+            />
+            <span class="min-w-0 flex-1 truncate">
+              {{ selectedCoverImage()!.name }}
+            </span>
+            <button
+              hlmBtn
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              class="shrink-0"
+              aria-label="Descartar la portada seleccionada"
+              (click)="clearSelectedCoverImage(coverImageInput)"
+            >
+              <ng-icon name="lucideX" />
+            </button>
+          </div>
+        }
+
+        @if (
+          tutorial?.coverImageFileId &&
+          !selectedCoverImage() &&
+          !coverImageRemoved()
+        ) {
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            variant="outline"
+            class="w-fit"
+            (click)="removeCoverImage(coverImageInput)"
+          >
+            <ng-icon name="lucideX" data-icon="inline-start" />
+            Quitar portada
+          </button>
+        }
+
+        @if (coverImageError()) {
+          <hlm-field-error>{{ coverImageError() }}</hlm-field-error>
+        }
+      </div>
+    </div>
+  </form>
+</div>
+
+<hlm-dialog-footer class="shrink-0">
   <button
     hlmBtn
     type="button"

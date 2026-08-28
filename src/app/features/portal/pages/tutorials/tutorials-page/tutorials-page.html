@@ -116,14 +116,25 @@
           <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @for (tutorial of response.tutorials; track tutorial.id) {
               <a
-                class="group flex min-h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-colors hover:border-primary/40 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                class="group flex min-h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-1 hover:border-primary/40 hover:bg-accent/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none motion-reduce:transition-none"
                 [routerLink]="['/tutorials', tutorial.slug]"
                 [attr.aria-label]="'Abrir tutorial: ' + tutorial.title"
               >
-                <div class="relative grid h-32 place-items-center overflow-hidden border-b border-border bg-primary/8 text-primary">
-                  <div class="absolute -right-8 -top-10 size-28 rounded-full border border-primary/15"></div>
-                  <div class="absolute -bottom-12 -left-8 size-32 rounded-full bg-primary/8"></div>
-                  <ng-icon name="lucideGraduationCap" class="relative text-4xl" aria-hidden="true" />
+                <div class="h-32 overflow-hidden border-b border-border">
+                  @if (tutorial.coverImageUrl) {
+                    <img
+                      class="size-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
+                      [src]="tutorial.coverImageUrl"
+                      [alt]="'Portada de ' + tutorial.title"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="relative grid size-full place-items-center overflow-hidden bg-primary/8 text-primary">
+                      <div class="absolute -right-8 -top-10 size-28 rounded-full border border-primary/15"></div>
+                      <div class="absolute -bottom-12 -left-8 size-32 rounded-full bg-primary/8"></div>
+                      <ng-icon name="lucideGraduationCap" class="relative text-4xl transition-transform duration-200 ease-out group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+                    </div>
+                  }
                 </div>
 
                 <div class="flex flex-1 flex-col p-5">
@@ -144,7 +155,7 @@
                     <p class="mt-3 text-sm leading-6 text-muted-foreground">Consulta la guía completa y sus recursos.</p>
                   }
                   <span class="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-primary">
-                    Ver tutorial <ng-icon name="lucideArrowRight" data-icon="inline-end" />
+                    Ver tutorial <ng-icon name="lucideArrowRight" class="transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" data-icon="inline-end" />
                   </span>
                 </div>
               </a>

@@ -8,6 +8,7 @@ type FileContext =
   | 'featured-banners'
   | 'landing-notices'
   | 'quick-accesses'
+  | 'tutorial-covers'
   | 'documents'
   | 'communications'
   | 'tutorials';
@@ -57,6 +58,10 @@ export class FileUploadService {
 
   uploadQuickAccessImage(file: File) {
     return this.upload(file, 'quick-accesses');
+  }
+
+  uploadTutorialCover(file: File) {
+    return this.upload(file, 'tutorial-covers');
   }
 
   uploadFile(file: File, group: FileContext) {

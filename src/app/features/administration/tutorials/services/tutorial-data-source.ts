@@ -81,4 +81,8 @@ export class TutorialDataSource {
   uploadTutorialFile(file: File) {
     return this.fileUploadService.upload(file, 'tutorials');
   }
+
+  uploadCover(file: File) {
+    return this.fileUploadService.uploadTutorialCover(file);
+  }
 }

@@ -29,6 +29,8 @@ export interface TutorialResponse {
   title: string;
   slug: string;
   summary: string | null;
+  coverImageFileId: string | null;
+  coverImageUrl: string | null;
   isPublished: boolean;
   category: TutorialCategoryResponse | null;
   createdAt: string;
@@ -54,6 +56,7 @@ export interface TutorialCreatePayload {
   title: string;
   summary?: string | null;
   categoryId?: number | null;
+  coverImageFileId?: string | null;
 }
 
 export type TutorialGeneralUpdatePayload = Partial<TutorialCreatePayload>;

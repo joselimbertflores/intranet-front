@@ -1,10 +1,9 @@
-import type { QuickAccessIconKey } from '../../../../../shared/models/quick-access-icon-key';
-
 export interface QuickAccessResponse {
   id: number;
   title: string;
   description: string | null;
-  iconKey: QuickAccessIconKey;
+  imageFileId: string | null;
+  imageUrl: string | null;
   backgroundColor: string;
   url: string;
   sortOrder: number;
@@ -14,7 +13,7 @@ export interface QuickAccessResponse {
 export interface QuickAccessToSave {
   title: string;
   description: string | null;
-  iconKey: QuickAccessIconKey;
+  imageFileId?: string;
   backgroundColor: string;
   url: string;
   isActive: boolean;

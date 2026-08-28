@@ -16,14 +16,18 @@
     [formRoot]="quickAccessForm"
   >
     <div
-      class="flex min-h-20 items-center gap-3 rounded-xl border border-border bg-muted/35 p-4"
+      class="flex min-h-24 items-center gap-4 rounded-xl border border-border bg-muted/35 p-4"
       [style.--quick-access-color]="quickAccessForm.backgroundColor().value()"
     >
       <span
-        class="quick-access-icon-surface grid size-11 shrink-0 place-items-center rounded-lg border"
+        class="quick-access-logo-surface grid size-16 shrink-0 place-items-center rounded-xl border p-2"
         aria-hidden="true"
       >
-        <ng-icon [name]="resolveIcon(quickAccessForm.iconKey().value())" />
+        @if (imagePreview()) {
+          <img class="size-full object-contain" [src]="imagePreview()" alt="" />
+        } @else {
+          <ng-icon name="lucideImage" class="text-2xl text-muted-foreground" />
+        }
       </span>
       <div class="min-w-0">
         <p class="line-clamp-2 font-medium">
@@ -78,44 +82,75 @@
         }
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
-        <div hlmField>
-          <label hlmFieldLabel for="quick-access-icon">Icono</label>
-          <hlm-select [formField]="quickAccessForm.iconKey">
-            <hlm-select-trigger class="w-full" buttonId="quick-access-icon">
-              <ng-template hlmSelectValueTemplate let-iconKey>
-                <span class="flex min-w-0 items-center gap-2">
-                  <ng-icon [name]="resolveIcon(iconKey)" />
-                  <span class="truncate">{{ iconLabels[iconKey] }}</span>
-                </span>
-              </ng-template>
-              <hlm-select-placeholder
-                >Selecciona un icono</hlm-select-placeholder
-              >
-            </hlm-select-trigger>
-            <hlm-select-content *hlmSelectPortal class="max-h-72">
-              <hlm-select-group>
-                @for (option of iconOptions; track option.key) {
-                  <hlm-select-item [value]="option.key">
-                    <ng-icon [name]="option.key" />
-                    <span>{{ option.label }}</span>
-                  </hlm-select-item>
-                }
-              </hlm-select-group>
-            </hlm-select-content>
-          </hlm-select>
+      <div
+        class="grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center"
+        [style.--quick-access-color]="quickAccessForm.backgroundColor().value()"
+      >
+        <div
+          class="quick-access-logo-surface grid size-28 place-items-center rounded-xl border p-3"
+          aria-hidden="true"
+        >
+          @if (imagePreview()) {
+            <img
+              class="size-full object-contain"
+              [src]="imagePreview()"
+              alt=""
+            />
+          } @else {
+            <ng-icon
+              name="lucideImage"
+              class="text-3xl text-muted-foreground"
+            />
+          }
         </div>
 
         <div hlmField>
-          <label hlmFieldLabel for="quick-access-color">Color</label>
+          <label hlmFieldLabel for="quick-access-image">Imagen o logo</label>
           <input
+            #imageInput
             hlmInput
-            id="quick-access-color"
-            type="color"
-            class="w-full"
-            [formField]="quickAccessForm.backgroundColor"
+            id="quick-access-image"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            (change)="onImageSelected($event)"
           />
+          <p hlmFieldDescription>
+            PNG, JPEG o WebP de hasta 2 MB. Se ajustará a un máximo de 512 px.
+          </p>
+          @if (selectedImage()) {
+            <div class="flex min-w-0 items-center gap-2 text-sm">
+              <ng-icon
+                name="lucideUpload"
+                class="shrink-0 text-muted-foreground"
+              />
+              <span class="truncate">{{ selectedImage()!.name }}</span>
+              <button
+                hlmBtn
+                type="button"
+                size="icon-xs"
+                variant="ghost"
+                aria-label="Conservar la imagen anterior"
+                (click)="clearSelectedImage(imageInput)"
+              >
+                <ng-icon name="lucideX" />
+              </button>
+            </div>
+          }
+          @if (imageError()) {
+            <hlm-field-error>{{ imageError() }}</hlm-field-error>
+          }
         </div>
+      </div>
+
+      <div hlmField>
+        <label hlmFieldLabel for="quick-access-color">Color decorativo</label>
+        <input
+          hlmInput
+          id="quick-access-color"
+          type="color"
+          class="w-full sm:w-40"
+          [formField]="quickAccessForm.backgroundColor"
+        />
       </div>
 
       <div hlmField>

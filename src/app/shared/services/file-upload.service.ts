@@ -7,6 +7,7 @@ type FileContext =
   | 'hero-slides'
   | 'featured-banners'
   | 'landing-notices'
+  | 'quick-accesses'
   | 'documents'
   | 'communications'
   | 'tutorials';
@@ -52,6 +53,10 @@ export class FileUploadService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadResult>(`${this.URL}/${group}`, formData);
+  }
+
+  uploadQuickAccessImage(file: File) {
+    return this.upload(file, 'quick-accesses');
   }
 
   uploadFile(file: File, group: FileContext) {

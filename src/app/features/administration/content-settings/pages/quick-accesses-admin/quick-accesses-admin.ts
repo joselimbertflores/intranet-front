@@ -17,7 +17,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideCircleAlert,
+  lucideExternalLink,
   lucideGripVertical,
+  lucideImage,
   lucideMoreHorizontal,
   lucidePencil,
   lucidePlus,
@@ -42,10 +44,6 @@ import {
   PermissionAction,
   Resource,
 } from '../../../../../core/auth/auth.types';
-import {
-  QUICK_ACCESS_ICONS,
-  resolveQuickAccessIcon,
-} from '../../../../../shared/constants/quick-access-icons';
 import { QuickAccessEditor } from '../../dialogs';
 import { QuickAccessResponse } from '../../interfaces';
 import { ContentSettingsDataSource } from '../../services';
@@ -68,13 +66,14 @@ import { ContentSettingsDataSource } from '../../services';
   providers: [
     provideIcons({
       lucideCircleAlert,
+      lucideExternalLink,
       lucideGripVertical,
+      lucideImage,
       lucideMoreHorizontal,
       lucidePencil,
       lucidePlus,
       lucideRefreshCw,
       lucideTrash2,
-      ...QUICK_ACCESS_ICONS,
     }),
   ],
   templateUrl: './quick-accesses-admin.html',
@@ -120,7 +119,6 @@ export default class QuickAccessesAdmin {
   readonly quickAccessToDelete = signal<QuickAccessResponse | null>(null);
   readonly actionError = signal<string | null>(null);
   readonly skeletonItems = Array.from({ length: 5 });
-  readonly resolveIcon = resolveQuickAccessIcon;
 
   readonly canCreate = computed(() =>
     this.authDataSource.can(Resource.CONTENT, PermissionAction.CREATE),

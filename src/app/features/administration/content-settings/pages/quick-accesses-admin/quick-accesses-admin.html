@@ -78,7 +78,7 @@
       aria-hidden="true"
     >
       <span></span>
-      <span>Icono</span>
+      <span>Logo</span>
       <span>Acceso</span>
       <span>Estado</span>
       <span class="text-center">Posición</span>
@@ -156,11 +156,19 @@
             </button>
 
             <span
-              class="quick-access-icon-surface grid size-10 place-items-center rounded-lg border"
+              class="quick-access-logo-surface grid size-10 place-items-center rounded-lg border p-1.5"
               [style.--quick-access-color]="item.backgroundColor"
               aria-hidden="true"
             >
-              <ng-icon [name]="resolveIcon(item.iconKey)" />
+              @if (item.imageUrl) {
+                <img
+                  class="size-full object-contain"
+                  [src]="item.imageUrl"
+                  alt=""
+                />
+              } @else {
+                <ng-icon name="lucideImage" class="text-muted-foreground" />
+              }
             </span>
 
             <div class="min-w-0">

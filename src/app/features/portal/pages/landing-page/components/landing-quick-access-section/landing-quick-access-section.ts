@@ -32,7 +32,9 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           >
             Accesos rápidos
           </h2>
-          <p class="mx-auto mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg">
+          <p
+            class="mx-auto mt-2 max-w-3xl text-base leading-relaxed font-medium text-muted-foreground sm:text-lg"
+          >
             Accede a los sistemas y recursos institucionales de uso frecuente.
           </p>
         </div>
@@ -44,7 +46,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           aria-label="Accesos rápidos"
         >
           @for (item of items(); track item.id) {
-            <portal-quick-access-card [item]="item" />
+            <portal-quick-access-card [item]="item" [showDescription]="false" />
           }
         </nav>
 

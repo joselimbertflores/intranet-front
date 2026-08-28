@@ -1,9 +1,12 @@
 .quick-access-surface {
   --quick-access-color: var(--primary);
 
-  border-color: var(--border);
+  border-color: color-mix(in srgb, var(--foreground) 16%, var(--border));
   background-color: var(--card);
   color: var(--card-foreground);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--foreground) 7%, transparent),
+    0 0.5rem 1.5rem color-mix(in srgb, var(--foreground) 7%, transparent);
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -11,20 +14,30 @@
     transform 180ms ease;
 }
 
+.quick-access-surface::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.3125rem;
+  background: var(--quick-access-color);
+  content: "";
+}
+
 .quick-access-surface:hover {
   border-color: color-mix(
     in srgb,
-    var(--quick-access-color) 45%,
+    var(--quick-access-color) 55%,
     var(--border)
   );
   background-color: color-mix(
     in srgb,
-    var(--quick-access-color) 8%,
+    var(--quick-access-color) 10%,
     var(--card)
   );
-  box-shadow: 0 0.5rem 1.25rem
-    color-mix(in srgb, var(--quick-access-color) 24%, transparent);
-  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 2px 4px color-mix(in srgb, var(--foreground) 8%, transparent),
+    0 0.875rem 2rem
+      color-mix(in srgb, var(--quick-access-color) 14%, transparent);
+  transform: translateY(-2px);
 }
 
 .quick-access-surface:focus-visible {
@@ -32,29 +45,24 @@
   outline-offset: 3px;
 }
 
-.quick-access-icon-surface {
-  transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+.quick-access-external-indicator {
+  transition: color 180ms ease;
 }
 
-.quick-access-surface:hover .quick-access-icon-surface {
-  background-color: color-mix(
-    in srgb,
-    var(--quick-access-color) 25%,
-    var(--muted)
-  );
-  transform: scale(1.1) rotate(-3deg);
+.quick-access-surface:hover .quick-access-external-indicator {
+  color: color-mix(in srgb, var(--quick-access-color) 72%, var(--foreground));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quick-access-surface,
-  .quick-access-icon-surface {
+  .quick-access-surface {
     transition: none;
   }
 
-  .quick-access-surface:hover,
-  .quick-access-surface:hover .quick-access-icon-surface {
+  .quick-access-external-indicator {
+    transition: none;
+  }
+
+  .quick-access-surface:hover {
     transform: none;
   }
 }

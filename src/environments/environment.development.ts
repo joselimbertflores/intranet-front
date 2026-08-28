@@ -1,3 +1,3 @@
 export const environment = {
-  baseUrl: 'http://localhost:8100',
+  baseUrl: `http://${window.location.hostname}:8100`,
 };

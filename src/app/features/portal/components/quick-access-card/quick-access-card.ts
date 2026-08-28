@@ -12,9 +12,9 @@ import { QuickAccess } from '../../models';
   styleUrl: './quick-access-card.css',
   template: `
     <a
-      class="quick-access-surface relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border px-5 pt-8 pb-6 text-center no-underline"
-      [class.min-h-52]="!showDescription()"
-      [class.min-h-64]="showDescription()"
+      class="quick-access-surface relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border px-3 pt-7 pb-5 text-center no-underline sm:px-5 sm:pt-8 sm:pb-6"
+      [class.min-h-48]="!showDescription() || !item().description"
+      [class.min-h-64]="showDescription() && item().description"
       [href]="item().url"
       target="_blank"
       rel="noopener noreferrer"
@@ -29,7 +29,7 @@ import { QuickAccess } from '../../models';
       />
 
       <span
-        class="flex h-24 w-full items-center justify-center px-3"
+        class="quick-access-logo flex h-18 w-full items-center justify-center px-2 sm:h-24 sm:px-3"
         aria-hidden="true"
       >
         @if (item().imageUrl) {

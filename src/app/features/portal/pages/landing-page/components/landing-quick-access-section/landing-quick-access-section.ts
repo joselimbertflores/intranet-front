@@ -42,7 +42,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         <nav
           landingReveal
           [landingRevealDelay]="80"
-          class="mx-auto grid max-w-6xl auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          class="mx-auto grid max-w-6xl auto-rows-fr grid-cols-2 gap-4 xl:grid-cols-4"
           aria-label="Accesos rápidos"
         >
           @for (item of items(); track item.id) {

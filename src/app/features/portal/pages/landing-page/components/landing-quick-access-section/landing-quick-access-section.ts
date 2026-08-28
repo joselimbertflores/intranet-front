@@ -28,7 +28,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         <div landingReveal class="mb-8 text-center sm:mb-9">
           <h2
             id="quick-access-title"
-            class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
+            class="text-3xl leading-tight font-bold tracking-[-0.025em] text-primary sm:text-4xl"
           >
             Accesos rápidos
           </h2>

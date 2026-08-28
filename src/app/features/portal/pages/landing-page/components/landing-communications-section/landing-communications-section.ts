@@ -51,7 +51,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           <div>
             <h2
               id="communications-title"
-              class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
+              class="text-3xl leading-tight font-bold tracking-[-0.025em] text-primary sm:text-4xl"
             >
               Comunicados recientes
             </h2>
@@ -61,7 +61,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           </div>
           <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
             Ver todos los comunicados
-            <ng-icon name="lucideArrowRight" />
+            <ng-icon name="lucideArrowRight" data-icon="inline-end" />
           </a>
         </div>
 
@@ -105,7 +105,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                     <span class="font-medium text-muted-foreground">{{ communication.code }}</span>
                   }
                 </div>
-                <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-extrabold text-foreground">
+                <h3 class="mt-3 line-clamp-3 text-lg leading-snug font-semibold text-foreground">
                   {{ communication.reference }}
                 </h3>
                 <time class="mt-3 text-sm text-muted-foreground" [attr.datetime]="communication.createdAt">
@@ -115,7 +115,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                   [href]="communication.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                  class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Leer comunicado
                   <ng-icon name="lucideArrowUpRight" />

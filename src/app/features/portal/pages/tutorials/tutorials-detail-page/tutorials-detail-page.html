@@ -1,4 +1,4 @@
-<main class="min-h-[55vh] bg-muted/30 pb-16">
+<div class="min-h-[55vh] bg-muted/30 pb-16">
   <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <button
       hlmBtn
@@ -128,7 +128,7 @@
                 @case (blockType.YOUTUBE) {
                   @if (block.content | tutorialYoutubeUrl; as safeUrl) {
                     <div
-                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-foreground"
+                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-muted"
                     >
                       <iframe
                         class="size-full border-0"
@@ -144,7 +144,7 @@
                 @case (blockType.VIDEO_FILE) {
                   @if (block.file; as file) {
                     <div
-                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-foreground"
+                      class="mx-auto aspect-video w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-muted"
                     >
                       <video
                         class="size-full object-contain"
@@ -217,4 +217,4 @@
       </article>
     }
   </div>
-</main>
+</div>

@@ -7,11 +7,6 @@
 @import "@spartan-ng/brain/hlm-tailwind-preset.css";
 @plugin '@tailwindcss/typography';
 
-.font-display {
-  font-family: var(--font-sans);
-  font-weight: 750;
-}
-
 :root {
   color-scheme: light;
 

@@ -96,13 +96,13 @@ register();
                   <div class="max-w-3xl">
                     @if (index === 0) {
                       <h1
-                        class="hero-title font-display max-w-[18ch] text-balance"
+                        class="hero-title max-w-[18ch] text-balance font-bold"
                       >
                         {{ slide.title }}
                       </h1>
                     } @else {
                       <h2
-                        class="hero-title font-display max-w-[18ch] text-balance"
+                        class="hero-title max-w-[18ch] text-balance font-bold"
                       >
                         {{ slide.title }}
                       </h2>
@@ -126,7 +126,7 @@ register();
                             [routerLink]="url"
                           >
                             {{ slide.linkLabel }}
-                            <ng-icon name="lucideArrowRight" />
+                            <ng-icon name="lucideArrowRight" data-icon="inline-end" />
                           </a>
                         } @else {
                           <a
@@ -138,7 +138,7 @@ register();
                             rel="noopener noreferrer"
                           >
                             {{ slide.linkLabel }}
-                            <ng-icon name="lucideArrowUpRight" />
+                            <ng-icon name="lucideArrowUpRight" data-icon="inline-end" />
                           </a>
                         }
                       </div>
@@ -188,7 +188,7 @@ register();
           <div class="max-w-3xl">
             <h1
               id="landing-hero-fallback-title"
-              class="hero-title font-display max-w-[18ch] text-balance"
+              class="hero-title max-w-[18ch] text-balance font-bold"
             >
               Intranet institucional
             </h1>

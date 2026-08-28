@@ -1,6 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
@@ -25,6 +26,7 @@ type DirectoryLocation = PortalDirectorySiteResponse & {
   imports: [NgIcon],
   providers: [provideIcons({ lucideMapPinOff })],
   templateUrl: './directory-map.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DirectoryMap implements AfterViewInit, OnDestroy {
   private readonly document = inject(DOCUMENT);

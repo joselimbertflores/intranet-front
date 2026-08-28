@@ -30,7 +30,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           <div>
             <h2
               id="documents-title"
-              class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
+              class="text-3xl leading-tight font-bold tracking-[-0.025em] text-primary sm:text-4xl"
             >
               Documentos más descargados
             </h2>
@@ -40,7 +40,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           </div>
           <a hlmBtn variant="link" routerLink="/documents" class="w-fit">
             Ver más documentos
-            <ng-icon name="lucideArrowRight" />
+            <ng-icon name="lucideArrowRight" data-icon="inline-end" />
           </a>
         </div>
 
@@ -56,7 +56,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                   <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
                 </span>
                 <div class="min-w-0">
-                  <h3 class="line-clamp-2 text-sm leading-snug font-bold text-foreground sm:text-base">
+                  <h3 class="line-clamp-2 text-sm leading-snug font-semibold text-foreground sm:text-base">
                     {{ document.title }}
                   </h3>
                   <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
@@ -83,7 +83,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                 [attr.aria-label]="'Descargar ' + document.title"
               >
                 Descargar
-                <ng-icon name="lucideDownload" />
+                <ng-icon name="lucideDownload" data-icon="inline-end" />
               </a>
             </article>
           }

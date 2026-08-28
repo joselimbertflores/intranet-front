@@ -36,7 +36,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         100deg,
         color-mix(in oklch, var(--primary) 9%, var(--background)) 0%,
         color-mix(in oklch, var(--portal-mint) 42%, var(--background)) 54%,
-        color-mix(in oklch, var(--portal-amber) 93%, var(--color-orange-600)) 100%
+        color-mix(in oklch, var(--portal-amber) 93%, var(--landing-gold)) 100%
       );
     }
   `,

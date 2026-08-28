@@ -17,9 +17,9 @@
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2
             id="authorities-results-title"
-            class="text-sm font-semibold uppercase tracking-wide"
+            class="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
           >
-            AUTORIDADES
+            Autoridades
           </h2>
           <span class="text-sm text-muted-foreground" aria-live="polite">
             <span class="font-semibold text-foreground">
@@ -39,7 +39,7 @@
             type="search"
             autocomplete="off"
             maxlength="255"
-            placeholder="Buscar autoridades..."
+            placeholder="Buscar autoridades…"
             [value]="searchTerm()"
             [disabled]="!authoritiesResource.value()?.length"
             (input)="onSearchInput($event)"
@@ -49,7 +49,7 @@
 
       <div
         hlmTableContainer
-        class="rounded-lg border border-border bg-card"
+        class="rounded-xl border border-border bg-card shadow-sm"
       >
         <table
           hlmTable

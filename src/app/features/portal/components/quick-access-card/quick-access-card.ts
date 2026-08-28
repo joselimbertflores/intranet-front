@@ -51,7 +51,7 @@ import { QuickAccess } from '../../models';
 
       <span class="mt-5 flex min-w-0 flex-1 flex-col items-center">
         <span
-          class="line-clamp-2 wrap-break-word text-base leading-6 font-bold"
+          class="line-clamp-2 wrap-break-word text-base leading-6 font-semibold"
         >
           {{ item().title }}
         </span>

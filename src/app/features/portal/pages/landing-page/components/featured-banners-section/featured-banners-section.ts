@@ -46,7 +46,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         <header landingReveal class="max-w-xl lg:pb-12">
           <h2
             id="featured-banners-title"
-            class="font-display text-3xl leading-tight tracking-[-0.025em] text-primary sm:text-4xl"
+            class="text-3xl leading-tight font-bold tracking-[-0.025em] text-primary sm:text-4xl"
           >
             Información destacada
           </h2>
@@ -101,7 +101,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                       class="relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10"
                     >
                       <h3
-                        class="font-display max-w-[20ch] text-balance text-3xl leading-[1.06] tracking-[-0.025em] sm:text-4xl"
+                        class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-bold tracking-[-0.025em] sm:text-4xl"
                       >
                         {{ banner.title }}
                       </h3>
@@ -120,7 +120,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                           @if (isInternalUrl(url)) {
                             <a hlmBtn variant="secondary" [routerLink]="url">
                               {{ banner.linkLabel }}
-                              <ng-icon name="lucideArrowRight" />
+                              <ng-icon name="lucideArrowRight" data-icon="inline-end" />
                             </a>
                           } @else {
                             <a
@@ -131,7 +131,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                               rel="noopener noreferrer"
                             >
                               {{ banner.linkLabel }}
-                              <ng-icon name="lucideArrowUpRight" />
+                              <ng-icon name="lucideArrowUpRight" data-icon="inline-end" />
                             </a>
                           }
                         </div>

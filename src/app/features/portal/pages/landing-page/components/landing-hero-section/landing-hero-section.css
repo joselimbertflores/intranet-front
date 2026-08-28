@@ -121,11 +121,6 @@
   box-shadow: 0 7px 20px rgb(2 15 25 / 0.22);
 }
 
-.hero-side-control:active {
-  translate: none !important;
-  transform: translateY(-50%);
-}
-
 .hero-side-control:focus-visible {
   outline: 2px solid white;
   outline-offset: 3px;

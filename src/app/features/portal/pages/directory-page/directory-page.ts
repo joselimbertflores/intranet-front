@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -35,6 +41,7 @@ type DirectoryTab = 'directory' | 'map';
     }),
   ],
   templateUrl: './directory-page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DirectoryPage {
   private readonly dataSource = inject(PortalDirectoryDataSource);

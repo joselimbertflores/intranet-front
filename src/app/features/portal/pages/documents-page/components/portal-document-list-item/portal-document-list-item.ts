@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -23,6 +23,7 @@ export type DocumentViewMode = 'list' | 'grid';
   ],
   providers: [provideIcons({ lucideDownload })],
   templateUrl: './portal-document-list-item.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortalDocumentListItem {
   readonly document = input.required<PortalDocumentResponse>();

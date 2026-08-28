@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   linkedSignal,
   ElementRef,
   viewChild,
@@ -28,7 +29,6 @@ import {
   lucideList,
   lucideRefreshCw,
   lucideSearch,
-  lucideX,
 } from '@ng-icons/lucide';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -152,10 +152,10 @@ function mapOrganizationalUnits(
       lucideList,
       lucideRefreshCw,
       lucideSearch,
-      lucideX,
     }),
   ],
   templateUrl: './documents-page.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DocumentsPage {
   private readonly router = inject(Router);

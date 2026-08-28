@@ -1,4 +1,10 @@
-import { Component, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideContactRound,
@@ -36,6 +42,7 @@ import {
     }),
   ],
   templateUrl: './directory-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DirectoryList {
   readonly entries = input.required<readonly PortalDirectoryEntryResponse[]>();
@@ -57,7 +64,7 @@ export class DirectoryList {
       );
     });
   });
-  
+
   readonly hasActiveFilters = computed(
     () => this.searchTerm().trim().length > 0 || this.selectedSiteId() !== null,
   );

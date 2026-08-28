@@ -11,6 +11,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
   lucideCircleAlert,
+  lucideExternalLink,
   lucideRefreshCw,
   lucideSearch,
   lucideSearchX,
@@ -38,6 +39,7 @@ import { PortalLandingDataSource } from '../../services';
     provideIcons({
       lucideArrowLeft,
       lucideCircleAlert,
+      lucideExternalLink,
       lucideRefreshCw,
       lucideSearch,
       lucideSearchX,

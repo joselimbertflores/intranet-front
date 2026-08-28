@@ -66,7 +66,7 @@ register();
           <institutional-logo class="size-10 rounded-full bg-primary" />
           <h2
             hlmDialogTitle
-            class="font-display wrap-break-word text-xl tracking-[-0.02em] text-primary"
+            class="wrap-break-word text-xl font-bold tracking-[-0.02em] text-primary"
           >
             Avisos
           </h2>
@@ -77,7 +77,7 @@ register();
             class="max-h-[calc(90dvh-16rem)] w-full min-w-0 overflow-x-hidden overflow-y-auto px-1 pb-1"
           >
             <h3
-              class="font-display w-full min-w-0 max-w-[28ch] wrap-break-word text-balance text-2xl leading-tight tracking-[-0.02em] text-primary"
+              class="w-full min-w-0 max-w-[28ch] wrap-break-word text-balance text-2xl leading-tight font-bold tracking-[-0.02em] text-primary"
             >
               {{ notice.title }}
             </h3>

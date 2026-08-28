@@ -117,7 +117,7 @@
             @for (tutorial of response.tutorials; track tutorial.id) {
               <a
                 class="group flex min-h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-1 hover:border-primary/40 hover:bg-accent/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none motion-reduce:transition-none"
-                [routerLink]="['/tutorials', tutorial.slug]"
+                [routerLink]="['/tutoriales', tutorial.slug]"
                 [attr.aria-label]="'Abrir tutorial: ' + tutorial.title"
               >
                 <div class="h-32 overflow-hidden border-b border-border">

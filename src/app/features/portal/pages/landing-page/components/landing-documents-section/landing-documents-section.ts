@@ -38,7 +38,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
               Consulta y descarga los documentos más utilizados por los funcionarios municipales.
             </p>
           </div>
-          <a hlmBtn variant="link" routerLink="/documents" class="w-fit">
+          <a hlmBtn variant="link" routerLink="/documentos" class="w-fit">
             Ver más documentos
             <ng-icon name="lucideArrowRight" data-icon="inline-end" />
           </a>

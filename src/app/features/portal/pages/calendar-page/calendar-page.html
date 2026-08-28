@@ -166,7 +166,7 @@
                 <dd class="mt-2">
                   <p class="wrap-break-word text-sm font-medium">{{ communication.reference }}</p>
                   @if (communication.code) { <p class="mt-1 text-sm text-muted-foreground">Cite: {{ communication.code }}</p> }
-                  <a hlmBtn size="sm" variant="outline" class="mt-3" routerLink="/communications" [queryParams]="{ q: communication.reference }" (click)="closeDialog()">
+                  <a hlmBtn size="sm" variant="outline" class="mt-3" routerLink="/comunicados" [queryParams]="{ q: communication.reference }" (click)="closeDialog()">
                     Ver comunicado <ng-icon name="lucideExternalLink" data-icon="inline-end" />
                   </a>
                 </dd>

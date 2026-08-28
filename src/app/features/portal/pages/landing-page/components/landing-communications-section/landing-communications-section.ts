@@ -59,7 +59,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
               Mantente informado con las últimas comunicaciones institucionales.
             </p>
           </div>
-          <a hlmBtn variant="link" routerLink="/communications" class="w-fit">
+          <a hlmBtn variant="link" routerLink="/comunicados" class="w-fit">
             Ver todos los comunicados
             <ng-icon name="lucideArrowRight" data-icon="inline-end" />
           </a>

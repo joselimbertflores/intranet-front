@@ -53,9 +53,12 @@
       <label hlmFieldLabel for="tutorial-editor-category">
         Categoría (opcional)
       </label>
-      <hlm-select [formField]="tutorialForm.categoryId">
+      <hlm-select
+        [formField]="tutorialForm.categoryId"
+        [itemToString]="categoryToString"
+      >
         <hlm-select-trigger class="w-full" buttonId="tutorial-editor-category">
-          <hlm-select-value />
+          <hlm-select-value placeholder="Sin categoría" />
         </hlm-select-trigger>
         <hlm-select-content *hlmSelectPortal>
           <hlm-select-item [value]="null">Sin categoría</hlm-select-item>

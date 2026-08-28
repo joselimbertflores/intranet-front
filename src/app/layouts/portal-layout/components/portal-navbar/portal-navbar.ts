@@ -185,19 +185,19 @@ export class PortalNavbar {
     { label: 'Inicio', route: '/', exact: true, icon: 'lucideHome' },
     {
       label: 'Documentos',
-      route: '/documents',
+      route: '/documentos',
       exact: false,
       icon: 'lucideFileText',
     },
     {
       label: 'Comunicados',
-      route: '/communications',
+      route: '/comunicados',
       exact: false,
       icon: 'lucideMegaphone',
     },
     {
       label: 'Directorio',
-      route: '/directory',
+      route: '/directorio',
       exact: false,
       icon: 'lucideContactRound',
     },
@@ -209,13 +209,13 @@ export class PortalNavbar {
     },
     {
       label: 'Tutoriales',
-      route: '/tutorials',
+      route: '/tutoriales',
       exact: false,
       icon: 'lucideGraduationCap',
     },
     {
       label: 'Calendario',
-      route: '/calendar',
+      route: '/calendario',
       exact: false,
       icon: 'lucideCalendarDays',
     },

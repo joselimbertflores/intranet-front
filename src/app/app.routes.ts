@@ -13,42 +13,37 @@ export const routes: Routes = [
           import('./features/portal/pages/landing-page/landing-page'),
       },
       {
-        path: 'repository',
+        path: 'documentos',
         loadComponent: () =>
           import('./features/portal/pages/documents-page/documents-page'),
       },
       {
-        path: 'documents',
-        loadComponent: () =>
-          import('./features/portal/pages/documents-page/documents-page'),
-      },
-      {
-        path: 'communications',
+        path: 'comunicados',
         loadComponent: () =>
           import('./features/portal/pages/communications-page/communications-page'),
       },
       {
-        path: 'communications/:id',
+        path: 'comunicados/:id',
         loadComponent: () =>
           import('./features/portal/pages/communications-page/communications-page'),
       },
       {
-        path: 'calendar',
+        path: 'calendario',
         loadComponent: () =>
           import('./features/portal/pages/calendar-page/calendar-page'),
       },
       {
-        path: 'tutorials',
+        path: 'tutoriales',
         loadComponent: () =>
           import('./features/portal/pages/tutorials/tutorials-page/tutorials-page'),
       },
       {
-        path: 'tutorials/:slug',
+        path: 'tutoriales/:slug',
         loadComponent: () =>
           import('./features/portal/pages/tutorials/tutorials-detail-page/tutorials-detail-page'),
       },
       {
-        path: 'directory',
+        path: 'directorio',
         loadComponent: () =>
           import('./features/portal/pages/directory-page/directory-page'),
       },

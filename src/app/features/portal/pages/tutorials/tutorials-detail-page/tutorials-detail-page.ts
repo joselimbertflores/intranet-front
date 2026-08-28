@@ -56,8 +56,8 @@ export default class TutorialsDetailPage {
     this.router.lastSuccessfulNavigation()?.previousNavigation?.finalUrl?.toString() ??
     null;
   private readonly canReturnToTutorialList =
-    this.previousUrl === '/tutorials' ||
-    Boolean(this.previousUrl?.startsWith('/tutorials?'));
+    this.previousUrl === '/tutoriales' ||
+    Boolean(this.previousUrl?.startsWith('/tutoriales?'));
 
   readonly slug = input.required<string>();
   readonly blockType = TutorialBlockType;
@@ -75,6 +75,6 @@ export default class TutorialsDetailPage {
       this.location.back();
       return;
     }
-    void this.router.navigate(['/tutorials']);
+    void this.router.navigate(['/tutoriales']);
   }
 }

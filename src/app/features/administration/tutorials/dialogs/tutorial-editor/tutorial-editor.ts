@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   signal,
@@ -90,6 +91,19 @@ export class TutorialEditor {
   readonly categoriesResource = rxResource({
     stream: () => this.categoryDataSource.findAll(),
   });
+  readonly categoryNames = computed(
+    () =>
+      new Map(
+        (this.categoriesResource.value() ?? []).map(({ id, name }) => [
+          id,
+          name,
+        ]),
+      ),
+  );
+  readonly categoryToString = (categoryId: number | null): string =>
+    categoryId === null
+      ? 'Sin categoría'
+      : (this.categoryNames().get(categoryId) ?? '');
   readonly selectedCoverImage = signal<File | null>(null);
   readonly coverImagePreview = signal<string | null>(
     this.tutorial?.coverImageUrl ?? null,

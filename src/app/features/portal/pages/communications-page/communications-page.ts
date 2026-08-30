@@ -19,7 +19,6 @@ import {
   lucideFileSearch,
   lucideRefreshCw,
   lucideSearch,
-  lucideX,
 } from '@ng-icons/lucide';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -71,7 +70,6 @@ const PAGE_SIZE = 10;
       lucideFileSearch,
       lucideRefreshCw,
       lucideSearch,
-      lucideX,
     }),
   ],
   templateUrl: './communications-page.html',
@@ -186,11 +184,6 @@ export default class CommunicationsPage {
   onSearchInput(event: Event): void {
     const input = event.target;
     if (input instanceof HTMLInputElement) this.searchTerm.set(input.value);
-  }
-
-  clearSearch(): void {
-    this.searchTerm.set('');
-    this.navigateToState({ ...this.queryState(), term: '', page: 1 }, true);
   }
 
   changeType(typeId: number | null | undefined): void {

@@ -23,18 +23,21 @@
 
       @if (directoryResource.error()) {
         <div
-          class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+          class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
           role="alert"
         >
-          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-
-          <h2 class="mt-4 text-lg font-semibold">
-            No se pudo cargar el directorio
-          </h2>
-
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">
-            Verifica la conexión e intenta nuevamente.
-          </p>
+          <ng-icon
+            name="lucideCircleAlert"
+            size="1.25rem"
+            class="mt-0.5 shrink-0 text-destructive"
+          />
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <h2 class="font-semibold">No se pudo cargar el directorio</h2>
+            <p class="text-sm text-muted-foreground">
+              Ocurrió un problema al obtener la información. Intente nuevamente
+              más tarde.
+            </p>
+          </div>
         </div>
       } @else if (activeTab() === "directory") {
         <div hlmTabsContent="directory">

@@ -20,7 +20,6 @@ import {
   lucideGraduationCap,
   lucideRefreshCw,
   lucideSearch,
-  lucideX,
 } from '@ng-icons/lucide';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -72,7 +71,6 @@ const PAGE_SIZE = 12;
       lucideGraduationCap,
       lucideRefreshCw,
       lucideSearch,
-      lucideX,
     }),
   ],
   templateUrl: './tutorials-page.html',
@@ -182,11 +180,6 @@ export default class TutorialsPage {
   onSearchInput(event: Event): void {
     const input = event.target;
     if (input instanceof HTMLInputElement) this.searchTerm.set(input.value);
-  }
-
-  clearSearch(): void {
-    this.searchTerm.set('');
-    this.navigateToState({ ...this.queryState(), term: '', page: 1 }, true);
   }
 
   filterByCategory(category: string | null | undefined): void {

@@ -15,7 +15,6 @@ import {
   lucideRefreshCw,
   lucideSearch,
   lucideSearchX,
-  lucideX,
 } from '@ng-icons/lucide';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputGroupImports } from '@spartan-ng/helm/input-group';
@@ -43,7 +42,6 @@ import { PortalLandingDataSource } from '../../services';
       lucideRefreshCw,
       lucideSearch,
       lucideSearchX,
-      lucideX,
     }),
   ],
   host: { class: 'block' },

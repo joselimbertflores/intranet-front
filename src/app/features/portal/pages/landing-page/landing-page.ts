@@ -6,9 +6,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideRefreshCw } from '@ng-icons/lucide';
-import { HlmAlertImports } from '@spartan-ng/helm/alert';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { lucideCircleAlert } from '@ng-icons/lucide';
 
 import { PortalLandingResponse } from '../../models';
 import { PortalLandingDataSource } from '../../services';
@@ -35,8 +33,6 @@ const EMPTY_LANDING_RESPONSE: PortalLandingResponse = {
   selector: 'landing-page',
   imports: [
     FeaturedBannersSection,
-    HlmAlertImports,
-    HlmButtonImports,
     LandingCommunicationsSection,
     LandingDocumentsSection,
     LandingHeroSection,
@@ -45,7 +41,7 @@ const EMPTY_LANDING_RESPONSE: PortalLandingResponse = {
     LandingSkeleton,
     NgIcon,
   ],
-  providers: [provideIcons({ lucideRefreshCw })],
+  providers: [provideIcons({ lucideCircleAlert })],
   host: { class: 'block min-h-full bg-background text-foreground' },
   templateUrl: './landing-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

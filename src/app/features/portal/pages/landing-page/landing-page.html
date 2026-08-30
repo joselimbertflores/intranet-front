@@ -1,22 +1,30 @@
 @if (landingResource.isLoading()) {
   <landing-skeleton />
 } @else if (landingResource.error()) {
-  <section class="grid min-h-120 place-items-center px-5 py-20">
-    <div hlmAlert variant="destructive" class="max-w-xl">
-      <ng-icon name="lucideRefreshCw" />
-      <h1 hlmAlertTitle>No pudimos cargar la intranet</h1>
-      <p hlmAlertDescription>Verifica tu conexión e intenta nuevamente.</p>
-      <div class="mt-4">
-        <button
-          hlmBtn
-          type="button"
-          variant="outline"
-          (click)="landingResource.reload()"
-        >
-          <ng-icon name="lucideRefreshCw" data-icon="inline-start" />
-          Intentar de nuevo
-        </button>
-      </div>
+  <section
+    class="mx-auto grid min-h-[55vh] w-full max-w-7xl place-items-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
+    role="alert"
+    aria-labelledby="landing-error-title"
+  >
+    <div class="flex max-w-lg flex-col items-center text-center">
+      <span
+        class="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <ng-icon name="lucideCircleAlert" size="1.5rem" />
+      </span>
+      <h1
+        id="landing-error-title"
+        class="mt-5 text-xl font-semibold tracking-tight sm:text-2xl"
+      >
+        No se pudo cargar el contenido
+      </h1>
+      <p
+        class="mt-2 max-w-md text-sm leading-6 text-muted-foreground sm:text-base"
+      >
+        Ocurrió un problema al obtener la información. Intente nuevamente más
+        tarde.
+      </p>
     </div>
   </section>
 } @else {

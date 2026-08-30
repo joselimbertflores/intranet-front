@@ -24,13 +24,15 @@
       </header>
 
       @if (eventsResource.error()) {
-        <div class="flex min-h-96 flex-col items-center justify-center px-6 py-12 text-center" role="alert">
-          <ng-icon name="lucideCircleAlert" class="text-3xl text-destructive" />
-          <h3 class="mt-4 text-lg font-semibold">No se pudieron cargar los eventos</h3>
-          <p class="mt-1 max-w-md text-sm text-muted-foreground">Verifica la conexión e intenta nuevamente.</p>
-          <button hlmBtn type="button" variant="outline" class="mt-5" (click)="eventsResource.reload()">
-            <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
-          </button>
+        <div class="flex items-start gap-3 p-5 sm:p-6" role="alert">
+          <ng-icon name="lucideCircleAlert" size="1.25rem" class="mt-0.5 shrink-0 text-destructive" />
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <h3 class="font-semibold">No se pudieron cargar los eventos</h3>
+            <p class="text-sm text-muted-foreground">Ocurrió un problema al obtener la información. Intente nuevamente más tarde.</p>
+            <button hlmBtn type="button" size="sm" variant="outline" class="mt-3 w-fit" (click)="eventsResource.reload()">
+              <ng-icon name="lucideRefreshCw" data-icon="inline-start" /> Reintentar
+            </button>
+          </div>
         </div>
       } @else if (isInitialLoading()) {
         <div class="p-4 sm:p-5" aria-label="Cargando calendario">

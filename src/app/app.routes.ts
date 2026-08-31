@@ -9,41 +9,49 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        title: 'Intranet institucional',
         loadComponent: () =>
           import('./features/portal/pages/landing-page/landing-page'),
       },
       {
         path: 'documentos',
+        title: 'Documentos',
         loadComponent: () =>
           import('./features/portal/pages/documents-page/documents-page'),
       },
       {
         path: 'comunicados',
+        title: 'Comunicados',
         loadComponent: () =>
           import('./features/portal/pages/communications-page/communications-page'),
       },
       {
         path: 'comunicados/:id',
+        title: 'Detalle del comunicado',
         loadComponent: () =>
           import('./features/portal/pages/communications-page/communications-page'),
       },
       {
         path: 'calendario',
+        title: 'Calendario',
         loadComponent: () =>
           import('./features/portal/pages/calendar-page/calendar-page'),
       },
       {
         path: 'tutoriales',
+        title: 'Tutoriales',
         loadComponent: () =>
           import('./features/portal/pages/tutorials/tutorials-page/tutorials-page'),
       },
       {
         path: 'tutoriales/:slug',
+        title: 'Detalle del tutorial',
         loadComponent: () =>
           import('./features/portal/pages/tutorials/tutorials-detail-page/tutorials-detail-page'),
       },
       {
         path: 'directorio',
+        title: 'Directorio institucional',
         loadComponent: () =>
           import('./features/portal/pages/directory-page/directory-page'),
       },

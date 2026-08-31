@@ -96,21 +96,15 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
 
     .documents-skeleton {
       --accent: color-mix(in srgb, var(--color-white) 18%, transparent);
-      background:
-        radial-gradient(
-          circle at 88% 8%,
-          color-mix(in oklch, var(--landing-gold) 15%, transparent),
-          transparent 27%
+      background: linear-gradient(
+        118deg,
+        color-mix(
+          in oklch,
+          var(--landing-emerald) 64%,
+          var(--landing-forest)
         ),
-        linear-gradient(
-          118deg,
-          color-mix(
-            in oklch,
-            var(--landing-emerald) 64%,
-            var(--landing-forest)
-          ),
-          color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest))
-        );
+        color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest))
+      );
     }
 
     .communications-skeleton {

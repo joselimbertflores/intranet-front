@@ -50,13 +50,17 @@ import { LandingReveal } from '../../scroll-reveal.directive';
           class="documents-list overflow-hidden rounded-2xl border text-card-foreground shadow-sm"
         >
           @for (document of visibleDocuments(); track document.id) {
-            <article class="document-row grid gap-4 border-b p-4 transition-colors last:border-b-0 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <article class="document-row group grid gap-4 border-b p-4 transition-colors duration-200 last:border-b-0 motion-reduce:transition-none md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
               <div class="flex min-w-0 items-center gap-4">
-                <span class="document-icon grid size-11 shrink-0 place-items-center rounded-xl" aria-hidden="true">
-                  <file-icon [fileName]="document.file.name" [mimeType]="document.file.mimeType" />
+                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground motion-reduce:transition-none" aria-hidden="true">
+                  <file-icon
+                    class="group-hover:text-primary-foreground"
+                    [fileName]="document.file.name"
+                    [mimeType]="document.file.mimeType"
+                  />
                 </span>
                 <div class="min-w-0">
-                  <h3 class="line-clamp-2 text-sm leading-snug font-semibold text-foreground sm:text-base">
+                  <h3 class="line-clamp-2 text-sm leading-snug font-semibold text-foreground transition-colors duration-200 group-hover:text-primary motion-reduce:transition-none sm:text-base">
                     {{ document.title }}
                   </h3>
                   <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
@@ -95,17 +99,11 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     .documents-section {
       position: relative;
       overflow: hidden;
-      background:
-        radial-gradient(
-          circle at 88% 8%,
-          color-mix(in oklch, var(--landing-gold) 15%, transparent),
-          transparent 27%
-        ),
-        linear-gradient(
-          118deg,
-          color-mix(in oklch, var(--landing-emerald) 64%, var(--landing-forest)) 0%,
-          color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest)) 100%
-        );
+      background: linear-gradient(
+        118deg,
+        color-mix(in oklch, var(--landing-emerald) 64%, var(--landing-forest)) 0%,
+        color-mix(in oklch, var(--landing-teal) 76%, var(--landing-forest)) 100%
+      );
     }
 
     .documents-heading {
@@ -121,8 +119,10 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     .documents-list {
       border-color: color-mix(in srgb, var(--color-white) 24%, transparent);
       background: var(--card);
-      box-shadow: 0 26px 64px -42px
-        color-mix(in oklch, var(--landing-forest) 82%, transparent);
+      box-shadow:
+        0 8px 18px -12px rgb(2 31 23 / 0.42),
+        0 2rem 4.5rem -2.3rem
+          color-mix(in oklch, var(--landing-forest) 92%, transparent);
     }
 
     .document-row {
@@ -130,13 +130,9 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     }
 
     .document-row:hover {
-      background: var(--muted);
+      background: color-mix(in srgb, var(--primary) 13%, var(--card));
     }
 
-    .document-icon {
-      color: var(--primary);
-      background: var(--muted);
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

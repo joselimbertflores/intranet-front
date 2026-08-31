@@ -12,7 +12,6 @@ import {
   lucideArrowUpRight,
   lucideImageOff,
 } from '@ng-icons/lucide';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCarouselImports } from '@spartan-ng/helm/carousel';
 
 import { FeaturedBanner } from '../../../../models';
@@ -21,7 +20,6 @@ import { LandingReveal } from '../../scroll-reveal.directive';
 @Component({
   selector: 'featured-banners-section',
   imports: [
-    HlmButtonImports,
     HlmCarouselImports,
     LandingReveal,
     NgIcon,
@@ -41,7 +39,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
       aria-labelledby="featured-banners-title"
     >
       <div
-        class="relative mx-auto grid w-full max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[minmax(13rem,0.7fr)_minmax(0,1.8fr)] lg:items-center lg:gap-12"
+        class="featured-banners-shell relative mx-auto grid w-full max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[minmax(13rem,0.7fr)_minmax(0,1.8fr)] lg:items-center lg:gap-12"
       >
         <header landingReveal class="max-w-xl lg:pb-12">
           <h2
@@ -61,22 +59,23 @@ import { LandingReveal } from '../../scroll-reveal.directive';
         <div landingReveal [landingRevealDelay]="80" class="min-w-0">
           <hlm-carousel
             #bannerCarousel
-            class="w-full"
+            class="w-full [&>div[emblacarousel]]:px-6 [&>div[emblacarousel]]:pt-10 [&>div[emblacarousel]]:pb-12 sm:[&>div[emblacarousel]]:px-8 lg:[&>div[emblacarousel]]:px-10"
             aria-label="Carrusel de banners destacados"
             [options]="carouselOptions()"
           >
-            <hlm-carousel-content class="ml-0 gap-4 sm:gap-6">
+            <hlm-carousel-content class="sm:-ml-6">
               @for (banner of items(); track banner.id) {
-                <hlm-carousel-item class="pl-0">
+                <hlm-carousel-item class="sm:pl-6">
                   <article
                     class="featured-banner group relative h-[21rem] overflow-hidden rounded-3xl text-white sm:h-[24rem] lg:h-[26rem]"
+                    [class.featured-banner-interactive]="banner.linkLabel && validUrl(banner.linkUrl)"
                   >
                     @if (!failedImages().has(banner.id)) {
                       <img
                         [src]="banner.imageUrl"
                         loading="lazy"
                         decoding="async"
-                        class="featured-banner-photo absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:transform-none"
+                        class="featured-banner-photo absolute inset-0 size-full object-cover"
                         [alt]="banner.title"
                         (error)="markImageAsFailed(banner.id)"
                       />
@@ -98,7 +97,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                       aria-hidden="true"
                     ></div>
                     <div
-                      class="relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10"
+                      class="featured-banner-copy relative flex h-full max-w-2xl flex-col justify-end p-6 sm:p-8 lg:p-10"
                     >
                       <h3
                         class="max-w-[20ch] text-balance text-3xl leading-[1.06] font-bold tracking-[-0.025em] sm:text-4xl"
@@ -117,26 +116,34 @@ import { LandingReveal } from '../../scroll-reveal.directive';
                         as url
                       ) {
                         <div class="mt-5">
-                          @if (isInternalUrl(url)) {
-                            <a hlmBtn variant="secondary" [routerLink]="url">
-                              {{ banner.linkLabel }}
-                              <ng-icon name="lucideArrowRight" data-icon="inline-end" />
-                            </a>
-                          } @else {
-                            <a
-                              hlmBtn
-                              variant="secondary"
-                              [href]="url"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {{ banner.linkLabel }}
-                              <ng-icon name="lucideArrowUpRight" data-icon="inline-end" />
-                            </a>
-                          }
+                          <span class="featured-banner-action inline-flex h-10 items-center gap-2 rounded-md bg-white/94 px-4 text-sm font-semibold text-(--landing-forest) shadow-sm">
+                            {{ banner.linkLabel }}
+                            <ng-icon
+                              [name]="isInternalUrl(url) ? 'lucideArrowRight' : 'lucideArrowUpRight'"
+                              aria-hidden="true"
+                            />
+                          </span>
                         </div>
                       }
                     </div>
+
+                    @if (banner.linkLabel && validUrl(banner.linkUrl); as url) {
+                      @if (isInternalUrl(url)) {
+                        <a
+                          class="featured-banner-link absolute inset-0 z-10 rounded-3xl outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-white"
+                          [routerLink]="url"
+                          [attr.aria-label]="banner.linkLabel + ': ' + banner.title"
+                        ></a>
+                      } @else {
+                        <a
+                          class="featured-banner-link absolute inset-0 z-10 rounded-3xl outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-white"
+                          [href]="url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="banner.linkLabel + ': ' + banner.title + ' (abre en una nueva pestaña)'"
+                        ></a>
+                      }
+                    }
                   </article>
                 </hlm-carousel-item>
               }
@@ -192,57 +199,121 @@ import { LandingReveal } from '../../scroll-reveal.directive';
   styles: `
     .featured-banners-section {
       position: relative;
+      isolation: isolate;
       background:
         radial-gradient(
-          circle at 12% 16%,
-          color-mix(in oklch, var(--landing-emerald) 16%, transparent),
-          transparent 28%
+          ellipse at 13% 12%,
+          color-mix(in srgb, var(--primary) 13%, transparent) 0%,
+          transparent 31%
+        ),
+        radial-gradient(
+          ellipse at 88% 92%,
+          color-mix(in srgb, var(--landing-teal) 11%, transparent) 0%,
+          transparent 30%
         ),
         linear-gradient(
           118deg,
-          color-mix(in oklch, var(--landing-emerald) 11%, var(--background)) 0%,
-          color-mix(in oklch, var(--landing-teal) 14%, var(--background)) 54%,
-          color-mix(in oklch, var(--landing-gold) 24%, var(--landing-cream))
-            100%
+          color-mix(in srgb, var(--primary) 10%, var(--background)) 0%,
+          color-mix(in srgb, var(--portal-mint) 58%, var(--background)) 48%,
+          color-mix(in srgb, var(--landing-teal) 9%, var(--background)) 100%
         );
     }
 
-    .featured-banners-section::before {
+    .featured-banners-section::before,
+    .featured-banners-section::after {
       position: absolute;
-      bottom: -13rem;
-      left: -11rem;
-      width: 25rem;
-      height: 25rem;
+      z-index: -1;
       border: 1px solid
-        color-mix(in oklch, var(--landing-teal) 24%, transparent);
-      border-radius: 9999px;
-      box-shadow: 0 0 0 4.5rem
-        color-mix(in oklch, var(--landing-emerald) 5%, transparent);
+        color-mix(in srgb, var(--primary) 22%, transparent);
+      border-radius: 50%;
       content: '';
       pointer-events: none;
     }
 
+    .featured-banners-section::before {
+      bottom: -25rem;
+      left: -14rem;
+      width: 38rem;
+      height: 38rem;
+      box-shadow:
+        0 0 0 4.5rem
+          color-mix(in srgb, var(--primary) 5%, transparent),
+        0 0 0 9rem
+          color-mix(in srgb, var(--landing-teal) 3%, transparent);
+    }
+
     .featured-banners-section::after {
-      position: absolute;
-      top: 1.5rem;
-      right: 2.5rem;
-      width: 10rem;
-      height: 7rem;
-      background-image: radial-gradient(
-        circle,
-        color-mix(in oklch, var(--landing-gold) 42%, transparent) 1px,
-        transparent 1.5px
+      top: -17rem;
+      right: -12rem;
+      width: 31rem;
+      height: 25rem;
+      border-color: color-mix(
+        in srgb,
+        var(--landing-teal) 20%,
+        transparent
       );
-      background-size: 1rem 1rem;
-      content: '';
-      opacity: 0.55;
-      pointer-events: none;
+      transform: rotate(-12deg);
+    }
+
+    .featured-banners-shell {
+      z-index: 1;
     }
 
     .featured-banner {
       background: var(--landing-forest);
-      box-shadow: 0 28px 60px -36px
-        color-mix(in oklch, var(--landing-teal) 52%, transparent);
+      box-shadow:
+        0 8px 18px -12px rgb(2 31 23 / 0.48),
+        0 1.75rem 3.75rem -2rem
+          color-mix(in oklch, var(--landing-teal) 58%, transparent);
+      transition:
+        box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .featured-banner-photo {
+      transition:
+        filter 520ms ease,
+        transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .featured-banner-copy,
+    .featured-banner-action {
+      transition-duration: 400ms;
+      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .featured-banner-copy {
+      transition-property: transform;
+    }
+
+    .featured-banner-action {
+      transition-property: background-color, box-shadow, transform;
+    }
+
+    .featured-banner-interactive:is(:hover, :focus-within) {
+      box-shadow:
+        0 16px 30px -15px rgb(2 31 23 / 0.64),
+        0 2.4rem 4.5rem -1.7rem
+          color-mix(in oklch, var(--landing-teal) 82%, transparent);
+      transform: translateY(-0.3rem) scale(1.006);
+    }
+
+    .featured-banner-interactive:is(:hover, :focus-within)
+      .featured-banner-photo {
+      filter: saturate(1.08) contrast(1.07) brightness(0.92);
+      transform: scale(1.085);
+    }
+
+    .featured-banner-interactive:is(:hover, :focus-within)
+      .featured-banner-copy {
+      transform: translateY(-0.3rem);
+    }
+
+    .featured-banner-interactive:is(:hover, :focus-within)
+      .featured-banner-action {
+      background: white;
+      box-shadow: 0 0.75rem 1.8rem -0.9rem rgb(2 31 23 / 0.68);
+      transform: translateX(0.25rem);
     }
 
     .featured-banner-photo {
@@ -264,13 +335,7 @@ import { LandingReveal } from '../../scroll-reveal.directive';
     }
 
     .image-fallback {
-      background:
-        radial-gradient(
-          circle at 78% 25%,
-          rgb(255 255 255 / 0.13),
-          transparent 24%
-        ),
-        linear-gradient(135deg, #087a43, #06334a);
+      background: linear-gradient(135deg, #087a43, #06334a);
     }
 
     .banner-indicator {
@@ -286,9 +351,22 @@ import { LandingReveal } from '../../scroll-reveal.directive';
       background: var(--primary);
     }
 
-    @media (max-width: 639px) {
-      .featured-banners-section::after {
-        display: none;
+    @media (prefers-reduced-motion: reduce) {
+      .featured-banner,
+      .featured-banner-photo,
+      .featured-banner-copy,
+      .featured-banner-action {
+        transition: none;
+      }
+
+      .featured-banner-interactive:is(:hover, :focus-within),
+      .featured-banner-interactive:is(:hover, :focus-within)
+        .featured-banner-photo,
+      .featured-banner-interactive:is(:hover, :focus-within)
+        .featured-banner-copy,
+      .featured-banner-interactive:is(:hover, :focus-within)
+        .featured-banner-action {
+        transform: none;
       }
     }
   `,

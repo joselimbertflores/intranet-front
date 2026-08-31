@@ -5,7 +5,7 @@
   />
 
   <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-    <section class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5" aria-label="Búsqueda y filtros de tutoriales">
+    <section class="rounded-2xl border border-border/80 bg-card p-4 shadow-md shadow-foreground/5 sm:p-5" aria-label="Búsqueda y filtros de tutoriales">
       <form class="grid gap-4 md:grid-cols-[minmax(0,1fr)_18rem_auto] md:items-end" [formRoot]="filtersForm" (submit)="$event.preventDefault()">
         <div hlmField>
           <label hlmFieldLabel for="tutorial-search">Buscar tutoriales</label>
@@ -75,7 +75,7 @@
       </div>
 
       @if (categoriesResource.error()) {
-        <div class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5" role="alert">
+        <div class="flex items-start gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 sm:p-5" role="alert">
           <ng-icon name="lucideCircleAlert" size="1.25rem" class="mt-0.5 shrink-0 text-destructive" />
           <div class="flex min-w-0 flex-1 flex-col gap-1">
             <h2 class="font-semibold">No se pudieron preparar los tutoriales</h2>
@@ -88,7 +88,7 @@
       } @else if (isInitialLoading()) {
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-label="Cargando tutoriales">
           @for (_ of skeletonCards; track $index) {
-            <article class="overflow-hidden rounded-xl border border-border bg-card">
+            <article class="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm shadow-foreground/5">
               <div hlmSkeleton class="h-32 w-full rounded-none"></div>
               <div class="flex flex-col gap-4 p-5">
                 <div class="flex justify-between gap-3"><div hlmSkeleton class="h-5 w-28"></div><div hlmSkeleton class="h-4 w-20"></div></div>
@@ -100,7 +100,7 @@
           }
         </div>
       } @else if (tutorialsResource.error()) {
-        <div class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5" role="alert">
+        <div class="flex items-start gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 sm:p-5" role="alert">
           <ng-icon name="lucideCircleAlert" size="1.25rem" class="mt-0.5 shrink-0 text-destructive" />
           <div class="flex min-w-0 flex-1 flex-col gap-1">
             <h2 class="font-semibold">No se pudieron cargar los tutoriales</h2>
@@ -115,23 +115,21 @@
           <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @for (tutorial of response.tutorials; track tutorial.id) {
               <a
-                class="group flex min-h-full flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm outline-none transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-1 hover:border-primary/40 hover:bg-accent/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none motion-reduce:transition-none"
+                class="group flex min-h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card text-card-foreground shadow-sm shadow-foreground/5 outline-none transition-[transform,box-shadow,background-color,border-color] duration-300 ease-out hover:-translate-y-2 hover:border-primary/45 hover:bg-primary/7 hover:shadow-xl hover:shadow-primary/15 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none motion-reduce:transition-none"
                 [routerLink]="['/tutoriales', tutorial.slug]"
                 [attr.aria-label]="'Abrir tutorial: ' + tutorial.title"
               >
-                <div class="h-32 overflow-hidden border-b border-border">
+                <div class="h-32 overflow-hidden bg-muted/55">
                   @if (tutorial.coverImageUrl) {
                     <img
-                      class="size-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
+                      class="size-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.045] motion-reduce:transform-none motion-reduce:transition-none"
                       [src]="tutorial.coverImageUrl"
                       [alt]="'Portada de ' + tutorial.title"
                       loading="lazy"
                     />
                   } @else {
-                    <div class="relative grid size-full place-items-center overflow-hidden bg-primary/8 text-primary">
-                      <div class="absolute -right-8 -top-10 size-28 rounded-full border border-primary/15"></div>
-                      <div class="absolute -bottom-12 -left-8 size-32 rounded-full bg-primary/8"></div>
-                      <ng-icon name="lucideGraduationCap" class="relative text-4xl transition-transform duration-200 ease-out group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+                    <div class="grid size-full place-items-center bg-linear-to-br from-primary/14 via-primary/8 to-muted text-primary transition-colors duration-300 group-hover:from-primary/24 group-hover:via-primary/14 motion-reduce:transition-none">
+                      <ng-icon name="lucideGraduationCap" class="text-4xl transition-transform duration-300 ease-out group-hover:-rotate-3 group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
                     </div>
                   }
                 </div>
@@ -169,7 +167,7 @@
             (currentPageChange)="changePage($event)"
           />
         } @else {
-          <div class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center">
+          <div class="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-border/80 bg-card px-6 py-12 text-center shadow-sm shadow-foreground/5">
             <ng-icon [name]="hasActiveFilters() ? 'lucideBookOpen' : 'lucideGraduationCap'" class="text-3xl text-muted-foreground" />
             <h2 class="mt-4 text-lg font-semibold">{{ hasActiveFilters() ? "No hay coincidencias" : "No hay tutoriales publicados" }}</h2>
             <p class="mt-1 max-w-md text-sm text-muted-foreground">

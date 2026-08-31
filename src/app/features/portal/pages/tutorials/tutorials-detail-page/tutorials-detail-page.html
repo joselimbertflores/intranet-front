@@ -13,7 +13,7 @@
 
     @if (tutorial.isLoading() && !tutorial.hasValue()) {
       <article
-        class="overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-8"
+        class="overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-sm shadow-foreground/5 sm:p-8"
         aria-label="Cargando tutorial"
       >
         <div class="mx-auto flex w-full max-w-4xl flex-col gap-5">
@@ -26,7 +26,7 @@
       </article>
     } @else if (tutorial.error()) {
       <section
-        class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+        class="flex min-h-80 flex-col items-center justify-center rounded-2xl border border-border/80 bg-card px-6 py-12 text-center shadow-sm shadow-foreground/5"
         role="alert"
       >
         <ng-icon name="lucideFileText" class="text-3xl text-muted-foreground" />
@@ -63,9 +63,9 @@
       </section>
     } @else if (tutorial.value(); as item) {
       <article
-        class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+        class="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5"
       >
-        <header class="border-b border-border p-5 sm:p-8">
+        <header class="border-b border-border bg-primary/4 p-5 sm:p-8">
           <div class="mx-auto w-full max-w-4xl">
             <div class="flex flex-wrap items-center gap-3">
               @if (item.category) {
@@ -114,7 +114,7 @@
                 @case (blockType.IMAGE) {
                   @if (block.file; as file) {
                     <figure
-                      class="mx-auto w-full max-w-[60rem] overflow-hidden rounded-xl border border-border bg-muted/40"
+                      class="mx-auto w-full max-w-[60rem] overflow-hidden rounded-2xl bg-muted/40 shadow-sm shadow-foreground/10"
                     >
                       <img
                         class="h-auto w-full max-w-full object-contain"
@@ -160,7 +160,7 @@
                 @case (blockType.FILE) {
                   @if (block.file; as file) {
                     <div
-                      class="mx-auto flex w-full max-w-4xl min-w-0 flex-col gap-4 rounded-xl border border-border bg-muted/25 p-4 sm:flex-row sm:items-center"
+                      class="mx-auto flex w-full max-w-4xl min-w-0 flex-col gap-4 rounded-xl border border-border/80 bg-muted/25 p-4 transition-colors hover:bg-accent/55 motion-reduce:transition-none sm:flex-row sm:items-center"
                     >
                       <span
                         class="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"

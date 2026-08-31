@@ -49,7 +49,7 @@
 
       <div
         hlmTableContainer
-        class="rounded-xl border border-border bg-card shadow-sm"
+        class="rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5"
       >
         <table
           hlmTable
@@ -124,7 +124,7 @@
               </tr>
             } @else if (filteredAuthorities().length) {
               @for (authority of filteredAuthorities(); track $index) {
-                <tr hlmTableRow>
+                <tr hlmTableRow class="transition-colors hover:bg-accent/70 motion-reduce:transition-none">
                   <td
                     hlmTableCell
                     class="whitespace-normal px-4 py-3 align-top font-medium"

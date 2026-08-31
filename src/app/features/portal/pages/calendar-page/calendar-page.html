@@ -5,7 +5,7 @@
   />
 
   <section class="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8" aria-labelledby="calendar-title">
-    <div class="rounded-xl border border-border bg-card shadow-sm">
+    <div class="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5">
       <header class="flex flex-col gap-4 border-b border-border p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex min-w-0 items-center justify-between gap-3 lg:justify-start">
           <div class="flex items-center gap-1">
@@ -71,7 +71,7 @@
                     @for (event of day.events.slice(0, 3); track event.id) {
                       <button
                         type="button"
-                        class="calendar-event min-w-0 rounded-md border px-1.5 py-1 text-left text-[0.68rem] leading-tight outline-none transition-colors hover:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:text-xs"
+                        class="calendar-event min-w-0 rounded-md border px-1.5 py-1 text-left text-[0.68rem] leading-tight outline-none transition-[background-color,box-shadow] hover:bg-accent/70 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:text-xs"
                         [attr.data-event-color]="eventColor(event)"
                         [attr.aria-label]="event.title + ', ' + eventTime(event)"
                         (click)="openEvent(event)"
@@ -106,7 +106,7 @@
                     <h3 [id]="'agenda-' + group.key" class="mb-2 text-sm font-semibold capitalize text-primary">{{ group.label }}</h3>
                     <div class="overflow-hidden rounded-xl border border-border">
                       @for (event of group.events; track event.id) {
-                        <button type="button" class="group flex w-full min-w-0 items-start gap-3 border-b border-border bg-background p-3 text-left outline-none transition-colors last:border-b-0 hover:bg-muted/50 focus-visible:bg-accent/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-4" (click)="openEvent(event)">
+                        <button type="button" class="group flex w-full min-w-0 items-start gap-3 border-b border-border bg-background p-3 text-left outline-none transition-colors last:border-b-0 hover:bg-accent/70 focus-visible:bg-accent/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none sm:p-4" (click)="openEvent(event)">
                           <span class="calendar-event mt-0.5 size-3 shrink-0 rounded-full border" [attr.data-event-color]="eventColor(event)"></span>
                           <span class="min-w-0 flex-1">
                             <span class="block wrap-break-word font-semibold leading-5 group-hover:text-primary">{{ event.title }}</span>

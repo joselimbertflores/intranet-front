@@ -8,7 +8,7 @@
     class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
     <section
-      class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      class="rounded-2xl border border-border/80 bg-card p-4 shadow-md shadow-foreground/5 sm:p-5"
       aria-label="Búsqueda y filtros de comunicados"
     >
       <form
@@ -132,7 +132,7 @@
 
       @if (typesResource.error()) {
         <div
-          class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+          class="flex items-start gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 sm:p-5"
           role="alert"
         >
           <ng-icon
@@ -161,7 +161,7 @@
         </div>
       } @else if (isInitialLoading()) {
         <div
-          class="overflow-hidden rounded-xl border border-border bg-card"
+          class="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm shadow-foreground/5"
           aria-label="Cargando comunicados"
         >
           @for (_ of skeletonRows; track $index) {
@@ -180,7 +180,7 @@
         </div>
       } @else if (communicationResource.error()) {
         <div
-          class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+          class="flex items-start gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 sm:p-5"
           role="alert"
         >
           <ng-icon
@@ -210,7 +210,7 @@
       } @else if (communicationResource.value(); as response) {
         @if (response.communications.length) {
           <div
-            class="hidden overflow-hidden rounded-xl border border-border bg-card shadow-sm md:block"
+            class="hidden overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5 md:block"
           >
             <div hlmTableContainer>
               <table hlmTable class="table-fixed">
@@ -235,7 +235,7 @@
                     communication of response.communications;
                     track communication.id
                   ) {
-                    <tr hlmTr>
+                    <tr hlmTr class="transition-colors hover:bg-accent/70 motion-reduce:transition-none">
                       <td
                         hlmTd
                         class="px-4 py-4 align-top tabular-nums text-muted-foreground"
@@ -292,14 +292,14 @@
           </div>
 
           <div
-            class="overflow-hidden rounded-xl border border-border bg-card shadow-sm md:hidden"
+            class="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5 md:hidden"
           >
             @for (
               communication of response.communications;
               track communication.id
             ) {
               <article
-                class="flex min-w-0 flex-col gap-4 border-b border-border p-4 last:border-b-0"
+                class="flex min-w-0 flex-col gap-4 border-b border-border p-4 transition-colors last:border-b-0 hover:bg-accent/60 motion-reduce:transition-none"
               >
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <span hlmBadge variant="secondary">{{
@@ -352,7 +352,7 @@
           />
         } @else {
           <div
-            class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+            class="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-border/80 bg-card px-6 py-12 text-center shadow-sm shadow-foreground/5"
           >
             <ng-icon
               name="lucideFileSearch"

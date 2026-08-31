@@ -23,7 +23,7 @@
 
       @if (directoryResource.error()) {
         <div
-          class="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+          class="flex items-start gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 sm:p-5"
           role="alert"
         >
           <ng-icon
@@ -43,7 +43,7 @@
         <div hlmTabsContent="directory">
           @if (directoryResource.isLoading() && !directoryResource.hasValue()) {
             <div
-              class="flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4"
+              class="flex flex-col gap-3 overflow-hidden rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5"
               aria-label="Cargando directorio"
             >
               @for (_ of skeletonRows; track $index) {

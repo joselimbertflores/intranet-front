@@ -97,7 +97,7 @@ register();
                 </div>
               } @else {
                 <div
-                  class="mt-5 flex w-full min-w-0 max-w-full items-center justify-center overflow-hidden border-x border-border/60 bg-muted/30 px-3 sm:px-4"
+                  class="mt-5 flex w-full min-w-0 max-w-full items-center justify-center overflow-hidden bg-muted/30 px-3 sm:px-4"
                 >
                   @if (validUrl(notice.imageLinkUrl); as linkUrl) {
                     <a

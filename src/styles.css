@@ -144,16 +144,6 @@
     --tw-prose-th-borders: var(--border);
     --tw-prose-td-borders: var(--border);
   }
-
-  .quick-access-logo-surface {
-    border-color: color-mix(
-      in srgb,
-      var(--quick-access-color) 24%,
-      var(--border)
-    );
-    background: color-mix(in srgb, var(--quick-access-color) 14%, var(--muted));
-    color: color-mix(in srgb, var(--quick-access-color) 58%, var(--foreground));
-  }
 }
 
 .portal-shell {

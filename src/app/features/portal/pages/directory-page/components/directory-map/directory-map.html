@@ -1,13 +1,13 @@
 @if (locations().length) {
   <section
-    class="isolate overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+    class="isolate overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5"
     aria-label="Mapa de sedes"
   >
     <div #map class="h-[32rem] w-full sm:h-[38rem]"></div>
   </section>
 } @else {
   <div
-    class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+    class="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-border/80 bg-card px-6 py-12 text-center shadow-sm shadow-foreground/5"
   >
     <ng-icon name="lucideMapPinOff" class="text-3xl text-muted-foreground" />
     <h2 class="mt-4 text-lg font-semibold">No hay sedes con ubicación</h2>

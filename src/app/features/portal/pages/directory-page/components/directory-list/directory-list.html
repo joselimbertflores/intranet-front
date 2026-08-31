@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-6">
   <section
-    class="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+    class="rounded-2xl border border-border/80 bg-card p-4 shadow-md shadow-foreground/5 sm:p-5"
     aria-label="Búsqueda y filtros del directorio"
   >
     <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_26rem] md:items-end">
@@ -87,7 +87,7 @@
     @if (filteredEntries().length) {
       <div
         hlmTableContainer
-        class="hidden overflow-hidden rounded-xl border bg-card md:block"
+        class="hidden overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md shadow-foreground/5 md:block"
       >
         <table hlmTable>
           <thead hlmTableHeader>
@@ -99,7 +99,7 @@
           </thead>
           <tbody hlmTableBody>
             @for (entry of filteredEntries(); track entry.id) {
-              <tr hlmTableRow>
+              <tr hlmTableRow class="transition-colors hover:bg-accent/70 motion-reduce:transition-none">
                 <td
                   hlmTableCell
                   class="max-w-96 whitespace-normal px-4 py-3 align-top"
@@ -201,7 +201,7 @@
       <div class="grid gap-3 md:hidden">
         @for (entry of filteredEntries(); track entry.id) {
           <article
-            class="rounded-xl border border-border bg-card p-4 shadow-sm"
+            class="rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-foreground/5 transition-colors hover:bg-accent/60 motion-reduce:transition-none"
           >
             <div class="flex flex-col gap-1">
               @if (entry.contactLabel) {
@@ -295,7 +295,7 @@
       </div>
     } @else {
       <div
-        class="flex min-h-72 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center"
+        class="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-border/80 bg-card px-6 py-12 text-center shadow-sm shadow-foreground/5"
       >
         <ng-icon
           name="lucideContactRound"

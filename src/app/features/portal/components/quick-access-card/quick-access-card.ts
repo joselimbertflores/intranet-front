@@ -12,7 +12,7 @@ import { QuickAccess } from '../../models';
   styleUrl: './quick-access-card.css',
   template: `
     <a
-      class="quick-access-surface relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border px-3 pt-7 pb-5 text-center no-underline sm:px-5 sm:pt-8 sm:pb-6"
+      class="quick-access-surface relative isolate flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border px-3 pt-7 pb-5 text-center no-underline sm:px-5 sm:pt-8 sm:pb-6"
       [class.min-h-48]="!showDescription() || !item().description"
       [class.min-h-64]="showDescription() && item().description"
       [href]="item().url"
@@ -24,12 +24,12 @@ import { QuickAccess } from '../../models';
       <ng-icon
         name="lucideExternalLink"
         size="0.875rem"
-        class="quick-access-external-indicator absolute top-4 right-4 text-muted-foreground"
+        class="quick-access-external-indicator absolute top-4 right-4 z-10 text-muted-foreground"
         aria-hidden="true"
       />
 
       <span
-        class="quick-access-logo flex h-18 w-full items-center justify-center px-2 sm:h-24 sm:px-3"
+        class="quick-access-logo relative z-10 flex h-18 w-full items-center justify-center px-2 sm:h-24 sm:px-3"
         aria-hidden="true"
       >
         @if (item().imageUrl) {
@@ -49,9 +49,9 @@ import { QuickAccess } from '../../models';
         }
       </span>
 
-      <span class="mt-5 flex min-w-0 flex-1 flex-col items-center">
+      <span class="relative z-10 mt-5 flex min-w-0 flex-1 flex-col items-center">
         <span
-          class="line-clamp-2 wrap-break-word text-base leading-6 font-semibold"
+          class="quick-access-title line-clamp-2 wrap-break-word text-base leading-6 font-semibold"
         >
           {{ item().title }}
         </span>

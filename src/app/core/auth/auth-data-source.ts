@@ -1,9 +1,16 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, map, of, tap, throwError } from 'rxjs';
 
 import { AuthUser, PermissionAction, Resource } from './auth.types';
 import { environment } from '../../../environments/environment';
+
+const AUTH_CHANNEL_NAME = 'intranet-auth';
+
+interface AuthChannelMessage {
+  type: 'logout';
+}
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +18,10 @@ import { environment } from '../../../environments/environment';
 export class AuthDataSource {
   private readonly URL = `${environment.baseUrl}/api/auth`;
 
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly authChannel = new BroadcastChannel(AUTH_CHANNEL_NAME);
 
   private _user = signal<AuthUser | null>(null);
   user = computed(() => this._user());
@@ -22,10 +32,25 @@ export class AuthDataSource {
     return user.permissions;
   });
 
+  constructor() {
+    this.authChannel.addEventListener('message', this.handleAuthMessage);
+    this.destroyRef.onDestroy(() => {
+      this.authChannel.removeEventListener('message', this.handleAuthMessage);
+      this.authChannel.close();
+    });
+  }
+
   logout() {
     return this.http
       .post(`${this.URL}/logout`, {}, { withCredentials: true })
-      .pipe(tap(() => this._user.set(null)));
+      .pipe(
+        tap(() => {
+          this.clearUser();
+          this.authChannel.postMessage({
+            type: 'logout',
+          } satisfies AuthChannelMessage);
+        }),
+      );
   }
 
   checkAuthStatus() {
@@ -66,4 +91,12 @@ export class AuthDataSource {
       permission.startsWith(`${resource}:`),
     );
   }
+
+  private readonly handleAuthMessage = (event: MessageEvent<unknown>): void => {
+    const message = event.data as Partial<AuthChannelMessage> | null;
+    if (message?.type !== 'logout') return;
+
+    this.clearUser();
+    void this.router.navigate(['/'], { replaceUrl: true });
+  };
 }

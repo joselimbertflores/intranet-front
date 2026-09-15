@@ -4,6 +4,12 @@ import { Resource } from './core/auth/auth.types';
 
 export const routes: Routes = [
   {
+    path: 'auth/error',
+    title: 'Error de autenticación',
+    loadComponent: () =>
+      import('./features/auth/pages/auth-error-page/auth-error-page'),
+  },
+  {
     path: '',
     loadComponent: () => import('./layouts/portal-layout/portal-layout'),
     children: [

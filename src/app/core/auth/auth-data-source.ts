@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { catchError, map, of, tap } from 'rxjs';
+import { catchError, map, of, tap, throwError } from 'rxjs';
 
 import { AuthUser, PermissionAction, Resource } from './auth.types';
 import { environment } from '../../../environments/environment';
@@ -34,9 +34,13 @@ export class AuthDataSource {
       .pipe(
         tap(({ user }) => this._user.set(user)),
         map(() => true),
-        catchError(() => {
-          this._user.set(null);
-          return of(false);
+        catchError((error: unknown) => {
+          if (error instanceof HttpErrorResponse && error.status === 401) {
+            this._user.set(null);
+            return of(false);
+          }
+
+          return throwError(() => error);
         }),
       );
   }

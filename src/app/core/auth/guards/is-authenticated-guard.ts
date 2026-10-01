@@ -10,7 +10,7 @@ export const isAuthenticatedGuard: CanActivateFn = (route, state) => {
   return authDataSource.checkAuthStatus().pipe(
     tap((isAuth) => {
       if (!isAuth) {
-        window.location.href = `${environment.baseUrl}/auth/login?returnUrl=${state.url}`;
+        window.location.href = `${environment.baseUrl}/auth/login?returnUrl=${encodeURIComponent(state.url)}`;
       }
     })
   );

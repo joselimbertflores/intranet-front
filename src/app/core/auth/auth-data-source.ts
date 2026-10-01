@@ -44,6 +44,13 @@ export class AuthDataSource {
     return this.http
       .post(`${this.URL}/logout`, {}, { withCredentials: true })
       .pipe(
+        catchError((error: unknown) => {
+          if (error instanceof HttpErrorResponse && error.status === 401) {
+            return of(null);
+          }
+
+          return throwError(() => error);
+        }),
         tap(() => {
           this.clearUser();
           this.authChannel.postMessage({
@@ -97,6 +104,9 @@ export class AuthDataSource {
     if (message?.type !== 'logout') return;
 
     this.clearUser();
-    void this.router.navigate(['/'], { replaceUrl: true });
+    const path = this.router.url.split(/[?#]/)[0];
+    if (path === '/administration' || path.startsWith('/administration/')) {
+      void this.router.navigate(['/'], { replaceUrl: true });
+    }
   };
 }

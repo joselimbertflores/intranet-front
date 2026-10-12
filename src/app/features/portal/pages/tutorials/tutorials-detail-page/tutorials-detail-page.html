@@ -106,7 +106,7 @@
                 @case (blockType.TEXT) {
                   @if (block.content) {
                     <div
-                      class="prose mx-auto w-full max-w-4xl wrap-break-word overflow-hidden [&_a]:wrap-break-word [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_video]:max-w-full"
+                      class="prose mx-auto w-full max-w-4xl [&_a]:wrap-break-word [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_video]:max-w-full"
                       [innerHTML]="block.content"
                     ></div>
                   }

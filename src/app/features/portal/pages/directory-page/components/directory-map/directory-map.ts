@@ -55,7 +55,7 @@ export class DirectoryMap implements AfterViewInit, OnDestroy {
     const mapElement = this.mapElement()?.nativeElement;
     if (!isPlatformBrowser(this.platformId) || !mapElement || !this.locations().length) return;
 
-    const leaflet = await import('leaflet');
+    const leaflet = (await import('leaflet')).default;
     if (this.destroyed) return;
 
     leaflet.Icon.Default.imagePath = '';
